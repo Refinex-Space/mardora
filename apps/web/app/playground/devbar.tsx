@@ -30,6 +30,14 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
     }));
   };
 
+  // Helper to toggle Draftly feature config
+  const toggleFeatureOption = (key: keyof PlaygroundConfig["features"]) => {
+    setConfig((prev) => ({
+      ...prev,
+      features: { ...prev.features, [key]: !prev.features[key] },
+    }));
+  };
+
   // Helper to toggle plugin
   const togglePlugin = (key: keyof PlaygroundConfig["plugins"]) => {
     setConfig((prev) => ({
@@ -146,6 +154,36 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
                 description="Sanitize HTML output for security"
                 checked={config.preview.sanitize}
                 onCheckedChange={() => togglePreviewOption("sanitize")}
+              />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Feature Options */}
+          <AccordionItem value="features">
+            <AccordionTrigger className="p-2 border-b rounded-none hover:no-underline cursor-pointer hover:bg-accent hover:text-accent-foreground">
+              Feature Options
+            </AccordionTrigger>
+            <AccordionContent className="p-3 space-y-3">
+              <ConfigSwitch
+                id="slashCommands"
+                label="Slash Commands"
+                description="Open the command menu with line-start slash input"
+                checked={config.features.slashCommands}
+                onCheckedChange={() => toggleFeatureOption("slashCommands")}
+              />
+              <ConfigSwitch
+                id="attachments"
+                label="Attachments"
+                description="Enable local file selection through media commands"
+                checked={config.features.attachments}
+                onCheckedChange={() => toggleFeatureOption("attachments")}
+              />
+              <ConfigSwitch
+                id="pasteDropUploads"
+                label="Paste/Drop Uploads"
+                description="Upload pasted or dropped files with the mock uploader"
+                checked={config.features.pasteDropUploads}
+                onCheckedChange={() => toggleFeatureOption("pasteDropUploads")}
               />
             </AccordionContent>
           </AccordionItem>

@@ -49,6 +49,12 @@ export type PlaygroundConfig = {
     includeBase: boolean;
     sanitize: boolean;
   };
+  // Draftly feature toggles
+  features: {
+    slashCommands: boolean;
+    attachments: boolean;
+    pasteDropUploads: boolean;
+  };
   // Plugin toggles
   plugins: PluginConfig;
 };
@@ -65,6 +71,11 @@ const defaultConfig: PlaygroundConfig = {
   preview: {
     includeBase: true,
     sanitize: true,
+  },
+  features: {
+    slashCommands: true,
+    attachments: true,
+    pasteDropUploads: true,
   },
   plugins: defaultPluginConfig,
 };
@@ -124,6 +135,17 @@ export default function Page() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const savedIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const objectUrlsRef = useRef<string[]>([]);
+
+  const mockUploader = useCallback(async (file: File) => {
+    const url = URL.createObjectURL(file);
+    objectUrlsRef.current.push(url);
+    return {
+      url,
+      name: file.name,
+      mimeType: file.type,
+    };
+  }, []);
 
   // Load from localStorage on mount, with version-based cache invalidation
   useEffect(() => {
@@ -202,6 +224,10 @@ export default function Page() {
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       if (savedIndicatorTimeoutRef.current) clearTimeout(savedIndicatorTimeoutRef.current);
+      for (const url of objectUrlsRef.current) {
+        URL.revokeObjectURL(url);
+      }
+      objectUrlsRef.current = [];
     };
   }, []);
 
@@ -316,11 +342,26 @@ export default function Page() {
         indentWithTab: config.editor.indentWithTab,
         highlightActiveLine: config.editor.highlightActiveLine,
         lineWrapping: config.editor.lineWrapping,
+        slashCommands: {
+          enabled: config.features.slashCommands,
+        },
+        attachments: {
+          enabled: config.features.attachments,
+          uploader: config.features.attachments ? mockUploader : undefined,
+          enablePaste: config.features.pasteDropUploads,
+          enableDrop: config.features.pasteDropUploads,
+          accept: {
+            image: ["image/*"],
+            video: ["video/*"],
+            audio: ["audio/*"],
+            file: ["*/*"],
+          },
+        },
         onNodesChange: (nodes) => {
           if (showNodes) setNodes(nodes);
         },
       }),
-    [theme, mode, showNodes, config.editor, activePlugins]
+    [theme, mode, showNodes, config.editor, config.features, activePlugins, mockUploader]
   );
 
   useEffect(() => {
