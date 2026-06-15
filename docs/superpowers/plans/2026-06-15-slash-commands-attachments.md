@@ -27,12 +27,10 @@
 - Modify `packages/draftly/src/editor/draftly.ts`: add `slashCommands` and `attachments` config and compose extensions.
 - Modify `packages/draftly/src/editor/index.ts`: export slash and attachment APIs.
 - Modify `packages/draftly/package.json`: add a `test` script for Bun unit tests.
-- Create `packages/draftly/tests/setup-dom.ts`: Bun test DOM setup for CodeMirror `EditorView` tests.
 - Create `packages/draftly/tests/slash-query.spec.ts`: slash trigger and filtering tests.
 - Create `packages/draftly/tests/slash-insertions.spec.ts`: basic command insertion tests.
 - Create `packages/draftly/tests/attachments-format.spec.ts`: attachment kind, accept, marker, and output formatting tests.
 - Create `packages/draftly/tests/attachments-upload.spec.ts`: async marker replacement behavior tests.
-- Modify `bun.lock`: record the `happy-dom` dev dependency used by core editor tests.
 - Modify `apps/web/app/playground/page.tsx`: pass slash and attachment config with mock uploader.
 - Modify `apps/web/app/playground/devbar.tsx`: add slash/attachment/paste-drop toggles.
 - Modify `apps/web/app/data/md/walkthrough.ts`: add usage documentation for the React playground.
@@ -49,21 +47,12 @@
 
 **Files:**
 - Modify: `packages/draftly/package.json`
-- Create: `packages/draftly/tests/setup-dom.ts`
 - Create: `packages/draftly/src/editor/slash/types.ts`
 - Create: `packages/draftly/src/editor/slash/query.ts`
 - Create: `packages/draftly/src/editor/slash/index.ts`
 - Create: `packages/draftly/tests/slash-query.spec.ts`
 
-- [ ] **Step 1: Add the draftly core test dependency and script**
-
-Run:
-
-```bash
-bun add --cwd packages/draftly --dev happy-dom
-```
-
-Expected: `packages/draftly/package.json` gains `happy-dom` under `devDependencies` and `bun.lock` updates.
+- [ ] **Step 1: Add the draftly core test script**
 
 Modify `packages/draftly/package.json` scripts to include `test`:
 
@@ -74,38 +63,12 @@ Modify `packages/draftly/package.json` scripts to include `test`:
     "dev": "tsup --watch",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "test": "bun test --preload ./tests/setup-dom.ts tests"
+    "test": "bun test tests"
   }
 }
 ```
 
-- [ ] **Step 2: Add Bun DOM setup**
-
-Create `packages/draftly/tests/setup-dom.ts`:
-
-```ts
-import { Window } from "happy-dom";
-
-const window = new Window({
-  url: "http://localhost/",
-});
-
-Object.assign(globalThis, {
-  window,
-  document: window.document,
-  HTMLElement: window.HTMLElement,
-  HTMLButtonElement: window.HTMLButtonElement,
-  HTMLInputElement: window.HTMLInputElement,
-  File: window.File,
-  ClipboardEvent: window.ClipboardEvent,
-  DragEvent: window.DragEvent,
-  DataTransfer: window.DataTransfer,
-  requestAnimationFrame: (callback: FrameRequestCallback) => setTimeout(() => callback(Date.now()), 0),
-  cancelAnimationFrame: (id: number) => clearTimeout(id),
-});
-```
-
-- [ ] **Step 3: Write failing slash query tests**
+- [ ] **Step 2: Write failing slash query tests**
 
 Create `packages/draftly/tests/slash-query.spec.ts`:
 
@@ -182,7 +145,7 @@ describe("filterSlashCommands", () => {
 });
 ```
 
-- [ ] **Step 4: Run the failing test**
+- [ ] **Step 3: Run the failing test**
 
 Run:
 
@@ -192,7 +155,7 @@ pnpm --config.package-manager-strict=false --filter draftly test -- slash-query.
 
 Expected: FAIL because `packages/draftly/src/editor/slash` does not exist.
 
-- [ ] **Step 5: Add slash types and query helpers**
+- [ ] **Step 4: Add slash types and query helpers**
 
 Create `packages/draftly/src/editor/slash/types.ts`:
 
@@ -275,7 +238,7 @@ export * from "./types";
 export * from "./query";
 ```
 
-- [ ] **Step 6: Run the slash query test**
+- [ ] **Step 5: Run the slash query test**
 
 Run:
 
@@ -285,10 +248,10 @@ pnpm --config.package-manager-strict=false --filter draftly test -- slash-query.
 
 Expected: PASS for all slash query tests.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add bun.lock packages/draftly/package.json packages/draftly/src/editor/slash packages/draftly/tests/setup-dom.ts packages/draftly/tests/slash-query.spec.ts
+git add packages/draftly/package.json packages/draftly/src/editor/slash packages/draftly/tests/slash-query.spec.ts
 git commit -m "test(editor): 添加斜杆命令查询测试"
 ```
 
