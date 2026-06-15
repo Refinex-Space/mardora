@@ -1,5 +1,13 @@
 # draftly
 
+## Unreleased
+
+### Minor Changes
+
+- Added a compact line-start slash command menu for common block and media insertions.
+- Added a browser attachment upload protocol for slash media commands, paste, and drop.
+- Added React and Vue2 playground wiring with mock `blob:` uploaders for local validation.
+
 ## 2.0.0
 
 ### Major Changes

@@ -136,9 +136,65 @@ function MarkdownEditor() {
 | `highlightActiveLine` | `boolean`                        | `true`           | Highlight the current line (in raw mode).                |
 | `lineWrapping`        | `boolean`                        | `true`           | Enable line wrapping.                                    |
 | `onNodesChange`       | `(nodes: DraftlyNode[]) => void` | `undefined`      | Callback fired on every document update with parsed AST. |
+| `slashCommands`       | `DraftlySlashCommandsConfig`     | `{ enabled: true }` | Configure the line-start slash command menu.             |
+| `attachments`         | `DraftlyAttachmentsConfig`       | `{ enabled: false }` | Configure browser file uploads for slash, paste, and drop. |
 | `markdown`            | `MarkdownConfig[]`               | `[]`             | Additional Lezer markdown parser extensions.             |
 | `extensions`          | `Extension[]`                    | `[]`             | Additional CodeMirror extensions.                        |
 | `keymap`              | `KeyBinding[]`                   | `[]`             | Additional keybindings.                                  |
+
+---
+
+### Slash Commands and Attachments
+
+Draftly includes a compact slash menu for inserting common blocks without memorizing markdown syntax. Type `/` at the start of an empty line, filter the command list, then use Enter to insert the selected block.
+
+Media commands use the browser attachment protocol. Application code supplies an uploader callback, so React, Vue, or plain CodeMirror integrations can upload to their own backend, OSS, MinIO, or another storage service and return the final URL.
+
+```tsx
+import { draftly, allPlugins } from "draftly";
+
+const extensions = draftly({
+  plugins: allPlugins,
+  slashCommands: {
+    enabled: true,
+  },
+  attachments: {
+    enabled: true,
+    enablePaste: true,
+    enableDrop: true,
+    accept: {
+      image: ["image/*"],
+      video: ["video/*"],
+      audio: ["audio/*"],
+      file: ["*/*"],
+    },
+    uploader: async (file, context) => {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("kind", context.kind);
+
+      const response = await fetch("/api/uploads", {
+        method: "POST",
+        body: form,
+      });
+      const result = await response.json();
+
+      return {
+        url: result.url,
+        name: file.name,
+        mimeType: file.type,
+      };
+    },
+  },
+});
+```
+
+Upload lifecycle:
+
+- Draftly inserts a visible upload marker before calling `uploader`.
+- Successful uploads replace the marker with markdown or HTML for the returned URL.
+- Failed uploads leave a visible failure marker so the user can retry or remove it.
+- If the user deletes the upload marker before completion, Draftly does not reinsert stale output.
 
 ---
 
@@ -223,6 +279,14 @@ Draftly's `ViewPlugin` decorates the editor to hide markdown syntax and render s
 - **Images**: Displayed inline with alt text and captions.
 - **Links**: Clickable with visual distinction.
 - **Code Blocks**: Syntax highlighted with language detection.
+
+### ⌨️ Slash Command Menu
+
+The built-in slash menu supports text, headings 1-6, quote, ordered list, unordered list, task list, table, divider, link, file, video, audio, and image commands. The menu only triggers at line start, which keeps ordinary body text like `https://` or `path/to/file` from opening the command picker.
+
+### 📎 Browser Attachments
+
+The attachment protocol is framework-agnostic. Paste, drop, and media slash commands all go through the same uploader contract and produce standard markdown-compatible output: image markdown, video/audio HTML, and file links.
 
 ### 🔌 Plugin Architecture
 
@@ -328,6 +392,8 @@ import { HeadingPlugin, ListPlugin } from "draftly/plugins";
 | `DraftlyPlugin` | `draftly/editor`  | Base class for creating plugins.                |
 | `ThemeEnum`     | `draftly/editor`  | Enum for theme modes (`AUTO`, `LIGHT`, `DARK`). |
 | `DraftlyNode`   | `draftly/editor`  | Type for AST nodes.                             |
+| `DraftlySlashCommand` | `draftly/editor` | Type for custom slash menu commands.            |
+| `DraftlyAttachmentUploader` | `draftly/editor` | Type for browser upload callbacks.              |
 | `preview`       | `draftly/preview` | Function to render markdown to HTML.            |
 | `generateCSS`   | `draftly/preview` | Function to generate CSS for preview styling.   |
 | `allPlugins`    | `draftly/plugins` | Array of all built-in plugins.                  |
