@@ -1,5 +1,6 @@
 import type { DraftlySlashCommand } from "./types";
 import { buildSlashReplacement } from "./insertions";
+import type { DraftlyAttachmentKind } from "../attachments";
 
 function markdownCommand(
   command: Omit<DraftlySlashCommand, "run">,
@@ -16,6 +17,37 @@ function markdownCommand(
         scrollIntoView: true,
       });
       view.focus();
+      return true;
+    },
+  };
+}
+
+function mediaCommand(command: Omit<DraftlySlashCommand, "run">, kind: DraftlyAttachmentKind): DraftlySlashCommand {
+  return {
+    ...command,
+    run: (context) => {
+      if (context.requestAttachment?.(kind, context)) {
+        return true;
+      }
+
+      const fallbackByKind: Record<DraftlyAttachmentKind, string> = {
+        image: "![image](url)",
+        video: '<video src="url" controls></video>',
+        audio: '<audio src="url" controls></audio>',
+        file: "[filename](url)",
+      };
+      const fallback = fallbackByKind[kind];
+      const replacement = buildSlashReplacement(
+        { marker: fallback, cursorOffset: kind === "file" ? 1 : fallback.indexOf("url") },
+        { ...context.queryRange, query: "" }
+      );
+
+      context.view.dispatch({
+        changes: replacement.changes,
+        selection: { anchor: replacement.selectionAnchor },
+        scrollIntoView: true,
+      });
+      context.view.focus();
       return true;
     },
   };
@@ -40,8 +72,8 @@ export const defaultSlashCommands: DraftlySlashCommand[] = [
   ),
   markdownCommand({ id: "divider", group: "basic", title: "分隔线", aliases: ["hr", "divider"], icon: "—", hint: "---" }, "---\n"),
   markdownCommand({ id: "link", group: "basic", title: "链接", aliases: ["link", "url"], icon: "↗", hint: "[]()" }, "[]()", 1),
-  markdownCommand({ id: "file", group: "media", title: "文件", aliases: ["file"], icon: "▤", hint: "file" }, "[filename](url)", 1),
-  markdownCommand({ id: "image", group: "media", title: "图片", aliases: ["image", "img", "tu"], icon: "▧", hint: "img" }, "![image](url)", 2),
-  markdownCommand({ id: "video", group: "media", title: "视频", aliases: ["video"], icon: "▶", hint: "video" }, '<video src="url" controls></video>', 12),
-  markdownCommand({ id: "audio", group: "media", title: "音频", aliases: ["audio"], icon: "♪", hint: "audio" }, '<audio src="url" controls></audio>', 12),
+  mediaCommand({ id: "file", group: "media", title: "文件", aliases: ["file"], icon: "▤", hint: "file" }, "file"),
+  mediaCommand({ id: "image", group: "media", title: "图片", aliases: ["image", "img", "tu"], icon: "▧", hint: "img" }, "image"),
+  mediaCommand({ id: "video", group: "media", title: "视频", aliases: ["video"], icon: "▶", hint: "video" }, "video"),
+  mediaCommand({ id: "audio", group: "media", title: "音频", aliases: ["audio"], icon: "♪", hint: "audio" }, "audio"),
 ];

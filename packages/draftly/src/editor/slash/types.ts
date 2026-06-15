@@ -1,10 +1,12 @@
 import type { EditorView } from "@codemirror/view";
+import type { DraftlyAttachmentKind } from "../attachments";
 
 export type DraftlySlashCommandGroup = "basic" | "media";
 
 export type DraftlySlashCommandContext = {
   view: EditorView;
   queryRange: { from: number; to: number };
+  requestAttachment?: (kind: DraftlyAttachmentKind, context: DraftlySlashCommandContext) => boolean;
 };
 
 export type DraftlySlashCommand = {
