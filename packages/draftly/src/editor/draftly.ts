@@ -9,6 +9,10 @@ import { indentOnInput } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import { ThemeEnum } from "./utils";
 import { markdownResetExtension } from "./theme";
+import type { DraftlySlashCommandsConfig } from "./slash";
+import { slashCommands } from "./slash";
+import type { DraftlyAttachmentsConfig } from "./attachments";
+import { attachments } from "./attachments";
 
 /**
  * DraftlyNode: represents a node in the markdown tree
@@ -65,6 +69,12 @@ export interface DraftlyConfig {
 
   /** Callback to receive the nodes on every update */
   onNodesChange?: (nodes: DraftlyNode[]) => void;
+
+  /** Slash command menu configuration */
+  slashCommands?: DraftlySlashCommandsConfig;
+
+  /** Browser attachment upload configuration */
+  attachments?: DraftlyAttachmentsConfig;
 }
 
 /**
@@ -102,6 +112,8 @@ export function draftly(config: DraftlyConfig = {}): Extension[] {
     highlightActiveLine: configHighlightActiveLine = true,
     lineWrapping: configLineWrapping = true,
     onNodesChange: configOnNodesChange = undefined,
+    slashCommands: configSlashCommands = { enabled: true },
+    attachments: configAttachments = { enabled: false },
   } = config;
 
   const allPlugins = [...plugins];
@@ -188,6 +200,13 @@ export function draftly(config: DraftlyConfig = {}): Extension[] {
 
     // Core CodeMirror extensions
     baseExtensions,
+
+    // Draftly editor commands and browser attachments
+    slashCommands({
+      ...configSlashCommands,
+      attachmentUploader: configAttachments.uploader,
+    }),
+    attachments(configAttachments),
 
     // Plugin extensions & keymaps
     pluginExtensions,

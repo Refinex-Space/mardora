@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { buildSlashReplacement, defaultSlashCommands } from "../src/editor/slash";
+import { draftly } from "../src/editor";
 
 describe("buildSlashReplacement", () => {
   it("replaces the slash query with heading markdown", () => {
@@ -51,5 +52,29 @@ describe("defaultSlashCommands", () => {
       "video",
       "audio",
     ]);
+  });
+});
+
+describe("draftly extension composition", () => {
+  it("returns extensions when slash commands and attachments are enabled", () => {
+    const extensions = draftly({
+      slashCommands: { enabled: true },
+      attachments: {
+        enabled: true,
+        uploader: async () => ({ url: "https://cdn/file.png" }),
+      },
+    });
+
+    expect(Array.isArray(extensions)).toBe(true);
+    expect(extensions.length).toBeGreaterThan(0);
+  });
+
+  it("allows slash commands and attachments to be disabled", () => {
+    const extensions = draftly({
+      slashCommands: { enabled: false },
+      attachments: { enabled: false },
+    });
+
+    expect(Array.isArray(extensions)).toBe(true);
   });
 });
