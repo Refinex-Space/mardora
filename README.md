@@ -1,7 +1,7 @@
 <h1 align="center">Draftly</h1>
 
 <p align="center">
-  <strong>A modern, extensible markdown editor and previewer for the web.</strong>
+  <strong>面向 Web 的现代化、可扩展 Markdown 编辑器与预览工具包。</strong>
 </p>
 
 <p align="center">
@@ -14,34 +14,134 @@
 </p>
 
 <p align="center">
-  <a href="#installation">Installation</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#features">Features</a> •
-  <a href="#api-reference">API</a> •
-  <a href="#license">License</a>
+  <a href="#项目概览">项目概览</a> •
+  <a href="#本地运行">本地运行</a> •
+  <a href="#安装">安装</a> •
+  <a href="#快速开始">快速开始</a> •
+  <a href="#使用方式">使用方式</a> •
+  <a href="#功能特性">功能特性</a> •
+  <a href="#api-参考">API</a> •
+  <a href="#许可证">许可证</a>
 </p>
 
 ---
 
-## Overview
+## 项目概览
 
-**Draftly** is a powerful, pluggable markdown editor and preview toolkit built on top of **CodeMirror 6**. It provides a seamless "rich text" editing experience while preserving standard markdown syntax. Draftly also includes a static HTML renderer that produces output visually identical to the editor, making it perfect for blogs, documentation sites, and content management systems.
+**Draftly** 是一个基于 **CodeMirror 6** 构建的可插拔 Markdown 编辑与预览工具包。它提供接近富文本的编辑体验，同时保留标准 Markdown 源文本；也提供静态 HTML 渲染能力，适合博客、文档站、内容管理系统和只读预览场景。
 
-### Why Draftly?
+### 为什么选择 Draftly？
 
-- 🚀 **Modern Architecture**: Built on CodeMirror 6 with incremental Lezer parsing.
-- 🎨 **Rich Editing**: WYSIWYG-like experience with full markdown control.
-- 🔌 **Extensible Plugin System**: Add custom rendering, keymaps, and syntax.
-- 🖼️ **Static Preview**: Render markdown to semantic HTML with visual parity.
-- 🌗 **Theming**: First-class support for light and dark modes.
-- 📦 **Modular Exports**: Import only what you need (`draftly/editor`, `draftly/preview`, `draftly/plugins`).
+- **现代架构**：基于 CodeMirror 6 与 Lezer 增量解析。
+- **富编辑体验**：在保留 Markdown 控制权的同时提供所见即所得式编辑。
+- **可扩展插件系统**：可扩展渲染、快捷键、主题与语法。
+- **静态预览**：将 Markdown 渲染为语义化 HTML，并与编辑器保持视觉一致。
+- **主题能力**：内置亮色、暗色与跟随系统主题模式。
+- **模块化导出**：按需导入 `draftly/editor`、`draftly/preview`、`draftly/plugins` 等模块。
 
 ---
 
-## Installation
+## 本地运行
 
-Install the package via your preferred package manager:
+本仓库是 Bun workspace + Turborepo 项目，包含演示站点 `apps/web`、核心包 `packages/draftly` 以及共享配置和 UI 包。
+
+### 环境要求
+
+- Node.js `>= 20`
+- Bun `1.3.5` 或兼容版本
+
+如果本机尚未安装 Bun，请先参考 Bun 官方安装方式安装；本仓库以 `bun.lock` 和根目录 `packageManager` 字段为准。
+
+### 启动开发环境
+
+在仓库根目录执行：
+
+```bash
+bun install
+bun run dev
+```
+
+`bun run dev` 会通过 Turbo 启动所有声明了 `dev` 脚本的 workspace：
+
+- `apps/web`：运行 Next.js 开发服务器，默认地址为 `http://localhost:3000`
+- `packages/draftly`：运行 `tsup --watch`，监听核心库源码并输出构建产物
+
+如果只想启动 Web 演示站点：
+
+```bash
+bun run --cwd apps/web dev
+```
+
+启动后打开：
+
+```text
+http://localhost:3000
+```
+
+编辑器 Playground 页面位于：
+
+```text
+http://localhost:3000/playground
+```
+
+### Vue2 Playground
+
+仓库还包含 `apps/vue2-playground`，用于验证 Draftly 在 Vue 2.6 + Vue CLI 4 + Webpack 4 环境中的接入效果。它与主 `/playground` 能力对齐，但实现上独立于 Next.js 演示站点，可独立演进。
+
+启动前先构建 Draftly 包：
+
+```bash
+bun run --cwd packages/draftly build
+```
+
+然后进入 Vue2 playground 使用常见 Vue CLI 命令：
+
+```bash
+cd apps/vue2-playground
+npm run dev
+```
+
+Vue CLI 开发服务器默认监听：
+
+```text
+http://localhost:3001
+```
+
+常用命令：
+
+| 命令                | 说明                          |
+| ------------------- | ----------------------------- |
+| `npm run dev`       | 启动 Vue CLI 开发服务器。     |
+| `npm run build`     | 构建 Vue2 playground。        |
+| `npm run lint`      | 检查 Vue2 playground 代码。   |
+| `npm run test:unit` | 运行 Vue2 playground 单元测试。 |
+
+### 生产构建与本地预览
+
+```bash
+bun run build
+bun run --cwd apps/web start
+```
+
+`bun run build` 会通过 Turbo 构建相关 workspace；`bun run --cwd apps/web start` 会启动 Next.js 生产服务，默认同样监听 `http://localhost:3000`。
+
+### 常用命令
+
+| 命令                                       | 说明                                          |
+| ------------------------------------------ | --------------------------------------------- |
+| `bun install`                              | 安装 workspace 依赖。                         |
+| `bun run dev`                              | 启动所有 workspace 的开发任务。               |
+| `bun run build`                            | 构建仓库内相关包与应用。                      |
+| `bun run lint`                             | 运行 Turbo lint 任务。                        |
+| `bun run format`                           | 使用 Prettier 格式化 `ts`、`tsx`、`md` 文件。 |
+| `bun run --cwd apps/web typecheck`         | 对 Web 应用执行 TypeScript 类型检查。         |
+| `bun run --cwd packages/draftly typecheck` | 对核心库执行 TypeScript 类型检查。            |
+
+---
+
+## 安装
+
+在你的项目中使用偏好的包管理器安装：
 
 ```bash
 # npm
@@ -59,7 +159,7 @@ bun add draftly
 
 ### Peer Dependencies
 
-Draftly requires the following CodeMirror packages as peer dependencies. Make sure they are installed in your project:
+Draftly 依赖下列 CodeMirror 包作为 peer dependencies。请确保它们已经安装到你的项目中：
 
 ```bash
 npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
@@ -67,9 +167,9 @@ npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language 
 
 ---
 
-## Quick Start
+## 快速开始
 
-Get up and running in seconds.
+最小接入示例：
 
 ```tsx
 import { EditorView } from "@codemirror/view";
@@ -87,13 +187,13 @@ const view = new EditorView({
 
 ---
 
-## Usage
+## 使用方式
 
-Draftly is designed for flexibility. Use it as a CodeMirror extension for interactive editing or as a standalone renderer for static previews.
+Draftly 同时支持交互式编辑和静态预览。你可以把它作为 CodeMirror extension 使用，也可以把 Markdown 渲染为只读 HTML。
 
-### Editor Integration
+### 编辑器集成
 
-Here's a complete example using `@uiw/react-codemirror`:
+下面是使用 `@uiw/react-codemirror` 的完整示例：
 
 ```tsx
 import CodeMirror from "@uiw/react-codemirror";
@@ -121,30 +221,28 @@ function MarkdownEditor() {
 }
 ```
 
-#### Editor Configuration (`DraftlyConfig`)
+#### 编辑器配置 `DraftlyConfig`
 
-| Option                | Type                             | Default          | Description                                              |
-| --------------------- | -------------------------------- | ---------------- | -------------------------------------------------------- |
-| `theme`               | `ThemeEnum`                      | `ThemeEnum.AUTO` | Theme mode: `LIGHT`, `DARK`, or `AUTO`.                  |
-| `themeStyle`          | `Extension`                      | `undefined`      | CodeMirror theme extension (e.g., `githubDark`).         |
-| `plugins`             | `DraftlyPlugin[]`                | `[]`             | Plugins to enable for rendering and parsing.             |
-| `baseStyles`          | `boolean`                        | `true`           | Load default base styles.                                |
-| `disableViewPlugin`   | `boolean`                        | `false`          | Disable rich rendering (raw markdown mode).              |
-| `defaultKeybindings`  | `boolean`                        | `true`           | Enable default CodeMirror keybindings.                   |
-| `history`             | `boolean`                        | `true`           | Enable undo/redo history.                                |
-| `indentWithTab`       | `boolean`                        | `true`           | Use Tab for indentation.                                 |
-| `highlightActiveLine` | `boolean`                        | `true`           | Highlight the current line (in raw mode).                |
-| `lineWrapping`        | `boolean`                        | `true`           | Enable line wrapping.                                    |
-| `onNodesChange`       | `(nodes: DraftlyNode[]) => void` | `undefined`      | Callback fired on every document update with parsed AST. |
-| `markdown`            | `MarkdownConfig[]`               | `[]`             | Additional Lezer markdown parser extensions.             |
-| `extensions`          | `Extension[]`                    | `[]`             | Additional CodeMirror extensions.                        |
-| `keymap`              | `KeyBinding[]`                   | `[]`             | Additional keybindings.                                  |
+| 配置项                | 类型                             | 默认值           | 说明                                     |
+| --------------------- | -------------------------------- | ---------------- | ---------------------------------------- |
+| `theme`               | `ThemeEnum`                      | `ThemeEnum.AUTO` | 主题模式：`LIGHT`、`DARK` 或 `AUTO`。    |
+| `themeStyle`          | `Extension`                      | `undefined`      | CodeMirror 主题扩展，例如 `githubDark`。 |
+| `plugins`             | `DraftlyPlugin[]`                | `[]`             | 启用的解析和渲染插件。                   |
+| `baseStyles`          | `boolean`                        | `true`           | 是否加载默认基础样式。                   |
+| `disableViewPlugin`   | `boolean`                        | `false`          | 是否关闭富渲染，退回原始 Markdown 模式。 |
+| `defaultKeybindings`  | `boolean`                        | `true`           | 是否启用默认 CodeMirror 快捷键。         |
+| `history`             | `boolean`                        | `true`           | 是否启用撤销和重做历史。                 |
+| `indentWithTab`       | `boolean`                        | `true`           | 是否使用 Tab 缩进。                      |
+| `highlightActiveLine` | `boolean`                        | `true`           | 是否在原始模式下高亮当前行。             |
+| `lineWrapping`        | `boolean`                        | `true`           | 是否启用自动换行。                       |
+| `onNodesChange`       | `(nodes: DraftlyNode[]) => void` | `undefined`      | 文档更新时触发，返回解析后的 AST。       |
+| `markdown`            | `MarkdownConfig[]`               | `[]`             | 额外的 Lezer Markdown 解析扩展。         |
+| `extensions`          | `Extension[]`                    | `[]`             | 额外的 CodeMirror extensions。           |
+| `keymap`              | `KeyBinding[]`                   | `[]`             | 额外的快捷键绑定。                       |
 
----
+### 静态预览
 
-### Static Preview
-
-Render markdown to semantic HTML for server-side rendering, static site generation, or read-only views.
+将 Markdown 渲染为语义化 HTML，适用于服务端渲染、静态站点生成和只读预览。
 
 ```tsx
 import { preview, generateCSS, allPlugins, ThemeEnum } from "draftly";
@@ -159,7 +257,7 @@ This is a **bold** statement with some \`inline code\`.
 - Item 3
 `;
 
-// Generate HTML
+// 生成 HTML
 const html = preview(markdown, {
   theme: ThemeEnum.LIGHT,
   plugins: allPlugins,
@@ -167,7 +265,7 @@ const html = preview(markdown, {
   wrapperClass: "prose",
 });
 
-// Generate matching CSS
+// 生成匹配的 CSS
 const css = generateCSS({
   theme: ThemeEnum.LIGHT,
   plugins: allPlugins,
@@ -175,7 +273,7 @@ const css = generateCSS({
   includeBase: true,
 });
 
-// Use in your app
+// 在应用中使用
 function ArticlePreview() {
   return (
     <>
@@ -186,41 +284,41 @@ function ArticlePreview() {
 }
 ```
 
-#### Preview Configuration (`PreviewConfig`)
+#### 预览配置 `PreviewConfig`
 
-| Option         | Type               | Default             | Description                           |
-| -------------- | ------------------ | ------------------- | ------------------------------------- |
-| `plugins`      | `DraftlyPlugin[]`  | `[]`                | Plugins for rendering.                |
-| `theme`        | `ThemeEnum`        | `ThemeEnum.AUTO`    | Theme mode.                           |
-| `sanitize`     | `boolean`          | `true`              | Sanitize HTML output (via DOMPurify). |
-| `wrapperClass` | `string`           | `"draftly-preview"` | CSS class for the wrapper element.    |
-| `wrapperTag`   | `string`           | `"article"`         | HTML tag for the wrapper element.     |
-| `markdown`     | `MarkdownConfig[]` | `[]`                | Additional parser extensions.         |
+| 配置项         | 类型               | 默认值              | 说明                                |
+| -------------- | ------------------ | ------------------- | ----------------------------------- |
+| `plugins`      | `DraftlyPlugin[]`  | `[]`                | 用于渲染的插件。                    |
+| `theme`        | `ThemeEnum`        | `ThemeEnum.AUTO`    | 主题模式。                          |
+| `sanitize`     | `boolean`          | `true`              | 是否通过 DOMPurify 清理 HTML 输出。 |
+| `wrapperClass` | `string`           | `"draftly-preview"` | 包裹元素的 CSS class。              |
+| `wrapperTag`   | `string`           | `"article"`         | 包裹元素的 HTML 标签。              |
+| `markdown`     | `MarkdownConfig[]` | `[]`                | 额外的 Markdown 解析扩展。          |
 
 ---
 
-## Features
+## 功能特性
 
-### 🎯 Rich Text Editing
+### 富文本式编辑
 
-Draftly's `ViewPlugin` decorates the editor to hide markdown syntax and render styled content inline. This provides a WYSIWYG-like experience while keeping the source as plain markdown.
+Draftly 的 `ViewPlugin` 会装饰编辑器内容，隐藏 Markdown 标记并在原位渲染样式，从而在保留纯文本源内容的前提下提供接近所见即所得的体验。
 
-- **Inline Formatting**: Bold, italic, strikethrough, and code are styled in-place.
-- **Headings**: Rendered with proper sizes and weights.
-- **Lists**: Ordered and unordered lists with custom bullets.
-- **Images**: Displayed inline with alt text and captions.
-- **Links**: Clickable with visual distinction.
-- **Code Blocks**: Syntax highlighted with language detection.
+- **行内格式**：原位展示加粗、斜体、删除线和行内代码。
+- **标题**：按层级渲染合适的字号和字重。
+- **列表**：支持有序列表和无序列表。
+- **图片**：支持行内图片、替代文本和标题说明。
+- **链接**：提供可点击链接和视觉区分。
+- **代码块**：支持带语言检测的语法高亮。
 
-### 🔌 Plugin Architecture
+### 插件架构
 
-Every feature in Draftly is a plugin. Plugins can provide:
+Draftly 中的功能都通过插件组织。插件可以提供：
 
-- **CodeMirror Extensions**: Custom decorations, widgets, and behaviors.
-- **Markdown Parser Extensions**: Extend the Lezer parser for custom syntax.
-- **Keymaps**: Add keyboard shortcuts.
-- **Themes**: Inject custom styles based on the current theme.
-- **Preview Renderers**: Define how elements are rendered to static HTML.
+- **CodeMirror Extensions**：自定义 decorations、widgets 和行为。
+- **Markdown Parser Extensions**：扩展 Lezer 解析器以支持自定义语法。
+- **Keymaps**：添加键盘快捷键。
+- **Themes**：根据当前主题注入样式。
+- **Preview Renderers**：定义静态 HTML 中元素的渲染方式。
 
 ```typescript
 import { DraftlyPlugin } from "draftly/editor";
@@ -258,89 +356,89 @@ class MyCustomPlugin extends DraftlyPlugin {
 }
 ```
 
-### 🌲 AST Access
+### AST 访问
 
-Access the parsed document structure via the `onNodesChange` callback. Perfect for building:
+通过 `onNodesChange` 回调可以访问解析后的文档结构，适合构建：
 
-- **Table of Contents**
-- **Document Outlines**
-- **Navigation Breadcrumbs**
-- **Word/Line Counters**
+- 目录
+- 文档大纲
+- 导航面包屑
+- 字数和行数统计
 
 ```typescript
 type DraftlyNode = {
-  from: number; // Start position
-  to: number; // End position
-  name: string; // Node type (e.g., "Heading", "Paragraph")
+  from: number; // 起始位置
+  to: number; // 结束位置
+  name: string; // 节点类型，例如 "Heading" 或 "Paragraph"
   children: DraftlyNode[];
-  isSelected: boolean; // True if cursor is within this node
+  isSelected: boolean; // 光标是否位于当前节点内
 };
 ```
 
-### 🌗 Theming
+### 主题能力
 
-Draftly provides seamless theming with automatic light/dark mode support:
+Draftly 提供自动亮暗模式支持：
 
-- **Auto Detection**: Follows system preference with `ThemeEnum.AUTO`.
-- **Manual Control**: Force `ThemeEnum.LIGHT` or `ThemeEnum.DARK`.
-- **Custom Themes**: Pass any CodeMirror theme via `themeStyle`.
-- **Preview Parity**: CSS generation ensures preview matches editor styling.
+- **自动检测**：通过 `ThemeEnum.AUTO` 跟随系统偏好。
+- **手动控制**：可强制使用 `ThemeEnum.LIGHT` 或 `ThemeEnum.DARK`。
+- **自定义主题**：通过 `themeStyle` 传入任意 CodeMirror 主题。
+- **预览一致性**：通过 CSS 生成能力保持预览与编辑器视觉一致。
 
-### 📦 Modular Imports
+### 模块化导入
 
-Import only what you need to minimize bundle size:
+按需导入可以减少最终 bundle 体积：
 
 ```typescript
-// Full package
+// 完整包
 import { draftly, preview, allPlugins } from "draftly";
 
-// Editor only
+// 仅编辑器
 import { draftly, DraftlyPlugin } from "draftly/editor";
 
-// Preview only
+// 仅预览
 import { preview, generateCSS } from "draftly/preview";
 
-// Individual plugins
+// 单独插件
 import { HeadingPlugin, ListPlugin } from "draftly/plugins";
 ```
 
 ---
 
-## API Reference
+## API 参考
 
-### Exports
+### 导出项
 
-| Export          | Path              | Description                                     |
-| --------------- | ----------------- | ----------------------------------------------- |
-| `draftly`       | `draftly/editor`  | Main editor extension factory.                  |
-| `DraftlyPlugin` | `draftly/editor`  | Base class for creating plugins.                |
-| `ThemeEnum`     | `draftly/editor`  | Enum for theme modes (`AUTO`, `LIGHT`, `DARK`). |
-| `DraftlyNode`   | `draftly/editor`  | Type for AST nodes.                             |
-| `preview`       | `draftly/preview` | Function to render markdown to HTML.            |
-| `generateCSS`   | `draftly/preview` | Function to generate CSS for preview styling.   |
-| `allPlugins`    | `draftly/plugins` | Array of all built-in plugins.                  |
-
----
-
-## Browser Support
-
-Draftly supports all modern browsers:
-
-| Browser | Version |
-| ------- | ------- |
-| Chrome  | 88+     |
-| Firefox | 78+     |
-| Safari  | 14+     |
-| Edge    | 88+     |
+| 导出            | 路径              | 说明                                    |
+| --------------- | ----------------- | --------------------------------------- |
+| `draftly`       | `draftly/editor`  | 主编辑器 extension factory。            |
+| `DraftlyPlugin` | `draftly/editor`  | 创建插件的基类。                        |
+| `ThemeEnum`     | `draftly/editor`  | 主题模式枚举：`AUTO`、`LIGHT`、`DARK`。 |
+| `DraftlyNode`   | `draftly/editor`  | AST 节点类型。                          |
+| `preview`       | `draftly/preview` | 将 Markdown 渲染为 HTML 的函数。        |
+| `generateCSS`   | `draftly/preview` | 生成预览样式 CSS 的函数。               |
+| `allPlugins`    | `draftly/plugins` | 所有内置插件数组。                      |
 
 ---
 
-## Contributing
+## 浏览器支持
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
+Draftly 支持现代浏览器：
+
+| 浏览器  | 版本 |
+| ------- | ---- |
+| Chrome  | 88+  |
+| Firefox | 78+  |
+| Safari  | 14+  |
+| Edge    | 88+  |
 
 ---
 
-## License
+## 贡献
+
+欢迎提交贡献。请在发起 pull request 前阅读 [贡献指南](CONTRIBUTING.md)。
+
+---
+
+## 许可证
 
 [MIT](LICENSE) © [NeuroNexul](https://github.com/NeuroNexul)

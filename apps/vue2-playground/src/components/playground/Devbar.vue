@@ -1,50 +1,83 @@
 <template>
-  <aside class="panel-content">
-    <section class="section">
-      <h2 class="panel-title">Editor</h2>
-      <label v-for="item in editorOptions" :key="item.key" class="toggle-row">
-        <span>{{ item.label }}</span>
-        <input
-          type="checkbox"
-          :checked="config.editor[item.key]"
-          @change="updateEditorOption(item.key, $event)"
-        />
-      </label>
-    </section>
+  <aside class="devbar-content">
+    <div class="devbar-title">Developer Panel</div>
+    <div v-if="outputTime !== null" class="output-time">Output generated in {{ outputLabel }}</div>
 
-    <section class="section">
-      <h2 class="panel-title">Preview</h2>
-      <label class="toggle-row">
-        <span>Include base CSS</span>
-        <input type="checkbox" :checked="config.preview.includeBase" @change="updatePreviewOption('includeBase', $event)" />
-      </label>
-      <label class="toggle-row">
-        <span>Sanitize HTML</span>
-        <input type="checkbox" :checked="config.preview.sanitize" @change="updatePreviewOption('sanitize', $event)" />
-      </label>
-    </section>
+    <div class="accordion">
+      <section class="accordion-item">
+        <button class="accordion-trigger" type="button" @click="toggleSection('editor')">
+          <span>Editor Options</span>
+          <span class="chevron" aria-hidden="true">{{ isOpen("editor") ? "^" : "v" }}</span>
+        </button>
+        <div v-if="isOpen('editor')" class="accordion-content">
+          <label v-for="item in editorOptions" :key="item.key" class="switch-row">
+            <span class="switch-copy">
+              <span class="switch-label">{{ item.label }}</span>
+              <span class="switch-description">{{ item.description }}</span>
+            </span>
+            <input
+              class="switch-input"
+              type="checkbox"
+              :checked="config.editor[item.key]"
+              @change="updateEditorOption(item.key, $event)"
+            />
+            <span class="switch-control" aria-hidden="true" />
+          </label>
+        </div>
+      </section>
 
-    <section class="section">
-      <h2 class="panel-title">Plugins</h2>
-      <label v-for="name in pluginNames" :key="name" class="toggle-row">
-        <span>{{ name }}</span>
-        <input type="checkbox" :checked="config.plugins[name]" @change="updatePlugin(name, $event)" />
-      </label>
-    </section>
+      <section class="accordion-item">
+        <button class="accordion-trigger" type="button" @click="toggleSection('preview')">
+          <span>Preview Options</span>
+          <span class="chevron" aria-hidden="true">{{ isOpen("preview") ? "^" : "v" }}</span>
+        </button>
+        <div v-if="isOpen('preview')" class="accordion-content">
+          <label class="switch-row">
+            <span class="switch-copy">
+              <span class="switch-label">Include Base CSS</span>
+              <span class="switch-description">Include base preview styles</span>
+            </span>
+            <input class="switch-input" type="checkbox" :checked="config.preview.includeBase" @change="updatePreviewOption('includeBase', $event)" />
+            <span class="switch-control" aria-hidden="true" />
+          </label>
+          <label class="switch-row">
+            <span class="switch-copy">
+              <span class="switch-label">Sanitize HTML</span>
+              <span class="switch-description">Sanitize HTML output for security</span>
+            </span>
+            <input class="switch-input" type="checkbox" :checked="config.preview.sanitize" @change="updatePreviewOption('sanitize', $event)" />
+            <span class="switch-control" aria-hidden="true" />
+          </label>
+        </div>
+      </section>
 
-    <section class="section">
-      <h2 class="panel-title">AST</h2>
-      <label class="toggle-row">
-        <span>Show nodes</span>
-        <input type="checkbox" :checked="showNodes" @change="updateShowNodes" />
-      </label>
-      <pre v-if="showNodes" class="node-list">{{ formattedNodes }}</pre>
-    </section>
+      <section class="accordion-item">
+        <button class="accordion-trigger" type="button" @click="toggleSection('plugins')">
+          <span>Plugins</span>
+          <span class="chevron" aria-hidden="true">{{ isOpen("plugins") ? "^" : "v" }}</span>
+        </button>
+        <div v-if="isOpen('plugins')" class="accordion-content">
+          <label v-for="name in pluginNames" :key="name" class="switch-row">
+            <span class="switch-copy">
+              <span class="switch-label">{{ name }}</span>
+              <span class="switch-description">Enable {{ name }} plugin</span>
+            </span>
+            <input class="switch-input" type="checkbox" :checked="config.plugins[name]" @change="updatePlugin(name, $event)" />
+            <span class="switch-control" aria-hidden="true" />
+          </label>
+        </div>
+      </section>
 
-    <section class="section">
-      <h2 class="panel-title">Output</h2>
-      <span class="toggle-row">Render time <strong>{{ outputLabel }}</strong></span>
-    </section>
+      <section class="accordion-item nodes-section" :class="{ 'nodes-section-open': isOpen('nodes') }">
+        <button class="accordion-trigger" type="button" @click="toggleNodes">
+          <span>Nodes <small>(Hide for performance)</small></span>
+          <span class="chevron" aria-hidden="true">{{ isOpen("nodes") ? "^" : "v" }}</span>
+        </button>
+        <div v-if="isOpen('nodes')" class="accordion-content node-content">
+          <pre class="node-list">{{ formattedNodes }}</pre>
+        </div>
+      </section>
+    </div>
   </aside>
 </template>
 
@@ -82,13 +115,14 @@ export default Vue.extend({
   },
   data() {
     return {
+      openSections: ["editor", "preview"] as string[],
       editorOptions: [
-        { key: "baseStyles" as EditorOptionKey, label: "Base styles" },
-        { key: "defaultKeybindings" as EditorOptionKey, label: "Default keybindings" },
-        { key: "history" as EditorOptionKey, label: "History" },
-        { key: "indentWithTab" as EditorOptionKey, label: "Indent with Tab" },
-        { key: "highlightActiveLine" as EditorOptionKey, label: "Highlight active line" },
-        { key: "lineWrapping" as EditorOptionKey, label: "Line wrapping" },
+        { key: "baseStyles" as EditorOptionKey, label: "Base Styles", description: "Include default editor styles" },
+        { key: "defaultKeybindings" as EditorOptionKey, label: "Default Keybindings", description: "Enable standard keyboard shortcuts" },
+        { key: "history" as EditorOptionKey, label: "History", description: "Enable undo/redo support" },
+        { key: "indentWithTab" as EditorOptionKey, label: "Indent with Tab", description: "Use Tab key for indentation" },
+        { key: "highlightActiveLine" as EditorOptionKey, label: "Highlight Active Line", description: "Highlight the current line" },
+        { key: "lineWrapping" as EditorOptionKey, label: "Line Wrapping", description: "Wrap long lines" },
       ],
     };
   },
@@ -104,6 +138,23 @@ export default Vue.extend({
     },
   },
   methods: {
+    isOpen(section: string): boolean {
+      return this.openSections.includes(section);
+    },
+    toggleSection(section: string) {
+      this.openSections = this.isOpen(section)
+        ? this.openSections.filter((item) => item !== section)
+        : [...this.openSections, section];
+    },
+    toggleNodes() {
+      if (this.isOpen("nodes")) {
+        this.openSections = this.openSections.filter((item) => item !== "nodes");
+        this.$emit("update-show-nodes", false);
+      } else {
+        this.openSections = ["nodes"];
+        this.$emit("update-show-nodes", true);
+      }
+    },
     eventChecked(event: Event): boolean {
       return (event.target as HTMLInputElement).checked;
     },

@@ -5,9 +5,11 @@
       :save-status="saveStatus"
       :sidebar-open="sidebarOpen"
       :devbar-open="devbarOpen"
+      :theme-preference="themePreference"
       @toggle-sidebar="sidebarOpen = !sidebarOpen"
       @toggle-devbar="devbarOpen = !devbarOpen"
       @change-mode="mode = $event"
+      @change-theme="setThemePreference"
     />
 
     <main class="playground-main">
@@ -72,7 +74,16 @@ import PlaygroundSidebar from "./Sidebar.vue";
 import { loadPlaygroundSnapshot, savePlaygroundSnapshot } from "@/state/storage";
 import { createDefaultConfig } from "@/state/playgroundConfig";
 import { createContentId, getContentMetrics } from "@/utils/contentMetrics";
-import type { Content, ContentMetrics, PlaygroundConfig, PlaygroundMode, PreviewOutput, SaveStatus, ThemeMode } from "@/types";
+import type {
+  Content,
+  ContentMetrics,
+  PlaygroundConfig,
+  PlaygroundMode,
+  PreviewOutput,
+  SaveStatus,
+  ThemeMode,
+  ThemePreference,
+} from "@/types";
 
 interface RenamePayload {
   id: string;
@@ -105,6 +116,7 @@ export default Vue.extend({
       devbarOpen: false,
       isDesktop: false,
       theme: "light" as ThemeMode,
+      themePreference: "system" as ThemePreference,
       saveTimer: 0,
       savedTimer: 0,
     };
@@ -122,10 +134,13 @@ export default Vue.extend({
   },
   mounted() {
     this.handleResize();
+    this.syncSystemTheme();
     window.addEventListener("resize", this.handleResize);
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", this.syncSystemTheme);
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.handleResize);
+    window.matchMedia("(prefers-color-scheme: dark)").removeEventListener("change", this.syncSystemTheme);
     window.clearTimeout(this.saveTimer);
     window.clearTimeout(this.savedTimer);
   },
@@ -136,6 +151,19 @@ export default Vue.extend({
         this.sidebarOpen = true;
         this.devbarOpen = true;
       }
+    },
+    syncSystemTheme() {
+      if (this.themePreference !== "system") return;
+      this.theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    },
+    setThemePreference(preference: ThemePreference) {
+      this.themePreference = preference;
+      this.theme =
+        preference === "system"
+          ? window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light"
+          : preference;
     },
     closePanels() {
       this.sidebarOpen = false;

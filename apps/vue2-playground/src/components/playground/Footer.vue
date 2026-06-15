@@ -1,10 +1,12 @@
 <template>
   <footer class="footer-bar">
-    <span>Draftly Vue2 Playground</span>
+    <span />
     <div class="footer-metrics">
-      <span>{{ metrics.words }} words</span>
-      <span>{{ metrics.lines }} lines</span>
-      <span>{{ metrics.chars }} chars</span>
+      <span>Words: {{ metrics.words }}</span>
+      <span class="metric-separator">.</span>
+      <span>Lines: {{ metrics.lines }}</span>
+      <span class="metric-separator">.</span>
+      <span>Char: {{ metrics.chars }}</span>
     </div>
   </footer>
 </template>

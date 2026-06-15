@@ -1,15 +1,19 @@
 :root {
   color-scheme: light;
-  --background: #f7f8fb;
+  --background: #ffffff;
   --surface: #ffffff;
-  --surface-muted: #f0f3f7;
-  --border: #d8dee8;
-  --text: #172033;
-  --muted: #657085;
-  --primary: #2563eb;
+  --surface-muted: #f4f4f5;
+  --surface-subtle: #fafafa;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --text: #27272a;
+  --muted: #71717a;
+  --muted-soft: #8f8f99;
+  --primary: #18181b;
   --primary-contrast: #ffffff;
+  --accent: #f4f4f5;
   --danger: #dc2626;
-  --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow: 0 10px 24px rgba(24, 24, 27, 0.12);
 }
 
 * {
@@ -38,6 +42,10 @@ select {
   font: inherit;
 }
 
+button {
+  border: 0;
+}
+
 .playground-shell {
   display: flex;
   flex-direction: column;
@@ -51,61 +59,247 @@ select {
 
 .playground-shell.theme-dark {
   color-scheme: dark;
-  --background: #0b1020;
-  --surface: #101827;
-  --surface-muted: #182235;
-  --border: #2d384d;
-  --text: #e8edf7;
-  --muted: #9aa7bb;
-  --primary: #60a5fa;
-  --primary-contrast: #07111f;
+  --background: #09090b;
+  --surface: #0d1117;
+  --surface-muted: #18181b;
+  --surface-subtle: #111827;
+  --border: #27272a;
+  --border-strong: #3f3f46;
+  --text: #e4e4e7;
+  --muted: #a1a1aa;
+  --muted-soft: #71717a;
+  --primary: #f4f4f5;
+  --primary-contrast: #18181b;
+  --accent: #18181b;
   --danger: #f87171;
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-}
-
-.playground-header,
-.footer-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 0 0 auto;
-  gap: 12px;
-  min-height: 48px;
-  padding: 8px 12px;
-  border-color: var(--border);
-  background: var(--surface);
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.36);
 }
 
 .playground-header {
-  border-bottom: 1px solid var(--border);
-}
-
-.footer-bar {
-  border-top: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.header-group,
-.mode-switch,
-.footer-metrics {
+  position: relative;
+  z-index: 30;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  flex: 0 0 60px;
+  gap: 16px;
+  min-height: 60px;
+  padding: 10px 24px;
+  background: var(--surface);
+}
+
+.header-left,
+.header-actions,
+.footer-metrics,
+.document-actions {
+  display: flex;
+  align-items: center;
   min-width: 0;
 }
 
+.header-left {
+  gap: 16px;
+}
+
+.header-actions {
+  gap: 10px;
+}
+
 .brand {
-  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
   white-space: nowrap;
 }
 
 .save-status {
-  min-width: 64px;
   color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.toolbar-button,
+.toolbar-icon-button,
+.button,
+.panel-action-button,
+.row-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.toolbar-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
+}
+
+.toolbar-icon-button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+}
+
+.button {
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.button-primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-contrast);
+}
+
+.button-secondary {
+  background: var(--surface);
+}
+
+.toolbar-button:hover,
+.toolbar-icon-button:hover,
+.button:hover,
+.panel-action-button:hover,
+.row-icon-button:hover {
+  background: var(--accent);
+}
+
+.toolbar-icon-button:hover {
+  border-color: var(--border);
+}
+
+.chevron {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.icon-panel,
+.icon-screen,
+.mode-dot {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.icon-panel {
+  width: 17px;
+  height: 17px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+}
+
+.icon-panel::before {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 5px;
+  width: 2px;
+  background: currentColor;
+  content: "";
+}
+
+.icon-panel-open::before {
+  left: auto;
+  right: 5px;
+}
+
+.icon-screen {
+  width: 16px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+}
+
+.icon-screen::after {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: -5px;
+  height: 2px;
+  background: currentColor;
+  content: "";
+}
+
+.mode-dot {
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  min-width: 172px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.compact-menu {
+  min-width: 140px;
+}
+
+.dropdown-label {
+  padding: 10px 14px 6px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdown-item:hover,
+.dropdown-item-active {
+  background: var(--accent);
+}
+
+.mode-item-icon {
+  width: 26px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
-  text-align: right;
-  text-transform: uppercase;
+}
+
+.checkmark {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .playground-main {
@@ -122,7 +316,7 @@ select {
   height: 100%;
   overflow: hidden;
   background: var(--surface);
-  transition: width 160ms ease;
+  transition: width 180ms ease;
 }
 
 .sidebar-panel {
@@ -130,7 +324,8 @@ select {
 }
 
 .devbar-panel {
-  border-left: 1px solid var(--border);
+  padding-right: 8px;
+  background: var(--background);
 }
 
 .sidebar-panel.panel-open {
@@ -138,12 +333,13 @@ select {
 }
 
 .devbar-panel.panel-open {
-  width: 384px;
+  width: 392px;
 }
 
 .sidebar-panel.panel-closed,
 .devbar-panel.panel-closed {
   width: 0;
+  padding-right: 0;
   border-color: transparent;
 }
 
@@ -152,7 +348,7 @@ select {
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
-  padding: 8px;
+  padding: 0 8px 0 8px;
 }
 
 .editor-frame {
@@ -164,48 +360,8 @@ select {
   min-height: 0;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface);
-}
-
-.button,
-.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-}
-
-.button {
-  padding: 0 10px;
-}
-
-.icon-button {
-  min-width: 36px;
-  padding: 0;
-}
-
-.button:hover,
-.icon-button:hover,
-.document-item:hover {
-  background: var(--surface-muted);
-}
-
-.button-active,
-.document-item-active {
-  border-color: var(--primary);
-  background: rgba(37, 99, 235, 0.12);
-  color: var(--primary);
-}
-
-.button-danger {
-  color: var(--danger);
 }
 
 .panel-content {
@@ -214,86 +370,343 @@ select {
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: 12px;
-  gap: 12px;
-  overflow: auto;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 64px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
 }
 
 .panel-title {
   margin: 0;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0;
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.field {
-  width: 100%;
-  min-height: 32px;
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
-  color: var(--text);
-}
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 28px;
-  color: var(--text);
-  font-size: 13px;
-}
-
-.toggle-row input {
-  flex: 0 0 auto;
+.panel-action-button {
+  width: 32px;
+  height: 32px;
+  border-color: transparent;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
 }
 
 .document-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 0;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 16px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.document-item:hover,
+.document-item-active {
+  background: var(--accent);
+}
+
+.document-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+}
+
+.document-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-actions {
+  gap: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.document-item:hover .document-actions,
+.document-item:focus-within .document-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.row-icon-button {
+  width: 28px;
+  height: 28px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.danger-action {
+  color: var(--danger);
+}
+
+.empty-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
+  align-items: center;
+  padding: 32px 16px;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.devbar-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.devbar-title {
+  flex: 0 0 48px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.output-time {
+  flex: 0 0 auto;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.accordion {
+  flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
 }
 
-.document-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 4px;
-  min-height: 36px;
-  padding: 4px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text);
+.accordion-item {
+  border-bottom: 1px solid var(--border);
 }
 
-.document-title {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.accordion-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
   text-align: left;
 }
 
-.empty-state {
+.accordion-trigger:hover {
+  background: var(--accent);
+}
+
+.accordion-trigger small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.accordion-content {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  padding: 14px 16px 18px;
+}
+
+.switch-row {
+  position: relative;
+  display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 42px;
+  cursor: pointer;
+}
+
+.switch-copy {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.switch-label {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.switch-description {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.switch-input {
+  position: absolute;
+  right: 0;
+  width: 38px;
+  height: 22px;
+  margin: 0;
+  opacity: 0;
+}
+
+.switch-control {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: #18181b;
+  transition: background 120ms ease;
+}
+
+.switch-control::after {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  content: "";
+  transition:
+    left 120ms ease,
+    right 120ms ease;
+}
+
+.switch-input:not(:checked) + .switch-control {
+  background: #d4d4d8;
+}
+
+.switch-input:not(:checked) + .switch-control::after {
+  right: 19px;
+}
+
+.playground-shell.theme-dark .switch-input:not(:checked) + .switch-control {
+  background: #3f3f46;
+}
+
+.node-content {
+  height: calc(100vh - 180px);
+  min-height: 280px;
+  padding: 0;
+}
+
+.node-list {
   width: 100%;
   height: 100%;
-  gap: 12px;
+  min-height: 0;
+  overflow: auto;
+  margin: 0;
+  padding: 10px;
+  background: var(--surface-subtle);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.field {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.field:focus {
+  border-color: var(--border-strong);
+  outline: 2px solid rgba(24, 24, 27, 0.08);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgba(24, 24, 27, 0.45);
+}
+
+.dialog-card {
+  display: flex;
+  width: min(420px, calc(100vw - 32px));
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.dialog-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dialog-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.dialog-description {
+  margin: 0;
   color: var(--muted);
+  font-size: 14px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .editor-host,
@@ -303,6 +716,18 @@ select {
   height: 100%;
   min-width: 0;
   min-height: 0;
+  overflow: auto;
+}
+
+.preview-host {
+  padding: 0;
+}
+
+.vue2-preview {
+  width: 100%;
+  max-width: 48rem;
+  min-height: 100%;
+  margin: 0 auto;
   overflow: auto;
 }
 
@@ -323,27 +748,37 @@ select {
   overflow: hidden;
 }
 
-.placeholder-pane {
-  display: grid;
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  place-items: center;
+  gap: 14px;
   color: var(--muted);
 }
 
-.node-list {
-  min-height: 160px;
-  max-height: 280px;
-  overflow: auto;
-  margin: 0;
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface-muted);
-  color: var(--text);
-  font-size: 11px;
-  line-height: 1.4;
-  white-space: pre-wrap;
+.footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 48px;
+  min-height: 48px;
+  padding: 0 32px;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+}
+
+.footer-metrics {
+  gap: 14px;
+  margin-left: auto;
+}
+
+.metric-separator {
+  color: var(--muted-soft);
 }
 
 .backdrop {
@@ -351,6 +786,18 @@ select {
 }
 
 @media (max-width: 1279px) {
+  .playground-header {
+    padding: 10px 12px;
+  }
+
+  .brand {
+    font-size: 20px;
+  }
+
+  .toolbar-button span:last-child {
+    display: none;
+  }
+
   .sidebar-panel,
   .devbar-panel {
     position: absolute;
@@ -366,14 +813,15 @@ select {
 
   .devbar-panel {
     right: 0;
+    padding-right: 0;
   }
 
   .devbar-panel.panel-open {
-    width: min(384px, 88vw);
+    width: min(392px, 90vw);
   }
 
   .sidebar-panel.panel-open {
-    width: min(264px, 82vw);
+    width: min(264px, 84vw);
   }
 
   .backdrop {
@@ -384,11 +832,12 @@ select {
     background: rgba(0, 0, 0, 0.45);
   }
 
-  .mode-switch {
-    overflow-x: auto;
+  .editor-panel {
+    padding: 0 8px;
   }
 
-  .brand {
-    display: none;
+  .footer-bar {
+    padding: 0 16px;
+    font-size: 12px;
   }
 }

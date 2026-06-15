@@ -209,7 +209,7 @@ export default Vue.extend({
         syntaxTheme,
         sanitize: this.config.preview.sanitize,
         wrapperTag: "div",
-        wrapperClass: "draftly-preview",
+        wrapperClass: "draftly-preview vue2-preview",
       });
 
       const cssOutput = generateCSS({

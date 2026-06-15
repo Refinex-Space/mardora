@@ -3,6 +3,7 @@ import type { DraftlyNode } from "draftly/editor";
 export type PlaygroundMode = "live" | "view" | "code" | "output";
 export type SaveStatus = "idle" | "saving" | "saved";
 export type ThemeMode = "light" | "dark";
+export type ThemePreference = "system" | ThemeMode;
 export type PluginConfig = Record<string, boolean>;
 
 export interface Content {

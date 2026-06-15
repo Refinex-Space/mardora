@@ -1,8 +1,13 @@
 <template>
   <aside class="panel-content">
-    <div class="section">
-      <h2 class="panel-title">Documents</h2>
-      <CreateContentDialog @create="$emit('create-content', $event)" />
+    <div class="panel-heading">
+      <h2 class="panel-title">Contents</h2>
+      <CreateContentDialog
+        trigger-label="+"
+        trigger-class="panel-action-button"
+        trigger-title="Create content"
+        @create="$emit('create-content', $event)"
+      />
     </div>
 
     <div class="document-list">
@@ -11,16 +16,28 @@
         :key="content.id"
         class="document-item"
         :class="{ 'document-item-active': currentContent === index }"
+        role="option"
+        :aria-selected="currentContent === index"
+        @click="$emit('select-content', index)"
       >
-        <button class="button document-title" type="button" @click="$emit('select-content', index)">
-          {{ content.title }}
-        </button>
-        <button class="icon-button" type="button" title="Rename" @click="renameContent(content.id, content.title)">
-          Edit
-        </button>
-        <button class="icon-button button-danger" type="button" title="Delete" @click="$emit('delete-content', content.id)">
-          Del
-        </button>
+        <span class="document-icon" aria-hidden="true">doc</span>
+        <span class="document-title">{{ content.title }}</span>
+        <div class="document-actions">
+          <button class="row-icon-button" type="button" title="Rename" @click.stop="renameContent(content.id, content.title)">
+            edit
+          </button>
+          <button class="row-icon-button danger-action" type="button" title="Delete" @click.stop="$emit('delete-content', content.id)">
+            del
+          </button>
+        </div>
+      </div>
+      <div v-if="contents.length === 0" class="empty-list">
+        <span>No contents yet</span>
+        <CreateContentDialog
+          trigger-label="Create content"
+          trigger-class="button button-secondary"
+          @create="$emit('create-content', $event)"
+        />
       </div>
     </div>
   </aside>
