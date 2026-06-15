@@ -16,7 +16,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test tests"
   },
   "devDependencies": {
     "@turbo/gen": "^2.7.6",
