@@ -1,4 +1,4 @@
-import { Extension } from "@codemirror/state";
+import { Extension, Prec } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { DraftlyAttachmentKind, DraftlyAttachmentUploader } from "../attachments";
 import { uploadAttachmentFile } from "../attachments";
@@ -27,6 +27,7 @@ class SlashCommandViewPlugin {
   private commands: DraftlySlashCommand[] = [];
   private activeIndex = 0;
   private menu: HTMLElement | null = null;
+  private renderVersion = 0;
 
   constructor(
     private readonly view: EditorView,
@@ -42,6 +43,7 @@ class SlashCommandViewPlugin {
   }
 
   destroy(): void {
+    this.renderVersion += 1;
     this.removeMenu();
   }
 
@@ -56,6 +58,7 @@ class SlashCommandViewPlugin {
     if (!this.query) return false;
     this.query = null;
     this.commands = [];
+    this.renderVersion += 1;
     this.removeMenu();
     return true;
   }
@@ -104,6 +107,7 @@ class SlashCommandViewPlugin {
     if (!query) {
       this.query = null;
       this.commands = [];
+      this.renderVersion += 1;
       this.removeMenu();
       return;
     }
@@ -120,27 +124,34 @@ class SlashCommandViewPlugin {
 
   private renderMenu(): void {
     if (!this.query) return;
+    const renderVersion = ++this.renderVersion;
+    const queryFrom = this.query.from;
     this.removeMenu();
 
-    const coords = this.view.coordsAtPos(this.query.from);
-    if (!coords) return;
+    this.view.requestMeasure({
+      read: (view) => view.coordsAtPos(queryFrom),
+      write: (coords) => {
+        if (renderVersion !== this.renderVersion || !this.query || !coords) return;
 
-    this.menu = createSlashMenuElement(
-      { commands: this.commands, activeIndex: this.activeIndex },
-      {
-        onHover: (index) => {
-          this.activeIndex = index;
-          this.renderMenu();
-        },
-        onSelect: (index) => {
-          this.select(index);
-        },
-      }
-    );
+        this.removeMenu();
+        this.menu = createSlashMenuElement(
+          { commands: this.commands, activeIndex: this.activeIndex },
+          {
+            onHover: (index) => {
+              this.activeIndex = index;
+              this.renderMenu();
+            },
+            onSelect: (index) => {
+              this.select(index);
+            },
+          }
+        );
 
-    this.menu.style.left = `${coords.left}px`;
-    this.menu.style.top = `${coords.bottom + 6}px`;
-    document.body.appendChild(this.menu);
+        this.menu.style.left = `${coords.left}px`;
+        this.menu.style.top = `${coords.bottom + 6}px`;
+        document.body.appendChild(this.menu);
+      },
+    });
   }
 
   private removeMenu(): void {
@@ -164,37 +175,39 @@ export function slashCommands(config: DraftlySlashRuntimeConfig = {}): Extension
   return [
     slashMenuTheme,
     plugin,
-    EditorView.domEventHandlers({
-      keydown(event, view) {
-        const value = view.plugin(plugin);
-        if (!value) return false;
+    Prec.highest(
+      EditorView.domEventHandlers({
+        keydown(event, view) {
+          const value = view.plugin(plugin);
+          if (!value) return false;
 
-        if (event.key === "ArrowDown") {
-          const handled = value.move(1);
-          if (handled) event.preventDefault();
-          return handled;
-        }
+          if (event.key === "ArrowDown") {
+            const handled = value.move(1);
+            if (handled) event.preventDefault();
+            return handled;
+          }
 
-        if (event.key === "ArrowUp") {
-          const handled = value.move(-1);
-          if (handled) event.preventDefault();
-          return handled;
-        }
+          if (event.key === "ArrowUp") {
+            const handled = value.move(-1);
+            if (handled) event.preventDefault();
+            return handled;
+          }
 
-        if (event.key === "Enter") {
-          const handled = value.selectActive();
-          if (handled) event.preventDefault();
-          return handled;
-        }
+          if (event.key === "Enter") {
+            const handled = value.selectActive();
+            if (handled) event.preventDefault();
+            return handled;
+          }
 
-        if (event.key === "Escape") {
-          const handled = value.close();
-          if (handled) event.preventDefault();
-          return handled;
-        }
+          if (event.key === "Escape") {
+            const handled = value.close();
+            if (handled) event.preventDefault();
+            return handled;
+          }
 
-        return false;
-      },
-    }),
+          return false;
+        },
+      })
+    ),
   ];
 }
