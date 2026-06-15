@@ -20,6 +20,11 @@ export function createDefaultConfig(): PlaygroundConfig {
       includeBase: true,
       sanitize: true,
     },
+    features: {
+      slashCommands: true,
+      attachments: true,
+      pasteDropUploads: true,
+    },
     plugins: createDefaultPluginConfig(),
   };
 }

@@ -25,6 +25,11 @@ export interface PlaygroundConfig {
     includeBase: boolean;
     sanitize: boolean;
   };
+  features: {
+    slashCommands: boolean;
+    attachments: boolean;
+    pasteDropUploads: boolean;
+  };
   plugins: PluginConfig;
 }
 

@@ -31,6 +31,25 @@ declare module "draftly/editor" {
     indentWithTab?: boolean;
     highlightActiveLine?: boolean;
     lineWrapping?: boolean;
+    slashCommands?: {
+      enabled?: boolean;
+    };
+    attachments?: {
+      enabled?: boolean;
+      uploader?: (file: File) => Promise<{
+        url: string;
+        name?: string;
+        mimeType?: string;
+      }>;
+      enablePaste?: boolean;
+      enableDrop?: boolean;
+      accept?: {
+        image?: string[];
+        video?: string[];
+        audio?: string[];
+        file?: string[];
+      };
+    };
     onNodesChange?: (nodes: DraftlyNode[]) => void;
   }): any;
 }

@@ -52,6 +52,28 @@
       </section>
 
       <section class="accordion-item">
+        <button class="accordion-trigger" type="button" @click="toggleSection('features')">
+          <span>Feature Options</span>
+          <span class="chevron" aria-hidden="true">{{ isOpen("features") ? "^" : "v" }}</span>
+        </button>
+        <div v-if="isOpen('features')" class="accordion-content">
+          <label v-for="item in featureOptions" :key="item.key" class="switch-row">
+            <span class="switch-copy">
+              <span class="switch-label">{{ item.label }}</span>
+              <span class="switch-description">{{ item.description }}</span>
+            </span>
+            <input
+              class="switch-input"
+              type="checkbox"
+              :checked="config.features[item.key]"
+              @change="updateFeatureOption(item.key, $event)"
+            />
+            <span class="switch-control" aria-hidden="true" />
+          </label>
+        </div>
+      </section>
+
+      <section class="accordion-item">
         <button class="accordion-trigger" type="button" @click="toggleSection('plugins')">
           <span>Plugins</span>
           <span class="chevron" aria-hidden="true">{{ isOpen("plugins") ? "^" : "v" }}</span>
@@ -88,6 +110,7 @@ import type { PlaygroundConfig } from "@/types";
 
 type EditorOptionKey = keyof PlaygroundConfig["editor"];
 type PreviewOptionKey = keyof PlaygroundConfig["preview"];
+type FeatureOptionKey = keyof PlaygroundConfig["features"];
 
 function cloneConfig(config: PlaygroundConfig): PlaygroundConfig {
   return JSON.parse(JSON.stringify(config)) as PlaygroundConfig;
@@ -123,6 +146,11 @@ export default Vue.extend({
         { key: "indentWithTab" as EditorOptionKey, label: "Indent with Tab", description: "Use Tab key for indentation" },
         { key: "highlightActiveLine" as EditorOptionKey, label: "Highlight Active Line", description: "Highlight the current line" },
         { key: "lineWrapping" as EditorOptionKey, label: "Line Wrapping", description: "Wrap long lines" },
+      ],
+      featureOptions: [
+        { key: "slashCommands" as FeatureOptionKey, label: "Slash Commands", description: "Open the command menu with line-start slash input" },
+        { key: "attachments" as FeatureOptionKey, label: "Attachments", description: "Enable local file selection through media commands" },
+        { key: "pasteDropUploads" as FeatureOptionKey, label: "Paste/Drop Uploads", description: "Upload pasted or dropped files with the mock uploader" },
       ],
     };
   },
@@ -166,6 +194,11 @@ export default Vue.extend({
     updatePreviewOption(key: PreviewOptionKey, event: Event) {
       const nextConfig = cloneConfig(this.config);
       nextConfig.preview[key] = this.eventChecked(event);
+      this.$emit("update-config", nextConfig);
+    },
+    updateFeatureOption(key: FeatureOptionKey, event: Event) {
+      const nextConfig = cloneConfig(this.config);
+      nextConfig.features[key] = this.eventChecked(event);
       this.$emit("update-config", nextConfig);
     },
     updatePlugin(name: string, event: Event) {

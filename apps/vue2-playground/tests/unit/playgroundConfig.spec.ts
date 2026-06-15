@@ -12,6 +12,16 @@ describe("playgroundConfig", () => {
     }
   });
 
+  it("enables slash commands and attachment uploads by default", () => {
+    const config = createDefaultConfig();
+
+    expect(config.features).toEqual({
+      slashCommands: true,
+      attachments: true,
+      pasteDropUploads: true,
+    });
+  });
+
   it("filters inactive plugins", () => {
     const config = createDefaultConfig();
     const firstPlugin = getActivePlugins(config.plugins)[0];

@@ -63,6 +63,7 @@ export default Vue.extend({
       previewOutput: { html: "", css: "" } as PreviewOutput,
       internalUpdate: false,
       renderRequest: 0,
+      objectUrls: [] as string[],
     };
   },
   mounted() {
@@ -70,6 +71,7 @@ export default Vue.extend({
   },
   beforeDestroy() {
     this.destroyViews();
+    this.revokeObjectUrls();
   },
   watch: {
     mode() {
@@ -143,6 +145,21 @@ export default Vue.extend({
         this.previewStyleElement = null;
       }
     },
+    revokeObjectUrls() {
+      for (const url of this.objectUrls) {
+        URL.revokeObjectURL(url);
+      }
+      this.objectUrls = [];
+    },
+    async mockUploader(file: File) {
+      const url = URL.createObjectURL(file);
+      this.objectUrls.push(url);
+      return {
+        url,
+        name: file.name,
+        mimeType: file.type,
+      };
+    },
     rebuildForMode() {
       this.$nextTick(() => {
         this.destroyViews();
@@ -184,6 +201,21 @@ export default Vue.extend({
               indentWithTab: this.config.editor.indentWithTab,
               highlightActiveLine: this.config.editor.highlightActiveLine,
               lineWrapping: this.config.editor.lineWrapping,
+              slashCommands: {
+                enabled: this.config.features.slashCommands,
+              },
+              attachments: {
+                enabled: this.config.features.attachments,
+                uploader: this.config.features.attachments ? this.mockUploader : undefined,
+                enablePaste: this.config.features.pasteDropUploads,
+                enableDrop: this.config.features.pasteDropUploads,
+                accept: {
+                  image: ["image/*"],
+                  video: ["video/*"],
+                  audio: ["audio/*"],
+                  file: ["*/*"],
+                },
+              },
               onNodesChange: (nodes: DraftlyNode[]) => {
                 if (this.showNodes) {
                   this.$emit("nodes-change", nodes);
