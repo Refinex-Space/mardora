@@ -1,9 +1,12 @@
 import type { DraftlySlashCommand } from "./types";
 import { createDraftlyIcon } from "../icons";
+import type { DraftlyLocale } from "../i18n";
+import type { DraftlySlashMessages } from "./types";
 
 export type DraftlySlashMenuState = {
   commands: DraftlySlashCommand[];
   activeIndex: number;
+  messages?: DraftlySlashMessages;
 };
 
 export type DraftlySlashMenuCallbacks = {
@@ -11,15 +14,36 @@ export type DraftlySlashMenuCallbacks = {
   onSelect: (index: number) => void;
 };
 
-const groupLabels: Record<DraftlySlashCommand["group"], string> = {
-  basic: "基本区块",
-  media: "媒体",
+const slashMessages: Record<DraftlyLocale, DraftlySlashMessages> = {
+  "zh-CN": {
+    groups: {
+      basic: "基本区块",
+      media: "媒体",
+    },
+    empty: "没有匹配的命令",
+    close: "关闭菜单",
+    closeHint: "esc",
+  },
+  "en-US": {
+    groups: {
+      basic: "Basic blocks",
+      media: "Media",
+    },
+    empty: "No matching commands",
+    close: "Close menu",
+    closeHint: "esc",
+  },
 };
+
+export function getSlashMessages(locale: DraftlyLocale): DraftlySlashMessages {
+  return slashMessages[locale];
+}
 
 export function createSlashMenuElement(
   state: DraftlySlashMenuState,
   callbacks: DraftlySlashMenuCallbacks
 ): HTMLElement {
+  const messages = state.messages ?? getSlashMessages("zh-CN");
   const root = document.createElement("div");
   root.className = "cm-draftly-slash-menu";
   root.setAttribute("role", "listbox");
@@ -39,7 +63,7 @@ export function createSlashMenuElement(
   if (state.commands.length === 0) {
     const empty = document.createElement("div");
     empty.className = "cm-draftly-slash-empty";
-    empty.textContent = "没有匹配的命令";
+    empty.textContent = messages.empty;
     list.appendChild(empty);
     root.appendChild(list);
     return root;
@@ -52,7 +76,7 @@ export function createSlashMenuElement(
       currentGroup = command.group;
       const label = document.createElement("div");
       label.className = "cm-draftly-slash-group";
-      label.textContent = groupLabels[currentGroup];
+      label.textContent = messages.groups[currentGroup];
       list.appendChild(label);
     }
 
@@ -92,7 +116,7 @@ export function createSlashMenuElement(
 
   const footer = document.createElement("div");
   footer.className = "cm-draftly-slash-footer";
-  footer.innerHTML = "<span>关闭菜单</span><span>esc</span>";
+  footer.innerHTML = `<span>${messages.close}</span><span>${messages.closeHint}</span>`;
   root.append(list, footer);
 
   return root;

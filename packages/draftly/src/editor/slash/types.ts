@@ -1,7 +1,15 @@
 import type { EditorView } from "@codemirror/view";
 import type { DraftlyAttachmentKind } from "../attachments";
+import type { DraftlyLocale } from "../i18n";
 
 export type DraftlySlashCommandGroup = "basic" | "media";
+
+export type DraftlySlashMessages = {
+  groups: Record<DraftlySlashCommandGroup, string>;
+  empty: string;
+  close: string;
+  closeHint: string;
+};
 
 export type DraftlySlashCommandContext = {
   view: EditorView;
@@ -27,5 +35,6 @@ export type DraftlySlashQuery = {
 
 export type DraftlySlashCommandsConfig = {
   enabled?: boolean;
+  locale?: DraftlyLocale;
   commands?: DraftlySlashCommand[];
 };
