@@ -43,6 +43,7 @@ declare module "draftly/editor" {
 
   export function draftly(config?: {
     theme?: ThemeEnum;
+    locale?: "zh-CN" | "en-US";
     baseStyles?: boolean;
     plugins?: DraftlyPlugin[];
     markdown?: unknown[];

@@ -8,6 +8,7 @@ export function createDefaultPluginConfig(): PluginConfig {
 
 export function createDefaultConfig(): PlaygroundConfig {
   return {
+    locale: "zh-CN",
     editor: {
       baseStyles: true,
       defaultKeybindings: true,

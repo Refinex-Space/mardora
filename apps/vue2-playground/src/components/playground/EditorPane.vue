@@ -241,6 +241,7 @@ export default Vue.extend({
             this.cmTheme(),
             draftly({
               theme: this.draftlyTheme(),
+              locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
               plugins: getActivePlugins(this.config.plugins),
               markdown: [],

@@ -5,6 +5,7 @@ export type SaveStatus = "idle" | "saving" | "saved";
 export type ThemeMode = "light" | "dark";
 export type ThemePreference = "system" | ThemeMode;
 export type PreviewContentWidth = "regular" | "wide";
+export type PlaygroundLocale = "zh-CN" | "en-US";
 export type PluginConfig = Record<string, boolean>;
 
 export interface Content {
@@ -14,6 +15,7 @@ export interface Content {
 }
 
 export interface PlaygroundConfig {
+  locale: PlaygroundLocale;
   editor: {
     baseStyles: boolean;
     defaultKeybindings: boolean;

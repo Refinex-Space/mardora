@@ -66,6 +66,24 @@
               </button>
             </div>
           </div>
+          <div class="option-row">
+            <span class="switch-copy">
+              <span class="switch-label">Language</span>
+              <span class="switch-description">Adjust Draftly-owned editor UI text</span>
+            </span>
+            <div class="segmented-control" role="group" aria-label="Language">
+              <button
+                v-for="item in localeOptions"
+                :key="item.value"
+                type="button"
+                class="segmented-control-button"
+                :class="{ 'segmented-control-button-active': config.locale === item.value }"
+                @click="updateLocale(item.value)"
+              >
+                {{ item.label }}
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -124,7 +142,7 @@
 <script lang="ts">
 import Vue from "vue";
 import type { DraftlyNode } from "draftly/editor";
-import type { PlaygroundConfig, PreviewContentWidth } from "@/types";
+import type { PlaygroundConfig, PlaygroundLocale, PreviewContentWidth } from "@/types";
 
 type EditorOptionKey = keyof PlaygroundConfig["editor"];
 type PreviewOptionKey = "includeBase" | "sanitize";
@@ -175,6 +193,10 @@ export default Vue.extend({
         { value: "regular" as PreviewContentWidth, label: "Regular" },
         { value: "wide" as PreviewContentWidth, label: "Wide" },
       ],
+      localeOptions: [
+        { value: "zh-CN" as PlaygroundLocale, label: "中文" },
+        { value: "en-US" as PlaygroundLocale, label: "English" },
+      ],
     };
   },
   computed: {
@@ -222,6 +244,11 @@ export default Vue.extend({
     updateContentWidth(value: PreviewContentWidth) {
       const nextConfig = cloneConfig(this.config);
       nextConfig.preview.contentWidth = value;
+      this.$emit("update-config", nextConfig);
+    },
+    updateLocale(value: PlaygroundLocale) {
+      const nextConfig = cloneConfig(this.config);
+      nextConfig.locale = value;
       this.$emit("update-config", nextConfig);
     },
     updateFeatureOption(key: FeatureOptionKey, event: Event) {

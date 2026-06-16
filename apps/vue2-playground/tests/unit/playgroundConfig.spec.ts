@@ -12,13 +12,20 @@ describe("playgroundConfig", () => {
     }
   });
 
-  it("enables slash commands and attachment uploads by default", () => {
+  it("defaults to Chinese locale", () => {
+    const config = createDefaultConfig();
+
+    expect(config.locale).toBe("zh-CN");
+  });
+
+  it("enables slash commands, attachment uploads, and table of contents by default", () => {
     const config = createDefaultConfig();
 
     expect(config.features).toEqual({
       slashCommands: true,
       attachments: true,
       pasteDropUploads: true,
+      tableOfContents: true,
     });
   });
 
