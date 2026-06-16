@@ -16,6 +16,8 @@ class TocViewPlugin {
   private config: ResolvedDraftlyTocConfig;
   private panelState: TocPanelState;
   private items: DraftlyTocItem[] = [];
+  private renderFrame: number | null = null;
+  private readonly measureKey = {};
 
   constructor(private readonly view: EditorView, rawConfig: DraftlyTocConfig) {
     this.config = resolveTocConfig(rawConfig);
@@ -26,47 +28,89 @@ class TocViewPlugin {
     };
     this.view.scrollDOM.addEventListener("scroll", this.handleScroll, { passive: true });
     this.recompute();
+    this.scheduleRender();
+    this.scheduleActiveMeasure();
   }
 
   update(update: ViewUpdate): void {
-    if (update.docChanged || update.viewportChanged || update.geometryChanged) this.recompute();
+    if (update.docChanged) {
+      this.recompute();
+      return;
+    }
+    if (update.viewportChanged || update.geometryChanged) this.scheduleActiveMeasure();
   }
 
   destroy(): void {
     this.view.scrollDOM.removeEventListener("scroll", this.handleScroll);
+    if (this.renderFrame !== null) {
+      this.view.dom.ownerDocument.defaultView?.cancelAnimationFrame(this.renderFrame);
+      this.renderFrame = null;
+    }
     this.panel?.remove();
     this.panel = null;
   }
 
   private readonly handleScroll = (): void => {
-    this.updateActiveItem();
+    this.scheduleActiveMeasure();
   };
 
   private recompute(): void {
     const next = extractTocItemsFromState(this.view.state, this.config);
-    this.items = this.withActive(next);
+    this.items = this.withPreservedActive(next);
     this.config.onTocChange?.(this.items);
     this.render();
+    this.scheduleActiveMeasure();
   }
 
-  private withActive(items: DraftlyTocItem[]): DraftlyTocItem[] {
+  private withPreservedActive(items: DraftlyTocItem[]): DraftlyTocItem[] {
     if (items.length === 0) return [];
-    const viewportTop = this.view.scrollDOM.getBoundingClientRect().top + 24;
-    let activeIndex = 0;
-    items.forEach((item, index) => {
-      if (typeof item.from !== "number") return;
-      const coords = this.view.coordsAtPos(item.from);
-      if (coords && coords.top <= viewportTop) activeIndex = index;
-    });
-    return items.map((item, index) => ({ ...item, active: index === activeIndex }));
+    const previousActive = this.items.find((item) => item.active)?.id;
+    const fallbackActiveId = items[0]?.id;
+    const activeId =
+      previousActive && items.some((item) => item.id === previousActive) ? previousActive : fallbackActiveId;
+    return items.map((item) => ({ ...item, active: item.id === activeId }));
   }
 
-  private updateActiveItem(): void {
-    const next = this.withActive(this.items);
+  private scheduleActiveMeasure(): void {
+    if (this.items.length === 0 || !this.view.dom.isConnected) return;
+    this.view.requestMeasure({
+      key: this.measureKey,
+      read: (view) => {
+        const viewportTop = view.scrollDOM.getBoundingClientRect().top + 24;
+        let activeId = this.items[0]?.id ?? null;
+        for (const item of this.items) {
+          if (typeof item.from !== "number") continue;
+          const coords = view.coordsAtPos(item.from);
+          if (coords && coords.top <= viewportTop) activeId = item.id;
+        }
+        return activeId;
+      },
+      write: (activeId) => {
+        if (!activeId) return;
+        this.updateActiveItem(activeId);
+      },
+    });
+  }
+
+  private updateActiveItem(activeId: string): void {
+    const next = this.items.map((item) => ({ ...item, active: item.id === activeId }));
     if (sameItems(next, this.items)) return;
     this.items = next;
     this.config.onTocChange?.(this.items);
     this.render();
+  }
+
+  private scheduleRender(): void {
+    const win = this.view.dom.ownerDocument.defaultView;
+    if (!win) {
+      this.render();
+      return;
+    }
+    if (this.renderFrame !== null) return;
+    this.renderFrame = win.requestAnimationFrame(() => {
+      this.renderFrame = null;
+      this.render();
+    });
   }
 
   private render(): void {
@@ -83,8 +127,11 @@ class TocViewPlugin {
         onResizeStart: (event) => this.startResize(event),
       }
     );
-    this.panel?.replaceWith(nextPanel);
-    if (!this.panel) this.view.dom.appendChild(nextPanel);
+    if (this.panel?.isConnected) {
+      this.panel.replaceWith(nextPanel);
+    } else {
+      this.view.dom.appendChild(nextPanel);
+    }
     this.panel = nextPanel;
   }
 
@@ -95,7 +142,8 @@ class TocViewPlugin {
       effects: EditorView.scrollIntoView(item.from, { y: "start" }),
     });
     this.view.focus();
-    this.updateActiveItem();
+    this.updateActiveItem(item.id);
+    this.scheduleActiveMeasure();
   }
 
   private persistPanelState(): void {

@@ -87,6 +87,7 @@ export default Vue.extend({
       renderRequest: 0,
       objectUrls: [] as string[],
       previewToc: [] as DraftlyTocItem[],
+      previewTocManualActiveUntil: 0,
     };
   },
   mounted() {
@@ -342,9 +343,15 @@ export default Vue.extend({
         top: Math.max(0, target.offsetTop - 24),
         behavior: "smooth",
       });
+      this.previewTocManualActiveUntil = Date.now() + 650;
       this.markPreviewTocActive(id);
+      window.setTimeout(() => {
+        this.previewTocManualActiveUntil = 0;
+        this.syncPreviewTocActive();
+      }, 700);
     },
     syncPreviewTocActive() {
+      if (Date.now() < this.previewTocManualActiveUntil) return;
       const previewHost = this.$refs.previewHost as HTMLElement | undefined;
       if (!previewHost || this.previewToc.length === 0) return;
 
