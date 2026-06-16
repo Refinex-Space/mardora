@@ -4,10 +4,11 @@
       <span>No Content Selected</span>
     </div>
 
-    <div v-else-if="mode === 'view'" class="preview-with-toc" :style="previewTocStyle">
-      <div ref="previewHost" class="preview-host" @scroll="syncPreviewTocActive">
+    <div v-else-if="mode === 'view' || mode === 'live'" class="preview-with-toc" :style="previewTocStyle">
+      <div v-if="mode === 'view'" ref="previewHost" class="preview-host" @scroll="syncPreviewTocActive">
         <div v-html="previewOutput.html" />
       </div>
+      <div v-else ref="editorHost" class="editor-host editor-host-with-toc" />
       <aside v-if="config.features.tableOfContents" class="vue2-preview-toc">
         <div class="vue2-preview-toc-resize" @mousedown="startPreviewTocResize" />
         <nav class="vue2-preview-toc-list" aria-label="Document table of contents">
@@ -19,7 +20,7 @@
             :class="{ 'vue2-preview-toc-item-active': item.active }"
             :data-level="item.level"
             :title="item.text"
-            @click="jumpPreviewToc(item.id)"
+            @click="jumpToc(item)"
           >
             {{ item.text }}
           </button>
@@ -251,10 +252,7 @@ export default Vue.extend({
               slashCommands: {
                 enabled: this.config.features.slashCommands,
               },
-              toc: {
-                enabled: this.mode === "live" && this.config.features.tableOfContents,
-                storageKey: "draftly-vue2-playground:toc",
-              },
+              toc: this.editorTocConfig(),
               attachments: {
                 enabled: this.config.features.attachments,
                 uploader: this.config.features.attachments ? this.mockUploader : undefined,
@@ -321,6 +319,28 @@ export default Vue.extend({
         }
       });
     },
+    editorTocConfig() {
+      if (this.mode !== "live" || !this.config.features.tableOfContents) {
+        return { enabled: false };
+      }
+
+      return {
+        enabled: false,
+        onTocChange: this.handleEditorTocChange,
+      };
+    },
+    handleEditorTocChange(items: DraftlyTocItem[]) {
+      if (Date.now() >= this.previewTocManualActiveUntil) {
+        this.previewToc = items;
+        return;
+      }
+
+      const activeId = this.previewToc.find((item) => item.active)?.id;
+      this.previewToc = items.map((item) => ({
+        ...item,
+        active: item.id === activeId,
+      }));
+    },
     updatePreviewStyles() {
       const previewHost = this.$refs.previewHost as HTMLElement | undefined;
       if (!previewHost) return;
@@ -355,6 +375,28 @@ export default Vue.extend({
           extensions: [this.cmTheme(), css(), EditorView.lineWrapping, EditorState.readOnly.of(true)],
         }),
       });
+    },
+    jumpToc(item: DraftlyTocItem) {
+      if (this.mode === "live") {
+        this.jumpEditorToc(item);
+        return;
+      }
+
+      this.jumpPreviewToc(item.id);
+    },
+    jumpEditorToc(item: DraftlyTocItem) {
+      if (!this.editorView || typeof item.from !== "number") return;
+
+      this.previewTocManualActiveUntil = Date.now() + 650;
+      this.markPreviewTocActive(item.id);
+      this.editorView.dispatch({
+        selection: { anchor: item.from },
+        effects: EditorView.scrollIntoView(item.from, { y: "start" }),
+      });
+      this.editorView.focus();
+      window.setTimeout(() => {
+        this.previewTocManualActiveUntil = 0;
+      }, 700);
     },
     jumpPreviewToc(id: string) {
       const previewHost = this.$refs.previewHost as HTMLElement | undefined;

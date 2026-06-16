@@ -739,7 +739,20 @@ button {
   scrollbar-gutter: stable;
 }
 
+.preview-with-toc .editor-host-with-toc {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.preview-with-toc .editor-host-with-toc .cm-scroller {
+  box-sizing: border-box;
+  padding-right: calc(var(--vue2-preview-toc-width, 240px) + 14px);
+  scrollbar-gutter: stable;
+}
+
 .preview-with-toc .preview-host::-webkit-scrollbar-track,
+.preview-with-toc .editor-host-with-toc .cm-scroller::-webkit-scrollbar-track,
 .vue2-preview-toc-list::-webkit-scrollbar-track {
   background: transparent;
 }
