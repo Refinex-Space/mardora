@@ -76,6 +76,27 @@ describe("selection toolbar link commands", () => {
       selection: { anchor: 0, head: 7 },
     });
   });
+
+  it("does not build a link change when the url is empty", () => {
+    expect(() => buildLinkChange({ from: 0, to: 4, title: "text", url: "" })).toThrow("Link URL is required");
+  });
+});
+
+describe("selection toolbar clear commands", () => {
+  it("clears color span wrappers", () => {
+    expect(
+      buildInlineFormatChange({
+        doc: '<span style="color: #2563eb">blue</span>',
+        from: 0,
+        to: 40,
+        spanStyle: { property: "color", value: "#2563eb" },
+        clear: true,
+      })
+    ).toEqual({
+      changes: { from: 0, to: 40, insert: "blue" },
+      selection: { anchor: 0, head: 4 },
+    });
+  });
 });
 
 describe("selection toolbar list commands", () => {

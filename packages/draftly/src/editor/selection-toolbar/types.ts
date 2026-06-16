@@ -82,6 +82,7 @@ export type InlineFormatInput = {
     property: "color" | "background-color";
     value: string;
   };
+  clear?: boolean;
 };
 
 export type ParsedSelectionLink =

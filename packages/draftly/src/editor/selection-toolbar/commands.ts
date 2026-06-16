@@ -15,6 +15,10 @@ function selectedText(input: Pick<InlineFormatInput, "doc" | "from" | "to">): st
   return input.doc.slice(input.from, input.to);
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function buildHtmlWrapper(input: InlineFormatInput): { open: string; close: string } {
   if (input.htmlTag) {
     return { open: `<${input.htmlTag}>`, close: `</${input.htmlTag}>` };
@@ -29,6 +33,25 @@ function buildHtmlWrapper(input: InlineFormatInput): { open: string; close: stri
 export function buildInlineFormatChange(input: InlineFormatInput): TextCommandResult {
   const text = selectedText(input);
   const { open, close } = buildHtmlWrapper(input);
+
+  if (input.clear) {
+    const tagPattern = input.spanStyle
+      ? new RegExp(
+          `^<span style="${escapeRegExp(input.spanStyle.property)}: ${
+            input.spanStyle.value ? escapeRegExp(input.spanStyle.value) : "#[0-9a-fA-F]{6}"
+          }">([\\s\\S]*)<\\/span>$`
+        )
+      : input.htmlTag
+        ? new RegExp(`^<${input.htmlTag}>([\\s\\S]*)<\\/${input.htmlTag}>$`)
+        : null;
+    const match = tagPattern ? text.match(tagPattern) : null;
+    const insert = match?.[1] ?? text;
+    return {
+      changes: { from: input.from, to: input.to, insert },
+      selection: { anchor: input.from, head: input.from + insert.length },
+    };
+  }
+
   const beforeFrom = Math.max(0, input.from - open.length);
   const afterTo = Math.min(input.doc.length, input.to + close.length);
   const before = input.doc.slice(beforeFrom, input.from);
@@ -68,6 +91,10 @@ export function buildLinkChange(input: LinkChangeInput): TextCommandResult {
       changes: { from: input.from, to: input.to, insert: input.title },
       selection: { anchor: input.from, head: input.from + input.title.length },
     };
+  }
+
+  if (!input.url.trim()) {
+    throw new Error("Link URL is required");
   }
 
   const insert = `[${input.title}](${input.url})`;

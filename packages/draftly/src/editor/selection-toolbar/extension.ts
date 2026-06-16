@@ -198,6 +198,11 @@ class SelectionToolbarViewPlugin {
   }
 
   private dispatchResult(result: TextCommandResult): void {
+    if (!this.isSavedRangeCurrent()) {
+      this.close();
+      return;
+    }
+
     this.view.dispatch({
       changes: result.changes,
       selection: result.selection,
@@ -205,6 +210,11 @@ class SelectionToolbarViewPlugin {
     });
     this.view.focus();
     this.close();
+  }
+
+  private isSavedRangeCurrent(): boolean {
+    if (!this.savedRange) return false;
+    return this.view.state.sliceDoc(this.savedRange.from, this.savedRange.to) === this.savedRange.text;
   }
 
   private handleAction(id: SelectionToolbarActionId): void {
@@ -251,13 +261,14 @@ class SelectionToolbarViewPlugin {
 
   private applyColor(value: string | null): void {
     const range = this.savedRange;
-    if (!range || !value) return;
+    if (!range) return;
     this.dispatchResult(
       buildInlineFormatChange({
         doc: this.view.state.doc.toString(),
         from: range.from,
         to: range.to,
-        spanStyle: { property: "color", value },
+        spanStyle: { property: "color", value: value ?? "" },
+        clear: value === null,
       })
     );
   }
