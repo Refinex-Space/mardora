@@ -1,35 +1,35 @@
 export default `
-## Draftly - See What You Get
-Removes the barrier between Writing and Preview.
+## Draftly - 所见即所得
+消除书写与预览之间的屏障。
 
-**Draftly** is a modern, intuitive Markdown editor built on the powerful CodeMirror 6 framework, designed to deliver a truly **What You See Is What You Get (WYSIWYG)** experience for plain text. Forget the distraction of raw ~~Markdown syntax~~; with _Draftly_, your document transforms into a beautiful, readable preview as you type, while keeping the underlying Markdown accessible and editable.
+**Draftly** 是一款基于强大的 CodeMirror 6 框架构建的现代、直观的 Markdown 编辑器，致力于为纯文本提供真正的 **所见即所得（WYSIWYG）** 体验。告别对原始 ~~Markdown 语法~~ 的分心；借助 _Draftly_，你的文档会在输入时即时转化为美观、可读的预览，同时底层 Markdown 始终可访问、可编辑。
 
 ![My PlaceHolder](https://res.cloudinary.com/djoo8ogmp/image/upload/v1746213279/uploaded/image_yjzjdl.png "Hello From Minecraft")
-### Why Draftly?
-- **🚀 Modern Architecture:** Built on CodeMirror 6 with incremental Lezer parsing.
-- **🎨 Rich Editing:** WYSIWYG-like experience with full markdown control.
-- **🔌 Extensible Plugin System:** Add custom rendering, keymaps, and syntax.
-- **🖼️ Static Preview:** Render markdown to semantic HTML with visual parity.
-- **🌗 Theming:** First-class support for light and dark modes.
-- **📦 Modular Exports:** Import only what you need (draftly/editor, draftly/preview, draftly/plugins).
+### 为什么选择 Draftly？
+- **🚀 现代架构：** 基于 CodeMirror 6 构建，配合增量式 Lezer 解析。
+- **🎨 富文本编辑：** WYSIWYG 风格的体验，同时拥有完整的 Markdown 控制力。
+- **🔌 可扩展的插件系统：** 可添加自定义渲染、快捷键和语法。
+- **🖼️ 静态预览：** 将 Markdown 渲染为语义化 HTML，视觉一致。
+- **🌗 主题：** 一等公民式地支持浅色与深色模式。
+- **📦 模块化导出：** 只导入你需要的内容（draftly/editor、draftly/preview、draftly/plugins）。
 
-### Examples:
-So far, we have seen headings, Images, and Lists. Let's explore some additional features you can utilise with Draftly.
+### 示例：
+到目前为止，我们已经看到了标题、图片和列表。接下来探索一些你可以借助 Draftly 使用的其他特性。
 
-#### Typography
-There is inline styling for typography. **Bold** Text can also be written as __Bold__. *Italics* can be written as _Italics_. We have ~~Strikethrough~~ as well. \`Inline Code\` can be used to display code pieces.
+#### 排版
+排版支持行内样式。**粗体** 也可以写成 __粗体__。*斜体* 可以写成 _斜体_。我们还支持 ~~删除线~~。\`行内代码\` 可用于展示代码片段。
 
-- **Subscript:** 2H~2~O => 2H~2~ + O~2~
-- **Superscript:** a^2^ + b^2^ = (a+b)^2^
+- **下标：** 2H~2~O => 2H~2~ + O~2~
+- **上标：** a^2^ + b^2^ = (a+b)^2^
 
-#### Code Blocks:
-Code blocks are useful for displaying large chunks of code. The code plugin includes several additional features that can be tweaked via CodeInfo (First Line).
-- **Language** - The first thing after the code mark (\`\`\`) is the language. This is the only positional argument.
-- **title=** The title of the Code Block. If not provided, *language* will be displayed in the header.
-- **caption=** The caption shown below the code block.
-- **line-numbers** Whether to display line numbers. Additionally can take a value as an initial line number (i.e., \`line-numbers{5}\`).
-- **/pattern/** Highlight matched pattern. If no parameter is present, all instances will be highlighted. \`/pattern/3\` Only 3rd instance will be highlighted. \`/pattern/2-4\` 2nd to 4th insyances will be highlighted.
-- **{line_no}** Line highlight. \`{2}\` 2nd line will be highlighted. \`{2-4}\` 2nd to 4th line will be highlighted. Both patterns can be merged with a comma. \`{2,4-6,9}\` 2, 4, 5, 6, 9th line will be highlighted.
+#### 代码块：
+代码块适用于展示大段代码。code 插件包含若干额外特性，可通过 CodeInfo（首行）进行配置。
+- **Language** - 紧跟代码标记（\`\`\`）之后的第一个内容即语言。这是唯一的位置参数。
+- **title=** 代码块的标题。如未提供，头部将显示 *language*。
+- **caption=** 显示在代码块下方的说明文字。
+- **line-numbers** 是否显示行号。还可接收一个数值作为起始行号（例如 \`line-numbers{5}\`）。
+- **/pattern/** 高亮匹配的内容。若无参数，则高亮所有匹配项。\`/pattern/3\` 仅高亮第 3 处匹配。\`/pattern/2-4\` 高亮第 2 至第 4 处匹配。
+- **{line_no}** 行高亮。\`{2}\` 高亮第 2 行。\`{2-4}\` 高亮第 2 至第 4 行。两种模式可用逗号合并。\`{2,4-6,9}\` 高亮第 2、4、5、6、9 行。
 
 \`\`\`tsx line-numbers title="hello.tsx" caption="This component renders 'Hello World'" /Hello World/1-5,8-10,19 {2,6-8}
 "use client";
@@ -44,17 +44,17 @@ export default function page(props: Props) {
 }
 \`\`\`
 
-#### Ordered & Task Lists
-1. Here's an example of **Ordered List**.
-2. Here's the second Line
-   1. Here's a nested List
-   2. Here's a nested Second Line
-- [ ] Here's a Task List
-- [x] Here's a Checked Task List Item
+#### 有序列表与任务列表
+1. 这是一个 **有序列表** 的示例。
+2. 这是第二行
+   1. 这是一个嵌套列表
+   2. 这是嵌套的第二行
+- [ ] 这是一个任务列表
+- [x] 这是一个已勾选的任务列表项
 
-#### Math (Katex):
-- Inline Math: $\\min_{(w\\in\\mathbb R^d)}\\sum_{i=1}^n(w^Tx_i-y_i)^2$
-- Block Math:
+#### 数学公式（KaTeX）：
+- 行内公式：$\\min_{(w\\in\\mathbb R^d)}\\sum_{i=1}^n(w^Tx_i-y_i)^2$
+- 块级公式：
 
 $$
 \\begin{aligned}
@@ -67,8 +67,8 @@ $$
 \\end{aligned}
 $$
 
-#### HTML:
-**Draftly** Supports both inline **HTML**, **HTML blocks**, & **comment**. <span style="border: 1px solid; padding: 0 0.5rem;">Inline HTML</span>
+#### HTML：
+**Draftly** 同时支持行内 **HTML**、**HTML 块** 和 **注释**。<span style="border: 1px solid; padding: 0 0.5rem;">行内 HTML</span>
 
 <div style="display: grid; place-items: center">
   <svg viewBox="0 0 200 200" width="400px" xmlns="http://www.w3.org/2000/svg" aria-labelledby="t">
@@ -130,20 +130,20 @@ $$
   </style>
 </div>
 
-## Installation
-Install the package via your preferred package manager:
+## 安装
+通过你偏好的包管理器安装该包：
 \`\`\`shell title="npm"
 npm install draftly
 \`\`\`
 
 #### Peer Dependencies
-Draftly requires the following CodeMirror packages as peer dependencies. Make sure they are installed in your project:
+Draftly 需要以下 CodeMirror 包作为 peer dependencies。请确保它们已安装在你的项目中：
 \`\`\`shell title="npm"
 npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
 \`\`\`
 
-#### Quick Start
-Get up and running in seconds.
+#### 快速开始
+几秒钟即可上手。
 \`\`\`js title="index.js" line-numbers
 import { EditorView } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
@@ -159,7 +159,7 @@ const view = new EditorView({
 });
 \`\`\`
 
-In essence, **Draftly** represents a significant leap forward in Markdown editing, effectively dissolving the barrier between writing and previewing. By harnessing the modern, high-performance capabilities of CodeMirror 6, it provides a fluid, real-time WYSIWYG experience that intuitively renders everything from basic typography to complex elements like code blocks and KaTeX math equations. This seamless integration of Markdown's raw power with the immediate visual feedback of a rich text editor creates a focused, efficient, and powerful environment, making it an exceptional tool for writers, developers, and academics alike.
+总而言之，**Draftly** 代表了 Markdown 编辑领域的一次重大飞跃，有效消除了书写与预览之间的屏障。借助 CodeMirror 6 现代、高性能的能力，它提供了一种流畅、实时的 WYSIWYG 体验，能够直观地渲染从基础排版到代码块、KaTeX 数学公式等复杂元素的一切内容。这种 Markdown 原始能力与富文本编辑器即时视觉反馈的无缝融合，创造了一个专注、高效且强大的环境，使其成为写作者、开发者和学者的卓越工具。
 
-As **LiveMD is an early-stage project undergoing active development**, we invite you to help shape its future. Your feedback is invaluable, and we welcome contributions to this open-source initiative.
+由于 **LiveMD 仍处于早期阶段并正在积极开发中**，我们诚邀你共同塑造它的未来。你的反馈无比珍贵，我们也欢迎你为这一开源项目贡献代码。
 `;

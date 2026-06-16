@@ -43,7 +43,7 @@
 
 ## 本地运行
 
-本仓库是 Bun workspace + Turborepo 项目，包含演示站点 `apps/web`、核心包 `packages/draftly` 以及共享配置和 UI 包。
+本仓库是 Bun workspace + Turborepo 项目，包含 React、Vue2、Vue3 演示环境、核心包 `packages/draftly` 以及共享配置和 UI 包。
 
 ### 环境要求
 
@@ -63,13 +63,15 @@ bun run dev
 
 `bun run dev` 会通过 Turbo 启动所有声明了 `dev` 脚本的 workspace：
 
-- `apps/web`：运行 Next.js 开发服务器，默认地址为 `http://localhost:3000`
+- `apps/react-playground`：运行 Next.js 开发服务器，默认地址为 `http://localhost:3000`
+- `apps/vue2-playground`：运行 Vue CLI 开发服务器，默认地址为 `http://localhost:3001`
+- `apps/vue3-playground`：运行 Vite 开发服务器，默认地址为 `http://localhost:3003`
 - `packages/draftly`：运行 `tsup --watch`，监听核心库源码并输出构建产物
 
-如果只想启动 Web 演示站点：
+如果只想启动 React 演示站点：
 
 ```bash
-bun run --cwd apps/web dev
+bun run --cwd apps/react-playground dev
 ```
 
 启动后打开：
@@ -84,9 +86,9 @@ http://localhost:3000
 http://localhost:3000/playground
 ```
 
-### Vue2 Playground
+### Vue Playgrounds
 
-仓库还包含 `apps/vue2-playground`，用于验证 Draftly 在 Vue 2.6 + Vue CLI 4 + Webpack 4 环境中的接入效果。它与主 `/playground` 能力对齐，但实现上独立于 Next.js 演示站点，可独立演进。
+仓库还包含 `apps/vue2-playground` 和 `apps/vue3-playground`，用于验证 Draftly 在 Vue 2.6 + Vue CLI 4 + Webpack 4 以及 Vue 3 + Vite 环境中的接入效果。它们与 React `/playground` 能力对齐，但实现上独立于 Next.js 演示站点，可独立演进。
 
 启动前先构建 Draftly 包：
 
@@ -107,23 +109,35 @@ Vue CLI 开发服务器默认监听：
 http://localhost:3001
 ```
 
+Vue3 playground 使用 Vite：
+
+```bash
+cd apps/vue3-playground
+npm run dev
+```
+
+Vite 开发服务器默认监听：
+
+```text
+http://localhost:3003
+```
+
 常用命令：
 
-| 命令                | 说明                          |
-| ------------------- | ----------------------------- |
-| `npm run dev`       | 启动 Vue CLI 开发服务器。     |
-| `npm run build`     | 构建 Vue2 playground。        |
-| `npm run lint`      | 检查 Vue2 playground 代码。   |
-| `npm run test:unit` | 运行 Vue2 playground 单元测试。 |
+| 命令                | 说明                               |
+| ------------------- | ---------------------------------- |
+| `npm run dev`       | 启动当前 Vue playground 开发服务器。 |
+| `npm run build`     | 构建当前 Vue playground。          |
+| `npm run test:unit` | 运行当前 Vue playground 单元测试。 |
 
 ### 生产构建与本地预览
 
 ```bash
 bun run build
-bun run --cwd apps/web start
+bun run --cwd apps/react-playground start
 ```
 
-`bun run build` 会通过 Turbo 构建相关 workspace；`bun run --cwd apps/web start` 会启动 Next.js 生产服务，默认同样监听 `http://localhost:3000`。
+`bun run build` 会通过 Turbo 构建相关 workspace；`bun run --cwd apps/react-playground start` 会启动 Next.js 生产服务，默认同样监听 `http://localhost:3000`。
 
 ### 常用命令
 
@@ -134,7 +148,7 @@ bun run --cwd apps/web start
 | `bun run build`                            | 构建仓库内相关包与应用。                      |
 | `bun run lint`                             | 运行 Turbo lint 任务。                        |
 | `bun run format`                           | 使用 Prettier 格式化 `ts`、`tsx`、`md` 文件。 |
-| `bun run --cwd apps/web typecheck`         | 对 Web 应用执行 TypeScript 类型检查。         |
+| `bun run --cwd apps/react-playground typecheck` | 对 React playground 执行 TypeScript 类型检查。 |
 | `bun run --cwd packages/draftly typecheck` | 对核心库执行 TypeScript 类型检查。            |
 
 ---
