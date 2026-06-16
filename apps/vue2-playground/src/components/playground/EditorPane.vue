@@ -56,7 +56,7 @@ const previewTocMinWidth = 180;
 const previewTocMaxWidth = 360;
 const previewTocDefaultWidth = 240;
 const regularContentWidth = "48rem";
-const wideContentWidth = "75vw";
+const wideContentWidth = "clamp(48rem, 75%, 80rem)";
 
 function clampPreviewTocWidth(width: number): number {
   return Math.min(Math.max(width, previewTocMinWidth), previewTocMaxWidth);
