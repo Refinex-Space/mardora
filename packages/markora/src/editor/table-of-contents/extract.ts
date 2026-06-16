@@ -1,10 +1,11 @@
 import type { EditorState } from "@codemirror/state";
-import { syntaxTree } from "@codemirror/language";
+import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import type { SyntaxNodeRef } from "@lezer/common";
 import type { MarkoraTocConfig, MarkoraTocItem, MarkoraTocLevel } from "./types";
 import { createTocSlugger, resolveTocConfig } from "./slug";
 
 const headingPattern = /^ATXHeading([1-6])$/;
+const tocParseTimeout = 100;
 
 function headingLevel(node: SyntaxNodeRef): MarkoraTocLevel | null {
   const match = headingPattern.exec(node.name);
@@ -29,8 +30,9 @@ export function extractTocItemsFromState(state: EditorState, config: MarkoraTocC
   const resolved = resolveTocConfig(config);
   const slug = createTocSlugger();
   const items: MarkoraTocItem[] = [];
+  const tree = ensureSyntaxTree(state, state.doc.length, tocParseTimeout) ?? syntaxTree(state);
 
-  syntaxTree(state).iterate({
+  tree.iterate({
     enter: (node) => {
       const level = headingLevel(node);
       if (!level || level < resolved.minLevel || level > resolved.maxLevel) return;

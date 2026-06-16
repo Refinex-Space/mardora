@@ -11,6 +11,7 @@
         <span class="icon-svg" aria-hidden="true" v-html="icons.panelLeftClose" />
       </button>
       <span class="brand-logo" aria-hidden="true" v-html="logo" />
+      <span class="brand-title">Markora</span>
     </div>
 
     <div class="header-actions">

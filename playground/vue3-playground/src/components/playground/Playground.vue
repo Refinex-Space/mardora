@@ -23,9 +23,6 @@
           :contents="contents"
           :current-content="currentContent"
           @select-content="selectContent"
-          @create-content="createContent"
-          @delete-content="deleteContent"
-          @rename-content="renameContent"
         />
       </div>
 
@@ -92,11 +89,6 @@ import type {
   ThemeMode,
   ThemePreference,
 } from "@/types";
-
-interface RenamePayload {
-  id: string;
-  title: string;
-}
 
 export default defineComponent({
   name: "Playground",
@@ -202,24 +194,6 @@ export default defineComponent({
       };
       this.contents = [...this.contents, nextContent];
       this.currentContent = this.contents.length - 1;
-      this.scheduleSave();
-    },
-    deleteContent(id: string) {
-      const index = this.contents.findIndex((content) => content.id === id);
-      if (index === -1) return;
-
-      this.contents = this.contents.filter((content) => content.id !== id);
-      if (this.contents.length === 0) {
-        this.currentContent = -1;
-      } else if (this.currentContent >= index) {
-        this.currentContent = Math.max(0, this.currentContent - 1);
-      }
-      this.scheduleSave();
-    },
-    renameContent(payload: RenamePayload) {
-      this.contents = this.contents.map((content) =>
-        content.id === payload.id ? { ...content, title: payload.title } : content
-      );
       this.scheduleSave();
     },
     updateCurrentContent(content: string) {

@@ -97,12 +97,7 @@ const DEBOUNCE_MS = 500;
 // The app will detect the mismatch and refresh the default entries in localStorage.
 const VERSION = 3;
 
-const DEFAULT_CONTENT_IDS = new Set([
-  "project-introduction",
-  "vue2-guide",
-  "vue3-guide",
-  "react-guide",
-]);
+const DEFAULT_CONTENT_IDS = new Set(["project-introduction", "vue2-guide", "vue3-guide", "react-guide"]);
 
 function buildDefaultContentsFor(locale: "zh" | "en"): Content[] {
   return buildDefaultContents(locale, {
@@ -318,32 +313,6 @@ export default function Page() {
     saveToStorage(newContents, newIndex);
   }
 
-  function deleteContent(id: string) {
-    const index = contents.findIndex((c) => c.id === id);
-    if (index === -1) return;
-
-    const newContents = contents.filter((c) => c.id !== id);
-    setContents(newContents);
-
-    // Adjust currentContent if needed
-    let newCurrent = currentContent;
-    if (newContents.length === 0) {
-      newCurrent = -1;
-    } else if (currentContent >= index) {
-      newCurrent = Math.max(0, currentContent - 1);
-    }
-    setCurrentContent(newCurrent);
-    saveToStorage(newContents, newCurrent);
-  }
-
-  function renameContent(id: string, newTitle: string) {
-    setContents((c) => {
-      const updated = c.map((content) => (content.id === id ? { ...content, title: newTitle } : content));
-      saveToStorage(updated, currentContent);
-      return updated;
-    });
-  }
-
   const editor = useRef<ReactCodeMirrorRef>(null);
   function handleSetCurrentContent(index: number) {
     setCurrentContent(index);
@@ -472,14 +441,7 @@ export default function Page() {
             }
           )}
         >
-          <Sidebar
-            contents={contents}
-            currentContent={currentContent}
-            setCurrentContent={handleSetCurrentContent}
-            addNewContent={addNewContent}
-            deleteContent={deleteContent}
-            renameContent={renameContent}
-          />
+          <Sidebar contents={contents} currentContent={currentContent} setCurrentContent={handleSetCurrentContent} />
         </div>
 
         {/* Editor */}

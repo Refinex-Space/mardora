@@ -58,6 +58,7 @@ type Mode = "live" | "view" | "code" | "output";
 type PluginConfig = Record<string, boolean>;
 
 type PlaygroundConfig = {
+  locale: "zh-CN" | "en-US";
   editor: {
     baseStyles: boolean;
     defaultKeybindings: boolean;
@@ -85,6 +86,7 @@ const defaultPluginConfig: PluginConfig = Object.fromEntries(
 );
 
 const defaultConfig: PlaygroundConfig = {
+  locale: "zh-CN",
   editor: {
     baseStyles: true,
     defaultKeybindings: true,
@@ -118,7 +120,7 @@ const STORAGE_VERSION = 2;
 
 const DEFAULT_CONTENTS: Content[] = [
   { id: "project-introduction", title: "项目介绍", content: projectIntroduction },
-  { id: "vue2-guide", title: "Ve2 接入指南", content: vue2Guide },
+  { id: "vue2-guide", title: "Vue2 接入指南", content: vue2Guide },
   { id: "vue3-guide", title: "Vue3 接入指南", content: vue3Guide },
   { id: "react-guide", title: "React 接入指南", content: reactGuide },
 ];
@@ -214,6 +216,7 @@ const extensions = useMemo<Extension[]>(
   () =>
     markora({
       theme: markoraTheme,
+      locale: config.locale,
       baseStyles: config.editor.baseStyles,
       plugins: activePlugins,
       disableViewPlugin: mode === "code",
@@ -248,7 +251,7 @@ const extensions = useMemo<Extension[]>(
         setNodes(nextNodes);
       },
     }),
-  [activePlugins, config.editor, config.features, markoraTheme, mode, uploader]
+  [activePlugins, config.editor, config.features, config.locale, markoraTheme, mode, uploader]
 );
 ```
 
@@ -354,6 +357,7 @@ useEffect(() => {
 | 配置                       | 默认值           | React 建议                                |
 | -------------------------- | ---------------- | ----------------------------------------- |
 | `theme`                    | `ThemeEnum.AUTO` | 从主题状态映射为 `ThemeEnum.LIGHT/DARK`。 |
+| `locale`                   | `"zh-CN"`        | 中文应用保持默认，英文应用传 `"en-US"`。  |
 | `baseStyles`               | `true`           | 初次接入保持开启。                        |
 | `plugins`                  | `[]`             | 传 `activePlugins`。                      |
 | `disableViewPlugin`        | `false`          | `mode === "code"` 时设为 `true`。         |

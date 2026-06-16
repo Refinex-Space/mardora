@@ -71,12 +71,7 @@ export default function Header({
       <div className="flex items-center gap-3">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
+            <Button variant="ghost" size="icon" className="size-8" onClick={() => setSidebarOpen(!sidebarOpen)}>
               <PanelLeftClose className="size-5" />
               <span className="sr-only">{t("header.toggleSidebar")}</span>
             </Button>
@@ -84,11 +79,8 @@ export default function Header({
           <TooltipContent side="bottom">{t("header.toggleSidebar")}</TooltipContent>
         </Tooltip>
         {/* Theme-aware inline logo */}
-        <span
-          className="size-7 inline-block"
-          dangerouslySetInnerHTML={{ __html: logo }}
-          aria-hidden="true"
-        />
+        <span className="size-7 inline-block" dangerouslySetInnerHTML={{ __html: logo }} aria-hidden="true" />
+        <span className="text-xl font-mono">Markora</span>
       </div>
       <div className="flex items-center gap-1">
         {saveStatus !== "idle" && (
@@ -133,21 +125,12 @@ export default function Header({
         </DropdownMenu>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              onClick={() => setDevbarOpen(!devbarOpen)}
-            >
+            <Button variant="ghost" size="icon" className="size-8" onClick={() => setDevbarOpen(!devbarOpen)}>
               <PanelRightClose className="size-5" />
-              <span className="sr-only">
-                {devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}
-              </span>
+              <span className="sr-only">{devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">
-            {devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}
-          </TooltipContent>
+          <TooltipContent side="bottom">{devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}</TooltipContent>
         </Tooltip>
       </div>
     </header>

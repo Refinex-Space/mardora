@@ -11,9 +11,18 @@ function stateFromDoc(doc: string): EditorState {
   });
 }
 
+function longDocWithHeadings(): string {
+  return Array.from({ length: 12 }, (_, index) => {
+    const level = index % 3 === 0 ? "##" : index % 3 === 1 ? "###" : "####";
+    return [`${level} Section ${index + 1}`, "body ".repeat(140)].join("\n\n");
+  }).join("\n\n");
+}
+
 describe("extractTocItemsFromState", () => {
   it("extracts only h2-h6 by default", () => {
-    const state = stateFromDoc(["# Title", "## Intro", "### Details", "###### Deep", "####### Not a heading"].join("\n\n"));
+    const state = stateFromDoc(
+      ["# Title", "## Intro", "### Details", "###### Deep", "####### Not a heading"].join("\n\n")
+    );
 
     expect(extractTocItemsFromState(state)).toEqual([
       expect.objectContaining({ id: "intro", level: 2, text: "Intro", active: false }),
@@ -49,5 +58,14 @@ describe("extractTocItemsFromState", () => {
     expect(item.to).toBeGreaterThan(item.from!);
     expect(state.sliceDoc(item.from!, item.to!)).toContain("Intro");
     expect(syntaxTree(state).length).toBeGreaterThan(0);
+  });
+
+  it("extracts headings beyond CodeMirror's initial partial parse", () => {
+    const state = stateFromDoc(longDocWithHeadings());
+
+    expect(syntaxTree(state).length).toBeLessThan(state.doc.length);
+    expect(extractTocItemsFromState(state).map((item) => item.text)).toEqual(
+      Array.from({ length: 12 }, (_, index) => `Section ${index + 1}`)
+    );
   });
 });

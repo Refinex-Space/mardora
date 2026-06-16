@@ -4,6 +4,7 @@ import { buildInlineFormatChange, buildLinkChange, buildListChange, parseSelecte
 import { createSelectionToolbarElement } from "./menu";
 import { computeSelectionToolbarLayout } from "./position";
 import { selectionToolbarTheme } from "./theme";
+import { canActivateFromNativeSelection } from "./activation";
 import type {
   MarkoraSelectionToolbarConfig,
   SelectionToolbarAnchorRect,
@@ -123,8 +124,18 @@ class SelectionToolbarViewPlugin {
     if (!this.view.hasFocus || this.view.dom.classList.contains("cm-markora-slash-open")) return;
 
     const selection = doc.getSelection();
-    if (!selection || selection.isCollapsed || !selection.anchorNode || !selection.focusNode || selection.rangeCount === 0) return;
-    if (!this.view.contentDOM.contains(selection.anchorNode) || !this.view.contentDOM.contains(selection.focusNode)) return;
+    if (!selection || !selection.anchorNode || !selection.focusNode) return;
+    if (
+      !canActivateFromNativeSelection({
+        editorSelectionEmpty: this.view.state.selection.main.empty,
+        nativeSelectionCollapsed: selection.isCollapsed,
+        anchorInEditor: this.view.contentDOM.contains(selection.anchorNode),
+        focusInEditor: this.view.contentDOM.contains(selection.focusNode),
+        rangeCount: selection.rangeCount,
+      })
+    ) {
+      return;
+    }
 
     let anchor: number;
     let head: number;
@@ -371,7 +382,9 @@ class SelectionToolbarViewPlugin {
   private removeLink(): void {
     const range = this.savedRange;
     if (!range) return;
-    this.dispatchResult(buildLinkChange({ from: range.from, to: range.to, title: this.link.title || range.text, url: "", remove: true }));
+    this.dispatchResult(
+      buildLinkChange({ from: range.from, to: range.to, title: this.link.title || range.text, url: "", remove: true })
+    );
   }
 
   private async copyLink(): Promise<void> {

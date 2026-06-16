@@ -140,6 +140,14 @@ button {
   height: 100%;
 }
 
+.brand-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .save-status {
   color: var(--muted);
   font-size: 13px;
@@ -449,12 +457,18 @@ button {
   background: var(--accent);
 }
 
-.document-icon {
+.document-icon,
+.doc-file-icon {
   flex: 0 0 auto;
-  width: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 11px;
+}
+
+.doc-file-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .document-title {
@@ -465,19 +479,6 @@ button {
   font-size: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.document-actions {
-  gap: 4px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms ease;
-}
-
-.document-item:hover .document-actions,
-.document-item:focus-within .document-actions {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .row-icon-button {

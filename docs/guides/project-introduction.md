@@ -11,6 +11,8 @@ referenced_by: docs/README.md#product-and-integration-guides
 
 Markora 的定位很明确：它是一个基于 CodeMirror 6 的 Markdown 编辑器能力包，而不是某个前端框架的黑盒组件。业务应用负责页面布局、状态管理、数据保存和文件存储；Markora 负责把 CodeMirror 6 组装成可扩展的 Markdown 编辑器，并提供编辑态渲染、插件体系、slash commands、附件上传入口、选区工具栏、目录、静态预览 HTML 和 CSS 生成。
 
+当前 `1.0.0` 文档按 playground 同等能力整理。业务侧按本文和对应框架指南接入后，应能获得编辑、源码、预览、输出、插件开关、附件、slash commands、选区工具栏、TOC、主题和 i18n 的完整能力链路。
+
 ## 1. 能力边界
 
 | 能力                  | Markora 是否提供 | 说明                                                                                                     |
@@ -88,8 +90,8 @@ const view = new EditorView({
   }),
 });
 
-// 单页应用卸载时必须 destroy，避免事件监听和 DOM 节点泄漏。
-view.destroy();
+// 单页应用卸载时必须执行，避免事件监听和 DOM 节点泄漏。
+// view.destroy();
 ```
 
 ## 5. `MarkoraConfig` 配置总表

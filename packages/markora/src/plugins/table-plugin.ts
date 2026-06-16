@@ -427,8 +427,8 @@ async function renderTableToHtml(parsed: ParsedTable, config?: MarkoraConfig): P
   for (let rowIndex = 0; rowIndex < normalized.rows.length; rowIndex++) {
     const row = normalized.rows[rowIndex] || [];
     html += `<tr class="cm-markora-table-row cm-markora-table-body-row${
-      rowIndex % 2 === 1 ? " cm-markora-table-row-even" : ""
-    }${rowIndex === normalized.rows.length - 1 ? " cm-markora-table-row-last" : ""}">`;
+      rowIndex === normalized.rows.length - 1 ? " cm-markora-table-row-last" : ""
+    }">`;
 
     for (let index = 0; index < normalized.headers.length; index++) {
       const alignment = normalized.alignments[index] || "left";
@@ -697,7 +697,6 @@ const lineDecorations = {
   header: Decoration.line({ class: "cm-markora-table-row cm-markora-table-header-row" }),
   delimiter: Decoration.line({ class: "cm-markora-table-row cm-markora-table-delimiter-row" }),
   body: Decoration.line({ class: "cm-markora-table-row cm-markora-table-body-row" }),
-  even: Decoration.line({ class: "cm-markora-table-row cm-markora-table-body-row cm-markora-table-row-even" }),
   last: Decoration.line({ class: "cm-markora-table-row-last" }),
 };
 
@@ -979,14 +978,11 @@ export class TablePlugin extends DecorationPlugin {
       const isHeader = lineNumber === tableInfo.startLineNumber;
       const isDelimiter = lineNumber === tableInfo.delimiterLineNumber;
       const isLastBody = !isHeader && !isDelimiter && lineNumber === tableInfo.endLineNumber;
-      const bodyIndex = isHeader || isDelimiter ? -1 : lineNumber - tableInfo.delimiterLineNumber - 1;
 
       if (isHeader) {
         decorations.push(lineDecorations.header.range(line.from));
       } else if (isDelimiter) {
         decorations.push(lineDecorations.delimiter.range(line.from));
-      } else if (bodyIndex % 2 === 1) {
-        decorations.push(lineDecorations.even.range(line.from));
       } else {
         decorations.push(lineDecorations.body.range(line.from));
       }
@@ -1613,14 +1609,6 @@ const theme = createTheme({
         display: "table-row !important",
       },
 
-      "& .cm-markora-table-header-row": {
-        backgroundColor: "rgba(15, 23, 42, 0.04)",
-      },
-
-      "& .cm-markora-table-row-even": {
-        backgroundColor: "rgba(15, 23, 42, 0.02)",
-      },
-
       "& .cm-markora-table-delimiter-row": {
         display: "none !important",
       },
@@ -1651,7 +1639,6 @@ const theme = createTheme({
 
       "& .cm-markora-table-th": {
         fontWeight: "600",
-        borderBottomWidth: "2px",
       },
 
       "& .cm-markora-table-cell-last": {
@@ -1731,14 +1718,6 @@ const theme = createTheme({
     ".cm-markora-table-wrapper, .cm-markora-table-widget": {
       borderColor: "var(--color-border, #30363d)",
       backgroundColor: "var(--color-background, #0d1117)",
-
-      "& .cm-markora-table-header-row": {
-        backgroundColor: "rgba(255, 255, 255, 0.05)",
-      },
-
-      "& .cm-markora-table-row-even": {
-        backgroundColor: "rgba(255, 255, 255, 0.025)",
-      },
 
       "& .cm-markora-table-cell": {
         borderColor: "var(--color-border, #30363d)",
