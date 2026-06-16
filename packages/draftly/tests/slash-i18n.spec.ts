@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { defaultDraftlyLocale, resolveDraftlyLocale } from "../src/editor";
-import { createSlashMenuElement, getSlashMessages } from "../src/editor/slash";
+import {
+  createSlashMenuElement,
+  defaultSlashCommands,
+  filterSlashCommands,
+  getDefaultSlashCommands,
+  getSlashMessages,
+} from "../src/editor/slash";
 import type { DraftlySlashCommand } from "../src/editor/slash";
 
 class FakeElement {
@@ -126,5 +132,38 @@ describe("slash i18n", () => {
     );
 
     expect(menu.textContent).toContain("No matching commands");
+  });
+});
+
+describe("localized default slash commands", () => {
+  it("keeps defaultSlashCommands Chinese for compatibility", () => {
+    expect(defaultSlashCommands.find((command) => command.id === "paragraph")?.title).toBe("文本");
+    expect(defaultSlashCommands.find((command) => command.id === "image")?.title).toBe("图片");
+  });
+
+  it("returns English command titles for en-US", () => {
+    const commands = getDefaultSlashCommands("en-US");
+
+    expect(commands.find((command) => command.id === "paragraph")?.title).toBe("Text");
+    expect(commands.find((command) => command.id === "ordered-list")?.title).toBe("Numbered list");
+    expect(commands.find((command) => command.id === "image")?.title).toBe("Image");
+  });
+
+  it("supports Chinese and English search terms in both locales", () => {
+    const zhCommands = getDefaultSlashCommands("zh-CN");
+    const enCommands = getDefaultSlashCommands("en-US");
+
+    expect(filterSlashCommands(zhCommands, "图片").map((command) => command.id)).toEqual(["image"]);
+    expect(filterSlashCommands(zhCommands, "image").map((command) => command.id)).toEqual(["image"]);
+    expect(filterSlashCommands(enCommands, "图片").map((command) => command.id)).toEqual(["image"]);
+    expect(filterSlashCommands(enCommands, "image").map((command) => command.id)).toEqual(["image"]);
+    expect(filterSlashCommands(enCommands, "标题").map((command) => command.id)).toEqual([
+      "heading-1",
+      "heading-2",
+      "heading-3",
+      "heading-4",
+      "heading-5",
+      "heading-6",
+    ]);
   });
 });

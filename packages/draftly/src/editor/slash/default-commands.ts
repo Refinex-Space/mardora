@@ -1,6 +1,77 @@
 import type { DraftlySlashCommand } from "./types";
 import { buildSlashReplacement } from "./insertions";
 import type { DraftlyAttachmentKind } from "../attachments";
+import type { DraftlyLocale } from "../i18n";
+
+type LocalizedSlashCommandCopy = {
+  title: string;
+  aliases: string[];
+};
+
+const commandCopy: Record<DraftlyLocale, Record<string, LocalizedSlashCommandCopy>> = {
+  "zh-CN": {
+    paragraph: { title: "文本", aliases: ["text", "plain", "wenben"] },
+    "heading-1": { title: "标题 1", aliases: ["h1", "heading", "heading1", "biaoti", "标题"] },
+    "heading-2": { title: "标题 2", aliases: ["h2", "heading", "heading2", "biaoti", "标题"] },
+    "heading-3": { title: "标题 3", aliases: ["h3", "heading", "heading3", "biaoti", "标题"] },
+    "heading-4": { title: "标题 4", aliases: ["h4", "heading", "heading4", "biaoti", "标题"] },
+    "heading-5": { title: "标题 5", aliases: ["h5", "heading", "heading5", "biaoti", "标题"] },
+    "heading-6": { title: "标题 6", aliases: ["h6", "heading", "heading6", "biaoti", "标题"] },
+    quote: { title: "引用", aliases: ["quote", "blockquote", "yinyong"] },
+    "ordered-list": { title: "有序列表", aliases: ["ol", "ordered", "numbered", "youxu", "有序"] },
+    "unordered-list": { title: "项目符号列表", aliases: ["ul", "bullet", "unordered", "bulleted", "wuxu", "无序"] },
+    "task-list": { title: "待办清单", aliases: ["todo", "task", "check", "daiban", "待办"] },
+    table: { title: "表格", aliases: ["table", "biaoge"] },
+    divider: { title: "分隔线", aliases: ["hr", "divider", "line", "fengexian", "分隔"] },
+    link: { title: "链接", aliases: ["link", "url", "lianjie"] },
+    file: { title: "文件", aliases: ["file", "wenjian"] },
+    image: { title: "图片", aliases: ["image", "img", "tu", "tupian", "图片"] },
+    video: { title: "视频", aliases: ["video", "shipin"] },
+    audio: { title: "音频", aliases: ["audio", "music", "yinpin"] },
+  },
+  "en-US": {
+    paragraph: { title: "Text", aliases: ["文本", "text", "plain", "wenben"] },
+    "heading-1": { title: "Heading 1", aliases: ["标题", "h1", "heading", "heading1", "biaoti"] },
+    "heading-2": { title: "Heading 2", aliases: ["标题", "h2", "heading", "heading2", "biaoti"] },
+    "heading-3": { title: "Heading 3", aliases: ["标题", "h3", "heading", "heading3", "biaoti"] },
+    "heading-4": { title: "Heading 4", aliases: ["标题", "h4", "heading", "heading4", "biaoti"] },
+    "heading-5": { title: "Heading 5", aliases: ["标题", "h5", "heading", "heading5", "biaoti"] },
+    "heading-6": { title: "Heading 6", aliases: ["标题", "h6", "heading", "heading6", "biaoti"] },
+    quote: { title: "Quote", aliases: ["引用", "quote", "blockquote", "yinyong"] },
+    "ordered-list": { title: "Numbered list", aliases: ["有序", "ol", "ordered", "numbered", "youxu"] },
+    "unordered-list": { title: "Bulleted list", aliases: ["无序", "ul", "bullet", "unordered", "bulleted", "wuxu"] },
+    "task-list": { title: "To-do list", aliases: ["待办", "todo", "task", "check", "daiban"] },
+    table: { title: "Table", aliases: ["表格", "table", "biaoge"] },
+    divider: { title: "Divider", aliases: ["分隔", "hr", "divider", "line", "fengexian"] },
+    link: { title: "Link", aliases: ["链接", "link", "url", "lianjie"] },
+    file: { title: "File", aliases: ["文件", "file", "wenjian"] },
+    image: { title: "Image", aliases: ["图片", "image", "img", "tu", "tupian"] },
+    video: { title: "Video", aliases: ["视频", "video", "shipin"] },
+    audio: { title: "Audio", aliases: ["音频", "audio", "music", "yinpin"] },
+  },
+};
+
+function commandMeta(
+  locale: DraftlyLocale,
+  id: string,
+  group: DraftlySlashCommand["group"],
+  icon: string,
+  hint: string
+): Omit<DraftlySlashCommand, "run"> {
+  const copy = commandCopy[locale][id];
+  if (!copy) {
+    throw new Error(`Missing slash command copy: ${locale}:${id}`);
+  }
+
+  return {
+    id,
+    group,
+    title: copy.title,
+    aliases: copy.aliases,
+    icon,
+    hint,
+  };
+}
 
 function markdownCommand(
   command: Omit<DraftlySlashCommand, "run">,
@@ -53,27 +124,27 @@ function mediaCommand(command: Omit<DraftlySlashCommand, "run">, kind: DraftlyAt
   };
 }
 
-export const defaultSlashCommands: DraftlySlashCommand[] = [
-  markdownCommand({ id: "paragraph", group: "basic", title: "文本", aliases: ["text", "plain"], icon: "type", hint: "" }, "", 0),
-  markdownCommand({ id: "heading-1", group: "basic", title: "标题 1", aliases: ["h1", "heading1"], icon: "heading-1", hint: "#" }, "# "),
-  markdownCommand({ id: "heading-2", group: "basic", title: "标题 2", aliases: ["h2", "heading2"], icon: "heading-2", hint: "##" }, "## "),
-  markdownCommand({ id: "heading-3", group: "basic", title: "标题 3", aliases: ["h3", "heading3"], icon: "heading-3", hint: "###" }, "### "),
-  markdownCommand({ id: "heading-4", group: "basic", title: "标题 4", aliases: ["h4", "heading4"], icon: "heading-4", hint: "####" }, "#### "),
-  markdownCommand({ id: "heading-5", group: "basic", title: "标题 5", aliases: ["h5", "heading5"], icon: "heading-5", hint: "#####" }, "##### "),
-  markdownCommand({ id: "heading-6", group: "basic", title: "标题 6", aliases: ["h6", "heading6"], icon: "heading-6", hint: "######" }, "###### "),
-  markdownCommand({ id: "quote", group: "basic", title: "引用", aliases: ["quote", "blockquote"], icon: "text-quote", hint: ">" }, "> "),
-  markdownCommand({ id: "ordered-list", group: "basic", title: "有序列表", aliases: ["ol", "ordered"], icon: "list-ordered", hint: "1." }, "1. "),
-  markdownCommand({ id: "unordered-list", group: "basic", title: "项目符号列表", aliases: ["ul", "bullet", "unordered"], icon: "list", hint: "-" }, "- "),
-  markdownCommand({ id: "task-list", group: "basic", title: "待办清单", aliases: ["todo", "task", "check"], icon: "list-todo", hint: "[]" }, "- [ ] "),
-  markdownCommand(
-    { id: "table", group: "basic", title: "表格", aliases: ["table"], icon: "table", hint: "| |" },
-    "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n",
-    2
-  ),
-  markdownCommand({ id: "divider", group: "basic", title: "分隔线", aliases: ["hr", "divider"], icon: "minus", hint: "---" }, "---\n"),
-  markdownCommand({ id: "link", group: "basic", title: "链接", aliases: ["link", "url"], icon: "link", hint: "[]()" }, "[]()", 1),
-  mediaCommand({ id: "file", group: "media", title: "文件", aliases: ["file"], icon: "file", hint: "file" }, "file"),
-  mediaCommand({ id: "image", group: "media", title: "图片", aliases: ["image", "img", "tu"], icon: "image", hint: "img" }, "image"),
-  mediaCommand({ id: "video", group: "media", title: "视频", aliases: ["video"], icon: "play", hint: "video" }, "video"),
-  mediaCommand({ id: "audio", group: "media", title: "音频", aliases: ["audio"], icon: "music-2", hint: "audio" }, "audio"),
-];
+export function getDefaultSlashCommands(locale: DraftlyLocale = "zh-CN"): DraftlySlashCommand[] {
+  return [
+    markdownCommand(commandMeta(locale, "paragraph", "basic", "type", ""), "", 0),
+    markdownCommand(commandMeta(locale, "heading-1", "basic", "heading-1", "#"), "# "),
+    markdownCommand(commandMeta(locale, "heading-2", "basic", "heading-2", "##"), "## "),
+    markdownCommand(commandMeta(locale, "heading-3", "basic", "heading-3", "###"), "### "),
+    markdownCommand(commandMeta(locale, "heading-4", "basic", "heading-4", "####"), "#### "),
+    markdownCommand(commandMeta(locale, "heading-5", "basic", "heading-5", "#####"), "##### "),
+    markdownCommand(commandMeta(locale, "heading-6", "basic", "heading-6", "######"), "###### "),
+    markdownCommand(commandMeta(locale, "quote", "basic", "text-quote", ">"), "> "),
+    markdownCommand(commandMeta(locale, "ordered-list", "basic", "list-ordered", "1."), "1. "),
+    markdownCommand(commandMeta(locale, "unordered-list", "basic", "list", "-"), "- "),
+    markdownCommand(commandMeta(locale, "task-list", "basic", "list-todo", "[]"), "- [ ] "),
+    markdownCommand(commandMeta(locale, "table", "basic", "table", "| |"), "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n", 2),
+    markdownCommand(commandMeta(locale, "divider", "basic", "minus", "---"), "---\n"),
+    markdownCommand(commandMeta(locale, "link", "basic", "link", "[]()"), "[]()", 1),
+    mediaCommand(commandMeta(locale, "file", "media", "file", "file"), "file"),
+    mediaCommand(commandMeta(locale, "image", "media", "image", "img"), "image"),
+    mediaCommand(commandMeta(locale, "video", "media", "play", "video"), "video"),
+    mediaCommand(commandMeta(locale, "audio", "media", "music-2", "audio"), "audio"),
+  ];
+}
+
+export const defaultSlashCommands: DraftlySlashCommand[] = getDefaultSlashCommands("zh-CN");
