@@ -48,6 +48,24 @@
             <input class="switch-input" type="checkbox" :checked="config.preview.sanitize" @change="updatePreviewOption('sanitize', $event)" />
             <span class="switch-control" aria-hidden="true" />
           </label>
+          <div class="option-row">
+            <span class="switch-copy">
+              <span class="switch-label">Content Width</span>
+              <span class="switch-description">Adjust Live and View content width</span>
+            </span>
+            <div class="segmented-control" role="group" aria-label="Content width">
+              <button
+                v-for="item in contentWidthOptions"
+                :key="item.value"
+                type="button"
+                class="segmented-control-button"
+                :class="{ 'segmented-control-button-active': config.preview.contentWidth === item.value }"
+                @click="updateContentWidth(item.value)"
+              >
+                {{ item.label }}
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -106,10 +124,10 @@
 <script lang="ts">
 import Vue from "vue";
 import type { DraftlyNode } from "draftly/editor";
-import type { PlaygroundConfig } from "@/types";
+import type { PlaygroundConfig, PreviewContentWidth } from "@/types";
 
 type EditorOptionKey = keyof PlaygroundConfig["editor"];
-type PreviewOptionKey = keyof PlaygroundConfig["preview"];
+type PreviewOptionKey = "includeBase" | "sanitize";
 type FeatureOptionKey = keyof PlaygroundConfig["features"];
 
 function cloneConfig(config: PlaygroundConfig): PlaygroundConfig {
@@ -153,6 +171,10 @@ export default Vue.extend({
         { key: "pasteDropUploads" as FeatureOptionKey, label: "Paste/Drop Uploads", description: "Upload pasted or dropped files with the mock uploader" },
         { key: "tableOfContents" as FeatureOptionKey, label: "Table of Contents", description: "Show the built-in right-side document outline" },
       ],
+      contentWidthOptions: [
+        { value: "regular" as PreviewContentWidth, label: "Regular" },
+        { value: "wide" as PreviewContentWidth, label: "Wide" },
+      ],
     };
   },
   computed: {
@@ -195,6 +217,11 @@ export default Vue.extend({
     updatePreviewOption(key: PreviewOptionKey, event: Event) {
       const nextConfig = cloneConfig(this.config);
       nextConfig.preview[key] = this.eventChecked(event);
+      this.$emit("update-config", nextConfig);
+    },
+    updateContentWidth(value: PreviewContentWidth) {
+      const nextConfig = cloneConfig(this.config);
+      nextConfig.preview.contentWidth = value;
       this.$emit("update-config", nextConfig);
     },
     updateFeatureOption(key: FeatureOptionKey, event: Event) {

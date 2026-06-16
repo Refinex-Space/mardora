@@ -561,6 +561,14 @@ button {
   cursor: pointer;
 }
 
+.option-row {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 42px;
+}
+
 .switch-copy {
   display: flex;
   flex: 1 1 auto;
@@ -621,6 +629,44 @@ button {
 
 .switch-input:not(:checked) + .switch-control::after {
   right: 19px;
+}
+
+.segmented-control {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  width: 100%;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.segmented-control-button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.segmented-control-button:hover {
+  color: var(--text);
+}
+
+.segmented-control-button-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.08);
 }
 
 .playground-shell.theme-dark .switch-input:not(:checked) + .switch-control {
@@ -751,6 +797,10 @@ button {
   scrollbar-gutter: stable;
 }
 
+.preview-with-toc .editor-host-with-toc .cm-draftly .cm-content {
+  max-width: var(--vue2-content-max-width, 48rem);
+}
+
 .preview-with-toc .preview-host,
 .preview-with-toc .editor-host-with-toc,
 .preview-with-toc .editor-host-with-toc .cm-scroller {
@@ -792,7 +842,7 @@ button {
 
 .vue2-preview {
   width: 100%;
-  max-width: 48rem;
+  max-width: var(--vue2-content-max-width, 48rem);
   min-height: 100%;
   margin: 0 auto;
   overflow: auto;

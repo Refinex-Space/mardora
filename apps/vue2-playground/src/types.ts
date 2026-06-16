@@ -4,6 +4,7 @@ export type PlaygroundMode = "live" | "view" | "code" | "output";
 export type SaveStatus = "idle" | "saving" | "saved";
 export type ThemeMode = "light" | "dark";
 export type ThemePreference = "system" | ThemeMode;
+export type PreviewContentWidth = "regular" | "wide";
 export type PluginConfig = Record<string, boolean>;
 
 export interface Content {
@@ -24,6 +25,7 @@ export interface PlaygroundConfig {
   preview: {
     includeBase: boolean;
     sanitize: boolean;
+    contentWidth: PreviewContentWidth;
   };
   features: {
     slashCommands: boolean;

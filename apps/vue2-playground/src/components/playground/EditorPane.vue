@@ -55,6 +55,8 @@ const previewTocStorageKey = "draftly-vue2-playground:preview-toc-width";
 const previewTocMinWidth = 180;
 const previewTocMaxWidth = 360;
 const previewTocDefaultWidth = 240;
+const regularContentWidth = "48rem";
+const wideContentWidth = "75vw";
 
 function clampPreviewTocWidth(width: number): number {
   return Math.min(Math.max(width, previewTocMinWidth), previewTocMaxWidth);
@@ -164,6 +166,7 @@ export default Vue.extend({
     previewTocStyle(): Record<string, string> {
       return {
         "--vue2-preview-toc-width": `${this.previewTocWidth}px`,
+        "--vue2-content-max-width": this.config.preview.contentWidth === "wide" ? wideContentWidth : regularContentWidth,
       };
     },
   },

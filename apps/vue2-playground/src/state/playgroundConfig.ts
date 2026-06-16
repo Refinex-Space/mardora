@@ -19,6 +19,7 @@ export function createDefaultConfig(): PlaygroundConfig {
     preview: {
       includeBase: true,
       sanitize: true,
+      contentWidth: "regular",
     },
     features: {
       slashCommands: true,
