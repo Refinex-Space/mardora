@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog";
+import { useLocale } from "../i18n/LocaleContext";
 
 type Props = {
   onCreateContent: (title: string) => void;
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export default function CreateContentDialog({ onCreateContent, trigger }: Props) {
+  const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
 
@@ -35,11 +37,11 @@ export default function CreateContentDialog({ onCreateContent, trigger }: Props)
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Content</DialogTitle>
-          <DialogDescription>Enter a title for your new content.</DialogDescription>
+          <DialogTitle>{t("dialog.create.title")}</DialogTitle>
+          <DialogDescription>{t("dialog.create.description")}</DialogDescription>
         </DialogHeader>
         <Input
-          placeholder="Content title"
+          placeholder={t("dialog.create.placeholder")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -47,10 +49,10 @@ export default function CreateContentDialog({ onCreateContent, trigger }: Props)
         />
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {t("dialog.create.cancel")}
           </Button>
           <Button onClick={handleCreate} disabled={!title.trim()}>
-            Create
+            {t("dialog.create.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

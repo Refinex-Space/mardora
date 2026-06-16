@@ -2,11 +2,11 @@
   <footer class="footer-bar">
     <span />
     <div class="footer-metrics">
-      <span>Words: {{ metrics.words }}</span>
+      <span>{{ $t("footer.words") }}: {{ metrics.words }}</span>
       <span class="metric-separator">.</span>
-      <span>Lines: {{ metrics.lines }}</span>
+      <span>{{ $t("footer.lines") }}: {{ metrics.lines }}</span>
       <span class="metric-separator">.</span>
-      <span>Char: {{ metrics.chars }}</span>
+      <span>{{ $t("footer.chars") }}: {{ metrics.chars }}</span>
     </div>
   </footer>
 </template>

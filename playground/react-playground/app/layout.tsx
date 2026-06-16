@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 
 import "@workspace/ui/globals.css";
 import { Providers } from "@/components/providers";
+import { LocaleProvider } from "./i18n/LocaleContext";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -24,7 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${fontSans.variable} ${fontMono.variable} ${fontCode.variable} font-sans antialiased `}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <LocaleProvider>{children}</LocaleProvider>
+        </Providers>
       </body>
     </html>
   );

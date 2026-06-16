@@ -1,74 +1,89 @@
 # Ve2 接入指南
 
-本文面向 Vue 2 项目，目标是接入一个与 Vue 2 playground 同等质量的 Markora 编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、目录、主题切换和本地持久化。
+本文面向 Vue 2 项目，即 Vue 2 + TypeScript + CodeMirror 6 的接入方式。目标是让业务项目接入一个与 Markora Vue 2 playground 同等质量的编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、选区工具栏、目录、主题切换和本地持久化。
 
-## 1. 安装依赖
+## 1. Vue 2 接入结论
+
+| 项目         | 建议                                                                         |
+| ------------ | ---------------------------------------------------------------------------- |
+| 接入方式     | 直接在 Vue 2 组件中创建 CodeMirror `EditorView`。                            |
+| 组件生命周期 | `mounted()` 创建或重建，`beforeDestroy()` 销毁。                             |
+| 文档状态     | Vue state 保存 Markdown 原文，CodeMirror 只作为编辑视图。                    |
+| 预览状态     | 使用 `preview()` + `generateCSS()` 生成 HTML/CSS。                           |
+| 附件上传     | 在 `attachments.uploader` 中接入业务上传接口。                               |
+| 目录         | 编辑态可用 `toc.onTocChange`，预览态可用 `extractPreviewTocFromMarkdown()`。 |
+
+## 2. 安装依赖
 
 ```shell
 npm install markora
 npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
-```
-
-如果要展示 HTML/CSS 输出视图，还需要：
-
-```shell
 npm install @codemirror/lang-html @codemirror/lang-css @uiw/codemirror-theme-github
 ```
 
-Vue 2 项目通常还需要 TypeScript、Vue 2 loader 与构建器本身的配置。Markora 不要求 Vue 2 专属 adapter，直接使用 CodeMirror `EditorView`。
+Vue 2 项目还需要自己的构建环境，例如 `vue@2`、`vue-template-compiler`、`@vue/cli-service`、`@vue/cli-plugin-typescript`。Markora 不提供 Vue 2 adapter，也不要求额外 adapter。
 
-## 2. 准备容器
+## 3. 模板结构
 
 ```vue
 <template>
-  <section class="markora-shell">
-    <div class="toolbar">
-      <button @click="mode = 'live'">编辑</button>
-      <button @click="mode = 'code'">源码</button>
-      <button @click="mode = 'view'">预览</button>
-      <button @click="mode = 'output'">输出</button>
-    </div>
+  <section class="markora-vue2-shell">
+    <header class="markora-toolbar">
+      <button type="button" @click="mode = 'live'">编辑</button>
+      <button type="button" @click="mode = 'code'">源码</button>
+      <button type="button" @click="mode = 'view'">预览</button>
+      <button type="button" @click="mode = 'output'">输出</button>
+    </header>
 
-    <div v-if="mode === 'view'" ref="previewHost" class="preview-host">
+    <div v-if="mode === 'view'" ref="previewHost" class="markora-preview-host">
       <div v-html="previewOutput.html" />
+
+      <aside v-if="config.features.tableOfContents" class="markora-preview-toc">
+        <button
+          v-for="item in previewToc"
+          :key="item.id"
+          type="button"
+          :data-level="item.level"
+          :class="{ active: item.active }"
+          @click="jumpToc(item)"
+        >
+          {{ item.text }}
+        </button>
+      </aside>
     </div>
 
-    <div v-else-if="mode === 'output'" class="output-grid">
+    <div v-else-if="mode === 'output'" class="markora-output-grid">
       <div ref="htmlOutputHost" />
       <div ref="cssOutputHost" />
     </div>
 
-    <div v-else ref="editorHost" class="editor-host" />
+    <div v-else ref="editorHost" class="markora-editor-host" />
   </section>
 </template>
 ```
 
-推荐让编辑器宿主拥有明确高度，否则 CodeMirror 的滚动区很难稳定：
-
 ```css
-.markora-shell {
-  height: 100vh;
+.markora-vue2-shell {
   display: flex;
   flex-direction: column;
+  height: 100vh;
 }
 
-.editor-host,
-.preview-host,
-.output-grid {
+.markora-editor-host,
+.markora-preview-host,
+.markora-output-grid {
   flex: 1;
   min-height: 0;
   overflow: auto;
 }
 
-.output-grid {
+.markora-output-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 ```
 
-## 3. 定义配置状态
-
-Vue 2 playground 的配置可以拆成 editor、preview、features、plugins 四块：
+## 4. 配置模型
 
 ```ts
 import { allPlugins } from "markora/plugins";
@@ -88,7 +103,6 @@ export type PlaygroundConfig = {
   preview: {
     includeBase: boolean;
     sanitize: boolean;
-    contentWidth: "regular" | "wide";
   };
   features: {
     slashCommands: boolean;
@@ -107,11 +121,7 @@ export function createDefaultPluginConfig(): PluginConfig {
 export function getActivePlugins(pluginConfig: PluginConfig) {
   return allPlugins.filter((plugin) => pluginConfig[plugin.name.toLowerCase()] !== false);
 }
-```
 
-默认配置：
-
-```ts
 export const defaultConfig: PlaygroundConfig = {
   locale: "zh-CN",
   editor: {
@@ -125,7 +135,6 @@ export const defaultConfig: PlaygroundConfig = {
   preview: {
     includeBase: true,
     sanitize: true,
-    contentWidth: "regular",
   },
   features: {
     slashCommands: true,
@@ -138,7 +147,7 @@ export const defaultConfig: PlaygroundConfig = {
 };
 ```
 
-## 4. 创建编辑器
+## 5. 完整组件脚本
 
 ```ts
 import Vue from "vue";
@@ -147,17 +156,22 @@ import { css } from "@codemirror/lang-css";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import type { MarkoraNode, MarkoraTocItem } from "markora/editor";
+import type { MarkoraAttachmentUploadContext, MarkoraNode, MarkoraTocItem } from "markora/editor";
 import { markora, ThemeEnum } from "markora/editor";
 import { extractPreviewTocFromMarkdown, generateCSS, preview } from "markora/preview";
-import { getActivePlugins } from "./playground-config";
+import { defaultConfig, getActivePlugins } from "./playground-config";
+
+type Mode = "live" | "code" | "view" | "output";
 
 export default Vue.extend({
+  name: "MarkoraVue2Editor",
+
   data() {
     return {
-      mode: "live" as "live" | "code" | "view" | "output",
+      mode: "live" as Mode,
       theme: "light" as "light" | "dark",
       content: "# Hello, Markora",
+      config: defaultConfig,
       editorView: null as EditorView | null,
       htmlView: null as EditorView | null,
       cssView: null as EditorView | null,
@@ -166,15 +180,16 @@ export default Vue.extend({
       previewToc: [] as MarkoraTocItem[],
       objectUrls: [] as string[],
       internalUpdate: false,
-      config: defaultConfig,
     };
   },
 
   mounted() {
+    // Vue 2 组件挂载后，DOM ref 才可用于创建 EditorView。
     this.rebuildForMode();
   },
 
   beforeDestroy() {
+    // 销毁所有 CodeMirror 视图和临时 URL，避免内存泄漏。
     this.destroyViews();
     this.revokeObjectUrls();
   },
@@ -193,8 +208,8 @@ export default Vue.extend({
       },
     },
     content(next: string) {
-      if (!this.editorView) return;
-      if (next === this.editorView.state.doc.toString()) return;
+      // 外部状态变更时同步到 CodeMirror，但避免由 CodeMirror 输入触发死循环。
+      if (!this.editorView || next === this.editorView.state.doc.toString()) return;
 
       this.internalUpdate = true;
       this.editorView.dispatch({
@@ -217,7 +232,8 @@ export default Vue.extend({
       return this.theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT;
     },
 
-    async mockUploader(file: File) {
+    async uploader(file: File) {
+      // playground 可用 blob URL 演示；生产环境必须改成真实上传接口。
       const url = URL.createObjectURL(file);
       this.objectUrls.push(url);
       return {
@@ -260,9 +276,6 @@ export default Vue.extend({
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
               plugins: getActivePlugins(this.config.plugins),
-              markdown: [],
-              extensions: [],
-              keymap: [],
               disableViewPlugin: this.mode === "code",
               defaultKeybindings: this.config.editor.defaultKeybindings,
               history: this.config.editor.history,
@@ -277,13 +290,14 @@ export default Vue.extend({
               },
               toc: {
                 enabled: this.mode === "live" && this.config.features.tableOfContents,
+                storageKey: "markora-vue2:toc",
                 onTocChange: (items: MarkoraTocItem[]) => {
                   this.previewToc = items;
                 },
               },
               attachments: {
                 enabled: this.config.features.attachments,
-                uploader: this.config.features.attachments ? this.mockUploader : undefined,
+                uploader: this.config.features.attachments ? this.uploader : undefined,
                 enablePaste: this.config.features.pasteDropUploads,
                 enableDrop: this.config.features.pasteDropUploads,
                 accept: {
@@ -302,195 +316,227 @@ export default Vue.extend({
         }),
       });
     },
+
+    async renderPreview() {
+      const plugins = getActivePlugins(this.config.plugins);
+      const syntaxTheme = this.cmTheme();
+
+      const htmlOutput = await preview(this.content, {
+        theme: this.markoraTheme(),
+        plugins,
+        markdown: [],
+        syntaxTheme,
+        sanitize: this.config.preview.sanitize,
+        wrapperTag: "div",
+        wrapperClass: "markora-preview vue2-preview",
+      });
+
+      const cssOutput = generateCSS({
+        theme: this.markoraTheme(),
+        plugins,
+        wrapperClass: "markora-preview",
+        includeBase: this.config.preview.includeBase,
+        syntaxTheme,
+      });
+
+      this.previewOutput = { html: htmlOutput, css: cssOutput };
+      this.previewToc = extractPreviewTocFromMarkdown(this.content);
+
+      this.$nextTick(() => {
+        if (this.mode === "view") this.updatePreviewStyles();
+        if (this.mode === "output") this.createOutputViews();
+      });
+    },
+
+    updatePreviewStyles() {
+      const previewHost = this.$refs.previewHost as HTMLElement | undefined;
+      if (!previewHost) return;
+
+      if (!this.previewStyleElement) {
+        this.previewStyleElement = document.createElement("style");
+        previewHost.prepend(this.previewStyleElement);
+      }
+
+      this.previewStyleElement.textContent = this.previewOutput.css;
+    },
+
+    createOutputViews() {
+      const htmlParent = this.$refs.htmlOutputHost as HTMLElement | undefined;
+      const cssParent = this.$refs.cssOutputHost as HTMLElement | undefined;
+      if (!htmlParent || !cssParent) return;
+
+      this.htmlView = new EditorView({
+        parent: htmlParent,
+        state: EditorState.create({
+          doc: this.previewOutput.html,
+          extensions: [this.cmTheme(), html(), EditorView.lineWrapping, EditorState.readOnly.of(true)],
+        }),
+      });
+
+      this.cssView = new EditorView({
+        parent: cssParent,
+        state: EditorState.create({
+          doc: this.previewOutput.css,
+          extensions: [this.cmTheme(), css(), EditorView.lineWrapping, EditorState.readOnly.of(true)],
+        }),
+      });
+    },
+
+    jumpToc(item: MarkoraTocItem) {
+      if (this.mode === "view") {
+        const host = this.$refs.previewHost as HTMLElement | undefined;
+        const target = host?.querySelector(`#${CSS.escape(item.id)}`) as HTMLElement | null;
+        target?.scrollIntoView({ block: "start" });
+        return;
+      }
+
+      if (this.editorView && typeof item.from === "number") {
+        this.editorView.dispatch({
+          selection: { anchor: item.from },
+          effects: EditorView.scrollIntoView(item.from, { y: "start" }),
+        });
+        this.editorView.focus();
+      }
+    },
+
+    destroyViews() {
+      this.editorView?.destroy();
+      this.htmlView?.destroy();
+      this.cssView?.destroy();
+      this.editorView = null;
+      this.htmlView = null;
+      this.cssView = null;
+
+      if (this.previewStyleElement) {
+        this.previewStyleElement.remove();
+        this.previewStyleElement = null;
+      }
+    },
+
+    revokeObjectUrls() {
+      for (const url of this.objectUrls) {
+        URL.revokeObjectURL(url);
+      }
+      this.objectUrls = [];
+    },
   },
 });
 ```
 
-生产 uploader 不要返回 `blob:` URL。应该上传到后端、对象存储或 CDN，并返回可长期访问的 `url`。
+## 6. Markora 配置速查
 
-## 5. 实现预览与输出模式
+| 配置                       | 默认值           | Vue 2 建议                                                                       |
+| -------------------------- | ---------------- | -------------------------------------------------------------------------------- |
+| `theme`                    | `ThemeEnum.AUTO` | 跟随应用主题明确传 `ThemeEnum.LIGHT/DARK`，避免 Vue 2 主题状态和系统主题不一致。 |
+| `locale`                   | `"zh-CN"`        | 中文应用保持默认，英文应用传 `"en-US"`。                                         |
+| `baseStyles`               | `true`           | 初次接入保持开启。                                                               |
+| `plugins`                  | `[]`             | 传 `getActivePlugins(config.plugins)`，支持插件开关。                            |
+| `disableViewPlugin`        | `false`          | `mode === "code"` 时设为 `true`。                                                |
+| `defaultKeybindings`       | `true`           | 保持开启。                                                                       |
+| `history`                  | `true`           | 保持开启。                                                                       |
+| `indentWithTab`            | `true`           | 保持开启。                                                                       |
+| `highlightActiveLine`      | `true`           | 源码模式有用。                                                                   |
+| `lineWrapping`             | `true`           | 文档编辑建议开启。                                                               |
+| `slashCommands.enabled`    | `true`           | 通过配置开关控制。                                                               |
+| `selectionToolbar.enabled` | `true`           | 富文本体验建议开启。                                                             |
+| `toc.enabled`              | `true`           | 内置面板或自定义侧栏二选一。                                                     |
+| `attachments.enabled`      | `false`          | 有 uploader 后再开启。                                                           |
 
-```ts
-async function renderPreview(this: Vue & any) {
-  const plugins = getActivePlugins(this.config.plugins);
-  const syntaxTheme = this.cmTheme();
+## 7. 附件上传接入
 
-  const htmlOutput = await preview(this.content, {
-    theme: this.markoraTheme(),
-    plugins,
-    markdown: [],
-    syntaxTheme,
-    sanitize: this.config.preview.sanitize,
-    wrapperTag: "div",
-    wrapperClass: "markora-preview vue2-preview",
-  });
+Vue 2 接入时，附件上传要明确区分 Markora 与业务后端职责。
 
-  const cssOutput = generateCSS({
-    theme: this.markoraTheme(),
-    plugins,
-    wrapperClass: "markora-preview",
-    includeBase: this.config.preview.includeBase,
-    syntaxTheme,
-  });
-
-  this.previewOutput = { html: htmlOutput, css: cssOutput };
-  this.previewToc = extractPreviewTocFromMarkdown(this.content);
-
-  this.$nextTick(() => {
-    if (this.mode === "view") {
-      this.updatePreviewStyles();
-    }
-    if (this.mode === "output") {
-      this.createOutputViews();
-    }
-  });
-}
-
-function updatePreviewStyles(this: Vue & any) {
-  const previewHost = this.$refs.previewHost as HTMLElement | undefined;
-  if (!previewHost) return;
-
-  if (!this.previewStyleElement) {
-    this.previewStyleElement = document.createElement("style");
-    previewHost.prepend(this.previewStyleElement);
-  }
-
-  this.previewStyleElement.textContent = this.previewOutput.css;
-}
-
-function createOutputViews(this: Vue & any) {
-  const htmlParent = this.$refs.htmlOutputHost as HTMLElement | undefined;
-  const cssParent = this.$refs.cssOutputHost as HTMLElement | undefined;
-  if (!htmlParent || !cssParent) return;
-
-  this.htmlView = new EditorView({
-    parent: htmlParent,
-    state: EditorState.create({
-      doc: this.previewOutput.html,
-      extensions: [this.cmTheme(), html(), EditorView.lineWrapping, EditorState.readOnly.of(true)],
-    }),
-  });
-
-  this.cssView = new EditorView({
-    parent: cssParent,
-    state: EditorState.create({
-      doc: this.previewOutput.css,
-      extensions: [this.cmTheme(), css(), EditorView.lineWrapping, EditorState.readOnly.of(true)],
-    }),
-  });
-}
-```
-
-## 6. 目录接入
-
-Live 编辑模式可以使用 `toc.onTocChange` 获取编辑态目录。预览模式建议用 `extractPreviewTocFromMarkdown(markdown)`，避免依赖已销毁的编辑器实例。
-
-```vue
-<aside v-if="config.features.tableOfContents" class="preview-toc">
-  <button
-    v-for="item in previewToc"
-    :key="item.id"
-    :data-level="item.level"
-    :class="{ active: item.active }"
-    @click="jumpToc(item)"
-  >
-    {{ item.text }}
-  </button>
-</aside>
-```
+| 项目     | Markora 负责                            | 业务负责                          |
+| -------- | --------------------------------------- | --------------------------------- |
+| 文件来源 | slash 选择、paste、drop。               | 决定是否开启 paste/drop。         |
+| 类型判断 | 根据 MIME 判断 image/video/audio/file。 | 限制业务允许的 MIME、后缀、大小。 |
+| 上传过程 | 插入上传中标记，调用 `uploader`。       | 上传到后端/OSS/S3/MinIO/CDN。     |
+| 成功结果 | 把结果替换成 Markdown/HTML。            | 返回最终可访问 URL。              |
+| 失败结果 | 插入 Upload failed 标记。               | 抛出错误并记录日志。              |
 
 ```ts
-function jumpToc(this: Vue & any, item: MarkoraTocItem) {
-  if (this.mode === "view") {
-    const host = this.$refs.previewHost as HTMLElement | undefined;
-    const target = host?.querySelector(`#${CSS.escape(item.id)}`) as HTMLElement | null;
-    target?.scrollIntoView({ block: "start" });
-    return;
+async function productionUploader(file: File, context: MarkoraAttachmentUploadContext) {
+  if (file.size > 20 * 1024 * 1024) {
+    throw new Error("File is larger than 20MB");
   }
 
-  if (this.editorView && typeof item.from === "number") {
-    this.editorView.dispatch({
-      selection: { anchor: item.from },
-      effects: EditorView.scrollIntoView(item.from, { y: "start" }),
-    });
-    this.editorView.focus();
+  const form = new FormData();
+  form.append("file", file);
+  form.append("kind", context.kind);
+  form.append("source", context.source);
+
+  const response = await fetch("/api/uploads", {
+    method: "POST",
+    body: form,
+  });
+
+  if (!response.ok) {
+    throw new Error("Upload failed");
   }
+
+  return response.json();
 }
 ```
 
-## 7. 本地持久化
+## 8. Preview 与输出模式
 
-Playground 采用版本号刷新默认文档，同时保留用户自建文档：
+| API                                       | 作用                            | Vue 2 使用方式                               |
+| ----------------------------------------- | ------------------------------- | -------------------------------------------- |
+| `preview(markdown, config)`               | 生成 HTML 字符串。              | 预览模式和发布前调用。                       |
+| `generateCSS(config)`                     | 生成和插件/主题一致的 CSS。     | 插入 `<style>` 或输出面板。                  |
+| `extractPreviewTocFromMarkdown(markdown)` | 从 Markdown 生成 preview 目录。 | 预览模式使用，因为此时可能没有 editor view。 |
+
+关键要求：`preview()` 和 `generateCSS()` 必须使用同一组 `plugins`、`theme`、`syntaxTheme`，否则 HTML 与 CSS 会不匹配。
+
+## 9. 插件体系
+
+Vue 2 不需要特殊插件写法。自定义插件仍然继承 `MarkoraPlugin`：
 
 ```ts
-export const STORAGE_CONTENTS_KEY = "markora-vue2-playground-contents";
-export const STORAGE_CURRENT_KEY = "markora-vue2-playground-current";
-export const STORAGE_VERSION_KEY = "markora-vue2-playground-version";
-export const STORAGE_VERSION = 2;
+import type { DecorationContext } from "markora/editor";
+import { MarkoraPlugin } from "markora/editor";
 
-export function loadSnapshot(defaultContents: Content[]) {
-  const storedContents = localStorage.getItem(STORAGE_CONTENTS_KEY);
-  const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
-  const versionMatches = storedVersion === String(STORAGE_VERSION);
+export class AuditPlugin extends MarkoraPlugin {
+  readonly name = "audit";
+  readonly version = "1.0.0";
 
-  if (storedContents && versionMatches) {
-    return JSON.parse(storedContents) as Content[];
+  buildDecorations(ctx: DecorationContext): void {
+    // 读取 ctx.view.state.doc。
+    // 向 ctx.decorations 追加 Decoration.range(...)。
   }
-
-  localStorage.setItem(STORAGE_CONTENTS_KEY, JSON.stringify(defaultContents));
-  localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
-  return defaultContents;
 }
 ```
 
-每次调整默认文章内容或标题时提高 `STORAGE_VERSION`，否则老用户本地缓存不会自动刷新。
+| 插件方法              | 用途                   |
+| --------------------- | ---------------------- |
+| `getExtensions()`     | 添加 CodeMirror 扩展。 |
+| `getMarkdownConfig()` | 添加 Markdown 语法。   |
+| `getKeymap()`         | 添加快捷键。           |
+| `buildDecorations()`  | 编辑态 decoration。    |
+| `renderToHTML()`      | 静态预览 HTML。        |
+| `getPreviewStyles()`  | 静态预览 CSS。         |
 
-## 8. 生命周期清理
+## 10. 持久化与版本升级
 
-```ts
-function destroyViews(this: Vue & any) {
-  this.editorView?.destroy();
-  this.htmlView?.destroy();
-  this.cssView?.destroy();
-  this.editorView = null;
-  this.htmlView = null;
-  this.cssView = null;
+Vue 2 playground 的策略是固定默认文档 id，并通过 `STORAGE_VERSION` 刷新默认文档，同时保留用户自建文档。
 
-  if (this.previewStyleElement) {
-    this.previewStyleElement.remove();
-    this.previewStyleElement = null;
-  }
-}
+| 字段                   | 作用                 |
+| ---------------------- | -------------------- |
+| `STORAGE_CONTENTS_KEY` | 保存文档数组。       |
+| `STORAGE_CURRENT_KEY`  | 保存当前文档索引。   |
+| `STORAGE_VERSION_KEY`  | 保存默认文档版本。   |
+| `STORAGE_VERSION`      | 默认文档变更时递增。 |
 
-function revokeObjectUrls(this: Vue & any) {
-  for (const url of this.objectUrls) {
-    URL.revokeObjectURL(url);
-  }
-  this.objectUrls = [];
-}
-```
+生产系统建议保存 Markdown 原文和业务元数据，不保存 CodeMirror 内部状态。
 
-Vue 2 中最容易遗漏的是 watcher 触发重建后没有销毁旧 `EditorView`，以及附件上传 demo 产生的 `blob:` URL 没有释放。
+## 11. 验收清单
 
-## 9. 插件与 API 标准
-
-Vue 2 接入不需要绕开 Markora 的标准 API。推荐直接使用：
-
-- `markora/editor`：编辑器扩展、`ThemeEnum`、`MarkoraNode`、`MarkoraTocItem`。
-- `markora/plugins`：`allPlugins`、`essentialPlugins` 和单个插件类。
-- `markora/preview`：`preview()`、`generateCSS()`、`extractPreviewTocFromMarkdown()`。
-- CodeMirror 6：`EditorState`、`EditorView`、`Extension`、`updateListener`、`EditorView.lineWrapping`。
-- Browser API：`File`、`FormData`、`URL.createObjectURL`、paste、drop。
-
-如果要自定义语法，创建 `MarkoraPlugin` 并提供 `getMarkdownConfig()`；如果要自定义编辑态视觉，提供 `buildDecorations()`；如果要让预览同步，提供 `renderToHTML()` 和 `getPreviewStyles()`。
-
-## 10. 验收清单
-
-- 编辑、源码、预览、输出模式都能切换。
-- 输入内容后 Vue 2 状态和 CodeMirror 文档保持一致。
-- `allPlugins` 全启用时，标题、列表、表格、图片、代码块、数学公式、Mermaid、HTML、Emoji 都能显示。
-- slash commands、选区工具栏、附件上传按配置开关生效。
-- 预览 HTML 和 CSS 与当前插件、主题、syntax theme 一致。
-- 目录在编辑态和预览态都能跳转。
-- 组件销毁时 `EditorView` 和 `blob:` URL 已清理。
-- 默认文章变更后提高 storage version，旧缓存能刷新默认文章并保留用户文章。
+- 编辑、源码、预览、输出模式均可切换。
+- Vue 2 state 与 CodeMirror doc 不会互相覆盖。
+- 组件销毁后 `EditorView.destroy()` 已执行。
+- 附件上传成功会插入图片、音视频或文件链接。
+- 附件上传失败会留下用户可见失败标记。
+- paste/drop 与页面其他上传区域没有事件冲突。
+- `preview()` 与 `generateCSS()` 使用同一组插件和主题。
+- TOC 在编辑态和预览态都能跳转。
+- 默认文档升级能保留用户自建文档。

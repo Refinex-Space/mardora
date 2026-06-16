@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocale } from "../i18n/LocaleContext";
 
 type Props = {
   counts: {
@@ -9,15 +10,16 @@ type Props = {
 };
 
 export default function Footer({ counts }: Props) {
+  const { t } = useLocale();
   return (
     <footer className="h-10 w-full py-1 px-8 flex items-center justify-between gap-6 font-mono text-sm text-muted-foreground">
       <div></div>
       <div className="flex items-center gap-4">
-        <span>Words: {counts.words}</span>
+        <span>{t("footer.words")}: {counts.words}</span>
         <span>•</span>
-        <span>Lines: {counts.lines}</span>
+        <span>{t("footer.lines")}: {counts.lines}</span>
         <span>•</span>
-        <span>Char: {counts.char}</span>
+        <span>{t("footer.chars")}: {counts.char}</span>
       </div>
     </footer>
   );

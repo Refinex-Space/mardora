@@ -7,6 +7,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Plus, FileText, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import CreateContentDialog from "./create-content-dialog";
+import { useLocale } from "../i18n/LocaleContext";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,7 @@ export default function Sidebar({
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [deletingContent, setDeletingContent] = useState<Content | null>(null);
+  const { t } = useLocale();
 
   function handleStartEdit(content: Content, e: React.MouseEvent) {
     e.stopPropagation();
@@ -77,7 +79,7 @@ export default function Sidebar({
     <div className="h-full w-full flex flex-col">
       {/* Header */}
       <div className="p-3 border-b flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Contents</h2>
+        <h2 className="text-sm font-semibold">{t("sidebar.contents")}</h2>
         <CreateContentDialog
           onCreateContent={addNewContent}
           trigger={
@@ -91,7 +93,7 @@ export default function Sidebar({
       {/* Content List */}
       <div className="flex-1 overflow-y-auto">
         {contents.length === 0 ? (
-          <div className="p-4 text-center text-muted-foreground text-sm">No contents yet</div>
+          <div className="p-4 text-center text-muted-foreground text-sm">{t("sidebar.noContents")}</div>
         ) : (
           <ul className="py-2">
             {contents.map((content, index) => (
@@ -136,11 +138,11 @@ export default function Sidebar({
       <Dialog open={!!editingContent} onOpenChange={(open) => !open && setEditingContent(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rename Content</DialogTitle>
-            <DialogDescription>Enter a new title for this content.</DialogDescription>
+            <DialogTitle>{t("dialog.rename.title")}</DialogTitle>
+            <DialogDescription>{t("dialog.rename.description")}</DialogDescription>
           </DialogHeader>
           <Input
-            placeholder="Content title"
+            placeholder={t("dialog.rename.placeholder")}
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
@@ -148,10 +150,10 @@ export default function Sidebar({
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingContent(null)}>
-              Cancel
+              {t("dialog.rename.cancel")}
             </Button>
             <Button onClick={handleSaveEdit} disabled={!editTitle.trim()}>
-              Save
+              {t("dialog.rename.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -161,14 +163,14 @@ export default function Sidebar({
       <AlertDialog open={!!deletingContent} onOpenChange={(open) => !open && setDeletingContent(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Content</AlertDialogTitle>
+            <AlertDialogTitle>{t("dialog.delete.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{deletingContent?.title}&quot;? This action cannot be undone.
+              {t("dialog.delete.description", { title: deletingContent?.title ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>{t("dialog.delete.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>{t("dialog.delete.confirm")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

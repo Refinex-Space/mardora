@@ -6,10 +6,12 @@
       :sidebar-open="sidebarOpen"
       :devbar-open="devbarOpen"
       :theme-preference="themePreference"
+      :shell-locale="shellLocale"
       @toggle-sidebar="sidebarOpen = !sidebarOpen"
       @toggle-devbar="devbarOpen = !devbarOpen"
       @change-mode="mode = $event"
       @change-theme="setThemePreference"
+      @change-locale="setShellLocale"
     />
 
     <main class="playground-main">
@@ -40,7 +42,7 @@
             @output-change="handleOutputChange"
           />
           <div v-else class="empty-state">
-            <span>No Content Selected</span>
+            <span>{{ $t("empty.noContentSelected") }}</span>
             <CreateContentDialog @create="createContent" />
           </div>
         </div>
@@ -71,9 +73,10 @@ import EditorPane from "./EditorPane.vue";
 import PlaygroundFooter from "./Footer.vue";
 import PlaygroundHeader from "./Header.vue";
 import PlaygroundSidebar from "./Sidebar.vue";
-import { loadPlaygroundSnapshot, savePlaygroundSnapshot } from "@/state/storage";
+import { loadPlaygroundSnapshot, relocalizeContents, savePlaygroundSnapshot } from "@/state/storage";
 import { createDefaultConfig } from "@/state/playgroundConfig";
 import { createContentId, getContentMetrics } from "@/utils/contentMetrics";
+import { setLocale as setShellLocaleStore, type ShellLocale } from "@/i18n";
 import type {
   Content,
   ContentMetrics,
@@ -131,6 +134,17 @@ export default Vue.extend({
     showBackdrop(): boolean {
       return !this.isDesktop && (this.sidebarOpen || this.devbarOpen);
     },
+    // Reads the reactive i18n store so this (and the watcher below) track locale changes.
+    shellLocale(): ShellLocale {
+      return (this as any).$i18nState.locale as ShellLocale;
+    },
+  },
+  watch: {
+    shellLocale(next: ShellLocale) {
+      const result = relocalizeContents(this.contents, this.currentContent, next);
+      this.contents = result.contents;
+      this.currentContent = result.currentContent;
+    },
   },
   mounted() {
     this.handleResize();
@@ -172,6 +186,9 @@ export default Vue.extend({
     selectContent(index: number) {
       this.currentContent = index;
       this.saveNow();
+    },
+    setShellLocale(locale: ShellLocale) {
+      setShellLocaleStore(locale);
     },
     createContent(title: string) {
       const nextContent: Content = {

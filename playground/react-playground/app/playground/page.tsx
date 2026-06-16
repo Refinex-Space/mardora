@@ -13,11 +13,17 @@ import Devbar from "./devbar";
 import Sidebar from "./sidebar";
 import { Content } from "./types";
 import CreateContentDialog from "./create-content-dialog";
+import { useLocale } from "../i18n/LocaleContext";
+import { buildDefaultContents } from "../data/defaultContents";
 
 import projectIntroduction from "../data/md/project-introduction";
 import reactGuide from "../data/md/react-guide";
 import vue2Guide from "../data/md/vue2-guide";
 import vue3Guide from "../data/md/vue3-guide";
+import projectIntroductionEn from "../data/md/project-introduction.en";
+import reactGuideEn from "../data/md/react-guide.en";
+import vue2GuideEn from "../data/md/vue2-guide.en";
+import vue3GuideEn from "../data/md/vue3-guide.en";
 
 import CodeMirror, { EditorView, Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
@@ -89,37 +95,29 @@ const DEBOUNCE_MS = 500;
 
 // Bump this version whenever default guide content changes.
 // The app will detect the mismatch and refresh the default entries in localStorage.
-const VERSION = 2;
+const VERSION = 3;
 
-const DEFAULT_CONTENTS: Content[] = [
-  {
-    id: "project-introduction",
-    title: "项目介绍",
-    content: projectIntroduction,
-  },
-  {
-    id: "vue2-guide",
-    title: "Ve2 接入指南",
-    content: vue2Guide,
-  },
-  {
-    id: "vue3-guide",
-    title: "Vue3 接入指南",
-    content: vue3Guide,
-  },
-  {
-    id: "react-guide",
-    title: "React 接入指南",
-    content: reactGuide,
-  },
-];
+const DEFAULT_CONTENT_IDS = new Set([
+  "project-introduction",
+  "vue2-guide",
+  "vue3-guide",
+  "react-guide",
+]);
 
-const DEFAULT_CONTENT_IDS = new Set(DEFAULT_CONTENTS.map((c) => c.id));
+function buildDefaultContentsFor(locale: "zh" | "en"): Content[] {
+  return buildDefaultContents(locale, {
+    projectIntroduction: { zh: projectIntroduction, en: projectIntroductionEn },
+    vue2Guide: { zh: vue2Guide, en: vue2GuideEn },
+    vue3Guide: { zh: vue3Guide, en: vue3GuideEn },
+    reactGuide: { zh: reactGuide, en: reactGuideEn },
+  });
+}
 
 export type SaveStatus = "idle" | "saving" | "saved";
 
 export default function Page() {
   const { resolvedTheme: theme } = useTheme();
+  const { locale, t } = useLocale();
   const cmTheme = theme?.includes("dark") ? githubDark : githubLight;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [devbarOpen, setDevbarOpen] = useState(false);
@@ -165,6 +163,7 @@ export default function Page() {
     const storedCurrent = localStorage.getItem(STORAGE_CURRENT_KEY);
     const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
     const isOutdated = storedVersion !== String(VERSION);
+    const defaultContents = buildDefaultContentsFor(locale);
 
     if (storedContents && !isOutdated) {
       // Version matches – use stored contents as-is
@@ -179,7 +178,7 @@ export default function Page() {
       try {
         const parsed = JSON.parse(storedContents) as Content[];
         const userContents = parsed.filter((c) => !DEFAULT_CONTENT_IDS.has(c.id));
-        const merged = [...DEFAULT_CONTENTS, ...userContents];
+        const merged = [...defaultContents, ...userContents];
         setContents(merged);
         setCurrentContent(0);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
@@ -190,9 +189,9 @@ export default function Page() {
       }
     } else {
       // First visit – seed with defaults
-      setContents(DEFAULT_CONTENTS);
+      setContents(defaultContents);
       setCurrentContent(0);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CONTENTS));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultContents));
       localStorage.setItem(STORAGE_CURRENT_KEY, "0");
       localStorage.setItem(STORAGE_VERSION_KEY, String(VERSION));
     }
@@ -205,7 +204,28 @@ export default function Page() {
     }
 
     setIsLoading(false);
+    // Only run on mount. Locale changes are handled by the effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // When the shell locale changes, swap the built-in sample docs to the
+  // selected language while preserving user-created docs and their content.
+  useEffect(() => {
+    if (isLoading) return;
+    setContents((prev) => {
+      if (prev.length === 0) return prev;
+      const localizedDefaults = buildDefaultContentsFor(locale);
+      const defaultsById = new Map(localizedDefaults.map((c) => [c.id, c]));
+      // Preserve user-created docs and their content; only replace the 4 built-ins.
+      const next = prev.map((c) =>
+        DEFAULT_CONTENT_IDS.has(c.id) && defaultsById.has(c.id) ? defaultsById.get(c.id)! : c
+      );
+      // Ensure any missing built-ins (e.g. user deleted one) are not re-added here.
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   // Debounced save to localStorage
   const saveToStorage = useCallback((data: Content[], current: number) => {
@@ -410,7 +430,7 @@ export default function Page() {
     return (
       <div className="min-h-svh h-svh flex flex-col items-center justify-center gap-3">
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
-        <span className="text-muted-foreground font-mono">Loading...</span>
+        <span className="text-muted-foreground font-mono">{t("common.loading")}</span>
       </div>
     );
   }
@@ -541,10 +561,10 @@ export default function Page() {
             )
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <span className="text-muted-foreground font-mono whitespace-nowrap">No Content Selected</span>
+              <span className="text-muted-foreground font-mono whitespace-nowrap">{t("empty.noContentSelected")}</span>
               <CreateContentDialog
                 onCreateContent={addNewContent}
-                trigger={<Button className="mt-4">Create New</Button>}
+                trigger={<Button className="mt-4">{t("empty.create")}</Button>}
               />
             </div>
           )}

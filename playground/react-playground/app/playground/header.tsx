@@ -13,6 +13,8 @@ import {
 import React, { Dispatch, SetStateAction } from "react";
 import type { SaveStatus } from "./page";
 import { ThemeSwitcher } from "@/components/providers";
+import { LanguageSwitcher } from "../i18n/LanguageSwitcher";
+import { useLocale } from "../i18n/LocaleContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,12 +23,21 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 
-const modes = [
-  { value: "live", label: "Live", icon: FilePenLineIcon },
-  { value: "view", label: "View", icon: FileTextIcon },
-  { value: "code", label: "Code", icon: ScanTextIcon },
-  { value: "output", label: "Output", icon: FileCodeCornerIcon },
-] as const;
+const modeKeys = {
+  live: "mode.live",
+  view: "mode.view",
+  code: "mode.code",
+  output: "mode.output",
+} as const;
+
+type ModeValue = keyof typeof modeKeys;
+
+const modes: { value: ModeValue; key: keyof typeof modeKeys; icon: typeof FilePenLineIcon }[] = [
+  { value: "live", key: "live", icon: FilePenLineIcon },
+  { value: "view", key: "view", icon: FileTextIcon },
+  { value: "code", key: "code", icon: ScanTextIcon },
+  { value: "output", key: "output", icon: FileCodeCornerIcon },
+];
 
 type Props = {
   sidebarOpen: boolean;
@@ -47,6 +58,7 @@ export default function Header({
   mode,
   setMode,
 }: Props) {
+  const { t } = useLocale();
   return (
     <header className="h-12 w-full flex items-center justify-between py-1 px-4 overflow-y-auto">
       <div className="flex items-center gap-3">
@@ -61,16 +73,17 @@ export default function Header({
             {saveStatus === "saving" ? (
               <>
                 <Loader2 className="size-3.5 animate-spin" />
-                <span className="hidden sm:inline">Saving...</span>
+                <span className="hidden sm:inline">{t("header.saving")}</span>
               </>
             ) : (
               <>
                 <Check className="size-3.5 text-green-500" />
-                <span className="hidden sm:inline">Saved</span>
+                <span className="hidden sm:inline">{t("header.saved")}</span>
               </>
             )}
           </div>
         )}
+        <LanguageSwitcher />
         <ThemeSwitcher />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -80,17 +93,17 @@ export default function Header({
                 if (!Icon) return null;
                 return <Icon className="size-4" />;
               })()}
-              <span className="hidden sm:inline">{modes.find((option) => option.value === mode)?.label}</span>
+              <span className="hidden sm:inline">{t(modeKeys[mode])}</span>
               <ChevronDown className="size-4 ml-auto" />
-              <span className="sr-only">Toggle theme</span>
+              <span className="sr-only">{t("header.selectMode")}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel>Select Mode</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("header.selectMode")}</DropdownMenuLabel>
             {modes.map((option) => (
               <DropdownMenuItem key={option.value} onClick={() => setMode(option.value)}>
                 <option.icon className="size-4" />
-                <span>{option.label}</span>
+                <span>{t(modeKeys[option.value])}</span>
                 {mode === option.value && <Check className="size-4 ml-auto" />}
               </DropdownMenuItem>
             ))}
@@ -98,7 +111,7 @@ export default function Header({
         </DropdownMenu>
         <Button variant="outline" size="sm" onClick={() => setDevbarOpen(!devbarOpen)}>
           {devbarOpen ? <PanelLeftCloseIcon className="size-4" /> : <PanelLeftOpenIcon className="size-4" />}
-          <span className="hidden sm:inline">{devbarOpen ? "Hide Devbar" : "Show Devbar"}</span>
+          <span className="hidden sm:inline">{devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}</span>
         </Button>
       </div>
     </header>

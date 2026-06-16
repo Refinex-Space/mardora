@@ -1,11 +1,11 @@
 <template>
   <aside class="panel-content">
     <div class="panel-heading">
-      <h2 class="panel-title">Contents</h2>
+      <h2 class="panel-title">{{ $t("sidebar.contents") }}</h2>
       <CreateContentDialog
         trigger-label="+"
         trigger-class="panel-action-button"
-        trigger-title="Create content"
+        :trigger-title="$t('sidebar.createContent')"
         @create="$emit('create-content', $event)"
       />
     </div>
@@ -23,18 +23,18 @@
         <span class="document-icon" aria-hidden="true">doc</span>
         <span class="document-title">{{ content.title }}</span>
         <div class="document-actions">
-          <button class="row-icon-button" type="button" title="Rename" @click.stop="renameContent(content.id, content.title)">
+          <button class="row-icon-button" type="button" :title="$t('sidebar.rename')" @click.stop="renameContent(content.id, content.title)">
             edit
           </button>
-          <button class="row-icon-button danger-action" type="button" title="Delete" @click.stop="$emit('delete-content', content.id)">
+          <button class="row-icon-button danger-action" type="button" :title="$t('sidebar.delete')" @click.stop="$emit('delete-content', content.id)">
             del
           </button>
         </div>
       </div>
       <div v-if="contents.length === 0" class="empty-list">
-        <span>No contents yet</span>
+        <span>{{ $t("sidebar.noContents") }}</span>
         <CreateContentDialog
-          trigger-label="Create content"
+          :trigger-label="$t('sidebar.createContent')"
           trigger-class="button button-secondary"
           @create="$emit('create-content', $event)"
         />
@@ -65,7 +65,7 @@ export default Vue.extend({
   },
   methods: {
     renameContent(id: string, currentTitle: string) {
-      const nextTitle = window.prompt("Rename document", currentTitle);
+      const nextTitle = window.prompt(this.$t("sidebar.renamePrompt"), currentTitle);
       if (!nextTitle || nextTitle.trim() === currentTitle) return;
       this.$emit("rename-content", { id, title: nextTitle.trim() });
     },

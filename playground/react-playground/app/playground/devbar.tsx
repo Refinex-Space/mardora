@@ -3,6 +3,7 @@ import { Switch } from "@workspace/ui/components/switch";
 import { Label } from "@workspace/ui/components/label";
 import { allPlugins, MarkoraNode } from "markora/src";
 import React from "react";
+import { useLocale } from "../i18n/LocaleContext";
 import { PlaygroundConfig } from "./page";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default function Devbar({ setShowNodes, nodes, config, setConfig, outputTime }: Props) {
+  const { t } = useLocale();
   // Helper to toggle editor config
   const toggleEditorOption = (key: keyof PlaygroundConfig["editor"]) => {
     setConfig((prev) => ({
@@ -68,12 +70,12 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
   return (
     <div className="h-full w-full flex flex-col border rounded-lg">
       <div className="text-muted-foreground font-mono text-center whitespace-nowrap h-10 p-2 border-b shrink-0">
-        Developer Panel
+        {t("devbar.title")}
       </div>
 
-      {outputTime !== null && (
+      {outputTime != null && (
         <div className="text-xs text-muted-foreground p-2 border-b">
-          Output generated in {outputTime?.toFixed(2)}ms
+          {t("devbar.outputTime", { ms: outputTime.toFixed(2) })}
         </div>
       )}
 
@@ -87,48 +89,48 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
           {/* Editor Options */}
           <AccordionItem value="editor">
             <AccordionTrigger className="p-2 border-b rounded-none hover:no-underline cursor-pointer hover:bg-accent hover:text-accent-foreground">
-              Editor Options
+              {t("devbar.editorOptions")}
             </AccordionTrigger>
             <AccordionContent className="p-3 space-y-3">
               <ConfigSwitch
                 id="baseStyles"
-                label="Base Styles"
-                description="Include default editor styles"
+                label={t("opt.baseStyles.label")}
+                description={t("opt.baseStyles.desc")}
                 checked={config.editor.baseStyles}
                 onCheckedChange={() => toggleEditorOption("baseStyles")}
               />
               <ConfigSwitch
                 id="defaultKeybindings"
-                label="Default Keybindings"
-                description="Enable standard keyboard shortcuts"
+                label={t("opt.defaultKeybindings.label")}
+                description={t("opt.defaultKeybindings.desc")}
                 checked={config.editor.defaultKeybindings}
                 onCheckedChange={() => toggleEditorOption("defaultKeybindings")}
               />
               <ConfigSwitch
                 id="history"
-                label="History"
-                description="Enable undo/redo support"
+                label={t("opt.history.label")}
+                description={t("opt.history.desc")}
                 checked={config.editor.history}
                 onCheckedChange={() => toggleEditorOption("history")}
               />
               <ConfigSwitch
                 id="indentWithTab"
-                label="Indent with Tab"
-                description="Use Tab key for indentation"
+                label={t("opt.indentWithTab.label")}
+                description={t("opt.indentWithTab.desc")}
                 checked={config.editor.indentWithTab}
                 onCheckedChange={() => toggleEditorOption("indentWithTab")}
               />
               <ConfigSwitch
                 id="highlightActiveLine"
-                label="Highlight Active Line"
-                description="Highlight the current line"
+                label={t("opt.highlightActiveLine.label")}
+                description={t("opt.highlightActiveLine.desc")}
                 checked={config.editor.highlightActiveLine}
                 onCheckedChange={() => toggleEditorOption("highlightActiveLine")}
               />
               <ConfigSwitch
                 id="lineWrapping"
-                label="Line Wrapping"
-                description="Wrap long lines"
+                label={t("opt.lineWrapping.label")}
+                description={t("opt.lineWrapping.desc")}
                 checked={config.editor.lineWrapping}
                 onCheckedChange={() => toggleEditorOption("lineWrapping")}
               />
@@ -138,20 +140,20 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
           {/* Preview Options */}
           <AccordionItem value="preview">
             <AccordionTrigger className="p-2 border-b rounded-none hover:no-underline cursor-pointer hover:bg-accent hover:text-accent-foreground">
-              Preview Options
+              {t("devbar.previewOptions")}
             </AccordionTrigger>
             <AccordionContent className="p-3 space-y-3">
               <ConfigSwitch
                 id="includeBase"
-                label="Include Base CSS"
-                description="Include base preview styles"
+                label={t("opt.includeBase.label")}
+                description={t("opt.includeBase.desc")}
                 checked={config.preview.includeBase}
                 onCheckedChange={() => togglePreviewOption("includeBase")}
               />
               <ConfigSwitch
                 id="sanitize"
-                label="Sanitize HTML"
-                description="Sanitize HTML output for security"
+                label={t("opt.sanitize.label")}
+                description={t("opt.sanitize.desc")}
                 checked={config.preview.sanitize}
                 onCheckedChange={() => togglePreviewOption("sanitize")}
               />
@@ -161,27 +163,27 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
           {/* Feature Options */}
           <AccordionItem value="features">
             <AccordionTrigger className="p-2 border-b rounded-none hover:no-underline cursor-pointer hover:bg-accent hover:text-accent-foreground">
-              Feature Options
+              {t("devbar.featureOptions")}
             </AccordionTrigger>
             <AccordionContent className="p-3 space-y-3">
               <ConfigSwitch
                 id="slashCommands"
-                label="Slash Commands"
-                description="Open the command menu with line-start slash input"
+                label={t("opt.slashCommands.label")}
+                description={t("opt.slashCommands.desc")}
                 checked={config.features.slashCommands}
                 onCheckedChange={() => toggleFeatureOption("slashCommands")}
               />
               <ConfigSwitch
                 id="attachments"
-                label="Attachments"
-                description="Enable local file selection through media commands"
+                label={t("opt.attachments.label")}
+                description={t("opt.attachments.desc")}
                 checked={config.features.attachments}
                 onCheckedChange={() => toggleFeatureOption("attachments")}
               />
               <ConfigSwitch
                 id="pasteDropUploads"
-                label="Paste/Drop Uploads"
-                description="Upload pasted or dropped files with the mock uploader"
+                label={t("opt.pasteDropUploads.label")}
+                description={t("opt.pasteDropUploads.desc")}
                 checked={config.features.pasteDropUploads}
                 onCheckedChange={() => toggleFeatureOption("pasteDropUploads")}
               />
@@ -191,7 +193,7 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
           {/* Plugin Toggles */}
           <AccordionItem value="plugins">
             <AccordionTrigger className="p-2 border-b rounded-none hover:no-underline cursor-pointer hover:bg-accent hover:text-accent-foreground">
-              Plugins
+              {t("devbar.plugins")}
             </AccordionTrigger>
             <AccordionContent className="p-3 space-y-3">
               {allPlugins.map((plugin) => {
@@ -201,7 +203,7 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
                     key={key}
                     id={key}
                     label={plugin.name}
-                    description={`Enable ${plugin.name} plugin`}
+                    description={t("opt.plugin.desc", { name: plugin.name })}
                     checked={config.plugins[key] ?? true}
                     onCheckedChange={() => togglePlugin(key)}
                   />
@@ -214,7 +216,7 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
           <AccordionItem value="nodes" className={"flex-1 flex flex-col min-h-0"}>
             <AccordionTrigger className="p-2 border-b rounded-none hover:no-underline cursor-pointer hover:bg-accent hover:text-accent-foreground shrink-0">
               <div>
-                Nodes <span className="text-muted-foreground text-xs">(Hide for performance)</span>
+                {t("devbar.nodes")} <span className="text-muted-foreground text-xs">{t("devbar.nodesHint")}</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className={"flex-1 h-full overflow-auto p-0"}>
