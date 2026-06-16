@@ -3,16 +3,32 @@ import { EditorView } from "@codemirror/view";
 export const slashMenuTheme = EditorView.baseTheme({
   ".cm-draftly-slash-menu": {
     position: "fixed",
+    display: "flex",
+    flexDirection: "column",
     zIndex: "1000",
     width: "328px",
     maxHeight: "420px",
-    overflowY: "auto",
+    overflow: "hidden",
     border: "1px solid rgba(120, 113, 108, 0.22)",
     borderRadius: "12px",
     background: "var(--draftly-slash-bg, #ffffff)",
     boxShadow: "0 18px 48px rgba(15, 23, 42, 0.16)",
     padding: "8px 0 0",
+    caretColor: "transparent",
+    cursor: "default",
     fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
+    userSelect: "none",
+  },
+  ".cm-draftly-slash-open .cm-cursor": {
+    visibility: "hidden",
+  },
+  ".cm-draftly-slash-open .cm-content": {
+    caretColor: "transparent",
+  },
+  ".cm-draftly-slash-list": {
+    flex: "1 1 auto",
+    minHeight: "0",
+    overflowY: "auto",
   },
   ".cm-draftly-slash-group": {
     padding: "8px 14px 6px",
@@ -58,11 +74,12 @@ export const slashMenuTheme = EditorView.baseTheme({
   },
   ".cm-draftly-slash-footer": {
     display: "flex",
+    flex: "0 0 auto",
     alignItems: "center",
     justifyContent: "space-between",
     minHeight: "40px",
-    marginTop: "6px",
     borderTop: "1px solid rgba(120, 113, 108, 0.18)",
+    background: "var(--draftly-slash-bg, #ffffff)",
     padding: "0 14px",
     color: "var(--draftly-slash-fg, #27272a)",
     fontSize: "14px",

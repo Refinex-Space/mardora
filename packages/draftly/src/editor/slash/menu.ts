@@ -23,11 +23,24 @@ export function createSlashMenuElement(
   root.className = "cm-draftly-slash-menu";
   root.setAttribute("role", "listbox");
 
+  const list = document.createElement("div");
+  list.className = "cm-draftly-slash-list";
+  root.addEventListener(
+    "wheel",
+    (event) => {
+      list.scrollTop += event.deltaY;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    { capture: true, passive: false }
+  );
+
   if (state.commands.length === 0) {
     const empty = document.createElement("div");
     empty.className = "cm-draftly-slash-empty";
     empty.textContent = "没有匹配的命令";
-    root.appendChild(empty);
+    list.appendChild(empty);
+    root.appendChild(list);
     return root;
   }
 
@@ -39,7 +52,7 @@ export function createSlashMenuElement(
       const label = document.createElement("div");
       label.className = "cm-draftly-slash-group";
       label.textContent = groupLabels[currentGroup];
-      root.appendChild(label);
+      list.appendChild(label);
     }
 
     const item = document.createElement("button");
@@ -67,13 +80,13 @@ export function createSlashMenuElement(
     hint.textContent = command.hint;
 
     item.append(icon, title, hint);
-    root.appendChild(item);
+    list.appendChild(item);
   }
 
   const footer = document.createElement("div");
   footer.className = "cm-draftly-slash-footer";
   footer.innerHTML = "<span>关闭菜单</span><span>esc</span>";
-  root.appendChild(footer);
+  root.append(list, footer);
 
   return root;
 }

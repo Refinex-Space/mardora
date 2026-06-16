@@ -28,6 +28,7 @@ class SlashCommandViewPlugin {
   private activeIndex = 0;
   private menu: HTMLElement | null = null;
   private renderVersion = 0;
+  private previousCaretColor: string | null = null;
 
   constructor(
     private readonly view: EditorView,
@@ -149,14 +150,31 @@ class SlashCommandViewPlugin {
 
         this.menu.style.left = `${coords.left}px`;
         this.menu.style.top = `${coords.bottom + 6}px`;
+        this.view.dom.classList.add("cm-draftly-slash-open");
+        this.hideEditorCaret();
         this.view.dom.appendChild(this.menu);
       },
     });
   }
 
+  private hideEditorCaret(): void {
+    if (this.previousCaretColor === null) {
+      this.previousCaretColor = this.view.contentDOM.style.caretColor;
+    }
+    this.view.contentDOM.style.caretColor = "transparent";
+  }
+
+  private restoreEditorCaret(): void {
+    if (this.previousCaretColor === null) return;
+    this.view.contentDOM.style.caretColor = this.previousCaretColor;
+    this.previousCaretColor = null;
+  }
+
   private removeMenu(): void {
     this.menu?.remove();
     this.menu = null;
+    this.view.dom.classList.remove("cm-draftly-slash-open");
+    this.restoreEditorCaret();
   }
 }
 
