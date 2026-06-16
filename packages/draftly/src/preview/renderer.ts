@@ -1,9 +1,11 @@
 import { SyntaxNode } from "@lezer/common";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import { EditorState } from "@codemirror/state";
 import { MarkdownConfig } from "@lezer/markdown";
 import { languages } from "@codemirror/language-data";
 
 import { DraftlyPlugin } from "../editor/plugin";
+import { extractTocItemsFromState } from "../editor/table-of-contents";
 import { ThemeEnum } from "../editor/utils";
 import { createPreviewContext } from "./context";
 import { defaultRenderers, escapeHtml } from "./default-renderers";
@@ -89,6 +91,22 @@ export class PreviewRenderer {
 
     // Parse the document
     const tree = parser.parse(this.doc);
+    const state = EditorState.create({
+      doc: this.doc,
+      extensions: [markdownSupport],
+    });
+    const tocItems = extractTocItemsFromState(state);
+    const headingIds = new Map(tocItems.map((item) => [`${item.from}:${item.to}`, item.id]));
+    const syntaxHighlighters = resolveSyntaxHighlighters(this.syntaxTheme, true);
+
+    this.ctx = createPreviewContext(
+      this.doc,
+      this.theme,
+      this.renderChildren.bind(this),
+      this.sanitizeHtml,
+      syntaxHighlighters,
+      (node) => headingIds.get(`${node.from}:${node.to}`) ?? null
+    );
 
     // Render from root
     return await this.renderNode(tree.topNode);

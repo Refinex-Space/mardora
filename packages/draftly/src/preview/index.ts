@@ -10,6 +10,7 @@ export { preview } from "./preview";
 // CSS generation
 export { generateCSS } from "./css-generator";
 export { generateSyntaxThemeCSS } from "./syntax-theme";
+export { extractPreviewTocFromMarkdown } from "./toc";
 
 // Types
 export type {

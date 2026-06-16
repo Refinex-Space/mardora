@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it } from "bun:test";
 import { createTocPanelElement } from "../src/editor/table-of-contents";
 
 class FakeStyle {
@@ -105,6 +105,11 @@ function installFakeDom(): void {
     }
   } as unknown as typeof MouseEvent;
 }
+
+afterEach(() => {
+  delete (globalThis as typeof globalThis & { document?: Document }).document;
+  delete (globalThis as typeof globalThis & { MouseEvent?: typeof MouseEvent }).MouseEvent;
+});
 
 describe("createTocPanelElement", () => {
   it("renders full panel items with active and nested states", () => {

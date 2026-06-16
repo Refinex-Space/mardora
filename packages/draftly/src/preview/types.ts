@@ -27,6 +27,9 @@ export interface PreviewContext {
 
   /** Active syntax highlighters used for code rendering */
   readonly syntaxHighlighters?: readonly import("@lezer/highlight").Highlighter[];
+
+  /** Return a stable heading id for TOC-aware heading renderers */
+  headingIdForNode?(node: SyntaxNode): string | null;
 }
 
 /**

@@ -12,9 +12,10 @@ export function createPreviewContext(
   theme: ThemeEnum,
   renderChildren: (node: SyntaxNode) => Promise<string>,
   sanitizeHtml: boolean = true,
-  syntaxHighlighters: readonly Highlighter[] = []
+  syntaxHighlighters: readonly Highlighter[] = [],
+  headingIdForNode?: (node: SyntaxNode) => string | null
 ): PreviewContext {
-  return {
+  const context: PreviewContext = {
     doc,
     theme,
     syntaxHighlighters,
@@ -38,4 +39,7 @@ export function createPreviewContext(
 
     renderChildren,
   };
+
+  if (headingIdForNode) context.headingIdForNode = headingIdForNode;
+  return context;
 }

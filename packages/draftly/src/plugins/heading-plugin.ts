@@ -3,6 +3,7 @@ import { syntaxTree } from "@codemirror/language";
 import { DecorationContext, DecorationPlugin } from "../editor/plugin";
 import { createTheme } from "../editor";
 import { SyntaxNode } from "@lezer/common";
+import type { PreviewContext } from "../preview/types";
 
 /**
  * Node types for ATX headings in markdown
@@ -114,7 +115,7 @@ export class HeadingPlugin extends DecorationPlugin {
     });
   }
 
-  override renderToHTML(node: SyntaxNode, children: string): string | null {
+  override renderToHTML(node: SyntaxNode, children: string, ctx: PreviewContext): string | null {
     if (node.name === "HeaderMark") {
       return "";
     }
@@ -126,9 +127,11 @@ export class HeadingPlugin extends DecorationPlugin {
     const level = parseInt(node.name.slice(-1), 10);
     const lineClass = headingLineDecorations[`heading-${level}` as keyof typeof headingLineDecorations].spec.class;
     const headingClass = headingMarkDecorations[`heading-${level}` as keyof typeof headingMarkDecorations].spec.class;
+    const id = level >= 2 ? ctx.headingIdForNode?.(node) : null;
+    const idAttr = id ? ` id="${id}"` : "";
 
     return `<div class="${lineClass}">
-      <h${level} class="${headingClass}">${children}</h${level}>
+      <h${level}${idAttr} class="${headingClass}">${children}</h${level}>
     </div>\n`;
   }
 }
