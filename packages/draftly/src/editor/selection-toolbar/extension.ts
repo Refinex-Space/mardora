@@ -19,7 +19,8 @@ import type {
 const toolbarWidth = 392;
 const toolbarHeight = 40;
 const panelWidth = 336;
-const panelHeight = 178;
+const linkPanelHeight = 138;
+const palettePanelHeight = 72;
 
 const textColors: SelectionToolbarPaletteItem[] = [
   { id: "default", label: "默认文字颜色", value: null },
@@ -63,6 +64,12 @@ function isValidUrl(value: string): boolean {
 
 function normalizedUrl(value: string): string {
   return value.startsWith("http") ? value : `https://${value}`;
+}
+
+function floatingSizeForPanel(panel: SelectionToolbarPanel): { width: number; height: number } {
+  if (panel === "toolbar") return { width: toolbarWidth, height: toolbarHeight };
+  if (panel === "link") return { width: panelWidth, height: linkPanelHeight };
+  return { width: panelWidth, height: palettePanelHeight };
 }
 
 class SelectionToolbarViewPlugin {
@@ -207,8 +214,7 @@ class SelectionToolbarViewPlugin {
     const range = this.savedRange;
     if (!range) return;
     const renderVersion = ++this.renderVersion;
-    const floating =
-      this.panel === "toolbar" ? { width: toolbarWidth, height: toolbarHeight } : { width: panelWidth, height: panelHeight };
+    const floating = floatingSizeForPanel(this.panel);
     this.detachMenu();
     const anchorFromSelection = this.selectionAnchor;
 
