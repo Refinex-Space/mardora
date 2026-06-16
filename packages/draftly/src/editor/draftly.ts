@@ -15,6 +15,8 @@ import type { DraftlyAttachmentsConfig } from "./attachments";
 import { attachments } from "./attachments";
 import type { DraftlySelectionToolbarConfig } from "./selection-toolbar";
 import { selectionToolbar } from "./selection-toolbar";
+import type { DraftlyTocConfig } from "./table-of-contents";
+import { tableOfContents } from "./table-of-contents";
 
 /**
  * DraftlyNode: represents a node in the markdown tree
@@ -80,6 +82,9 @@ export interface DraftlyConfig {
 
   /** Selected text floating toolbar configuration */
   selectionToolbar?: DraftlySelectionToolbarConfig;
+
+  /** Table of contents configuration */
+  toc?: DraftlyTocConfig;
 }
 
 /**
@@ -120,6 +125,7 @@ export function draftly(config: DraftlyConfig = {}): Extension[] {
     slashCommands: configSlashCommands = { enabled: true },
     attachments: configAttachments = { enabled: false },
     selectionToolbar: configSelectionToolbar = { enabled: true },
+    toc: configToc = { enabled: true },
   } = config;
 
   const allPlugins = [...plugins];
@@ -214,6 +220,7 @@ export function draftly(config: DraftlyConfig = {}): Extension[] {
     }),
     attachments(configAttachments),
     selectionToolbar(configSelectionToolbar),
+    tableOfContents(configToc),
 
     // Plugin extensions & keymaps
     pluginExtensions,

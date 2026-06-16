@@ -4,3 +4,4 @@ export * from "./storage";
 export * from "./extract";
 export * from "./panel";
 export * from "./theme";
+export * from "./extension";

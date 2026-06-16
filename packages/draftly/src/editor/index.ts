@@ -7,3 +7,4 @@ export * from "./icons";
 export * from "./slash";
 export * from "./attachments";
 export * from "./selection-toolbar";
+export * from "./table-of-contents";
