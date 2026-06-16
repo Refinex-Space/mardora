@@ -98,3 +98,39 @@ export type LinkChangeInput = {
 };
 
 export type SelectionToolbarListKind = "ordered" | "unordered" | "task";
+
+export type SelectionToolbarPanel = "toolbar" | "link" | "color" | "highlight";
+
+export type SelectionToolbarPaletteItem = {
+  id: string;
+  label: string;
+  value: string | null;
+};
+
+export type SelectionToolbarLinkState = {
+  title: string;
+  url: string;
+  canRemove: boolean;
+  error?: string;
+  copied?: boolean;
+};
+
+export type SelectionToolbarMenuState = {
+  panel: SelectionToolbarPanel;
+  buttons: SelectionToolbarButton[];
+  textColors: SelectionToolbarPaletteItem[];
+  highlightColors: SelectionToolbarPaletteItem[];
+  link: SelectionToolbarLinkState;
+};
+
+export type SelectionToolbarMenuCallbacks = {
+  onAction: (id: SelectionToolbarActionId) => void;
+  onColor: (value: string | null) => void;
+  onHighlight: (value: string | null) => void;
+  onLinkInput: (field: "title" | "url", value: string) => void;
+  onLinkSubmit: () => void;
+  onLinkCopy: () => void;
+  onLinkOpen: () => void;
+  onLinkRemove: () => void;
+  onCancelPanel: () => void;
+};
