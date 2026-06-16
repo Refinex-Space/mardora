@@ -46,6 +46,7 @@ class TocViewPlugin {
       this.view.dom.ownerDocument.defaultView?.cancelAnimationFrame(this.renderFrame);
       this.renderFrame = null;
     }
+    this.clearLayoutWidth();
     this.panel?.remove();
     this.panel = null;
   }
@@ -115,10 +116,12 @@ class TocViewPlugin {
 
   private render(): void {
     if (!this.config.enabled) {
+      this.clearLayoutWidth();
       this.panel?.remove();
       this.panel = null;
       return;
     }
+    this.syncLayoutWidth();
     const nextPanel = createTocPanelElement(
       { expanded: this.panelState.expanded, width: this.panelState.width, items: this.items },
       {
@@ -154,6 +157,17 @@ class TocViewPlugin {
     this.panelState = { ...this.panelState, expanded: !this.panelState.expanded };
     this.persistPanelState();
     this.render();
+  }
+
+  private syncLayoutWidth(): void {
+    const layoutWidth = this.panelState.expanded ? this.panelState.width : 42;
+    this.view.dom.style.setProperty("--draftly-toc-layout-width", `${layoutWidth}px`);
+    this.view.dom.style.setProperty("--draftly-toc-scrollbar-gutter", "14px");
+  }
+
+  private clearLayoutWidth(): void {
+    this.view.dom.style.removeProperty("--draftly-toc-layout-width");
+    this.view.dom.style.removeProperty("--draftly-toc-scrollbar-gutter");
   }
 
   private startResize(event: MouseEvent): void {

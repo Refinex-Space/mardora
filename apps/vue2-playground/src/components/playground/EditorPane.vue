@@ -4,14 +4,12 @@
       <span>No Content Selected</span>
     </div>
 
-    <div v-else-if="mode === 'view'" class="preview-with-toc">
+    <div v-else-if="mode === 'view'" class="preview-with-toc" :style="previewTocStyle">
       <div ref="previewHost" class="preview-host" @scroll="syncPreviewTocActive">
         <div v-html="previewOutput.html" />
       </div>
       <aside v-if="config.features.tableOfContents" class="vue2-preview-toc">
-        <div class="vue2-preview-toc-header">
-          <span>目录</span>
-        </div>
+        <div class="vue2-preview-toc-resize" @mousedown="startPreviewTocResize" />
         <nav class="vue2-preview-toc-list" aria-label="Document table of contents">
           <button
             v-for="item in previewToc"
@@ -52,6 +50,22 @@ import { extractPreviewTocFromMarkdown, generateCSS, preview } from "draftly/pre
 import { getActivePlugins } from "@/state/playgroundConfig";
 import type { Content, PlaygroundConfig, PlaygroundMode, PreviewOutput, ThemeMode } from "@/types";
 
+const previewTocStorageKey = "draftly-vue2-playground:preview-toc-width";
+const previewTocMinWidth = 180;
+const previewTocMaxWidth = 360;
+const previewTocDefaultWidth = 240;
+
+function clampPreviewTocWidth(width: number): number {
+  return Math.min(Math.max(width, previewTocMinWidth), previewTocMaxWidth);
+}
+
+function readPreviewTocWidth(): number {
+  if (typeof window === "undefined") return previewTocDefaultWidth;
+  const raw = window.localStorage.getItem(previewTocStorageKey);
+  const parsed = raw ? Number(raw) : previewTocDefaultWidth;
+  return Number.isFinite(parsed) ? clampPreviewTocWidth(parsed) : previewTocDefaultWidth;
+}
+
 export default Vue.extend({
   name: "EditorPane",
   props: {
@@ -86,6 +100,7 @@ export default Vue.extend({
       internalUpdate: false,
       renderRequest: 0,
       objectUrls: [] as string[],
+      previewTocWidth: readPreviewTocWidth(),
       previewToc: [] as DraftlyTocItem[],
       previewTocManualActiveUntil: 0,
     };
@@ -142,6 +157,13 @@ export default Vue.extend({
           this.renderPreview();
         }
       },
+    },
+  },
+  computed: {
+    previewTocStyle(): Record<string, string> {
+      return {
+        "--vue2-preview-toc-width": `${this.previewTocWidth}px`,
+      };
     },
   },
   methods: {
@@ -370,6 +392,25 @@ export default Vue.extend({
         ...item,
         active: item.id === activeId,
       }));
+    },
+    startPreviewTocResize(event: MouseEvent) {
+      event.preventDefault();
+      const startX = event.clientX;
+      const startWidth = this.previewTocWidth;
+      document.body.classList.add("vue2-preview-toc-resizing");
+
+      const move = (moveEvent: MouseEvent) => {
+        this.previewTocWidth = clampPreviewTocWidth(startWidth - (moveEvent.clientX - startX));
+      };
+      const up = () => {
+        document.body.classList.remove("vue2-preview-toc-resizing");
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("mouseup", up);
+        window.localStorage.setItem(previewTocStorageKey, String(this.previewTocWidth));
+      };
+
+      document.addEventListener("mousemove", move);
+      document.addEventListener("mouseup", up);
     },
     escapeCssIdentifier(value: string): string {
       if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {

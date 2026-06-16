@@ -150,6 +150,6 @@ describe("createTocPanelElement", () => {
     );
 
     expect(panel.getAttribute("data-draftly-toc-expanded")).toBe("false");
-    expect(panel.textContent).toContain("目录");
+    expect(panel.querySelector(".cm-draftly-toc-collapsed")).not.toBeNull();
   });
 });

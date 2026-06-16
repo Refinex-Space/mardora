@@ -18,26 +18,14 @@ function appendIcon(parent: HTMLElement, name: string): void {
   if (icon) parent.appendChild(icon);
 }
 
-function createHeader(callbacks: TocPanelCallbacks): HTMLElement {
-  const header = document.createElement("div");
-  header.className = "cm-draftly-toc-header";
-
-  const title = document.createElement("div");
-  title.className = "cm-draftly-toc-title";
-  appendIcon(title, "table-of-contents");
-  const text = document.createElement("span");
-  text.textContent = "目录";
-  title.appendChild(text);
-
+function createExpandedToggle(callbacks: TocPanelCallbacks): HTMLButtonElement {
   const toggle = document.createElement("button");
   toggle.type = "button";
   toggle.className = "cm-draftly-toc-toggle";
   toggle.setAttribute("aria-label", "Toggle table of contents");
   toggle.textContent = "‹";
   toggle.addEventListener("click", callbacks.onToggle);
-
-  header.append(title, toggle);
-  return header;
+  return toggle;
 }
 
 function createCollapsed(callbacks: TocPanelCallbacks): HTMLElement {
@@ -46,9 +34,6 @@ function createCollapsed(callbacks: TocPanelCallbacks): HTMLElement {
   button.className = "cm-draftly-toc-collapsed";
   button.setAttribute("aria-label", "Open table of contents");
   appendIcon(button, "table-of-contents");
-  const label = document.createElement("span");
-  label.textContent = "目录";
-  button.appendChild(label);
   button.addEventListener("click", callbacks.onToggle);
   return button;
 }
@@ -81,7 +66,7 @@ export function createTocPanelElement(state: TocPanelRenderState, callbacks: Toc
     return root;
   }
 
-  root.appendChild(createHeader(callbacks));
+  root.appendChild(createExpandedToggle(callbacks));
 
   const list = document.createElement("nav");
   list.className = "cm-draftly-toc-list";
