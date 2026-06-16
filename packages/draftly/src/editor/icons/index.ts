@@ -1,4 +1,4 @@
-type IconElementName = "circle" | "path" | "rect";
+type IconElementName = "circle" | "line" | "path" | "rect";
 
 type IconElementDefinition = {
   name: IconElementName;
@@ -6,6 +6,11 @@ type IconElementDefinition = {
 };
 
 export type DraftlyIconName =
+  | "baseline"
+  | "bold"
+  | "code"
+  | "copy"
+  | "external-link"
   | "file"
   | "heading-1"
   | "heading-2"
@@ -13,7 +18,9 @@ export type DraftlyIconName =
   | "heading-4"
   | "heading-5"
   | "heading-6"
+  | "highlighter"
   | "image"
+  | "italic"
   | "link"
   | "list"
   | "list-ordered"
@@ -21,13 +28,42 @@ export type DraftlyIconName =
   | "minus"
   | "music-2"
   | "play"
+  | "strikethrough"
   | "table"
   | "text-quote"
+  | "trash-2"
+  | "underline"
   | "type";
 
 const svgNamespace = "http://www.w3.org/2000/svg";
 
 const iconDefinitions: Record<DraftlyIconName, IconElementDefinition[]> = {
+  baseline: [
+    { name: "path", attrs: { d: "M4 20h16" } },
+    { name: "path", attrs: { d: "m6 16 6-12 6 12" } },
+    { name: "path", attrs: { d: "M8 12h8" } },
+  ],
+  bold: [
+    {
+      name: "path",
+      attrs: {
+        d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8",
+      },
+    },
+  ],
+  code: [
+    { name: "path", attrs: { d: "m16 18 6-6-6-6" } },
+    { name: "path", attrs: { d: "m8 6-6 6 6 6" } },
+  ],
+  copy: [
+    { name: "rect", attrs: { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2" } },
+    { name: "path", attrs: { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" } },
+  ],
+  "external-link": [
+    { name: "path", attrs: { d: "M15 3h6v6" } },
+    { name: "path", attrs: { d: "M10 14 21 3" } },
+    { name: "path", attrs: { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" } },
+  ],
   file: [
     {
       name: "path",
@@ -77,10 +113,19 @@ const iconDefinitions: Record<DraftlyIconName, IconElementDefinition[]> = {
     { name: "circle", attrs: { cx: "19", cy: "16", r: "2" } },
     { name: "path", attrs: { d: "M20 10c-2 2-3 3.5-3 6" } },
   ],
+  highlighter: [
+    { name: "path", attrs: { d: "m9 11-6 6v3h9l3-3" } },
+    { name: "path", attrs: { d: "m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" } },
+  ],
   image: [
     { name: "rect", attrs: { width: "18", height: "18", x: "3", y: "3", rx: "2", ry: "2" } },
     { name: "circle", attrs: { cx: "9", cy: "9", r: "2" } },
     { name: "path", attrs: { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" } },
+  ],
+  italic: [
+    { name: "line", attrs: { x1: "19", x2: "10", y1: "4", y2: "4" } },
+    { name: "line", attrs: { x1: "14", x2: "5", y1: "20", y2: "20" } },
+    { name: "line", attrs: { x1: "15", x2: "9", y1: "4", y2: "20" } },
   ],
   link: [
     { name: "path", attrs: { d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" } },
@@ -115,6 +160,11 @@ const iconDefinitions: Record<DraftlyIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "M12 18V2l7 4" } },
   ],
   play: [{ name: "path", attrs: { d: "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" } }],
+  strikethrough: [
+    { name: "path", attrs: { d: "M16 4H9a3 3 0 0 0-2.83 4" } },
+    { name: "path", attrs: { d: "M14 12a4 4 0 0 1 0 8H6" } },
+    { name: "line", attrs: { x1: "4", x2: "20", y1: "12", y2: "12" } },
+  ],
   table: [
     { name: "path", attrs: { d: "M12 3v18" } },
     { name: "rect", attrs: { width: "18", height: "18", x: "3", y: "3", rx: "2" } },
@@ -126,6 +176,17 @@ const iconDefinitions: Record<DraftlyIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "M21 12H8" } },
     { name: "path", attrs: { d: "M21 19H8" } },
     { name: "path", attrs: { d: "M3 12v7" } },
+  ],
+  "trash-2": [
+    { name: "path", attrs: { d: "M10 11v6" } },
+    { name: "path", attrs: { d: "M14 11v6" } },
+    { name: "path", attrs: { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" } },
+    { name: "path", attrs: { d: "M3 6h18" } },
+    { name: "path", attrs: { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" } },
+  ],
+  underline: [
+    { name: "path", attrs: { d: "M6 4v6a6 6 0 0 0 12 0V4" } },
+    { name: "line", attrs: { x1: "4", x2: "20", y1: "20", y2: "20" } },
   ],
   type: [
     { name: "path", attrs: { d: "M12 4v16" } },

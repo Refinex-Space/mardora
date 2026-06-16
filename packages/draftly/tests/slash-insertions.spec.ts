@@ -78,6 +78,27 @@ describe("defaultSlashCommands", () => {
     });
     expect(defaultSlashCommands.every((command) => hasDraftlyIcon(command.icon))).toBe(true);
   });
+
+  it("contains built-in icons required by the selection toolbar", () => {
+    expect(
+      [
+        "bold",
+        "italic",
+        "strikethrough",
+        "underline",
+        "code",
+        "highlighter",
+        "baseline",
+        "link",
+        "list-ordered",
+        "list",
+        "list-todo",
+        "copy",
+        "external-link",
+        "trash-2",
+      ].every((icon) => hasDraftlyIcon(icon))
+    ).toBe(true);
+  });
 });
 
 describe("draftly extension composition", () => {
