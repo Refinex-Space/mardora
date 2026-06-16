@@ -34,6 +34,9 @@ declare module "draftly/editor" {
     slashCommands?: {
       enabled?: boolean;
     };
+    selectionToolbar?: {
+      enabled?: boolean;
+    };
     attachments?: {
       enabled?: boolean;
       uploader?: (file: File) => Promise<{

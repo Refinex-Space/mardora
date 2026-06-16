@@ -13,6 +13,8 @@ import type { DraftlySlashCommandsConfig } from "./slash";
 import { slashCommands } from "./slash";
 import type { DraftlyAttachmentsConfig } from "./attachments";
 import { attachments } from "./attachments";
+import type { DraftlySelectionToolbarConfig } from "./selection-toolbar";
+import { selectionToolbar } from "./selection-toolbar";
 
 /**
  * DraftlyNode: represents a node in the markdown tree
@@ -75,6 +77,9 @@ export interface DraftlyConfig {
 
   /** Browser attachment upload configuration */
   attachments?: DraftlyAttachmentsConfig;
+
+  /** Selected text floating toolbar configuration */
+  selectionToolbar?: DraftlySelectionToolbarConfig;
 }
 
 /**
@@ -114,6 +119,7 @@ export function draftly(config: DraftlyConfig = {}): Extension[] {
     onNodesChange: configOnNodesChange = undefined,
     slashCommands: configSlashCommands = { enabled: true },
     attachments: configAttachments = { enabled: false },
+    selectionToolbar: configSelectionToolbar = { enabled: true },
   } = config;
 
   const allPlugins = [...plugins];
@@ -207,6 +213,7 @@ export function draftly(config: DraftlyConfig = {}): Extension[] {
       attachmentUploader: configAttachments.uploader,
     }),
     attachments(configAttachments),
+    selectionToolbar(configSelectionToolbar),
 
     // Plugin extensions & keymaps
     pluginExtensions,
