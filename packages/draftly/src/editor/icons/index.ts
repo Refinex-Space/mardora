@@ -30,6 +30,7 @@ export type DraftlyIconName =
   | "play"
   | "strikethrough"
   | "table"
+  | "table-of-contents"
   | "text-quote"
   | "trash-2"
   | "underline"
@@ -170,6 +171,14 @@ const iconDefinitions: Record<DraftlyIconName, IconElementDefinition[]> = {
     { name: "rect", attrs: { width: "18", height: "18", x: "3", y: "3", rx: "2" } },
     { name: "path", attrs: { d: "M3 9h18" } },
     { name: "path", attrs: { d: "M3 15h18" } },
+  ],
+  "table-of-contents": [
+    { name: "path", attrs: { d: "M16 5H3" } },
+    { name: "path", attrs: { d: "M16 12H3" } },
+    { name: "path", attrs: { d: "M16 19H3" } },
+    { name: "path", attrs: { d: "M21 5h.01" } },
+    { name: "path", attrs: { d: "M21 12h.01" } },
+    { name: "path", attrs: { d: "M21 19h.01" } },
   ],
   "text-quote": [
     { name: "path", attrs: { d: "M17 5H3" } },
