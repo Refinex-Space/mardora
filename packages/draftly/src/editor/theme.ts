@@ -9,7 +9,16 @@ export const draftlyBaseTheme = EditorView.theme({
   "&.cm-draftly": {
     fontSize: "16px",
     lineHeight: "1.6",
+    minHeight: "100%",
     backgroundColor: "transparent !important",
+  },
+
+  "&.cm-draftly.cm-focused": {
+    outline: "none",
+  },
+
+  "&.cm-draftly .cm-scroller": {
+    minHeight: "100%",
   },
 
   "&.cm-draftly .cm-content": {
