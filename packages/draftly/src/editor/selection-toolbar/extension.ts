@@ -6,6 +6,7 @@ import { computeSelectionToolbarLayout } from "./position";
 import { selectionToolbarTheme } from "./theme";
 import type {
   DraftlySelectionToolbarConfig,
+  SelectionToolbarAnchorRect,
   SelectionToolbarActionId,
   SelectionToolbarButton,
   SelectionToolbarLinkState,
@@ -68,11 +69,13 @@ class SelectionToolbarViewPlugin {
   private menu: HTMLElement | null = null;
   private panel: SelectionToolbarPanel = "toolbar";
   private savedRange: { from: number; to: number; text: string } | null = null;
+  private selectionAnchor: SelectionToolbarAnchorRect | null = null;
   private link: SelectionToolbarLinkState = { title: "", url: "", canRemove: false };
   private renderVersion = 0;
 
   constructor(private readonly view: EditorView) {
     this.view.dom.ownerDocument.addEventListener("mousedown", this.handleDocumentMouseDown, true);
+    this.view.dom.ownerDocument.addEventListener("selectionchange", this.handleDocumentSelectionChange);
     this.updateState();
   }
 
@@ -84,6 +87,7 @@ class SelectionToolbarViewPlugin {
 
   destroy(): void {
     this.view.dom.ownerDocument.removeEventListener("mousedown", this.handleDocumentMouseDown, true);
+    this.view.dom.ownerDocument.removeEventListener("selectionchange", this.handleDocumentSelectionChange);
     this.removeMenu();
   }
 
@@ -105,9 +109,55 @@ class SelectionToolbarViewPlugin {
     this.close();
   };
 
+  private readonly handleDocumentSelectionChange = (): void => {
+    const doc = this.view.dom.ownerDocument;
+    const activeElement = doc.activeElement;
+    if (this.menu && activeElement instanceof Node && this.menu.contains(activeElement)) return;
+    if (!this.view.hasFocus || this.view.dom.classList.contains("cm-draftly-slash-open")) return;
+
+    const selection = doc.getSelection();
+    if (!selection || selection.isCollapsed || !selection.anchorNode || !selection.focusNode || selection.rangeCount === 0) return;
+    if (!this.view.contentDOM.contains(selection.anchorNode) || !this.view.contentDOM.contains(selection.focusNode)) return;
+
+    let anchor: number;
+    let head: number;
+    try {
+      anchor = this.view.posAtDOM(selection.anchorNode, selection.anchorOffset);
+      head = this.view.posAtDOM(selection.focusNode, selection.focusOffset);
+    } catch {
+      return;
+    }
+    const from = Math.min(anchor, head);
+    const to = Math.max(anchor, head);
+    if (from === to) return;
+
+    const rect = selection.getRangeAt(0).getBoundingClientRect();
+    this.savedRange = {
+      from,
+      to,
+      text: this.view.state.sliceDoc(from, to),
+    };
+    this.selectionAnchor = {
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+    };
+    this.renderMenu();
+  };
+
   private updateState(): void {
     const selection = this.view.state.selection.main;
-    if (selection.empty || !this.view.hasFocus || this.view.dom.classList.contains("cm-draftly-slash-open")) {
+    if (this.view.dom.classList.contains("cm-draftly-slash-open")) {
+      this.close();
+      return;
+    }
+    if (!this.view.hasFocus) {
+      if (this.isMenuActive() && this.savedRange) return;
+      this.close();
+      return;
+    }
+    if (selection.empty) {
       this.close();
       return;
     }
@@ -117,17 +167,28 @@ class SelectionToolbarViewPlugin {
       to: selection.to,
       text: this.view.state.sliceDoc(selection.from, selection.to),
     };
+    this.selectionAnchor = null;
     this.renderMenu();
+  }
+
+  private isMenuActive(): boolean {
+    const activeElement = this.view.dom.ownerDocument.activeElement;
+    return !!this.menu && activeElement instanceof Node && this.menu.contains(activeElement);
   }
 
   private close(): void {
     this.panel = "toolbar";
     this.savedRange = null;
+    this.selectionAnchor = null;
     this.removeMenu();
   }
 
   private removeMenu(): void {
     this.renderVersion += 1;
+    this.detachMenu();
+  }
+
+  private detachMenu(): void {
     this.menu?.remove();
     this.menu = null;
   }
@@ -148,10 +209,12 @@ class SelectionToolbarViewPlugin {
     const renderVersion = ++this.renderVersion;
     const floating =
       this.panel === "toolbar" ? { width: toolbarWidth, height: toolbarHeight } : { width: panelWidth, height: panelHeight };
-    this.removeMenu();
+    this.detachMenu();
+    const anchorFromSelection = this.selectionAnchor;
 
     this.view.requestMeasure({
       read: (view) => {
+        if (anchorFromSelection) return anchorFromSelection;
         const from = view.coordsAtPos(range.from);
         const to = view.coordsAtPos(range.to);
         if (!from || !to) return null;
