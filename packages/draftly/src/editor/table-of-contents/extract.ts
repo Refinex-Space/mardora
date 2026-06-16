@@ -1,0 +1,51 @@
+import type { EditorState } from "@codemirror/state";
+import { syntaxTree } from "@codemirror/language";
+import type { SyntaxNodeRef } from "@lezer/common";
+import type { DraftlyTocConfig, DraftlyTocItem, DraftlyTocLevel } from "./types";
+import { createTocSlugger, resolveTocConfig } from "./slug";
+
+const headingPattern = /^ATXHeading([1-6])$/;
+
+function headingLevel(node: SyntaxNodeRef): DraftlyTocLevel | null {
+  const match = headingPattern.exec(node.name);
+  if (!match) return null;
+  const level = Number(match[1]);
+  return level >= 2 && level <= 6 ? (level as DraftlyTocLevel) : null;
+}
+
+export function stripMarkdownHeadingText(text: string): string {
+  return text
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/_([^_]+)_/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .trim();
+}
+
+export function extractTocItemsFromState(state: EditorState, config: DraftlyTocConfig = {}): DraftlyTocItem[] {
+  const resolved = resolveTocConfig(config);
+  const slug = createTocSlugger();
+  const items: DraftlyTocItem[] = [];
+
+  syntaxTree(state).iterate({
+    enter: (node) => {
+      const level = headingLevel(node);
+      if (!level || level < resolved.minLevel || level > resolved.maxLevel) return;
+      const text = stripMarkdownHeadingText(state.sliceDoc(node.from, node.to));
+      if (!text) return;
+      items.push({
+        id: slug(text),
+        level,
+        text,
+        from: node.from,
+        to: node.to,
+        active: false,
+      });
+    },
+  });
+
+  return items;
+}
