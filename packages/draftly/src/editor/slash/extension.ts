@@ -4,6 +4,7 @@ import type { DraftlyAttachmentKind, DraftlyAttachmentUploader } from "../attach
 import { uploadAttachmentFile } from "../attachments";
 import { defaultSlashCommands } from "./default-commands";
 import { createSlashMenuElement } from "./menu";
+import { computeSlashMenuLayout } from "./position";
 import { detectSlashQuery, filterSlashCommands } from "./query";
 import { slashMenuTheme } from "./theme";
 import type { DraftlySlashCommand, DraftlySlashCommandsConfig, DraftlySlashQuery } from "./types";
@@ -34,6 +35,7 @@ class SlashCommandViewPlugin {
     private readonly view: EditorView,
     private readonly config: Required<Pick<DraftlySlashRuntimeConfig, "commands">> & DraftlySlashRuntimeConfig
   ) {
+    this.view.dom.ownerDocument.addEventListener("keydown", this.handleDocumentKeydown, true);
     this.updateState();
   }
 
@@ -44,6 +46,7 @@ class SlashCommandViewPlugin {
   }
 
   destroy(): void {
+    this.view.dom.ownerDocument.removeEventListener("keydown", this.handleDocumentKeydown, true);
     this.renderVersion += 1;
     this.removeMenu();
   }
@@ -51,7 +54,7 @@ class SlashCommandViewPlugin {
   move(delta: number): boolean {
     if (!this.query || this.commands.length === 0) return false;
     this.activeIndex = (this.activeIndex + delta + this.commands.length) % this.commands.length;
-    this.renderMenu();
+    this.syncActiveItem("center");
     return true;
   }
 
@@ -67,6 +70,26 @@ class SlashCommandViewPlugin {
   selectActive(): boolean {
     if (!this.query || this.commands.length === 0) return false;
     return this.select(this.activeIndex);
+  }
+
+  handleKeydown(event: KeyboardEvent): boolean {
+    if (event.key === "ArrowDown") {
+      return this.move(1);
+    }
+
+    if (event.key === "ArrowUp") {
+      return this.move(-1);
+    }
+
+    if (event.key === "Enter") {
+      return this.selectActive();
+    }
+
+    if (event.key === "Escape") {
+      return this.close();
+    }
+
+    return false;
   }
 
   private select(index: number): boolean {
@@ -100,6 +123,16 @@ class SlashCommandViewPlugin {
 
     return true;
   }
+
+  private readonly handleDocumentKeydown = (event: KeyboardEvent): void => {
+    if (!this.query || event.defaultPrevented) return;
+
+    const handled = this.handleKeydown(event);
+    if (!handled) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+  };
 
   private updateState(): void {
     const cursor = this.view.state.selection.main.head;
@@ -140,7 +173,7 @@ class SlashCommandViewPlugin {
           {
             onHover: (index) => {
               this.activeIndex = index;
-              this.renderMenu();
+              this.syncActiveItem("nearest");
             },
             onSelect: (index) => {
               this.select(index);
@@ -148,13 +181,69 @@ class SlashCommandViewPlugin {
           }
         );
 
-        this.menu.style.left = `${coords.left}px`;
-        this.menu.style.top = `${coords.bottom + 6}px`;
+        const layout = computeSlashMenuLayout({
+          anchor: { left: coords.left, top: coords.top, bottom: coords.bottom },
+          viewport: {
+            width: this.view.dom.ownerDocument.defaultView?.innerWidth ?? window.innerWidth,
+            height: this.view.dom.ownerDocument.defaultView?.innerHeight ?? window.innerHeight,
+          },
+        });
+        this.menu.dataset.draftlySlashPlacement = layout.placement;
+        this.menu.style.left = `${layout.left}px`;
+        this.menu.style.maxHeight = `${layout.maxHeight}px`;
+        this.menu.style.top = layout.top === null ? "" : `${layout.top}px`;
+        this.menu.style.bottom = layout.bottom === null ? "" : `${layout.bottom}px`;
         this.view.dom.classList.add("cm-draftly-slash-open");
         this.hideEditorCaret();
         this.view.dom.appendChild(this.menu);
+        this.syncActiveItem("nearest");
       },
     });
+  }
+
+  private syncActiveItem(scrollMode: "center" | "nearest"): void {
+    if (!this.menu) return;
+
+    const items = this.menu.querySelectorAll<HTMLElement>(".cm-draftly-slash-item");
+    let activeItem: HTMLElement | null = null;
+
+    items.forEach((item) => {
+      const itemIndex = Number(item.dataset.draftlySlashIndex);
+      const isActive = itemIndex === this.activeIndex;
+      item.classList.toggle("cm-draftly-slash-item-active", isActive);
+      item.setAttribute("aria-selected", String(isActive));
+      if (isActive) {
+        activeItem = item;
+      }
+    });
+
+    if (activeItem) {
+      this.scrollActiveItemIntoView(activeItem, scrollMode);
+    }
+  }
+
+  private scrollActiveItemIntoView(activeItem: HTMLElement, mode: "center" | "nearest"): void {
+    const list = this.menu?.querySelector<HTMLElement>(".cm-draftly-slash-list");
+    if (!list) return;
+
+    const itemTop = activeItem.offsetTop;
+    const itemBottom = itemTop + activeItem.offsetHeight;
+    const visibleTop = list.scrollTop;
+    const visibleBottom = visibleTop + list.clientHeight;
+
+    if (mode === "center") {
+      list.scrollTop = itemTop - (list.clientHeight - activeItem.offsetHeight) / 2;
+      return;
+    }
+
+    if (itemTop < visibleTop) {
+      list.scrollTop = itemTop;
+      return;
+    }
+
+    if (itemBottom > visibleBottom) {
+      list.scrollTop = itemBottom - list.clientHeight;
+    }
   }
 
   private hideEditorCaret(): void {
@@ -199,31 +288,9 @@ export function slashCommands(config: DraftlySlashRuntimeConfig = {}): Extension
           const value = view.plugin(plugin);
           if (!value) return false;
 
-          if (event.key === "ArrowDown") {
-            const handled = value.move(1);
-            if (handled) event.preventDefault();
-            return handled;
-          }
-
-          if (event.key === "ArrowUp") {
-            const handled = value.move(-1);
-            if (handled) event.preventDefault();
-            return handled;
-          }
-
-          if (event.key === "Enter") {
-            const handled = value.selectActive();
-            if (handled) event.preventDefault();
-            return handled;
-          }
-
-          if (event.key === "Escape") {
-            const handled = value.close();
-            if (handled) event.preventDefault();
-            return handled;
-          }
-
-          return false;
+          const handled = value.handleKeydown(event);
+          if (handled) event.preventDefault();
+          return handled;
         },
       })
     ),

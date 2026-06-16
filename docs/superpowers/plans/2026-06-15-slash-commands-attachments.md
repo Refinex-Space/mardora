@@ -406,7 +406,7 @@ export const defaultSlashCommands: DraftlySlashCommand[] = [
   markdownCommand({ id: "heading-6", group: "basic", title: "标题 6", aliases: ["h6", "heading6"], icon: "H6", hint: "######" }, "###### "),
   markdownCommand({ id: "quote", group: "basic", title: "引用", aliases: ["quote", "blockquote"], icon: "“", hint: ">" }, "> "),
   markdownCommand({ id: "ordered-list", group: "basic", title: "有序列表", aliases: ["ol", "ordered"], icon: "1.", hint: "1." }, "1. "),
-  markdownCommand({ id: "unordered-list", group: "basic", title: "项目符号列表", aliases: ["ul", "bullet", "unordered"], icon: "•", hint: "-" }, "- "),
+  markdownCommand({ id: "unordered-list", group: "basic", title: "无顺列表", aliases: ["ul", "bullet", "unordered"], icon: "•", hint: "-" }, "- "),
   markdownCommand({ id: "task-list", group: "basic", title: "待办清单", aliases: ["todo", "task", "check"], icon: "☑", hint: "[]" }, "- [ ] "),
   markdownCommand(
     { id: "table", group: "basic", title: "表格", aliases: ["table"], icon: "▦", hint: "| |" },

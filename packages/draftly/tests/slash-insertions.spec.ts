@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { buildSlashReplacement, defaultSlashCommands } from "../src/editor/slash";
 import { draftly } from "../src/editor";
+import { hasDraftlyIcon } from "../src/editor/icons";
 
 describe("buildSlashReplacement", () => {
   it("replaces the slash query with heading markdown", () => {
@@ -52,6 +53,30 @@ describe("defaultSlashCommands", () => {
       "video",
       "audio",
     ]);
+  });
+
+  it("uses built-in icon identifiers for the default commands", () => {
+    expect(Object.fromEntries(defaultSlashCommands.map((command) => [command.id, command.icon]))).toMatchObject({
+      paragraph: "type",
+      "heading-1": "heading-1",
+      "heading-2": "heading-2",
+      "heading-3": "heading-3",
+      "heading-4": "heading-4",
+      "heading-5": "heading-5",
+      "heading-6": "heading-6",
+      quote: "text-quote",
+      "ordered-list": "list-ordered",
+      "unordered-list": "list",
+      "task-list": "list-todo",
+      table: "table",
+      divider: "minus",
+      link: "link",
+      file: "file",
+      image: "image",
+      video: "play",
+      audio: "music-2",
+    });
+    expect(defaultSlashCommands.every((command) => hasDraftlyIcon(command.icon))).toBe(true);
   });
 });
 

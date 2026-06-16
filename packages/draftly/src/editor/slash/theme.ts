@@ -34,7 +34,7 @@ export const slashMenuTheme = EditorView.baseTheme({
     padding: "8px 14px 6px",
     color: "var(--draftly-slash-muted, #a8a29e)",
     fontSize: "12px",
-    fontWeight: "700",
+    fontWeight: "500",
   },
   ".cm-draftly-slash-item": {
     display: "grid",
@@ -53,16 +53,25 @@ export const slashMenuTheme = EditorView.baseTheme({
     background: "var(--draftly-slash-active, #f4f4f5)",
   },
   ".cm-draftly-slash-icon": {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
     color: "var(--draftly-slash-icon, #3f3f46)",
-    fontSize: "14px",
-    fontWeight: "650",
+    fontSize: "13px",
+    fontWeight: "400",
     textAlign: "center",
+  },
+  ".cm-draftly-slash-icon svg": {
+    display: "block",
+    width: "17px",
+    height: "17px",
+    strokeWidth: "1.9",
   },
   ".cm-draftly-slash-title": {
     overflow: "hidden",
     color: "inherit",
     fontSize: "14px",
-    fontWeight: "560",
+    fontWeight: "400",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
@@ -70,7 +79,7 @@ export const slashMenuTheme = EditorView.baseTheme({
     marginLeft: "12px",
     color: "var(--draftly-slash-muted, #a8a29e)",
     fontSize: "12px",
-    fontWeight: "600",
+    fontWeight: "400",
   },
   ".cm-draftly-slash-footer": {
     display: "flex",
@@ -87,7 +96,7 @@ export const slashMenuTheme = EditorView.baseTheme({
   ".cm-draftly-slash-footer span:last-child": {
     color: "var(--draftly-slash-muted, #a8a29e)",
     fontSize: "12px",
-    fontWeight: "650",
+    fontWeight: "400",
   },
   ".cm-draftly-slash-empty": {
     padding: "14px",

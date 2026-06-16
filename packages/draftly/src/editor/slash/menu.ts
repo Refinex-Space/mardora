@@ -1,4 +1,5 @@
 import type { DraftlySlashCommand } from "./types";
+import { createDraftlyIcon } from "../icons";
 
 export type DraftlySlashMenuState = {
   commands: DraftlySlashCommand[];
@@ -59,6 +60,7 @@ export function createSlashMenuElement(
     item.type = "button";
     item.className =
       index === state.activeIndex ? "cm-draftly-slash-item cm-draftly-slash-item-active" : "cm-draftly-slash-item";
+    item.dataset.draftlySlashIndex = String(index);
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(index === state.activeIndex));
     item.addEventListener("mouseenter", () => callbacks.onHover(index));
@@ -69,7 +71,12 @@ export function createSlashMenuElement(
 
     const icon = document.createElement("span");
     icon.className = "cm-draftly-slash-icon";
-    icon.textContent = command.icon;
+    const svgIcon = createDraftlyIcon(command.icon);
+    if (svgIcon) {
+      icon.appendChild(svgIcon);
+    } else {
+      icon.textContent = command.icon;
+    }
 
     const title = document.createElement("span");
     title.className = "cm-draftly-slash-title";
