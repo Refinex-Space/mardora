@@ -149,7 +149,7 @@ class SlashCommandViewPlugin {
 
         this.menu.style.left = `${coords.left}px`;
         this.menu.style.top = `${coords.bottom + 6}px`;
-        document.body.appendChild(this.menu);
+        this.view.dom.appendChild(this.menu);
       },
     });
   }
