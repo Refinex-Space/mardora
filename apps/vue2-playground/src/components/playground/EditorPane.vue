@@ -4,8 +4,30 @@
       <span>No Content Selected</span>
     </div>
 
-    <div v-else-if="mode === 'view'" ref="previewHost" class="preview-host">
-      <div v-html="previewOutput.html" />
+    <div v-else-if="mode === 'view'" class="preview-with-toc">
+      <div ref="previewHost" class="preview-host" @scroll="syncPreviewTocActive">
+        <div v-html="previewOutput.html" />
+      </div>
+      <aside v-if="config.features.tableOfContents" class="vue2-preview-toc">
+        <div class="vue2-preview-toc-header">
+          <span>目录</span>
+        </div>
+        <nav class="vue2-preview-toc-list" aria-label="Document table of contents">
+          <button
+            v-for="item in previewToc"
+            :key="item.id"
+            type="button"
+            class="vue2-preview-toc-item"
+            :class="{ 'vue2-preview-toc-item-active': item.active }"
+            :data-level="item.level"
+            :title="item.text"
+            @click="jumpPreviewToc(item.id)"
+          >
+            {{ item.text }}
+          </button>
+          <div v-if="previewToc.length === 0" class="vue2-preview-toc-empty">暂无目录</div>
+        </nav>
+      </aside>
     </div>
 
     <div v-else-if="mode === 'output'" class="code-output-grid">
@@ -24,9 +46,9 @@ import { css } from "@codemirror/lang-css";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import type { DraftlyNode } from "draftly/editor";
+import type { DraftlyNode, DraftlyTocItem } from "draftly/editor";
 import { draftly, ThemeEnum } from "draftly/editor";
-import { generateCSS, preview } from "draftly/preview";
+import { extractPreviewTocFromMarkdown, generateCSS, preview } from "draftly/preview";
 import { getActivePlugins } from "@/state/playgroundConfig";
 import type { Content, PlaygroundConfig, PlaygroundMode, PreviewOutput, ThemeMode } from "@/types";
 
@@ -64,6 +86,7 @@ export default Vue.extend({
       internalUpdate: false,
       renderRequest: 0,
       objectUrls: [] as string[],
+      previewToc: [] as DraftlyTocItem[],
     };
   },
   mounted() {
@@ -144,6 +167,7 @@ export default Vue.extend({
         this.previewStyleElement.remove();
         this.previewStyleElement = null;
       }
+      this.previewToc = [];
     },
     revokeObjectUrls() {
       for (const url of this.objectUrls) {
@@ -204,6 +228,10 @@ export default Vue.extend({
               slashCommands: {
                 enabled: this.config.features.slashCommands,
               },
+              toc: {
+                enabled: this.mode === "live" && this.config.features.tableOfContents,
+                storageKey: "draftly-vue2-playground:toc",
+              },
               attachments: {
                 enabled: this.config.features.attachments,
                 uploader: this.config.features.attachments ? this.mockUploader : undefined,
@@ -254,6 +282,7 @@ export default Vue.extend({
 
       if (requestId !== this.renderRequest) return;
       this.previewOutput = { html: htmlOutput, css: cssOutput };
+      this.previewToc = extractPreviewTocFromMarkdown(this.content.content);
       this.$emit("output-change", {
         output: this.previewOutput,
         outputTime: performance.now() - startedAt,
@@ -262,6 +291,7 @@ export default Vue.extend({
       this.$nextTick(() => {
         if (this.mode === "view") {
           this.updatePreviewStyles();
+          this.syncPreviewTocActive();
         }
         if (this.mode === "output") {
           this.createOutputViews();
@@ -302,6 +332,43 @@ export default Vue.extend({
           extensions: [this.cmTheme(), css(), EditorView.lineWrapping, EditorState.readOnly.of(true)],
         }),
       });
+    },
+    jumpPreviewToc(id: string) {
+      const previewHost = this.$refs.previewHost as HTMLElement | undefined;
+      const target = previewHost?.querySelector<HTMLElement>(`#${this.escapeCssIdentifier(id)}`);
+      if (!previewHost || !target) return;
+
+      previewHost.scrollTo({
+        top: Math.max(0, target.offsetTop - 24),
+        behavior: "smooth",
+      });
+      this.markPreviewTocActive(id);
+    },
+    syncPreviewTocActive() {
+      const previewHost = this.$refs.previewHost as HTMLElement | undefined;
+      if (!previewHost || this.previewToc.length === 0) return;
+
+      let activeId = this.previewToc[0].id;
+      for (const item of this.previewToc) {
+        const target = previewHost.querySelector<HTMLElement>(`#${this.escapeCssIdentifier(item.id)}`);
+        if (target && target.offsetTop - previewHost.scrollTop <= 40) {
+          activeId = item.id;
+        }
+      }
+
+      this.markPreviewTocActive(activeId);
+    },
+    markPreviewTocActive(activeId: string) {
+      this.previewToc = this.previewToc.map((item) => ({
+        ...item,
+        active: item.id === activeId,
+      }));
+    },
+    escapeCssIdentifier(value: string): string {
+      if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+        return CSS.escape(value);
+      }
+      return value.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
     },
   },
 });

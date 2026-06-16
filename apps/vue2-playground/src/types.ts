@@ -29,6 +29,7 @@ export interface PlaygroundConfig {
     slashCommands: boolean;
     attachments: boolean;
     pasteDropUploads: boolean;
+    tableOfContents: boolean;
   };
   plugins: PluginConfig;
 }

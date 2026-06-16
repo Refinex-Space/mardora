@@ -24,6 +24,7 @@ export function createDefaultConfig(): PlaygroundConfig {
       slashCommands: true,
       attachments: true,
       pasteDropUploads: true,
+      tableOfContents: true,
     },
     plugins: createDefaultPluginConfig(),
   };

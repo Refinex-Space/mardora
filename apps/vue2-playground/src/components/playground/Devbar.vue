@@ -151,6 +151,7 @@ export default Vue.extend({
         { key: "slashCommands" as FeatureOptionKey, label: "Slash Commands", description: "Open the command menu with line-start slash input" },
         { key: "attachments" as FeatureOptionKey, label: "Attachments", description: "Enable local file selection through media commands" },
         { key: "pasteDropUploads" as FeatureOptionKey, label: "Paste/Drop Uploads", description: "Upload pasted or dropped files with the mock uploader" },
+        { key: "tableOfContents" as FeatureOptionKey, label: "Table of Contents", description: "Show the built-in right-side document outline" },
       ],
     };
   },
