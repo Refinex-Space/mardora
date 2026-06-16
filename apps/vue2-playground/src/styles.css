@@ -751,10 +751,42 @@ button {
   scrollbar-gutter: stable;
 }
 
+.preview-with-toc .preview-host,
+.preview-with-toc .editor-host-with-toc,
+.preview-with-toc .editor-host-with-toc .cm-scroller {
+  scrollbar-color: rgba(113, 113, 122, 0.42) transparent;
+  scrollbar-width: thin;
+}
+
+.preview-with-toc .preview-host::-webkit-scrollbar,
+.preview-with-toc .editor-host-with-toc::-webkit-scrollbar,
+.preview-with-toc .editor-host-with-toc .cm-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+
 .preview-with-toc .preview-host::-webkit-scrollbar-track,
 .preview-with-toc .editor-host-with-toc::-webkit-scrollbar-track,
 .preview-with-toc .editor-host-with-toc .cm-scroller::-webkit-scrollbar-track,
 .vue2-preview-toc-list::-webkit-scrollbar-track {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.preview-with-toc .preview-host::-webkit-scrollbar-thumb,
+.preview-with-toc .editor-host-with-toc::-webkit-scrollbar-thumb,
+.preview-with-toc .editor-host-with-toc .cm-scroller::-webkit-scrollbar-thumb {
+  border: 0;
+  border-radius: 999px;
+  background: rgba(113, 113, 122, 0.42);
+  box-shadow: none;
+}
+
+.preview-with-toc .preview-host::-webkit-scrollbar-corner,
+.preview-with-toc .editor-host-with-toc::-webkit-scrollbar-corner,
+.preview-with-toc .editor-host-with-toc .cm-scroller::-webkit-scrollbar-corner {
   background: transparent;
 }
 
