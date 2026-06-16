@@ -742,7 +742,7 @@ button {
 .preview-with-toc .editor-host-with-toc {
   width: 100%;
   min-width: 0;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .preview-with-toc .editor-host-with-toc .cm-scroller {
@@ -752,6 +752,7 @@ button {
 }
 
 .preview-with-toc .preview-host::-webkit-scrollbar-track,
+.preview-with-toc .editor-host-with-toc::-webkit-scrollbar-track,
 .preview-with-toc .editor-host-with-toc .cm-scroller::-webkit-scrollbar-track,
 .vue2-preview-toc-list::-webkit-scrollbar-track {
   background: transparent;
