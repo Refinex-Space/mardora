@@ -1,3 +1,10 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#superpowers-specs
+---
+
 # Slash Menu I18n Design
 
 ## Goal

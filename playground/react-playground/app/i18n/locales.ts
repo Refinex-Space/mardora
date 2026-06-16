@@ -15,6 +15,7 @@ export const SHELL_LOCALE_STORAGE_KEY = "markora-playground-locale";
 
 export type MessageKey =
   // header
+  | "header.toggleSidebar"
   | "header.selectMode"
   | "header.selectTheme"
   | "header.selectLanguage"
@@ -95,6 +96,7 @@ export type MessageKey =
 type Dict = Record<MessageKey, string>;
 
 const zh: Dict = {
+  "header.toggleSidebar": "切换文档目录",
   "header.selectMode": "选择模式",
   "header.selectTheme": "选择主题",
   "header.selectLanguage": "选择语言",
@@ -174,6 +176,7 @@ const zh: Dict = {
 };
 
 const en: Dict = {
+  "header.toggleSidebar": "Toggle contents",
   "header.selectMode": "Select Mode",
   "header.selectTheme": "Select Theme",
   "header.selectLanguage": "Select Language",

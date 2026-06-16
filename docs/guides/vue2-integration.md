@@ -1,3 +1,10 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#product-and-integration-guides
+---
+
 # Ve2 接入指南
 
 本文面向 Vue 2 项目，即 Vue 2 + TypeScript + CodeMirror 6 的接入方式。目标是让业务项目接入一个与 Markora Vue 2 playground 同等质量的编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、选区工具栏、目录、主题切换和本地持久化。

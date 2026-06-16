@@ -1,3 +1,10 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#product-and-integration-guides
+---
+
 # 项目介绍
 
 本文是 Markora 的产品级技术参考文档。它定义 Markora 能解决什么问题、提供哪些 API、每个配置项的含义和默认值、附件上传的真实能力边界，以及业务团队应该如何把它接入到自己的项目中。

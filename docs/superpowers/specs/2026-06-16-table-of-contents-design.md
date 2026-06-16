@@ -1,3 +1,10 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#superpowers-specs
+---
+
 # Markora 内置目录设计
 
 ## Goal

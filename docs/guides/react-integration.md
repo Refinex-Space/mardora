@@ -1,3 +1,10 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#product-and-integration-guides
+---
+
 # React 接入指南
 
 本文面向 React 项目，目标是接入一个与 Markora React playground 同等质量的编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、选区工具栏、主题切换、本地持久化和节点调试。

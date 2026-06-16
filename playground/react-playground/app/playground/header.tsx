@@ -1,20 +1,23 @@
 import { Button } from "@workspace/ui/components/button";
 import {
   Check,
-  ChevronDown,
   FileCodeCornerIcon,
   FilePenLineIcon,
   FileTextIcon,
+  GalleryHorizontalEnd,
   Loader2,
-  PanelLeftCloseIcon,
-  PanelLeftOpenIcon,
+  PanelLeftClose,
+  PanelRightClose,
   ScanTextIcon,
 } from "lucide-react";
 import React, { Dispatch, SetStateAction } from "react";
 import type { SaveStatus } from "./page";
 import { ThemeSwitcher } from "@/components/providers";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
 import { LanguageSwitcher } from "../i18n/LanguageSwitcher";
 import { useLocale } from "../i18n/LocaleContext";
+import { LOGO_DARK_SVG, LOGO_LIGHT_SVG } from "../brand/logo";
+import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,17 +62,37 @@ export default function Header({
   setMode,
 }: Props) {
   const { t } = useLocale();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme?.includes("dark");
+  const logo = isDark ? LOGO_DARK_SVG : LOGO_LIGHT_SVG;
+
   return (
     <header className="h-12 w-full flex items-center justify-between py-1 px-4 overflow-y-auto">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="size-8 p-1" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          {sidebarOpen ? <PanelLeftCloseIcon className="size-5" /> : <PanelLeftOpenIcon className="size-5" />}
-        </Button>
-        <h2 className="text-xl font-mono">markora</h2>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <PanelLeftClose className="size-5" />
+              <span className="sr-only">{t("header.toggleSidebar")}</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{t("header.toggleSidebar")}</TooltipContent>
+        </Tooltip>
+        {/* Theme-aware inline logo */}
+        <span
+          className="size-7 inline-block"
+          dangerouslySetInnerHTML={{ __html: logo }}
+          aria-hidden="true"
+        />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {saveStatus !== "idle" && (
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground mr-1">
             {saveStatus === "saving" ? (
               <>
                 <Loader2 className="size-3.5 animate-spin" />
@@ -86,18 +109,17 @@ export default function Header({
         <LanguageSwitcher />
         <ThemeSwitcher />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              {(function () {
-                const Icon = modes.find((option) => option.value === mode)?.icon;
-                if (!Icon) return null;
-                return <Icon className="size-4" />;
-              })()}
-              <span className="hidden sm:inline">{t(modeKeys[mode])}</span>
-              <ChevronDown className="size-4 ml-auto" />
-              <span className="sr-only">{t("header.selectMode")}</span>
-            </Button>
-          </DropdownMenuTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8">
+                  <GalleryHorizontalEnd className="size-4" />
+                  <span className="sr-only">{t("header.selectMode")}</span>
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("header.selectMode")}</TooltipContent>
+          </Tooltip>
           <DropdownMenuContent>
             <DropdownMenuLabel>{t("header.selectMode")}</DropdownMenuLabel>
             {modes.map((option) => (
@@ -109,10 +131,24 @@ export default function Header({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="outline" size="sm" onClick={() => setDevbarOpen(!devbarOpen)}>
-          {devbarOpen ? <PanelLeftCloseIcon className="size-4" /> : <PanelLeftOpenIcon className="size-4" />}
-          <span className="hidden sm:inline">{devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}</span>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => setDevbarOpen(!devbarOpen)}
+            >
+              <PanelRightClose className="size-5" />
+              <span className="sr-only">
+                {devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}
+              </span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}
+          </TooltipContent>
+        </Tooltip>
       </div>
     </header>
   );

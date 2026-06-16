@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronDown, Languages } from "lucide-react";
+import { Check, Languages } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
 import { SHELL_LOCALE_OPTIONS, useLocale } from "./LocaleContext";
 
 export function LanguageSwitcher() {
@@ -19,9 +20,6 @@ export function LanguageSwitcher() {
   React.useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Short label shown next to the icon.
-  const shortLabel = locale === "zh" ? "中文" : "EN";
 
   if (!mounted) {
     return (
@@ -33,14 +31,17 @@ export function LanguageSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Languages className="size-4" />
-          <span className="hidden sm:inline">{shortLabel}</span>
-          <ChevronDown className="size-4 ml-auto" />
-          <span className="sr-only">{t("header.selectLanguage")}</span>
-        </Button>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-8">
+              <Languages className="size-4" />
+              <span className="sr-only">{t("header.selectLanguage")}</span>
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">{t("header.selectLanguage")}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent>
         <DropdownMenuLabel>{t("header.selectLanguage")}</DropdownMenuLabel>
         {SHELL_LOCALE_OPTIONS.map((option) => (

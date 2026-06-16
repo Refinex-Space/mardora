@@ -1,3 +1,10 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#superpowers-specs
+---
+
 # Playground Shell i18n + Language Switcher
 
 **Date:** 2026-06-16

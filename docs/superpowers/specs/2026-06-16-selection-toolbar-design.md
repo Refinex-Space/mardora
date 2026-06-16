@@ -1,3 +1,10 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#superpowers-specs
+---
+
 # Markora 选中文本工具条设计
 
 ## Goal

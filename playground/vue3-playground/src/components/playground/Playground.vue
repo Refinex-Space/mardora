@@ -7,6 +7,7 @@
       :devbar-open="devbarOpen"
       :theme-preference="themePreference"
       :shell-locale="shellLocale"
+      :theme="theme"
       @toggle-sidebar="sidebarOpen = !sidebarOpen"
       @toggle-devbar="devbarOpen = !devbarOpen"
       @change-mode="mode = $event"
