@@ -17,6 +17,8 @@ import type { DraftlySelectionToolbarConfig } from "./selection-toolbar";
 import { selectionToolbar } from "./selection-toolbar";
 import type { DraftlyTocConfig } from "./table-of-contents";
 import { tableOfContents } from "./table-of-contents";
+import type { DraftlyI18nConfig, DraftlyLocale } from "./i18n";
+import { resolveDraftlyLocale } from "./i18n";
 
 /**
  * DraftlyNode: represents a node in the markdown tree
@@ -37,6 +39,12 @@ export type DraftlyNode = {
 export interface DraftlyConfig {
   /** Theme */
   theme?: ThemeEnum;
+
+  /** Editor UI locale. Defaults to Simplified Chinese. */
+  locale?: DraftlyLocale;
+
+  /** Internationalization configuration for editor-owned UI text */
+  i18n?: DraftlyI18nConfig;
 
   /** Weather to load base styles */
   baseStyles?: boolean;
@@ -110,6 +118,8 @@ export interface DraftlyConfig {
  */
 export function draftly(config: DraftlyConfig = {}): Extension[] {
   const {
+    locale: configLocale,
+    i18n: configI18n = {},
     theme: configTheme = ThemeEnum.AUTO,
     baseStyles = true,
     plugins = [],
@@ -127,6 +137,7 @@ export function draftly(config: DraftlyConfig = {}): Extension[] {
     selectionToolbar: configSelectionToolbar = { enabled: true },
     toc: configToc = { enabled: true },
   } = config;
+  const resolvedLocale = resolveDraftlyLocale(configSlashCommands.locale ?? configI18n.locale ?? configLocale);
 
   const allPlugins = [...plugins];
 
@@ -216,6 +227,7 @@ export function draftly(config: DraftlyConfig = {}): Extension[] {
     // Draftly editor commands and browser attachments
     slashCommands({
       ...configSlashCommands,
+      inheritedLocale: resolvedLocale,
       attachmentUploader: configAttachments.uploader,
     }),
     attachments(configAttachments),

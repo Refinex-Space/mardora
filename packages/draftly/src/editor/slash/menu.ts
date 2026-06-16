@@ -6,7 +6,7 @@ import type { DraftlySlashMessages } from "./types";
 export type DraftlySlashMenuState = {
   commands: DraftlySlashCommand[];
   activeIndex: number;
-  messages?: DraftlySlashMessages;
+  messages: DraftlySlashMessages;
 };
 
 export type DraftlySlashMenuCallbacks = {
@@ -43,7 +43,7 @@ export function createSlashMenuElement(
   state: DraftlySlashMenuState,
   callbacks: DraftlySlashMenuCallbacks
 ): HTMLElement {
-  const messages = state.messages ?? getSlashMessages("zh-CN");
+  const { messages } = state;
   const root = document.createElement("div");
   root.className = "cm-draftly-slash-menu";
   root.setAttribute("role", "listbox");

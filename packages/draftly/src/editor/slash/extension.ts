@@ -2,16 +2,35 @@ import { Extension, Prec } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { DraftlyAttachmentKind, DraftlyAttachmentUploader } from "../attachments";
 import { uploadAttachmentFile } from "../attachments";
-import { defaultSlashCommands } from "./default-commands";
-import { createSlashMenuElement } from "./menu";
+import type { DraftlyLocale } from "../i18n";
+import { resolveDraftlyLocale } from "../i18n";
+import { getDefaultSlashCommands } from "./default-commands";
+import { createSlashMenuElement, getSlashMessages } from "./menu";
 import { computeSlashMenuLayout } from "./position";
 import { detectSlashQuery, filterSlashCommands } from "./query";
 import { slashMenuTheme } from "./theme";
-import type { DraftlySlashCommand, DraftlySlashCommandsConfig, DraftlySlashQuery } from "./types";
+import type { DraftlySlashCommand, DraftlySlashCommandsConfig, DraftlySlashMessages, DraftlySlashQuery } from "./types";
 
 export type DraftlySlashRuntimeConfig = DraftlySlashCommandsConfig & {
   attachmentUploader?: DraftlyAttachmentUploader | undefined;
+  inheritedLocale?: DraftlyLocale | undefined;
 };
+
+export type ResolvedDraftlySlashRuntimeConfig = Required<Pick<DraftlySlashRuntimeConfig, "commands">> &
+  DraftlySlashRuntimeConfig & {
+    locale: DraftlyLocale;
+    messages: DraftlySlashMessages;
+  };
+
+export function createSlashRuntimeConfig(config: DraftlySlashRuntimeConfig = {}): ResolvedDraftlySlashRuntimeConfig {
+  const locale = resolveDraftlyLocale(config.locale ?? config.inheritedLocale);
+  return {
+    ...config,
+    locale,
+    commands: config.commands ?? getDefaultSlashCommands(locale),
+    messages: getSlashMessages(locale),
+  };
+}
 
 function requestFile(kind: DraftlyAttachmentKind): Promise<File | null> {
   return new Promise((resolve) => {
@@ -33,7 +52,7 @@ class SlashCommandViewPlugin {
 
   constructor(
     private readonly view: EditorView,
-    private readonly config: Required<Pick<DraftlySlashRuntimeConfig, "commands">> & DraftlySlashRuntimeConfig
+    private readonly config: ResolvedDraftlySlashRuntimeConfig
   ) {
     this.view.dom.ownerDocument.addEventListener("keydown", this.handleDocumentKeydown, true);
     this.updateState();
@@ -169,7 +188,7 @@ class SlashCommandViewPlugin {
 
         this.removeMenu();
         this.menu = createSlashMenuElement(
-          { commands: this.commands, activeIndex: this.activeIndex },
+          { commands: this.commands, activeIndex: this.activeIndex, messages: this.config.messages },
           {
             onHover: (index) => {
               this.activeIndex = index;
@@ -272,10 +291,7 @@ export function slashCommands(config: DraftlySlashRuntimeConfig = {}): Extension
     return [];
   }
 
-  const normalizedConfig = {
-    commands: config.commands ?? defaultSlashCommands,
-    attachmentUploader: config.attachmentUploader,
-  };
+  const normalizedConfig = createSlashRuntimeConfig(config);
 
   const plugin = ViewPlugin.define((view) => new SlashCommandViewPlugin(view, normalizedConfig));
 

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { defaultDraftlyLocale, resolveDraftlyLocale } from "../src/editor";
 import {
   createSlashMenuElement,
+  createSlashRuntimeConfig,
   defaultSlashCommands,
   filterSlashCommands,
   getDefaultSlashCommands,
@@ -165,5 +166,33 @@ describe("localized default slash commands", () => {
       "heading-5",
       "heading-6",
     ]);
+  });
+});
+
+describe("slash runtime i18n config", () => {
+  it("uses English default commands when slash locale is en-US", () => {
+    const runtime = createSlashRuntimeConfig({ locale: "en-US" });
+
+    expect(runtime.commands.find((command) => command.id === "paragraph")?.title).toBe("Text");
+    expect(runtime.messages.close).toBe("Close menu");
+  });
+
+  it("preserves custom command titles while localizing menu chrome", () => {
+    const custom: DraftlySlashCommand[] = [
+      {
+        id: "custom",
+        group: "basic",
+        title: "自定义命令",
+        aliases: ["custom"],
+        icon: "type",
+        hint: "",
+        run: () => true,
+      },
+    ];
+    const runtime = createSlashRuntimeConfig({ locale: "en-US", commands: custom });
+
+    expect(runtime.commands).toBe(custom);
+    expect(runtime.commands[0]?.title).toBe("自定义命令");
+    expect(runtime.messages.groups.basic).toBe("Basic blocks");
   });
 });
