@@ -1,10 +1,17 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#superpowers-plans
+---
+
 # Slash Menu I18n Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add Chinese and English localization for the Draftly slash command menu, defaulting to Chinese and allowing integrators to opt into English.
+**Goal:** Add Chinese and English localization for the Markora slash command menu, defaulting to Chinese and allowing integrators to opt into English.
 
-**Architecture:** Add a tiny core i18n layer in `packages/draftly/src/editor/i18n.ts`, then route the resolved locale into slash menu commands and menu chrome. Keep default command behavior source-compatible by preserving `defaultSlashCommands` as the Chinese command list while adding `getDefaultSlashCommands(locale)`.
+**Architecture:** Add a tiny core i18n layer in `packages/markora/src/editor/i18n.ts`, then route the resolved locale into slash menu commands and menu chrome. Keep default command behavior source-compatible by preserving `defaultSlashCommands` as the Chinese command list while adding `getDefaultSlashCommands(locale)`.
 
 **Tech Stack:** TypeScript, CodeMirror 6 extensions, Bun test, Vue 2.6 + Vue CLI 4 playground.
 
@@ -12,41 +19,41 @@
 
 ## File Structure
 
-- Create `packages/draftly/src/editor/i18n.ts`: shared `DraftlyLocale`, default locale, and locale resolver.
-- Modify `packages/draftly/src/editor/slash/types.ts`: add `locale` to slash config and export `DraftlySlashMessages`.
-- Modify `packages/draftly/src/editor/slash/default-commands.ts`: replace the fixed command array with localized command definitions and `getDefaultSlashCommands(locale)`.
-- Modify `packages/draftly/src/editor/slash/menu.ts`: accept localized menu messages instead of hard-coded group/footer/empty strings.
-- Modify `packages/draftly/src/editor/slash/extension.ts`: resolve locale and pass localized commands/messages into the view plugin.
-- Modify `packages/draftly/src/editor/draftly.ts`: add top-level `locale` and `i18n.locale`, then pass the resolved locale to slash commands.
-- Modify `packages/draftly/src/editor/index.ts`: export the i18n types.
-- Create `packages/draftly/tests/slash-i18n.spec.ts`: cover command localization, search aliases, menu chrome, slash config resolution, and custom command preservation.
-- Modify `apps/vue2-playground/src/types.ts`: add `PlaygroundLocale` and `config.locale`.
-- Modify `apps/vue2-playground/src/state/playgroundConfig.ts`: default to `zh-CN`.
-- Modify `apps/vue2-playground/src/components/playground/Devbar.vue`: add a Language segmented control.
-- Modify `apps/vue2-playground/src/components/playground/EditorPane.vue`: pass `locale: this.config.locale` to `draftly()`.
-- Modify `apps/vue2-playground/src/shims-draftly.d.ts`: add the legacy app type declarations for `locale`.
-- Modify `apps/vue2-playground/tests/unit/playgroundConfig.spec.ts`: assert the new locale default and current feature defaults.
+- Create `packages/markora/src/editor/i18n.ts`: shared `MarkoraLocale`, default locale, and locale resolver.
+- Modify `packages/markora/src/editor/slash/types.ts`: add `locale` to slash config and export `MarkoraSlashMessages`.
+- Modify `packages/markora/src/editor/slash/default-commands.ts`: replace the fixed command array with localized command definitions and `getDefaultSlashCommands(locale)`.
+- Modify `packages/markora/src/editor/slash/menu.ts`: accept localized menu messages instead of hard-coded group/footer/empty strings.
+- Modify `packages/markora/src/editor/slash/extension.ts`: resolve locale and pass localized commands/messages into the view plugin.
+- Modify `packages/markora/src/editor/markora.ts`: add top-level `locale` and `i18n.locale`, then pass the resolved locale to slash commands.
+- Modify `packages/markora/src/editor/index.ts`: export the i18n types.
+- Create `packages/markora/tests/slash-i18n.spec.ts`: cover command localization, search aliases, menu chrome, slash config resolution, and custom command preservation.
+- Modify `playground/vue2-playground/src/types.ts`: add `PlaygroundLocale` and `config.locale`.
+- Modify `playground/vue2-playground/src/state/playgroundConfig.ts`: default to `zh-CN`.
+- Modify `playground/vue2-playground/src/components/playground/Devbar.vue`: add a Language segmented control.
+- Modify `playground/vue2-playground/src/components/playground/EditorPane.vue`: pass `locale: this.config.locale` to `markora()`.
+- Modify `playground/vue2-playground/src/shims-markora.d.ts`: add the legacy app type declarations for `locale`.
+- Modify `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`: assert the new locale default and current feature defaults.
 
 ---
 
 ## Task 1: Core Locale Types and Slash Menu Messages
 
 **Files:**
-- Create: `packages/draftly/src/editor/i18n.ts`
-- Modify: `packages/draftly/src/editor/index.ts`
-- Modify: `packages/draftly/src/editor/slash/types.ts`
-- Modify: `packages/draftly/src/editor/slash/menu.ts`
-- Test: `packages/draftly/tests/slash-i18n.spec.ts`
+- Create: `packages/markora/src/editor/i18n.ts`
+- Modify: `packages/markora/src/editor/index.ts`
+- Modify: `packages/markora/src/editor/slash/types.ts`
+- Modify: `packages/markora/src/editor/slash/menu.ts`
+- Test: `packages/markora/tests/slash-i18n.spec.ts`
 
 - [ ] **Step 1: Add failing tests for menu messages and locale fallback**
 
-Create `packages/draftly/tests/slash-i18n.spec.ts` with this initial content:
+Create `packages/markora/tests/slash-i18n.spec.ts` with this initial content:
 
 ```ts
 import { afterEach, describe, expect, it } from "bun:test";
-import { defaultDraftlyLocale, resolveDraftlyLocale } from "../src/editor";
+import { defaultMarkoraLocale, resolveMarkoraLocale } from "../src/editor";
 import { createSlashMenuElement, getSlashMessages } from "../src/editor/slash";
-import type { DraftlySlashCommand } from "../src/editor/slash";
+import type { MarkoraSlashCommand } from "../src/editor/slash";
 
 class FakeElement {
   className = "";
@@ -122,7 +129,7 @@ afterEach(() => {
   delete (globalThis as typeof globalThis & { document?: Document }).document;
 });
 
-const commands: DraftlySlashCommand[] = [
+const commands: MarkoraSlashCommand[] = [
   {
     id: "paragraph",
     group: "basic",
@@ -145,10 +152,10 @@ const commands: DraftlySlashCommand[] = [
 
 describe("slash i18n", () => {
   it("defaults to Chinese locale", () => {
-    expect(defaultDraftlyLocale).toBe("zh-CN");
-    expect(resolveDraftlyLocale()).toBe("zh-CN");
-    expect(resolveDraftlyLocale("en-US")).toBe("en-US");
-    expect(resolveDraftlyLocale("fr-FR" as never)).toBe("zh-CN");
+    expect(defaultMarkoraLocale).toBe("zh-CN");
+    expect(resolveMarkoraLocale()).toBe("zh-CN");
+    expect(resolveMarkoraLocale("en-US")).toBe("en-US");
+    expect(resolveMarkoraLocale("fr-FR" as never)).toBe("zh-CN");
   });
 
   it("renders Chinese slash menu chrome by default", () => {
@@ -174,35 +181,35 @@ describe("slash i18n", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test slash-i18n.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts
 ```
 
-Expected: FAIL because `defaultDraftlyLocale`, `resolveDraftlyLocale`, `getSlashMessages`, and the `messages` state property do not exist.
+Expected: FAIL because `defaultMarkoraLocale`, `resolveMarkoraLocale`, `getSlashMessages`, and the `messages` state property do not exist.
 
 - [ ] **Step 3: Add core i18n helpers**
 
-Create `packages/draftly/src/editor/i18n.ts`:
+Create `packages/markora/src/editor/i18n.ts`:
 
 ```ts
-export type DraftlyLocale = "zh-CN" | "en-US";
+export type MarkoraLocale = "zh-CN" | "en-US";
 
-export type DraftlyI18nConfig = {
-  locale?: DraftlyLocale;
+export type MarkoraI18nConfig = {
+  locale?: MarkoraLocale;
 };
 
-export const defaultDraftlyLocale: DraftlyLocale = "zh-CN";
+export const defaultMarkoraLocale: MarkoraLocale = "zh-CN";
 
-const supportedDraftlyLocales = new Set<DraftlyLocale>(["zh-CN", "en-US"]);
+const supportedMarkoraLocales = new Set<MarkoraLocale>(["zh-CN", "en-US"]);
 
-export function resolveDraftlyLocale(locale?: DraftlyLocale): DraftlyLocale {
-  return locale && supportedDraftlyLocales.has(locale) ? locale : defaultDraftlyLocale;
+export function resolveMarkoraLocale(locale?: MarkoraLocale): MarkoraLocale {
+  return locale && supportedMarkoraLocales.has(locale) ? locale : defaultMarkoraLocale;
 }
 ```
 
-Modify `packages/draftly/src/editor/index.ts` to export the new module:
+Modify `packages/markora/src/editor/index.ts` to export the new module:
 
 ```ts
-export * from "./draftly";
+export * from "./markora";
 export * from "./icons";
 export * from "./i18n";
 export * from "./selection-toolbar";
@@ -212,62 +219,62 @@ export * from "./table-of-contents";
 
 - [ ] **Step 4: Add slash message types and dictionary**
 
-Modify `packages/draftly/src/editor/slash/types.ts`:
+Modify `packages/markora/src/editor/slash/types.ts`:
 
 ```ts
 import type { EditorView } from "@codemirror/view";
-import type { DraftlyAttachmentKind } from "../attachments";
-import type { DraftlyLocale } from "../i18n";
+import type { MarkoraAttachmentKind } from "../attachments";
+import type { MarkoraLocale } from "../i18n";
 
-export type DraftlySlashCommandGroup = "basic" | "media";
+export type MarkoraSlashCommandGroup = "basic" | "media";
 
-export type DraftlySlashMessages = {
-  groups: Record<DraftlySlashCommandGroup, string>;
+export type MarkoraSlashMessages = {
+  groups: Record<MarkoraSlashCommandGroup, string>;
   empty: string;
   close: string;
   closeHint: string;
 };
 
-export type DraftlySlashCommandContext = {
+export type MarkoraSlashCommandContext = {
   view: EditorView;
   queryRange: { from: number; to: number };
-  requestAttachment?: (kind: DraftlyAttachmentKind, context: DraftlySlashCommandContext) => boolean;
+  requestAttachment?: (kind: MarkoraAttachmentKind, context: MarkoraSlashCommandContext) => boolean;
 };
 
-export type DraftlySlashCommand = {
+export type MarkoraSlashCommand = {
   id: string;
-  group: DraftlySlashCommandGroup;
+  group: MarkoraSlashCommandGroup;
   title: string;
   aliases: string[];
   icon: string;
   hint: string;
-  run: (context: DraftlySlashCommandContext) => boolean;
+  run: (context: MarkoraSlashCommandContext) => boolean;
 };
 
-export type DraftlySlashQuery = {
+export type MarkoraSlashQuery = {
   from: number;
   to: number;
   query: string;
 };
 
-export type DraftlySlashCommandsConfig = {
+export type MarkoraSlashCommandsConfig = {
   enabled?: boolean;
-  locale?: DraftlyLocale;
-  commands?: DraftlySlashCommand[];
+  locale?: MarkoraLocale;
+  commands?: MarkoraSlashCommand[];
 };
 ```
 
-Add to `packages/draftly/src/editor/slash/menu.ts`:
+Add to `packages/markora/src/editor/slash/menu.ts`:
 
 ```ts
-import type { DraftlyLocale } from "../i18n";
-import type { DraftlySlashCommand, DraftlySlashMessages } from "./types";
+import type { MarkoraLocale } from "../i18n";
+import type { MarkoraSlashCommand, MarkoraSlashMessages } from "./types";
 ```
 
 Replace the hard-coded `groupLabels` with:
 
 ```ts
-const slashMessages: Record<DraftlyLocale, DraftlySlashMessages> = {
+const slashMessages: Record<MarkoraLocale, MarkoraSlashMessages> = {
   "zh-CN": {
     groups: {
       basic: "基本区块",
@@ -288,18 +295,18 @@ const slashMessages: Record<DraftlyLocale, DraftlySlashMessages> = {
   },
 };
 
-export function getSlashMessages(locale: DraftlyLocale): DraftlySlashMessages {
+export function getSlashMessages(locale: MarkoraLocale): MarkoraSlashMessages {
   return slashMessages[locale];
 }
 ```
 
-Update `DraftlySlashMenuState`:
+Update `MarkoraSlashMenuState`:
 
 ```ts
-export type DraftlySlashMenuState = {
-  commands: DraftlySlashCommand[];
+export type MarkoraSlashMenuState = {
+  commands: MarkoraSlashCommand[];
   activeIndex: number;
-  messages: DraftlySlashMessages;
+  messages: MarkoraSlashMessages;
 };
 ```
 
@@ -316,7 +323,7 @@ footer.innerHTML = `<span>${state.messages.close}</span><span>${state.messages.c
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test slash-i18n.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts
 ```
 
 Expected: PASS.
@@ -326,7 +333,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/i18n.ts packages/draftly/src/editor/index.ts packages/draftly/src/editor/slash/types.ts packages/draftly/src/editor/slash/menu.ts packages/draftly/tests/slash-i18n.spec.ts
+git add packages/markora/src/editor/i18n.ts packages/markora/src/editor/index.ts packages/markora/src/editor/slash/types.ts packages/markora/src/editor/slash/menu.ts packages/markora/tests/slash-i18n.spec.ts
 git commit -m "feat(i18n): 添加 slash 菜单基础文案字典"
 ```
 
@@ -335,13 +342,13 @@ git commit -m "feat(i18n): 添加 slash 菜单基础文案字典"
 ## Task 2: Locale-Aware Default Slash Commands
 
 **Files:**
-- Modify: `packages/draftly/src/editor/slash/default-commands.ts`
-- Test: `packages/draftly/tests/slash-i18n.spec.ts`
-- Test: `packages/draftly/tests/slash-query.spec.ts`
+- Modify: `packages/markora/src/editor/slash/default-commands.ts`
+- Test: `packages/markora/tests/slash-i18n.spec.ts`
+- Test: `packages/markora/tests/slash-query.spec.ts`
 
 - [ ] **Step 1: Add failing tests for localized commands and bilingual search**
 
-Append to `packages/draftly/tests/slash-i18n.spec.ts`:
+Append to `packages/markora/tests/slash-i18n.spec.ts`:
 
 ```ts
 import { filterSlashCommands } from "../src/editor/slash";
@@ -386,17 +393,17 @@ describe("localized default slash commands", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test slash-i18n.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts
 ```
 
 Expected: FAIL because `getDefaultSlashCommands` does not exist.
 
 - [ ] **Step 3: Implement localized command metadata**
 
-In `packages/draftly/src/editor/slash/default-commands.ts`, import locale type:
+In `packages/markora/src/editor/slash/default-commands.ts`, import locale type:
 
 ```ts
-import type { DraftlyLocale } from "../i18n";
+import type { MarkoraLocale } from "../i18n";
 ```
 
 Add localized titles and aliases:
@@ -407,7 +414,7 @@ type LocalizedSlashCommandCopy = {
   aliases: string[];
 };
 
-const commandCopy: Record<DraftlyLocale, Record<string, LocalizedSlashCommandCopy>> = {
+const commandCopy: Record<MarkoraLocale, Record<string, LocalizedSlashCommandCopy>> = {
   "zh-CN": {
     paragraph: { title: "文本", aliases: ["text", "plain", "wenben"] },
     "heading-1": { title: "标题 1", aliases: ["h1", "heading", "heading1", "biaoti", "标题"] },
@@ -454,7 +461,7 @@ const commandCopy: Record<DraftlyLocale, Record<string, LocalizedSlashCommandCop
 Use a helper to build command metadata:
 
 ```ts
-function commandMeta(locale: DraftlyLocale, id: string, group: DraftlySlashCommand["group"], icon: string, hint: string): Omit<DraftlySlashCommand, "run"> {
+function commandMeta(locale: MarkoraLocale, id: string, group: MarkoraSlashCommand["group"], icon: string, hint: string): Omit<MarkoraSlashCommand, "run"> {
   const copy = commandCopy[locale][id];
   if (!copy) {
     throw new Error(`Missing slash command copy: ${locale}:${id}`);
@@ -474,7 +481,7 @@ function commandMeta(locale: DraftlyLocale, id: string, group: DraftlySlashComma
 Replace the exported array with:
 
 ```ts
-export function getDefaultSlashCommands(locale: DraftlyLocale = "zh-CN"): DraftlySlashCommand[] {
+export function getDefaultSlashCommands(locale: MarkoraLocale = "zh-CN"): MarkoraSlashCommand[] {
   return [
     markdownCommand(commandMeta(locale, "paragraph", "basic", "type", ""), "", 0),
     markdownCommand(commandMeta(locale, "heading-1", "basic", "heading-1", "#"), "# "),
@@ -497,7 +504,7 @@ export function getDefaultSlashCommands(locale: DraftlyLocale = "zh-CN"): Draftl
   ];
 }
 
-export const defaultSlashCommands: DraftlySlashCommand[] = getDefaultSlashCommands("zh-CN");
+export const defaultSlashCommands: MarkoraSlashCommand[] = getDefaultSlashCommands("zh-CN");
 ```
 
 - [ ] **Step 4: Run focused tests**
@@ -505,7 +512,7 @@ export const defaultSlashCommands: DraftlySlashCommand[] = getDefaultSlashComman
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
 ```
 
 Expected: PASS.
@@ -515,22 +522,22 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/slash/default-commands.ts packages/draftly/tests/slash-i18n.spec.ts
+git add packages/markora/src/editor/slash/default-commands.ts packages/markora/tests/slash-i18n.spec.ts
 git commit -m "feat(i18n): 支持 slash 默认命令中英文文案"
 ```
 
 ---
 
-## Task 3: Wire Locale Through Slash Extension and Draftly Config
+## Task 3: Wire Locale Through Slash Extension and Markora Config
 
 **Files:**
-- Modify: `packages/draftly/src/editor/slash/extension.ts`
-- Modify: `packages/draftly/src/editor/draftly.ts`
-- Test: `packages/draftly/tests/slash-i18n.spec.ts`
+- Modify: `packages/markora/src/editor/slash/extension.ts`
+- Modify: `packages/markora/src/editor/markora.ts`
+- Test: `packages/markora/tests/slash-i18n.spec.ts`
 
 - [ ] **Step 1: Add failing tests for runtime locale resolution and custom commands**
 
-Append to `packages/draftly/tests/slash-i18n.spec.ts`:
+Append to `packages/markora/tests/slash-i18n.spec.ts`:
 
 ```ts
 import { createSlashRuntimeConfig } from "../src/editor/slash";
@@ -544,7 +551,7 @@ describe("slash runtime i18n config", () => {
   });
 
   it("preserves custom command titles while localizing menu chrome", () => {
-    const custom: DraftlySlashCommand[] = [
+    const custom: MarkoraSlashCommand[] = [
       {
         id: "custom",
         group: "basic",
@@ -569,39 +576,39 @@ describe("slash runtime i18n config", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test slash-i18n.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts
 ```
 
 Expected: FAIL because `createSlashRuntimeConfig` does not exist and `slashCommands()` still uses the fixed Chinese defaults.
 
 - [ ] **Step 3: Implement slash runtime normalization**
 
-Modify imports in `packages/draftly/src/editor/slash/extension.ts`:
+Modify imports in `packages/markora/src/editor/slash/extension.ts`:
 
 ```ts
-import type { DraftlyLocale } from "../i18n";
-import { resolveDraftlyLocale } from "../i18n";
+import type { MarkoraLocale } from "../i18n";
+import { resolveMarkoraLocale } from "../i18n";
 import { getDefaultSlashCommands } from "./default-commands";
 import { createSlashMenuElement, getSlashMessages } from "./menu";
-import type { DraftlySlashCommand, DraftlySlashCommandsConfig, DraftlySlashMessages, DraftlySlashQuery } from "./types";
+import type { MarkoraSlashCommand, MarkoraSlashCommandsConfig, MarkoraSlashMessages, MarkoraSlashQuery } from "./types";
 ```
 
 Update runtime config:
 
 ```ts
-export type DraftlySlashRuntimeConfig = DraftlySlashCommandsConfig & {
-  attachmentUploader?: DraftlyAttachmentUploader | undefined;
-  inheritedLocale?: DraftlyLocale | undefined;
+export type MarkoraSlashRuntimeConfig = MarkoraSlashCommandsConfig & {
+  attachmentUploader?: MarkoraAttachmentUploader | undefined;
+  inheritedLocale?: MarkoraLocale | undefined;
 };
 
-export type ResolvedDraftlySlashRuntimeConfig = Required<Pick<DraftlySlashRuntimeConfig, "commands">> &
-  DraftlySlashRuntimeConfig & {
-    locale: DraftlyLocale;
-    messages: DraftlySlashMessages;
+export type ResolvedMarkoraSlashRuntimeConfig = Required<Pick<MarkoraSlashRuntimeConfig, "commands">> &
+  MarkoraSlashRuntimeConfig & {
+    locale: MarkoraLocale;
+    messages: MarkoraSlashMessages;
   };
 
-export function createSlashRuntimeConfig(config: DraftlySlashRuntimeConfig = {}): ResolvedDraftlySlashRuntimeConfig {
-  const locale = resolveDraftlyLocale(config.locale ?? config.inheritedLocale);
+export function createSlashRuntimeConfig(config: MarkoraSlashRuntimeConfig = {}): ResolvedMarkoraSlashRuntimeConfig {
+  const locale = resolveMarkoraLocale(config.locale ?? config.inheritedLocale);
   return {
     ...config,
     locale,
@@ -616,7 +623,7 @@ Change the plugin constructor type:
 ```ts
 constructor(
   private readonly view: EditorView,
-  private readonly config: ResolvedDraftlySlashRuntimeConfig
+  private readonly config: ResolvedMarkoraSlashRuntimeConfig
 ) {
   this.view.dom.ownerDocument.addEventListener("keydown", this.handleDocumentKeydown, true);
   this.updateState();
@@ -646,26 +653,26 @@ Replace normalization in `slashCommands()`:
 const normalizedConfig = createSlashRuntimeConfig(config);
 ```
 
-- [ ] **Step 4: Add top-level Draftly locale config**
+- [ ] **Step 4: Add top-level Markora locale config**
 
-Modify `packages/draftly/src/editor/draftly.ts` imports:
+Modify `packages/markora/src/editor/markora.ts` imports:
 
 ```ts
-import type { DraftlyI18nConfig, DraftlyLocale } from "./i18n";
-import { resolveDraftlyLocale } from "./i18n";
+import type { MarkoraI18nConfig, MarkoraLocale } from "./i18n";
+import { resolveMarkoraLocale } from "./i18n";
 ```
 
-Add to `DraftlyConfig`:
+Add to `MarkoraConfig`:
 
 ```ts
 /** Editor UI locale. Defaults to Simplified Chinese. */
-locale?: DraftlyLocale;
+locale?: MarkoraLocale;
 
 /** Internationalization configuration for editor-owned UI text */
-i18n?: DraftlyI18nConfig;
+i18n?: MarkoraI18nConfig;
 ```
 
-In `draftly(config: DraftlyConfig = {})`, destructure:
+In `markora(config: MarkoraConfig = {})`, destructure:
 
 ```ts
 const {
@@ -679,7 +686,7 @@ const {
 Before composing extensions, resolve:
 
 ```ts
-const resolvedLocale = resolveDraftlyLocale(configSlashCommands.locale ?? configI18n.locale ?? configLocale);
+const resolvedLocale = resolveMarkoraLocale(configSlashCommands.locale ?? configI18n.locale ?? configLocale);
 ```
 
 Pass inherited locale to slash:
@@ -697,8 +704,8 @@ slashCommands({
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
 ```
 
 Expected: both commands PASS.
@@ -708,8 +715,8 @@ Expected: both commands PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/slash/extension.ts packages/draftly/src/editor/draftly.ts packages/draftly/tests/slash-i18n.spec.ts
-git commit -m "feat(i18n): 串联 Draftly locale 到 slash 菜单"
+git add packages/markora/src/editor/slash/extension.ts packages/markora/src/editor/markora.ts packages/markora/tests/slash-i18n.spec.ts
+git commit -m "feat(i18n): 串联 Markora locale 到 slash 菜单"
 ```
 
 ---
@@ -717,16 +724,16 @@ git commit -m "feat(i18n): 串联 Draftly locale 到 slash 菜单"
 ## Task 4: Vue2 Playground Language Control
 
 **Files:**
-- Modify: `apps/vue2-playground/src/types.ts`
-- Modify: `apps/vue2-playground/src/state/playgroundConfig.ts`
-- Modify: `apps/vue2-playground/src/components/playground/Devbar.vue`
-- Modify: `apps/vue2-playground/src/components/playground/EditorPane.vue`
-- Modify: `apps/vue2-playground/src/shims-draftly.d.ts`
-- Test: `apps/vue2-playground/tests/unit/playgroundConfig.spec.ts`
+- Modify: `playground/vue2-playground/src/types.ts`
+- Modify: `playground/vue2-playground/src/state/playgroundConfig.ts`
+- Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
+- Modify: `playground/vue2-playground/src/components/playground/EditorPane.vue`
+- Modify: `playground/vue2-playground/src/shims-markora.d.ts`
+- Test: `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`
 
 - [ ] **Step 1: Add failing playground config assertions**
 
-Modify `apps/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
+Modify `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
 
 ```ts
   it("defaults to Chinese locale", () => {
@@ -761,7 +768,7 @@ Expected: FAIL because `config.locale` does not exist.
 
 - [ ] **Step 3: Add playground locale type and default**
 
-Modify `apps/vue2-playground/src/types.ts`:
+Modify `playground/vue2-playground/src/types.ts`:
 
 ```ts
 export type PlaygroundLocale = "zh-CN" | "en-US";
@@ -773,7 +780,7 @@ Add to `PlaygroundConfig`:
   locale: PlaygroundLocale;
 ```
 
-Modify `apps/vue2-playground/src/state/playgroundConfig.ts`:
+Modify `playground/vue2-playground/src/state/playgroundConfig.ts`:
 
 ```ts
 export function createDefaultConfig(): PlaygroundConfig {
@@ -805,7 +812,7 @@ export function createDefaultConfig(): PlaygroundConfig {
 
 - [ ] **Step 4: Add Devbar language selector**
 
-Modify imports in `apps/vue2-playground/src/components/playground/Devbar.vue`:
+Modify imports in `playground/vue2-playground/src/components/playground/Devbar.vue`:
 
 ```ts
 import type { PlaygroundConfig, PreviewContentWidth, PlaygroundLocale } from "@/types";
@@ -817,7 +824,7 @@ Add this UI block in the Preview Options section after Content Width:
           <div class="option-row">
             <span class="switch-copy">
               <span class="switch-label">Language</span>
-              <span class="switch-description">Adjust Draftly-owned editor UI text</span>
+              <span class="switch-description">Adjust Markora-owned editor UI text</span>
             </span>
             <div class="segmented-control" role="group" aria-label="Language">
               <button
@@ -853,9 +860,9 @@ Add method:
     },
 ```
 
-- [ ] **Step 5: Pass locale into Draftly and shims**
+- [ ] **Step 5: Pass locale into Markora and shims**
 
-Modify `apps/vue2-playground/src/components/playground/EditorPane.vue` inside `draftly({ ... })`:
+Modify `playground/vue2-playground/src/components/playground/EditorPane.vue` inside `markora({ ... })`:
 
 ```ts
               locale: this.config.locale,
@@ -864,18 +871,18 @@ Modify `apps/vue2-playground/src/components/playground/EditorPane.vue` inside `d
 Place it near `theme`:
 
 ```ts
-              theme: this.draftlyTheme(),
+              theme: this.markoraTheme(),
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
 ```
 
-Modify `apps/vue2-playground/src/shims-draftly.d.ts`:
+Modify `playground/vue2-playground/src/shims-markora.d.ts`:
 
 ```ts
     locale?: "zh-CN" | "en-US";
 ```
 
-Add that property inside the declared `draftly(config?: { ... })` object.
+Add that property inside the declared `markora(config?: { ... })` object.
 
 - [ ] **Step 6: Run Vue2 checks**
 
@@ -893,7 +900,7 @@ Expected: both commands PASS. Build may print existing bundle size warnings.
 Run:
 
 ```bash
-git add apps/vue2-playground/src/types.ts apps/vue2-playground/src/state/playgroundConfig.ts apps/vue2-playground/src/components/playground/Devbar.vue apps/vue2-playground/src/components/playground/EditorPane.vue apps/vue2-playground/src/shims-draftly.d.ts apps/vue2-playground/tests/unit/playgroundConfig.spec.ts
+git add playground/vue2-playground/src/types.ts playground/vue2-playground/src/state/playgroundConfig.ts playground/vue2-playground/src/components/playground/Devbar.vue playground/vue2-playground/src/components/playground/EditorPane.vue playground/vue2-playground/src/shims-markora.d.ts playground/vue2-playground/tests/unit/playgroundConfig.spec.ts
 git commit -m "feat(playground): 增加 slash 菜单语言调试项"
 ```
 
@@ -903,15 +910,15 @@ git commit -m "feat(playground): 增加 slash 菜单语言调试项"
 
 **Files:**
 - No new source files expected.
-- Validate: `packages/draftly`, `apps/vue2-playground`, browser at `http://localhost:3001/`.
+- Validate: `packages/markora`, `playground/vue2-playground`, browser at `http://localhost:3001/`.
 
 - [ ] **Step 1: Run package and app checks**
 
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
 pnpm --config.package-manager-strict=false --filter vue2-playground test:unit playgroundConfig.spec.ts
 pnpm --config.package-manager-strict=false --filter vue2-playground build
 git diff --check
@@ -919,8 +926,8 @@ git diff --check
 
 Expected:
 
-- Draftly focused tests PASS.
-- Draftly typecheck PASS.
+- Markora focused tests PASS.
+- Markora typecheck PASS.
 - Vue2 playground focused unit test PASS.
 - Vue2 playground build PASS with only existing bundle size warnings.
 - `git diff --check` produces no output.

@@ -7,10 +7,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "draftly/editor": fileURLToPath(new URL("../../packages/draftly/dist/editor/index.js", import.meta.url)),
-      "draftly/preview": fileURLToPath(new URL("../../packages/draftly/dist/preview/index.js", import.meta.url)),
-      "draftly/plugins": fileURLToPath(new URL("../../packages/draftly/dist/plugins/index.js", import.meta.url)),
-      draftly: fileURLToPath(new URL("../../packages/draftly/dist/index.js", import.meta.url)),
+      "markora/editor": fileURLToPath(new URL("../../packages/markora/dist/editor/index.js", import.meta.url)),
+      "markora/preview": fileURLToPath(new URL("../../packages/markora/dist/preview/index.js", import.meta.url)),
+      "markora/plugins": fileURLToPath(new URL("../../packages/markora/dist/plugins/index.js", import.meta.url)),
+      markora: fileURLToPath(new URL("../../packages/markora/dist/index.js", import.meta.url)),
     },
   },
   server: {

@@ -9,8 +9,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
 import { Button } from "@workspace/ui/components/button";
-import { Moon, Sun, Monitor, Check, ChevronDown } from "lucide-react";
+import { Palette, Monitor, Sun, Moon, Check } from "lucide-react";
 
 // =============================================
 // THEME CONFIGURATION - Edit themes here
@@ -33,7 +34,7 @@ const themeClassMap: Record<string, string> = {
 };
 
 // =============================================
-// Theme Switcher Component
+// Theme Switcher Component (icon-only)
 // =============================================
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
@@ -43,27 +44,27 @@ export function ThemeSwitcher() {
     setMounted(true);
   }, []);
 
-  // Get current theme icon
-  const CurrentIcon = THEME_OPTIONS.find((t) => t.value === theme)?.icon ?? Monitor;
-
   if (!mounted) {
     return (
       <Button variant="ghost" size="icon" className="size-8">
-        <Monitor className="size-4" />
+        <Palette className="size-4" />
       </Button>
     );
   }
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          <CurrentIcon className="size-4" />
-          <span className="hidden sm:inline">{theme}</span>
-          <ChevronDown className="size-4 ml-auto" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-8">
+              <Palette className="size-4" />
+              <span className="sr-only">Select Theme</span>
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">Select Theme</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent>
         <DropdownMenuLabel>Select Theme</DropdownMenuLabel>
         {THEME_OPTIONS.map((option) => (
@@ -87,7 +88,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       attribute="class"
       defaultTheme="system"
       enableSystem
-      storageKey="draftly-theme"
+      storageKey="markora-theme"
       disableTransitionOnChange
       enableColorScheme
       themes={themeValues}

@@ -1,4 +1,4 @@
-import type { DraftlyNode } from "draftly/editor";
+import type { MarkoraNode } from "markora/editor";
 
 export type PlaygroundMode = "live" | "view" | "code" | "output";
 export type SaveStatus = "idle" | "saving" | "saved";
@@ -55,4 +55,4 @@ export interface ContentMetrics {
   chars: number;
 }
 
-export type NodesChangeHandler = (nodes: DraftlyNode[]) => void;
+export type NodesChangeHandler = (nodes: MarkoraNode[]) => void;

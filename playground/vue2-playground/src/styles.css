@@ -114,6 +114,40 @@ button {
   white-space: nowrap;
 }
 
+/* Inline (lucide-style) header icons + theme-aware brand logo */
+.icon-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.icon-svg svg {
+  width: 20px;
+  height: 20px;
+}
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+}
+
+.brand-logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .save-status {
   color: var(--muted);
   font-size: 13px;
@@ -423,12 +457,18 @@ button {
   background: var(--accent);
 }
 
-.document-icon {
+.document-icon,
+.doc-file-icon {
   flex: 0 0 auto;
-  width: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 11px;
+}
+
+.doc-file-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .document-title {
@@ -439,19 +479,6 @@ button {
   font-size: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.document-actions {
-  gap: 4px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms ease;
-}
-
-.document-item:hover .document-actions,
-.document-item:focus-within .document-actions {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .row-icon-button {
@@ -797,7 +824,7 @@ button {
   scrollbar-gutter: stable;
 }
 
-.preview-with-toc .editor-host-with-toc .cm-draftly .cm-content {
+.preview-with-toc .editor-host-with-toc .cm-markora .cm-content {
   max-width: var(--vue2-content-max-width, 48rem);
 }
 
@@ -858,44 +885,44 @@ button {
   margin: 0;
 }
 
-.vue2-preview .cm-draftly-paragraph {
+.vue2-preview .cm-markora-paragraph {
   padding-top: 0.25em !important;
   padding-bottom: 0.25em !important;
 }
 
-.vue2-preview .cm-draftly-line-h1 {
+.vue2-preview .cm-markora-line-h1 {
   padding-top: 1.25em !important;
   padding-bottom: 0.4em !important;
 }
 
-.vue2-preview .cm-draftly-line-h2 {
+.vue2-preview .cm-markora-line-h2 {
   padding-top: 1em !important;
   padding-bottom: 0.35em !important;
 }
 
-.vue2-preview .cm-draftly-line-h3,
-.vue2-preview .cm-draftly-line-h4,
-.vue2-preview .cm-draftly-line-h5,
-.vue2-preview .cm-draftly-line-h6 {
+.vue2-preview .cm-markora-line-h3,
+.vue2-preview .cm-markora-line-h4,
+.vue2-preview .cm-markora-line-h5,
+.vue2-preview .cm-markora-line-h6 {
   padding-top: 0.85em !important;
   padding-bottom: 0.3em !important;
 }
 
-.vue2-preview .cm-draftly-code-container {
+.vue2-preview .cm-markora-code-container {
   margin: 0.75rem 0 !important;
   border-radius: var(--radius) !important;
 }
 
-.vue2-preview .cm-draftly-code-block {
+.vue2-preview .cm-markora-code-block {
   border-radius: var(--radius) !important;
 }
 
-.vue2-preview .cm-draftly-code-container .cm-draftly-code-block {
+.vue2-preview .cm-markora-code-container .cm-markora-code-block {
   margin: 0 !important;
   border-radius: 0 !important;
 }
 
-.vue2-preview .cm-draftly-quote-line {
+.vue2-preview .cm-markora-quote-line {
   margin: 0.5rem 0 !important;
 }
 

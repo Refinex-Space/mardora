@@ -1,45 +1,52 @@
+---
+owner: refinex
+updated: 2026-06-16
+status: active
+referenced_by: docs/README.md#superpowers-plans
+---
+
 # Selection Toolbar Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build Draftly's core selected-text toolbar with inline formatting, link editing, color/highlight swatches, list conversion, and Vue2 playground validation.
+**Goal:** Build Markora's core selected-text toolbar with inline formatting, link editing, color/highlight swatches, list conversion, and Vue2 playground validation.
 
-**Architecture:** Add a core `editor/selection-toolbar` module beside the existing `slash` module. Keep document transformations in pure functions, keep floating placement in pure functions, and keep DOM concerns inside the toolbar menu/view plugin. Register the toolbar through `draftly()` so every framework integration gets the same behavior.
+**Architecture:** Add a core `editor/selection-toolbar` module beside the existing `slash` module. Keep document transformations in pure functions, keep floating placement in pure functions, and keep DOM concerns inside the toolbar menu/view plugin. Register the toolbar through `markora()` so every framework integration gets the same behavior.
 
-**Tech Stack:** TypeScript, CodeMirror 6 `ViewPlugin`, Bun test, existing Draftly SVG icon registry, existing Draftly plugin and theme patterns.
+**Tech Stack:** TypeScript, CodeMirror 6 `ViewPlugin`, Bun test, existing Markora SVG icon registry, existing Markora plugin and theme patterns.
 
 ---
 
 ## File Structure
 
-- Create `packages/draftly/src/editor/selection-toolbar/types.ts`
+- Create `packages/markora/src/editor/selection-toolbar/types.ts`
   - Shared command, range, palette, panel, layout, and runtime config types.
-- Create `packages/draftly/src/editor/selection-toolbar/commands.ts`
+- Create `packages/markora/src/editor/selection-toolbar/commands.ts`
   - Pure document transformation helpers for inline markers, HTML wrappers, links, and list markers.
-- Create `packages/draftly/src/editor/selection-toolbar/position.ts`
+- Create `packages/markora/src/editor/selection-toolbar/position.ts`
   - Pure layout helper for toolbar and child panels.
-- Create `packages/draftly/src/editor/selection-toolbar/menu.ts`
+- Create `packages/markora/src/editor/selection-toolbar/menu.ts`
   - DOM renderer for the toolbar, color panel, and link panel.
-- Create `packages/draftly/src/editor/selection-toolbar/theme.ts`
+- Create `packages/markora/src/editor/selection-toolbar/theme.ts`
   - Base theme for black/white compact toolbar UI.
-- Create `packages/draftly/src/editor/selection-toolbar/extension.ts`
+- Create `packages/markora/src/editor/selection-toolbar/extension.ts`
   - CodeMirror `ViewPlugin` that tracks selections, renders the menu, executes commands, and handles closing.
-- Create `packages/draftly/src/editor/selection-toolbar/index.ts`
+- Create `packages/markora/src/editor/selection-toolbar/index.ts`
   - Public exports for the toolbar module.
-- Modify `packages/draftly/src/editor/icons/index.ts`
+- Modify `packages/markora/src/editor/icons/index.ts`
   - Add toolbar icons: `bold`, `italic`, `strikethrough`, `underline`, `code`, `highlighter`, `baseline`, `copy`, `external-link`, `trash-2`.
-- Modify `packages/draftly/src/editor/draftly.ts`
-  - Add `selectionToolbar?: DraftlySelectionToolbarConfig` to `DraftlyConfig`.
+- Modify `packages/markora/src/editor/markora.ts`
+  - Add `selectionToolbar?: MarkoraSelectionToolbarConfig` to `MarkoraConfig`.
   - Register `selectionToolbar()` by default.
-- Modify `packages/draftly/src/editor/index.ts`
+- Modify `packages/markora/src/editor/index.ts`
   - Export `./selection-toolbar`.
-- Modify `apps/vue2-playground/src/shims-draftly.d.ts`
+- Modify `playground/vue2-playground/src/shims-markora.d.ts`
   - Add the optional `selectionToolbar` config shape for the Vue2 TypeScript shim.
-- Create `packages/draftly/tests/selection-toolbar-commands.spec.ts`
+- Create `packages/markora/tests/selection-toolbar-commands.spec.ts`
   - Bun tests for command transformations.
-- Create `packages/draftly/tests/selection-toolbar-position.spec.ts`
+- Create `packages/markora/tests/selection-toolbar-position.spec.ts`
   - Bun tests for toolbar and panel placement.
-- Modify `packages/draftly/tests/slash-insertions.spec.ts`
+- Modify `packages/markora/tests/slash-insertions.spec.ts`
   - Extend icon registry test to cover new toolbar icon identifiers.
 
 ---
@@ -47,12 +54,12 @@
 ### Task 1: Add Toolbar Icon Names
 
 **Files:**
-- Modify: `packages/draftly/src/editor/icons/index.ts`
-- Test: `packages/draftly/tests/slash-insertions.spec.ts`
+- Modify: `packages/markora/src/editor/icons/index.ts`
+- Test: `packages/markora/tests/slash-insertions.spec.ts`
 
 - [ ] **Step 1: Write the failing icon coverage test**
 
-Append this test to the existing `describe("defaultSlashCommands", ...)` block or add a new `describe("draftly icons", ...)` block in `packages/draftly/tests/slash-insertions.spec.ts`:
+Append this test to the existing `describe("defaultSlashCommands", ...)` block or add a new `describe("markora icons", ...)` block in `packages/markora/tests/slash-insertions.spec.ts`:
 
 ```ts
 it("contains built-in icons required by the selection toolbar", () => {
@@ -71,7 +78,7 @@ it("contains built-in icons required by the selection toolbar", () => {
     "copy",
     "external-link",
     "trash-2",
-  ].every((icon) => hasDraftlyIcon(icon))).toBe(true);
+  ].every((icon) => hasMarkoraIcon(icon))).toBe(true);
 });
 ```
 
@@ -80,20 +87,20 @@ it("contains built-in icons required by the selection toolbar", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/slash-insertions.spec.ts
 ```
 
-Expected: FAIL because `hasDraftlyIcon("bold")` and the other new names return false.
+Expected: FAIL because `hasMarkoraIcon("bold")` and the other new names return false.
 
 - [ ] **Step 3: Add icon names and SVG definitions**
 
-In `packages/draftly/src/editor/icons/index.ts`, extend `IconElementName`:
+In `packages/markora/src/editor/icons/index.ts`, extend `IconElementName`:
 
 ```ts
 type IconElementName = "circle" | "line" | "path" | "rect";
 ```
 
-Extend `DraftlyIconName` with:
+Extend `MarkoraIconName` with:
 
 ```ts
   | "baseline"
@@ -164,7 +171,7 @@ Add these entries to `iconDefinitions`:
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/slash-insertions.spec.ts
 ```
 
 Expected: PASS.
@@ -174,7 +181,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/icons/index.ts packages/draftly/tests/slash-insertions.spec.ts
+git add packages/markora/src/editor/icons/index.ts packages/markora/tests/slash-insertions.spec.ts
 git commit -m "feat(editor): 补充选区工具条内置图标"
 ```
 
@@ -183,15 +190,15 @@ git commit -m "feat(editor): 补充选区工具条内置图标"
 ### Task 2: Implement Positioning Pure Function
 
 **Files:**
-- Create: `packages/draftly/src/editor/selection-toolbar/types.ts`
-- Create: `packages/draftly/src/editor/selection-toolbar/position.ts`
-- Create: `packages/draftly/src/editor/selection-toolbar/index.ts`
-- Modify: `packages/draftly/src/editor/index.ts`
-- Test: `packages/draftly/tests/selection-toolbar-position.spec.ts`
+- Create: `packages/markora/src/editor/selection-toolbar/types.ts`
+- Create: `packages/markora/src/editor/selection-toolbar/position.ts`
+- Create: `packages/markora/src/editor/selection-toolbar/index.ts`
+- Modify: `packages/markora/src/editor/index.ts`
+- Test: `packages/markora/tests/selection-toolbar-position.spec.ts`
 
 - [ ] **Step 1: Write the failing positioning tests**
 
-Create `packages/draftly/tests/selection-toolbar-position.spec.ts`:
+Create `packages/markora/tests/selection-toolbar-position.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -258,19 +265,19 @@ describe("computeSelectionToolbarLayout", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/selection-toolbar-position.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-position.spec.ts
 ```
 
 Expected: FAIL because `../src/editor/selection-toolbar` does not exist.
 
 - [ ] **Step 3: Add shared types**
 
-Create `packages/draftly/src/editor/selection-toolbar/types.ts`:
+Create `packages/markora/src/editor/selection-toolbar/types.ts`:
 
 ```ts
-import type { DraftlyIconName } from "../icons";
+import type { MarkoraIconName } from "../icons";
 
-export type DraftlySelectionToolbarConfig = {
+export type MarkoraSelectionToolbarConfig = {
   enabled?: boolean;
 };
 
@@ -322,14 +329,14 @@ export type SelectionToolbarActionId =
 export type SelectionToolbarButton = {
   id: SelectionToolbarActionId;
   label: string;
-  icon: DraftlyIconName;
+  icon: MarkoraIconName;
   active?: boolean;
 };
 ```
 
 - [ ] **Step 4: Implement the positioning helper**
 
-Create `packages/draftly/src/editor/selection-toolbar/position.ts`:
+Create `packages/markora/src/editor/selection-toolbar/position.ts`:
 
 ```ts
 import type { SelectionToolbarLayout, SelectionToolbarLayoutInput, SelectionToolbarPlacement } from "./types";
@@ -370,14 +377,14 @@ export function computeSelectionToolbarLayout(input: SelectionToolbarLayoutInput
 
 - [ ] **Step 5: Export the module**
 
-Create `packages/draftly/src/editor/selection-toolbar/index.ts`:
+Create `packages/markora/src/editor/selection-toolbar/index.ts`:
 
 ```ts
 export * from "./types";
 export * from "./position";
 ```
 
-Modify `packages/draftly/src/editor/index.ts`:
+Modify `packages/markora/src/editor/index.ts`:
 
 ```ts
 export * from "./selection-toolbar";
@@ -388,7 +395,7 @@ export * from "./selection-toolbar";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/selection-toolbar-position.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-position.spec.ts
 ```
 
 Expected: PASS.
@@ -398,7 +405,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/selection-toolbar packages/draftly/src/editor/index.ts packages/draftly/tests/selection-toolbar-position.spec.ts
+git add packages/markora/src/editor/selection-toolbar packages/markora/src/editor/index.ts packages/markora/tests/selection-toolbar-position.spec.ts
 git commit -m "feat(editor): 添加选区工具条定位计算"
 ```
 
@@ -407,14 +414,14 @@ git commit -m "feat(editor): 添加选区工具条定位计算"
 ### Task 3: Implement Document Transformation Commands
 
 **Files:**
-- Modify: `packages/draftly/src/editor/selection-toolbar/types.ts`
-- Create: `packages/draftly/src/editor/selection-toolbar/commands.ts`
-- Modify: `packages/draftly/src/editor/selection-toolbar/index.ts`
-- Test: `packages/draftly/tests/selection-toolbar-commands.spec.ts`
+- Modify: `packages/markora/src/editor/selection-toolbar/types.ts`
+- Create: `packages/markora/src/editor/selection-toolbar/commands.ts`
+- Modify: `packages/markora/src/editor/selection-toolbar/index.ts`
+- Test: `packages/markora/tests/selection-toolbar-commands.spec.ts`
 
 - [ ] **Step 1: Write failing command tests**
 
-Create `packages/draftly/tests/selection-toolbar-commands.spec.ts`:
+Create `packages/markora/tests/selection-toolbar-commands.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -467,31 +474,31 @@ describe("selection toolbar inline commands", () => {
 
 describe("selection toolbar link commands", () => {
   it("derives link defaults from a selected URL", () => {
-    expect(parseSelectedLink("https://draftly.dev")).toEqual({
+    expect(parseSelectedLink("https://markora.dev")).toEqual({
       kind: "url",
       title: "",
-      url: "https://draftly.dev",
+      url: "https://markora.dev",
     });
   });
 
   it("parses an existing markdown link", () => {
-    expect(parseSelectedLink("[Draftly](https://draftly.dev)")).toEqual({
+    expect(parseSelectedLink("[Markora](https://markora.dev)")).toEqual({
       kind: "markdown-link",
-      title: "Draftly",
-      url: "https://draftly.dev",
+      title: "Markora",
+      url: "https://markora.dev",
     });
   });
 
   it("writes a markdown link", () => {
-    expect(buildLinkChange({ from: 0, to: 7, title: "Draftly", url: "https://draftly.dev" })).toEqual({
-      changes: { from: 0, to: 7, insert: "[Draftly](https://draftly.dev)" },
+    expect(buildLinkChange({ from: 0, to: 7, title: "Markora", url: "https://markora.dev" })).toEqual({
+      changes: { from: 0, to: 7, insert: "[Markora](https://markora.dev)" },
       selection: { anchor: 0, head: 28 },
     });
   });
 
   it("deletes a markdown link back to plain text", () => {
-    expect(buildLinkChange({ from: 0, to: 28, title: "Draftly", url: "", remove: true })).toEqual({
-      changes: { from: 0, to: 28, insert: "Draftly" },
+    expect(buildLinkChange({ from: 0, to: 28, title: "Markora", url: "", remove: true })).toEqual({
+      changes: { from: 0, to: 28, insert: "Markora" },
       selection: { anchor: 0, head: 7 },
     });
   });
@@ -532,14 +539,14 @@ describe("selection toolbar list commands", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/selection-toolbar-commands.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts
 ```
 
 Expected: FAIL because command exports are missing.
 
 - [ ] **Step 3: Add command types**
 
-Append to `packages/draftly/src/editor/selection-toolbar/types.ts`:
+Append to `packages/markora/src/editor/selection-toolbar/types.ts`:
 
 ```ts
 export type TextChange = {
@@ -588,7 +595,7 @@ export type SelectionToolbarListKind = "ordered" | "unordered" | "task";
 
 - [ ] **Step 4: Implement command helpers**
 
-Create `packages/draftly/src/editor/selection-toolbar/commands.ts`:
+Create `packages/markora/src/editor/selection-toolbar/commands.ts`:
 
 ```ts
 import type {
@@ -741,7 +748,7 @@ export function stripSpanStyle(text: string, property: "color" | "background-col
 
 - [ ] **Step 5: Export command helpers**
 
-Modify `packages/draftly/src/editor/selection-toolbar/index.ts`:
+Modify `packages/markora/src/editor/selection-toolbar/index.ts`:
 
 ```ts
 export * from "./types";
@@ -754,7 +761,7 @@ export * from "./commands";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/selection-toolbar-commands.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts
 ```
 
 Expected: PASS.
@@ -764,7 +771,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/selection-toolbar packages/draftly/tests/selection-toolbar-commands.spec.ts
+git add packages/markora/src/editor/selection-toolbar packages/markora/tests/selection-toolbar-commands.spec.ts
 git commit -m "feat(editor): 添加选区工具条文本转换命令"
 ```
 
@@ -773,14 +780,14 @@ git commit -m "feat(editor): 添加选区工具条文本转换命令"
 ### Task 4: Render Toolbar Menu, Link Panel, and Color Panel
 
 **Files:**
-- Modify: `packages/draftly/src/editor/selection-toolbar/types.ts`
-- Create: `packages/draftly/src/editor/selection-toolbar/menu.ts`
-- Create: `packages/draftly/src/editor/selection-toolbar/theme.ts`
-- Modify: `packages/draftly/src/editor/selection-toolbar/index.ts`
+- Modify: `packages/markora/src/editor/selection-toolbar/types.ts`
+- Create: `packages/markora/src/editor/selection-toolbar/menu.ts`
+- Create: `packages/markora/src/editor/selection-toolbar/theme.ts`
+- Modify: `packages/markora/src/editor/selection-toolbar/index.ts`
 
 - [ ] **Step 1: Add menu state and callback types**
 
-Append to `packages/draftly/src/editor/selection-toolbar/types.ts`:
+Append to `packages/markora/src/editor/selection-toolbar/types.ts`:
 
 ```ts
 export type SelectionToolbarPanel = "toolbar" | "link" | "color" | "highlight";
@@ -822,10 +829,10 @@ export type SelectionToolbarMenuCallbacks = {
 
 - [ ] **Step 2: Implement menu renderer**
 
-Create `packages/draftly/src/editor/selection-toolbar/menu.ts`:
+Create `packages/markora/src/editor/selection-toolbar/menu.ts`:
 
 ```ts
-import { createDraftlyIcon } from "../icons";
+import { createMarkoraIcon } from "../icons";
 import type {
   SelectionToolbarButton,
   SelectionToolbarMenuCallbacks,
@@ -837,17 +844,17 @@ function iconButton(button: SelectionToolbarButton, callbacks: SelectionToolbarM
   const element = document.createElement("button");
   element.type = "button";
   element.className = button.active
-    ? "cm-draftly-selection-toolbar-button cm-draftly-selection-toolbar-button-active"
-    : "cm-draftly-selection-toolbar-button";
+    ? "cm-markora-selection-toolbar-button cm-markora-selection-toolbar-button-active"
+    : "cm-markora-selection-toolbar-button";
   element.setAttribute("aria-label", button.label);
   element.setAttribute("aria-pressed", String(!!button.active));
-  element.dataset.draftlySelectionAction = button.id;
+  element.dataset.markoraSelectionAction = button.id;
   element.addEventListener("mousedown", (event) => {
     event.preventDefault();
     callbacks.onAction(button.id);
   });
 
-  const icon = createDraftlyIcon(button.icon);
+  const icon = createMarkoraIcon(button.icon);
   if (icon) {
     element.appendChild(icon);
   } else {
@@ -858,7 +865,7 @@ function iconButton(button: SelectionToolbarButton, callbacks: SelectionToolbarM
 
 function divider(): HTMLSpanElement {
   const element = document.createElement("span");
-  element.className = "cm-draftly-selection-toolbar-divider";
+  element.className = "cm-markora-selection-toolbar-divider";
   element.setAttribute("aria-hidden", "true");
   return element;
 }
@@ -886,8 +893,8 @@ function paletteButton(
   element.className = className;
   element.setAttribute("aria-label", item.label);
   element.title = item.label;
-  element.dataset.draftlySwatch = item.id;
-  if (item.value) element.style.setProperty("--draftly-swatch-color", item.value);
+  element.dataset.markoraSwatch = item.id;
+  if (item.value) element.style.setProperty("--markora-swatch-color", item.value);
   element.addEventListener("mousedown", (event) => {
     event.preventDefault();
     callback(item.value);
@@ -897,17 +904,17 @@ function paletteButton(
 
 function appendPalette(root: HTMLElement, title: string, items: SelectionToolbarPaletteItem[], callback: (value: string | null) => void): void {
   const group = document.createElement("div");
-  group.className = "cm-draftly-selection-toolbar-palette-group";
+  group.className = "cm-markora-selection-toolbar-palette-group";
 
   const label = document.createElement("div");
-  label.className = "cm-draftly-selection-toolbar-palette-label";
+  label.className = "cm-markora-selection-toolbar-palette-label";
   label.textContent = title;
   group.appendChild(label);
 
   const grid = document.createElement("div");
-  grid.className = "cm-draftly-selection-toolbar-swatch-grid";
+  grid.className = "cm-markora-selection-toolbar-swatch-grid";
   for (const item of items) {
-    grid.appendChild(paletteButton(item, "cm-draftly-selection-toolbar-swatch", callback));
+    grid.appendChild(paletteButton(item, "cm-markora-selection-toolbar-swatch", callback));
   }
   group.appendChild(grid);
   root.appendChild(group);
@@ -915,7 +922,7 @@ function appendPalette(root: HTMLElement, title: string, items: SelectionToolbar
 
 function appendLinkPanel(root: HTMLElement, state: SelectionToolbarMenuState, callbacks: SelectionToolbarMenuCallbacks): void {
   const title = document.createElement("input");
-  title.className = "cm-draftly-selection-toolbar-link-input";
+  title.className = "cm-markora-selection-toolbar-link-input";
   title.setAttribute("aria-label", "Link title");
   title.value = state.link.title;
   title.addEventListener("input", () => callbacks.onLinkInput("title", title.value));
@@ -925,7 +932,7 @@ function appendLinkPanel(root: HTMLElement, state: SelectionToolbarMenuState, ca
   });
 
   const url = document.createElement("input");
-  url.className = "cm-draftly-selection-toolbar-link-input";
+  url.className = "cm-markora-selection-toolbar-link-input";
   url.setAttribute("aria-label", "Link URL");
   url.value = state.link.url;
   url.addEventListener("input", () => callbacks.onLinkInput("url", url.value));
@@ -935,11 +942,11 @@ function appendLinkPanel(root: HTMLElement, state: SelectionToolbarMenuState, ca
   });
 
   const actions = document.createElement("div");
-  actions.className = "cm-draftly-selection-toolbar-link-actions";
+  actions.className = "cm-markora-selection-toolbar-link-actions";
 
   const follow = document.createElement("button");
   follow.type = "button";
-  follow.className = "cm-draftly-selection-toolbar-follow";
+  follow.className = "cm-markora-selection-toolbar-follow";
   follow.textContent = "Follow Link  ⌘ + click";
   follow.addEventListener("mousedown", (event) => {
     event.preventDefault();
@@ -955,9 +962,9 @@ function appendLinkPanel(root: HTMLElement, state: SelectionToolbarMenuState, ca
     if (label === "Remove link" && !state.link.canRemove) continue;
     const button = document.createElement("button");
     button.type = "button";
-    button.className = label === "Remove link" ? "cm-draftly-selection-toolbar-link-button cm-draftly-selection-toolbar-link-button-danger" : "cm-draftly-selection-toolbar-link-button";
+    button.className = label === "Remove link" ? "cm-markora-selection-toolbar-link-button cm-markora-selection-toolbar-link-button-danger" : "cm-markora-selection-toolbar-link-button";
     button.setAttribute("aria-label", label);
-    const svg = createDraftlyIcon(icon);
+    const svg = createMarkoraIcon(icon);
     if (svg) button.appendChild(svg);
     button.addEventListener("mousedown", (event) => {
       event.preventDefault();
@@ -969,7 +976,7 @@ function appendLinkPanel(root: HTMLElement, state: SelectionToolbarMenuState, ca
   root.append(title, url);
   if (state.link.error) {
     const error = document.createElement("div");
-    error.className = "cm-draftly-selection-toolbar-error";
+    error.className = "cm-markora-selection-toolbar-error";
     error.textContent = state.link.error;
     root.appendChild(error);
   }
@@ -984,8 +991,8 @@ export function createSelectionToolbarElement(
   const root = document.createElement("div");
   root.className =
     state.panel === "toolbar"
-      ? "cm-draftly-selection-toolbar"
-      : "cm-draftly-selection-toolbar cm-draftly-selection-toolbar-panel";
+      ? "cm-markora-selection-toolbar"
+      : "cm-markora-selection-toolbar cm-markora-selection-toolbar-panel";
   root.setAttribute("role", "toolbar");
   root.addEventListener("mousedown", (event) => event.preventDefault());
 
@@ -1005,13 +1012,13 @@ export function createSelectionToolbarElement(
 
 - [ ] **Step 3: Add toolbar theme**
 
-Create `packages/draftly/src/editor/selection-toolbar/theme.ts`:
+Create `packages/markora/src/editor/selection-toolbar/theme.ts`:
 
 ```ts
 import { EditorView } from "@codemirror/view";
 
 export const selectionToolbarTheme = EditorView.baseTheme({
-  ".cm-draftly-selection-toolbar": {
+  ".cm-markora-selection-toolbar": {
     position: "fixed",
     zIndex: "1001",
     display: "inline-flex",
@@ -1019,14 +1026,14 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     gap: "2px",
     border: "1px solid rgba(24, 24, 27, 0.14)",
     borderRadius: "10px",
-    background: "var(--draftly-selection-toolbar-bg, #ffffff)",
+    background: "var(--markora-selection-toolbar-bg, #ffffff)",
     boxShadow: "0 14px 38px rgba(15, 23, 42, 0.16)",
     padding: "4px",
-    color: "var(--draftly-selection-toolbar-fg, #18181b)",
+    color: "var(--markora-selection-toolbar-fg, #18181b)",
     fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
     userSelect: "none",
   },
-  ".cm-draftly-selection-toolbar-panel": {
+  ".cm-markora-selection-toolbar-panel": {
     display: "flex",
     flexDirection: "column",
     alignItems: "stretch",
@@ -1034,7 +1041,7 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     gap: "6px",
     padding: "8px",
   },
-  ".cm-draftly-selection-toolbar-button, .cm-draftly-selection-toolbar-link-button": {
+  ".cm-markora-selection-toolbar-button, .cm-markora-selection-toolbar-link-button": {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1047,88 +1054,88 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     cursor: "default",
     padding: "0",
   },
-  ".cm-draftly-selection-toolbar-button:hover, .cm-draftly-selection-toolbar-button-active": {
-    background: "var(--draftly-selection-toolbar-active, #f4f4f5)",
+  ".cm-markora-selection-toolbar-button:hover, .cm-markora-selection-toolbar-button-active": {
+    background: "var(--markora-selection-toolbar-active, #f4f4f5)",
   },
-  ".cm-draftly-selection-toolbar-button svg, .cm-draftly-selection-toolbar-link-button svg": {
+  ".cm-markora-selection-toolbar-button svg, .cm-markora-selection-toolbar-link-button svg": {
     width: "16px",
     height: "16px",
     strokeWidth: "2",
   },
-  ".cm-draftly-selection-toolbar-divider": {
+  ".cm-markora-selection-toolbar-divider": {
     width: "1px",
     height: "22px",
     margin: "0 4px",
-    background: "var(--draftly-selection-toolbar-border, #e4e4e7)",
+    background: "var(--markora-selection-toolbar-border, #e4e4e7)",
   },
-  ".cm-draftly-selection-toolbar-link-input": {
+  ".cm-markora-selection-toolbar-link-input": {
     boxSizing: "border-box",
     width: "100%",
     border: "0",
     borderRadius: "7px",
-    background: "var(--draftly-selection-toolbar-input, #f4f4f5)",
+    background: "var(--markora-selection-toolbar-input, #f4f4f5)",
     color: "inherit",
     font: "inherit",
     fontSize: "14px",
     outline: "none",
     padding: "8px 10px",
   },
-  ".cm-draftly-selection-toolbar-link-actions": {
+  ".cm-markora-selection-toolbar-link-actions": {
     display: "flex",
     alignItems: "center",
     gap: "6px",
   },
-  ".cm-draftly-selection-toolbar-follow": {
+  ".cm-markora-selection-toolbar-follow": {
     marginRight: "auto",
     border: "0",
     background: "transparent",
-    color: "var(--draftly-selection-toolbar-link, #2563eb)",
+    color: "var(--markora-selection-toolbar-link, #2563eb)",
     cursor: "default",
     fontSize: "14px",
     padding: "0 4px",
   },
-  ".cm-draftly-selection-toolbar-link-button-danger": {
-    color: "var(--draftly-selection-toolbar-danger, #dc2626)",
+  ".cm-markora-selection-toolbar-link-button-danger": {
+    color: "var(--markora-selection-toolbar-danger, #dc2626)",
   },
-  ".cm-draftly-selection-toolbar-error": {
-    color: "var(--draftly-selection-toolbar-danger, #dc2626)",
+  ".cm-markora-selection-toolbar-error": {
+    color: "var(--markora-selection-toolbar-danger, #dc2626)",
     fontSize: "12px",
     padding: "0 2px",
   },
-  ".cm-draftly-selection-toolbar-palette-label": {
-    color: "var(--draftly-selection-toolbar-muted, #71717a)",
+  ".cm-markora-selection-toolbar-palette-label": {
+    color: "var(--markora-selection-toolbar-muted, #71717a)",
     fontSize: "12px",
     padding: "0 2px 4px",
   },
-  ".cm-draftly-selection-toolbar-swatch-grid": {
+  ".cm-markora-selection-toolbar-swatch-grid": {
     display: "grid",
     gridTemplateColumns: "repeat(8, 24px)",
     gap: "6px",
   },
-  ".cm-draftly-selection-toolbar-swatch": {
+  ".cm-markora-selection-toolbar-swatch": {
     width: "24px",
     height: "24px",
-    border: "1px solid var(--draftly-selection-toolbar-border, #e4e4e7)",
+    border: "1px solid var(--markora-selection-toolbar-border, #e4e4e7)",
     borderRadius: "6px",
-    background: "var(--draftly-swatch-color, transparent)",
+    background: "var(--markora-swatch-color, transparent)",
     padding: "0",
   },
-  "&dark .cm-draftly-selection-toolbar": {
-    "--draftly-selection-toolbar-bg": "#18181b",
-    "--draftly-selection-toolbar-fg": "#f4f4f5",
-    "--draftly-selection-toolbar-active": "#27272a",
-    "--draftly-selection-toolbar-border": "#3f3f46",
-    "--draftly-selection-toolbar-input": "#27272a",
-    "--draftly-selection-toolbar-muted": "#a1a1aa",
-    "--draftly-selection-toolbar-link": "#60a5fa",
-    "--draftly-selection-toolbar-danger": "#f87171",
+  "&dark .cm-markora-selection-toolbar": {
+    "--markora-selection-toolbar-bg": "#18181b",
+    "--markora-selection-toolbar-fg": "#f4f4f5",
+    "--markora-selection-toolbar-active": "#27272a",
+    "--markora-selection-toolbar-border": "#3f3f46",
+    "--markora-selection-toolbar-input": "#27272a",
+    "--markora-selection-toolbar-muted": "#a1a1aa",
+    "--markora-selection-toolbar-link": "#60a5fa",
+    "--markora-selection-toolbar-danger": "#f87171",
   },
 });
 ```
 
 - [ ] **Step 4: Export menu and theme**
 
-Modify `packages/draftly/src/editor/selection-toolbar/index.ts`:
+Modify `packages/markora/src/editor/selection-toolbar/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1143,7 +1150,7 @@ export * from "./theme";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
 ```
 
 Expected: PASS.
@@ -1153,23 +1160,23 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/selection-toolbar
+git add packages/markora/src/editor/selection-toolbar
 git commit -m "feat(editor): 渲染选区工具条界面"
 ```
 
 ---
 
-### Task 5: Wire Toolbar ViewPlugin Into Draftly
+### Task 5: Wire Toolbar ViewPlugin Into Markora
 
 **Files:**
-- Create: `packages/draftly/src/editor/selection-toolbar/extension.ts`
-- Modify: `packages/draftly/src/editor/selection-toolbar/index.ts`
-- Modify: `packages/draftly/src/editor/draftly.ts`
-- Modify: `apps/vue2-playground/src/shims-draftly.d.ts`
+- Create: `packages/markora/src/editor/selection-toolbar/extension.ts`
+- Modify: `packages/markora/src/editor/selection-toolbar/index.ts`
+- Modify: `packages/markora/src/editor/markora.ts`
+- Modify: `playground/vue2-playground/src/shims-markora.d.ts`
 
 - [ ] **Step 1: Add extension exports**
 
-Modify `packages/draftly/src/editor/selection-toolbar/index.ts`:
+Modify `packages/markora/src/editor/selection-toolbar/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1182,7 +1189,7 @@ export * from "./extension";
 
 - [ ] **Step 2: Implement the ViewPlugin extension**
 
-Create `packages/draftly/src/editor/selection-toolbar/extension.ts`:
+Create `packages/markora/src/editor/selection-toolbar/extension.ts`:
 
 ```ts
 import { Extension, Prec } from "@codemirror/state";
@@ -1197,7 +1204,7 @@ import { createSelectionToolbarElement } from "./menu";
 import { computeSelectionToolbarLayout } from "./position";
 import { selectionToolbarTheme } from "./theme";
 import type {
-  DraftlySelectionToolbarConfig,
+  MarkoraSelectionToolbarConfig,
   SelectionToolbarActionId,
   SelectionToolbarButton,
   SelectionToolbarLinkState,
@@ -1283,7 +1290,7 @@ class SelectionToolbarViewPlugin {
 
   private updateState(): void {
     const selection = this.view.state.selection.main;
-    if (selection.empty || !this.view.hasFocus || this.view.dom.classList.contains("cm-draftly-slash-open")) {
+    if (selection.empty || !this.view.hasFocus || this.view.dom.classList.contains("cm-markora-slash-open")) {
       this.close();
       return;
     }
@@ -1364,7 +1371,7 @@ class SelectionToolbarViewPlugin {
         this.menu.style.left = `${layout.left}px`;
         this.menu.style.top = `${layout.top}px`;
         this.menu.style.maxHeight = `${layout.maxHeight}px`;
-        this.menu.dataset.draftlySelectionPlacement = layout.placement;
+        this.menu.dataset.markoraSelectionPlacement = layout.placement;
         this.view.dom.appendChild(this.menu);
       },
     });
@@ -1456,7 +1463,7 @@ class SelectionToolbarViewPlugin {
   }
 }
 
-export function selectionToolbar(config: DraftlySelectionToolbarConfig = {}): Extension[] {
+export function selectionToolbar(config: MarkoraSelectionToolbarConfig = {}): Extension[] {
   if (config.enabled === false) return [];
   const plugin = ViewPlugin.define((view) => new SelectionToolbarViewPlugin(view));
   return [
@@ -1476,20 +1483,20 @@ export function selectionToolbar(config: DraftlySelectionToolbarConfig = {}): Ex
 }
 ```
 
-- [ ] **Step 3: Register the toolbar in `draftly()`**
+- [ ] **Step 3: Register the toolbar in `markora()`**
 
-Modify `packages/draftly/src/editor/draftly.ts` imports:
+Modify `packages/markora/src/editor/markora.ts` imports:
 
 ```ts
-import type { DraftlySelectionToolbarConfig } from "./selection-toolbar";
+import type { MarkoraSelectionToolbarConfig } from "./selection-toolbar";
 import { selectionToolbar } from "./selection-toolbar";
 ```
 
-Add to `DraftlyConfig`:
+Add to `MarkoraConfig`:
 
 ```ts
   /** Selected text floating toolbar configuration */
-  selectionToolbar?: DraftlySelectionToolbarConfig;
+  selectionToolbar?: MarkoraSelectionToolbarConfig;
 ```
 
 Add to config destructuring:
@@ -1506,7 +1513,7 @@ Add to composed extensions after `attachments(configAttachments)`:
 
 - [ ] **Step 4: Update Vue2 shim**
 
-Modify the local `DraftlyConfig` declaration in `apps/vue2-playground/src/shims-draftly.d.ts` to include:
+Modify the local `MarkoraConfig` declaration in `playground/vue2-playground/src/shims-markora.d.ts` to include:
 
 ```ts
     selectionToolbar?: {
@@ -1519,8 +1526,8 @@ Modify the local `DraftlyConfig` declaration in `apps/vue2-playground/src/shims-
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/selection-toolbar-commands.spec.ts tests/selection-toolbar-position.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts tests/selection-toolbar-position.spec.ts
 ```
 
 Expected: both commands PASS.
@@ -1530,7 +1537,7 @@ Expected: both commands PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/selection-toolbar packages/draftly/src/editor/draftly.ts apps/vue2-playground/src/shims-draftly.d.ts
+git add packages/markora/src/editor/selection-toolbar packages/markora/src/editor/markora.ts playground/vue2-playground/src/shims-markora.d.ts
 git commit -m "feat(editor): 接入选中文本工具条扩展"
 ```
 
@@ -1539,14 +1546,14 @@ git commit -m "feat(editor): 接入选中文本工具条扩展"
 ### Task 6: Harden UX Details and State Guards
 
 **Files:**
-- Modify: `packages/draftly/src/editor/selection-toolbar/commands.ts`
-- Modify: `packages/draftly/src/editor/selection-toolbar/extension.ts`
-- Modify: `packages/draftly/src/editor/selection-toolbar/theme.ts`
-- Test: `packages/draftly/tests/selection-toolbar-commands.spec.ts`
+- Modify: `packages/markora/src/editor/selection-toolbar/commands.ts`
+- Modify: `packages/markora/src/editor/selection-toolbar/extension.ts`
+- Modify: `packages/markora/src/editor/selection-toolbar/theme.ts`
+- Test: `packages/markora/tests/selection-toolbar-commands.spec.ts`
 
 - [ ] **Step 1: Add failing tests for range and clear behavior**
 
-Append these tests to `packages/draftly/tests/selection-toolbar-commands.spec.ts`:
+Append these tests to `packages/markora/tests/selection-toolbar-commands.spec.ts`:
 
 ```ts
 it("does not build a link change when the url is empty", () => {
@@ -1574,14 +1581,14 @@ it("clears color span wrappers", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/selection-toolbar-commands.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts
 ```
 
 Expected: FAIL because `clear` is not typed and empty URLs are not rejected.
 
 - [ ] **Step 3: Add `clear` support to inline command types**
 
-Modify `InlineFormatInput` in `packages/draftly/src/editor/selection-toolbar/types.ts`:
+Modify `InlineFormatInput` in `packages/markora/src/editor/selection-toolbar/types.ts`:
 
 ```ts
 export type InlineFormatInput = {
@@ -1600,7 +1607,7 @@ export type InlineFormatInput = {
 
 - [ ] **Step 4: Harden command implementations**
 
-Modify `packages/draftly/src/editor/selection-toolbar/commands.ts`:
+Modify `packages/markora/src/editor/selection-toolbar/commands.ts`:
 
 ```ts
 export function buildInlineFormatChange(input: InlineFormatInput): TextCommandResult {
@@ -1664,7 +1671,7 @@ export function buildLinkChange(input: LinkChangeInput): TextCommandResult {
 
 - [ ] **Step 5: Guard saved range before applying changes**
 
-In `packages/draftly/src/editor/selection-toolbar/extension.ts`, add:
+In `packages/markora/src/editor/selection-toolbar/extension.ts`, add:
 
 ```ts
   private isSavedRangeCurrent(): boolean {
@@ -1714,8 +1721,8 @@ Add this public method to `SelectionToolbarViewPlugin`:
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/selection-toolbar-commands.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
 ```
 
 Expected: PASS.
@@ -1725,7 +1732,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/draftly/src/editor/selection-toolbar packages/draftly/tests/selection-toolbar-commands.spec.ts
+git add packages/markora/src/editor/selection-toolbar packages/markora/tests/selection-toolbar-commands.spec.ts
 git commit -m "fix(editor): 加固选区工具条状态边界"
 ```
 
@@ -1734,18 +1741,18 @@ git commit -m "fix(editor): 加固选区工具条状态边界"
 ### Task 7: Build and Verify Vue2 Playground Runtime
 
 **Files:**
-- Modify only if type errors require it: `apps/vue2-playground/src/shims-draftly.d.ts`
-- Runtime build output: `packages/draftly/dist` generated by build and typically ignored by git.
+- Modify only if type errors require it: `playground/vue2-playground/src/shims-markora.d.ts`
+- Runtime build output: `packages/markora/dist` generated by build and typically ignored by git.
 
 - [ ] **Step 1: Run full package checks**
 
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
-pnpm --config.package-manager-strict=false --dir packages/draftly lint
-pnpm --config.package-manager-strict=false --dir packages/draftly build
+pnpm --config.package-manager-strict=false --dir packages/markora test
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora lint
+pnpm --config.package-manager-strict=false --dir packages/markora build
 ```
 
 Expected:
@@ -1794,14 +1801,14 @@ Expected: all listed interactions work without console errors.
 
 Use Browser developer logs or equivalent check.
 
-Expected: no new `error` logs from Draftly selection toolbar interactions.
+Expected: no new `error` logs from Markora selection toolbar interactions.
 
 - [ ] **Step 6: Commit verification-only shim changes if any**
 
 If Step 2 or Step 4 required shim-only adjustments, commit them:
 
 ```bash
-git add apps/vue2-playground/src/shims-draftly.d.ts
+git add playground/vue2-playground/src/shims-markora.d.ts
 git commit -m "fix(playground): 同步选区工具条类型声明"
 ```
 
@@ -1843,10 +1850,10 @@ Expected:
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
-pnpm --config.package-manager-strict=false --dir packages/draftly build
-pnpm --config.package-manager-strict=false --dir packages/draftly lint
+pnpm --config.package-manager-strict=false --dir packages/markora test
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora build
+pnpm --config.package-manager-strict=false --dir packages/markora lint
 pnpm --config.package-manager-strict=false --filter vue2-playground build
 git diff --check
 ```
@@ -1867,5 +1874,5 @@ Final response must include:
 - Rollback method:
 
 ```text
-Rollback by reverting the selection-toolbar commits. This removes the toolbar module, DraftlyConfig.selectionToolbar registration, icon additions, tests, and Vue2 shim changes while leaving slash menu and existing plugins intact.
+Rollback by reverting the selection-toolbar commits. This removes the toolbar module, MarkoraConfig.selectionToolbar registration, icon additions, tests, and Vue2 shim changes while leaving slash menu and existing plugins intact.
 ```

@@ -1,458 +1,265 @@
-<h1 align="center">Draftly</h1>
+<h1 align="center">Markora</h1>
 
 <p align="center">
-  <strong>面向 Web 的现代化、可扩展 Markdown 编辑器与预览工具包。</strong>
+  <strong>基于 CodeMirror 6 的框架无关 Markdown 编辑器、插件体系与静态预览工具包。</strong>
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/draftly"><img src="https://img.shields.io/npm/v/draftly?style=flat-square&color=blue" alt="npm version" /></a>
-  <a href="https://www.npmjs.com/package/draftly"><img src="https://img.shields.io/npm/dm/draftly?style=flat-square" alt="npm downloads" /></a>
-  <a href="https://github.com/NeuroNexul/draftly/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/draftly?style=flat-square" alt="license" /></a>
-  <a href="https://github.com/NeuroNexul/draftly"><img src="https://img.shields.io/github/stars/NeuroNexul/draftly?style=flat-square" alt="GitHub stars" /></a>
+  <a href="https://www.npmjs.com/package/markora"><img src="https://img.shields.io/npm/v/markora?style=flat-square&color=blue" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/markora"><img src="https://img.shields.io/npm/dm/markora?style=flat-square" alt="npm downloads" /></a>
+  <a href="https://github.com/Refinex-Space/markora/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/markora?style=flat-square" alt="license" /></a>
   <img src="https://img.shields.io/badge/TypeScript-Ready-blue?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/CodeMirror-6-orange?style=flat-square" alt="CodeMirror 6" />
 </p>
 
 <p align="center">
-  <a href="#项目概览">项目概览</a> •
-  <a href="#本地运行">本地运行</a> •
-  <a href="#安装">安装</a> •
   <a href="#快速开始">快速开始</a> •
-  <a href="#使用方式">使用方式</a> •
-  <a href="#功能特性">功能特性</a> •
-  <a href="#api-参考">API</a> •
-  <a href="#许可证">许可证</a>
+  <a href="#能力范围">能力范围</a> •
+  <a href="#接入指南">接入指南</a> •
+  <a href="#api-入口">API 入口</a> •
+  <a href="#本地开发">本地开发</a> •
+  <a href="#发布检查">发布检查</a>
 </p>
 
 ---
 
-## 项目概览
+## 项目定位
 
-**Draftly** 是一个基于 **CodeMirror 6** 构建的可插拔 Markdown 编辑与预览工具包。它提供接近富文本的编辑体验，同时保留标准 Markdown 源文本；也提供静态 HTML 渲染能力，适合博客、文档站、内容管理系统和只读预览场景。
+Markora 是一个面向业务系统的 Markdown 编辑器能力包。它不绑定 React、Vue 或任何应用框架，而是把 CodeMirror 6、Lezer Markdown、编辑态装饰、内置 Markdown 插件、slash commands、附件入口、选区工具栏、目录 TOC、静态 HTML 预览和 CSS 生成组织成稳定 API。
 
-### 为什么选择 Draftly？
+业务应用负责页面布局、状态管理、权限、数据保存、文件存储和发布流程；Markora 负责提供可组合的 Markdown 编辑与预览能力。
 
-- **现代架构**：基于 CodeMirror 6 与 Lezer 增量解析。
-- **富编辑体验**：在保留 Markdown 控制权的同时提供所见即所得式编辑。
-- **可扩展插件系统**：可扩展渲染、快捷键、主题与语法。
-- **静态预览**：将 Markdown 渲染为语义化 HTML，并与编辑器保持视觉一致。
-- **主题能力**：内置亮色、暗色与跟随系统主题模式。
-- **模块化导出**：按需导入 `draftly/editor`、`draftly/preview`、`draftly/plugins` 等模块。
+当前版本目标是 `1.0.0`：用户可以按文档接入，得到与仓库内 React、Vue2、Vue3 playground 对齐的完整能力形态。
 
----
+## 快速开始
 
-## 本地运行
+### 安装
 
-本仓库是 Bun workspace + Turborepo 项目，包含 React、Vue2、Vue3 演示环境、核心包 `packages/draftly` 以及共享配置和 UI 包。
+```bash
+npm install markora
+npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
+```
 
-### 环境要求
+如需像 playground 一样展示 HTML/CSS 输出面板，通常还会安装：
 
-- Node.js `>= 20`
-- Bun `1.3.5` 或兼容版本
+```bash
+npm install @codemirror/lang-html @codemirror/lang-css @uiw/codemirror-theme-github
+```
 
-如果本机尚未安装 Bun，请先参考 Bun 官方安装方式安装；本仓库以 `bun.lock` 和根目录 `packageManager` 字段为准。
+### 最小编辑器
 
-### 启动开发环境
+```ts
+import { EditorState } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
+import { markora, ThemeEnum } from "markora/editor";
+import { allPlugins } from "markora/plugins";
 
-在仓库根目录执行：
+const parent = document.getElementById("editor");
+
+if (!parent) {
+  throw new Error("Missing #editor container");
+}
+
+const view = new EditorView({
+  parent,
+  state: EditorState.create({
+    doc: "# Hello, Markora",
+    extensions: [
+      markora({
+        theme: ThemeEnum.AUTO,
+        plugins: allPlugins,
+      }),
+    ],
+  }),
+});
+
+// 单页应用卸载时执行：
+// view.destroy();
+```
+
+### Playground 同等能力配置
+
+```ts
+import type { MarkoraAttachmentUploader } from "markora/editor";
+import { markora, ThemeEnum } from "markora/editor";
+import { allPlugins } from "markora/plugins";
+
+const uploader: MarkoraAttachmentUploader = async (file, context) => {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("kind", context.kind);
+  form.append("source", context.source);
+
+  const response = await fetch("/api/markora/uploads", {
+    method: "POST",
+    body: form,
+  });
+
+  if (!response.ok) {
+    throw new Error("Upload failed");
+  }
+
+  return response.json() as Promise<{
+    url: string;
+    name?: string;
+    title?: string;
+    mimeType?: string;
+  }>;
+};
+
+const extensions = markora({
+  theme: ThemeEnum.AUTO,
+  locale: "zh-CN",
+  plugins: allPlugins,
+  baseStyles: true,
+  disableViewPlugin: false,
+  defaultKeybindings: true,
+  history: true,
+  indentWithTab: true,
+  highlightActiveLine: true,
+  lineWrapping: true,
+  slashCommands: {
+    enabled: true,
+  },
+  selectionToolbar: {
+    enabled: true,
+  },
+  toc: {
+    enabled: true,
+    storageKey: "markora:toc",
+  },
+  attachments: {
+    enabled: true,
+    uploader,
+    enablePaste: true,
+    enableDrop: true,
+    accept: {
+      image: ["image/*"],
+      video: ["video/*"],
+      audio: ["audio/*"],
+      file: ["*/*"],
+    },
+  },
+});
+```
+
+## 能力范围
+
+| 能力                  | 状态   | 说明                                                                                                 |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| CodeMirror 6 扩展组装 | 支持   | `markora()` 返回 `Extension[]`，可直接放入 CodeMirror。                                              |
+| 编辑态富 Markdown     | 支持   | 保留 Markdown 源文本，同时通过 decoration/widget 提供接近 WYSIWYG 的编辑体验。                       |
+| 内置 Markdown 插件    | 支持   | 段落、标题、行内格式、链接、列表、表格、HTML、图片、数学公式、Mermaid、代码块、引用、分割线、Emoji。 |
+| Slash commands        | 支持   | 行首输入 `/` 打开命令菜单，支持基础 Markdown 块和媒体命令。                                          |
+| 附件上传入口          | 支持   | 文件选择、粘贴、拖拽会调用业务侧 `uploader`，成功后替换为 Markdown/HTML。                            |
+| 附件存储服务          | 不提供 | OSS/S3/后端上传、签名 URL、权限、扫描、删除、进度条由业务系统实现。                                  |
+| 选区工具栏            | 支持   | 文本选区后提供加粗、斜体、删除线、下划线、行内代码、链接、颜色、高亮和列表操作。                     |
+| 目录 TOC              | 支持   | 编辑态内置目录面板，也可通过回调或 preview TOC API 自定义侧栏。                                      |
+| 静态预览              | 支持   | `preview()` 输出 HTML，`generateCSS()` 输出同插件和主题匹配的 CSS。                                  |
+| i18n                  | 支持   | 内置 UI 支持 `"zh-CN"` 和 `"en-US"`。                                                                |
+| 框架组件              | 不提供 | React/Vue 接入由业务组件持有生命周期；仓库 playground 提供参考实现。                                 |
+
+## 静态预览
+
+```ts
+import { ThemeEnum } from "markora/editor";
+import { allPlugins } from "markora/plugins";
+import { generateCSS, preview } from "markora/preview";
+
+const markdown = "# Hello\n\nThis is **Markora**.";
+
+const html = await preview(markdown, {
+  theme: ThemeEnum.LIGHT,
+  plugins: allPlugins,
+  sanitize: true,
+  wrapperTag: "article",
+  wrapperClass: "markora-preview",
+});
+
+const css = generateCSS({
+  theme: ThemeEnum.LIGHT,
+  plugins: allPlugins,
+  includeBase: true,
+  wrapperClass: "markora-preview",
+});
+```
+
+生产环境必须让 `preview()` 和 `generateCSS()` 使用同一组 `plugins`、`theme`、`wrapperClass` 和语法高亮主题，否则 HTML 与 CSS 可能不匹配。
+
+## 接入指南
+
+完整接入不是只调用 `markora()`，还需要处理框架生命周期、状态同步、预览输出、附件上传、TOC、主题和持久化策略。请优先阅读：
+
+- [项目介绍与 API 总览](docs/guides/project-introduction.md)
+- [React 接入指南](docs/guides/react-integration.md)
+- [Vue2 接入指南](docs/guides/vue2-integration.md)
+- [Vue3 接入指南](docs/guides/vue3-integration.md)
+
+达到 playground 同等质量时，建议至少完成：
+
+1. 安装 `markora` 和 CodeMirror peer dependencies。
+2. 使用 `allPlugins` 跑通编辑态和 preview。
+3. 使用应用状态保存 Markdown 原文，不保存 `EditorView` 内部状态。
+4. 用 `disableViewPlugin: true` 提供源码模式。
+5. 用 `preview()` 与 `generateCSS()` 提供预览和输出模式。
+6. 提供真实 `attachments.uploader`，并在业务侧处理大小、类型、权限、失败和最终 URL。
+7. 开启 slash commands、selection toolbar 和 TOC。
+8. 在组件卸载时执行 `EditorView.destroy()` 并释放 `blob:` URL。
+
+## API 入口
+
+| 入口              | 用途                                                             |
+| ----------------- | ---------------------------------------------------------------- |
+| `markora`         | 聚合入口，兼容快速验证。                                         |
+| `markora/editor`  | 编辑器核心、配置类型、主题、i18n、附件、slash、TOC、选区工具栏。 |
+| `markora/plugins` | 内置插件与 `allPlugins`。                                        |
+| `markora/preview` | 静态 HTML、CSS、目录提取。                                       |
+| `markora/lib`     | 底层输入处理工具。                                               |
+
+核心配置见 [项目介绍与 API 总览](docs/guides/project-introduction.md#5-markoraconfig-配置总表)。
+
+## 本地开发
+
+本仓库是 Bun workspace + Turborepo monorepo。
 
 ```bash
 bun install
 bun run dev
 ```
 
-`bun run dev` 会通过 Turbo 启动所有声明了 `dev` 脚本的 workspace：
+常用入口：
 
-- `apps/react-playground`：运行 Next.js 开发服务器，默认地址为 `http://localhost:3000`
-- `apps/vue2-playground`：运行 Vue CLI 开发服务器，默认地址为 `http://localhost:3001`
-- `apps/vue3-playground`：运行 Vite 开发服务器，默认地址为 `http://localhost:3003`
-- `packages/draftly`：运行 `tsup --watch`，监听核心库源码并输出构建产物
+| 目标                  | 命令                                            | 地址                               |
+| --------------------- | ----------------------------------------------- | ---------------------------------- |
+| React playground      | `bun run --cwd playground/react-playground dev` | `http://localhost:3000`            |
+| React playground 页面 | 同上                                            | `http://localhost:3000/playground` |
+| Vue2 playground       | `bun run --cwd playground/vue2-playground dev`  | `http://localhost:3001`            |
+| Vue3 playground       | `bun run --cwd playground/vue3-playground dev`  | `http://localhost:3003`            |
+| 核心包 watch          | `bun run --cwd packages/markora dev`            | 输出 `packages/markora/dist`       |
 
-如果只想启动 React 演示站点：
-
-```bash
-bun run --cwd apps/react-playground dev
-```
-
-启动后打开：
-
-```text
-http://localhost:3000
-```
-
-编辑器 Playground 页面位于：
-
-```text
-http://localhost:3000/playground
-```
-
-### Vue Playgrounds
-
-仓库还包含 `apps/vue2-playground` 和 `apps/vue3-playground`，用于验证 Draftly 在 Vue 2.6 + Vue CLI 4 + Webpack 4 以及 Vue 3 + Vite 环境中的接入效果。它们与 React `/playground` 能力对齐，但实现上独立于 Next.js 演示站点，可独立演进。
-
-启动前先构建 Draftly 包：
+Vue playground 通过 `markora/editor` 等包导出消费核心包。若核心源码刚有修改，先运行：
 
 ```bash
-bun run --cwd packages/draftly build
+bun run --cwd packages/markora build
 ```
 
-然后进入 Vue2 playground 使用常见 Vue CLI 命令：
+## 发布检查
 
 ```bash
-cd apps/vue2-playground
-npm run dev
-```
-
-Vue CLI 开发服务器默认监听：
-
-```text
-http://localhost:3001
-```
-
-Vue3 playground 使用 Vite：
-
-```bash
-cd apps/vue3-playground
-npm run dev
-```
-
-Vite 开发服务器默认监听：
-
-```text
-http://localhost:3003
-```
-
-常用命令：
-
-| 命令                | 说明                               |
-| ------------------- | ---------------------------------- |
-| `npm run dev`       | 启动当前 Vue playground 开发服务器。 |
-| `npm run build`     | 构建当前 Vue playground。          |
-| `npm run test:unit` | 运行当前 Vue playground 单元测试。 |
-
-### 生产构建与本地预览
-
-```bash
+bun run --cwd packages/markora test
+bun run --cwd packages/markora typecheck
 bun run build
-bun run --cwd apps/react-playground start
+bun run lint
 ```
 
-`bun run build` 会通过 Turbo 构建相关 workspace；`bun run --cwd apps/react-playground start` 会启动 Next.js 生产服务，默认同样监听 `http://localhost:3000`。
-
-### 常用命令
-
-| 命令                                       | 说明                                          |
-| ------------------------------------------ | --------------------------------------------- |
-| `bun install`                              | 安装 workspace 依赖。                         |
-| `bun run dev`                              | 启动所有 workspace 的开发任务。               |
-| `bun run build`                            | 构建仓库内相关包与应用。                      |
-| `bun run lint`                             | 运行 Turbo lint 任务。                        |
-| `bun run format`                           | 使用 Prettier 格式化 `ts`、`tsx`、`md` 文件。 |
-| `bun run --cwd apps/react-playground typecheck` | 对 React playground 执行 TypeScript 类型检查。 |
-| `bun run --cwd packages/draftly typecheck` | 对核心库执行 TypeScript 类型检查。            |
-
----
-
-## 安装
-
-在你的项目中使用偏好的包管理器安装：
+公开 API、配置语义、导出类型或发布包行为变化时，按仓库发布流程添加 Changeset，并在发布前运行：
 
 ```bash
-# npm
-npm install draftly
-
-# yarn
-yarn add draftly
-
-# pnpm
-pnpm add draftly
-
-# bun
-bun add draftly
+bun run changeset
+bun run version-packages
+bun run release
 ```
-
-### Peer Dependencies
-
-Draftly 依赖下列 CodeMirror 包作为 peer dependencies。请确保它们已经安装到你的项目中：
-
-```bash
-npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
-```
-
----
-
-## 快速开始
-
-最小接入示例：
-
-```tsx
-import { EditorView } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
-import { draftly } from "draftly";
-
-const view = new EditorView({
-  state: EditorState.create({
-    doc: "# Hello, Draftly!",
-    extensions: [draftly()],
-  }),
-  parent: document.getElementById("editor")!,
-});
-```
-
----
-
-## 使用方式
-
-Draftly 同时支持交互式编辑和静态预览。你可以把它作为 CodeMirror extension 使用，也可以把 Markdown 渲染为只读 HTML。
-
-### 编辑器集成
-
-下面是使用 `@uiw/react-codemirror` 的完整示例：
-
-```tsx
-import CodeMirror from "@uiw/react-codemirror";
-import { draftly, allPlugins, ThemeEnum } from "draftly";
-import { githubDark } from "@uiw/codemirror-theme-github";
-
-function MarkdownEditor() {
-  return (
-    <CodeMirror
-      value="# Welcome to Draftly\n\nStart writing..."
-      height="500px"
-      extensions={[
-        draftly({
-          theme: ThemeEnum.DARK,
-          themeStyle: githubDark,
-          plugins: allPlugins,
-          lineWrapping: true,
-          history: true,
-          indentWithTab: true,
-          onNodesChange: (nodes) => console.log("AST:", nodes),
-        }),
-      ]}
-    />
-  );
-}
-```
-
-#### 编辑器配置 `DraftlyConfig`
-
-| 配置项                | 类型                             | 默认值           | 说明                                     |
-| --------------------- | -------------------------------- | ---------------- | ---------------------------------------- |
-| `theme`               | `ThemeEnum`                      | `ThemeEnum.AUTO` | 主题模式：`LIGHT`、`DARK` 或 `AUTO`。    |
-| `themeStyle`          | `Extension`                      | `undefined`      | CodeMirror 主题扩展，例如 `githubDark`。 |
-| `plugins`             | `DraftlyPlugin[]`                | `[]`             | 启用的解析和渲染插件。                   |
-| `baseStyles`          | `boolean`                        | `true`           | 是否加载默认基础样式。                   |
-| `disableViewPlugin`   | `boolean`                        | `false`          | 是否关闭富渲染，退回原始 Markdown 模式。 |
-| `defaultKeybindings`  | `boolean`                        | `true`           | 是否启用默认 CodeMirror 快捷键。         |
-| `history`             | `boolean`                        | `true`           | 是否启用撤销和重做历史。                 |
-| `indentWithTab`       | `boolean`                        | `true`           | 是否使用 Tab 缩进。                      |
-| `highlightActiveLine` | `boolean`                        | `true`           | 是否在原始模式下高亮当前行。             |
-| `lineWrapping`        | `boolean`                        | `true`           | 是否启用自动换行。                       |
-| `onNodesChange`       | `(nodes: DraftlyNode[]) => void` | `undefined`      | 文档更新时触发，返回解析后的 AST。       |
-| `markdown`            | `MarkdownConfig[]`               | `[]`             | 额外的 Lezer Markdown 解析扩展。         |
-| `extensions`          | `Extension[]`                    | `[]`             | 额外的 CodeMirror extensions。           |
-| `keymap`              | `KeyBinding[]`                   | `[]`             | 额外的快捷键绑定。                       |
-
-### 静态预览
-
-将 Markdown 渲染为语义化 HTML，适用于服务端渲染、静态站点生成和只读预览。
-
-```tsx
-import { preview, generateCSS, allPlugins, ThemeEnum } from "draftly";
-
-const markdown = `
-# Hello World
-
-This is a **bold** statement with some \`inline code\`.
-
-- Item 1
-- Item 2
-- Item 3
-`;
-
-// 生成 HTML
-const html = preview(markdown, {
-  theme: ThemeEnum.LIGHT,
-  plugins: allPlugins,
-  sanitize: true,
-  wrapperClass: "prose",
-});
-
-// 生成匹配的 CSS
-const css = generateCSS({
-  theme: ThemeEnum.LIGHT,
-  plugins: allPlugins,
-  wrapperClass: "prose",
-  includeBase: true,
-});
-
-// 在应用中使用
-function ArticlePreview() {
-  return (
-    <>
-      <style>{css}</style>
-      <article dangerouslySetInnerHTML={{ __html: html }} />
-    </>
-  );
-}
-```
-
-#### 预览配置 `PreviewConfig`
-
-| 配置项         | 类型               | 默认值              | 说明                                |
-| -------------- | ------------------ | ------------------- | ----------------------------------- |
-| `plugins`      | `DraftlyPlugin[]`  | `[]`                | 用于渲染的插件。                    |
-| `theme`        | `ThemeEnum`        | `ThemeEnum.AUTO`    | 主题模式。                          |
-| `sanitize`     | `boolean`          | `true`              | 是否通过 DOMPurify 清理 HTML 输出。 |
-| `wrapperClass` | `string`           | `"draftly-preview"` | 包裹元素的 CSS class。              |
-| `wrapperTag`   | `string`           | `"article"`         | 包裹元素的 HTML 标签。              |
-| `markdown`     | `MarkdownConfig[]` | `[]`                | 额外的 Markdown 解析扩展。          |
-
----
-
-## 功能特性
-
-### 富文本式编辑
-
-Draftly 的 `ViewPlugin` 会装饰编辑器内容，隐藏 Markdown 标记并在原位渲染样式，从而在保留纯文本源内容的前提下提供接近所见即所得的体验。
-
-- **行内格式**：原位展示加粗、斜体、删除线和行内代码。
-- **标题**：按层级渲染合适的字号和字重。
-- **列表**：支持有序列表和无序列表。
-- **图片**：支持行内图片、替代文本和标题说明。
-- **链接**：提供可点击链接和视觉区分。
-- **代码块**：支持带语言检测的语法高亮。
-
-### 插件架构
-
-Draftly 中的功能都通过插件组织。插件可以提供：
-
-- **CodeMirror Extensions**：自定义 decorations、widgets 和行为。
-- **Markdown Parser Extensions**：扩展 Lezer 解析器以支持自定义语法。
-- **Keymaps**：添加键盘快捷键。
-- **Themes**：根据当前主题注入样式。
-- **Preview Renderers**：定义静态 HTML 中元素的渲染方式。
-
-```typescript
-import { DraftlyPlugin } from "draftly/editor";
-
-class MyCustomPlugin extends DraftlyPlugin {
-  name = "my-custom-plugin";
-
-  onRegister(context) {
-    console.log("Plugin registered!", context.config);
-  }
-
-  getExtensions() {
-    return [
-      /* CodeMirror extensions */
-    ];
-  }
-
-  getKeymap() {
-    return [
-      /* KeyBinding[] */
-    ];
-  }
-
-  getMarkdownConfig() {
-    return {
-      /* MarkdownConfig */
-    };
-  }
-
-  theme(mode) {
-    return {
-      /* Theme spec */
-    };
-  }
-}
-```
-
-### AST 访问
-
-通过 `onNodesChange` 回调可以访问解析后的文档结构，适合构建：
-
-- 目录
-- 文档大纲
-- 导航面包屑
-- 字数和行数统计
-
-```typescript
-type DraftlyNode = {
-  from: number; // 起始位置
-  to: number; // 结束位置
-  name: string; // 节点类型，例如 "Heading" 或 "Paragraph"
-  children: DraftlyNode[];
-  isSelected: boolean; // 光标是否位于当前节点内
-};
-```
-
-### 主题能力
-
-Draftly 提供自动亮暗模式支持：
-
-- **自动检测**：通过 `ThemeEnum.AUTO` 跟随系统偏好。
-- **手动控制**：可强制使用 `ThemeEnum.LIGHT` 或 `ThemeEnum.DARK`。
-- **自定义主题**：通过 `themeStyle` 传入任意 CodeMirror 主题。
-- **预览一致性**：通过 CSS 生成能力保持预览与编辑器视觉一致。
-
-### 模块化导入
-
-按需导入可以减少最终 bundle 体积：
-
-```typescript
-// 完整包
-import { draftly, preview, allPlugins } from "draftly";
-
-// 仅编辑器
-import { draftly, DraftlyPlugin } from "draftly/editor";
-
-// 仅预览
-import { preview, generateCSS } from "draftly/preview";
-
-// 单独插件
-import { HeadingPlugin, ListPlugin } from "draftly/plugins";
-```
-
----
-
-## API 参考
-
-### 导出项
-
-| 导出            | 路径              | 说明                                    |
-| --------------- | ----------------- | --------------------------------------- |
-| `draftly`       | `draftly/editor`  | 主编辑器 extension factory。            |
-| `DraftlyPlugin` | `draftly/editor`  | 创建插件的基类。                        |
-| `ThemeEnum`     | `draftly/editor`  | 主题模式枚举：`AUTO`、`LIGHT`、`DARK`。 |
-| `DraftlyNode`   | `draftly/editor`  | AST 节点类型。                          |
-| `preview`       | `draftly/preview` | 将 Markdown 渲染为 HTML 的函数。        |
-| `generateCSS`   | `draftly/preview` | 生成预览样式 CSS 的函数。               |
-| `allPlugins`    | `draftly/plugins` | 所有内置插件数组。                      |
-
----
-
-## 浏览器支持
-
-Draftly 支持现代浏览器：
-
-| 浏览器  | 版本 |
-| ------- | ---- |
-| Chrome  | 88+  |
-| Firefox | 78+  |
-| Safari  | 14+  |
-| Edge    | 88+  |
-
----
-
-## 贡献
-
-欢迎提交贡献。请在发起 pull request 前阅读 [贡献指南](CONTRIBUTING.md)。
-
----
 
 ## 许可证
 
-[MIT](LICENSE) © [NeuroNexul](https://github.com/NeuroNexul)
+[MIT](LICENSE) © Refinex-Space

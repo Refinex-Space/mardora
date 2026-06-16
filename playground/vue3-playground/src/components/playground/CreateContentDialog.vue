@@ -7,21 +7,21 @@
     <div v-if="open" class="dialog-backdrop" @click.self="close">
       <form class="dialog-card" @submit.prevent="handleSubmit">
         <div class="dialog-header">
-          <h2 class="dialog-title">Create Content</h2>
-          <p class="dialog-description">Enter a title for the new document.</p>
+          <h2 class="dialog-title">{{ $t("dialog.create.title") }}</h2>
+          <p class="dialog-description">{{ $t("dialog.create.description") }}</p>
         </div>
         <input
           ref="titleInput"
           v-model="title"
           class="field"
           type="text"
-          placeholder="Content title"
+          :placeholder="$t('dialog.create.placeholder')"
           aria-label="Content title"
           @keydown.esc="close"
         />
         <div class="dialog-actions">
-          <button class="button button-secondary" type="button" @click="close">Cancel</button>
-          <button class="button button-primary" type="submit" :disabled="!title.trim()">Create</button>
+          <button class="button button-secondary" type="button" @click="close">{{ $t("dialog.create.cancel") }}</button>
+          <button class="button button-primary" type="submit" :disabled="!title.trim()">{{ $t("dialog.create.confirm") }}</button>
         </div>
       </form>
     </div>

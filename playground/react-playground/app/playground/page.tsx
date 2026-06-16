@@ -13,17 +13,25 @@ import Devbar from "./devbar";
 import Sidebar from "./sidebar";
 import { Content } from "./types";
 import CreateContentDialog from "./create-content-dialog";
+import { useLocale } from "../i18n/LocaleContext";
+import { buildDefaultContents } from "../data/defaultContents";
 
-import whatIsDraftly from "../data/md/what-id-draftly";
-import walkthrough from "../data/md/walkthrough";
+import projectIntroduction from "../data/md/project-introduction";
+import reactGuide from "../data/md/react-guide";
+import vue2Guide from "../data/md/vue2-guide";
+import vue3Guide from "../data/md/vue3-guide";
+import projectIntroductionEn from "../data/md/project-introduction.en";
+import reactGuideEn from "../data/md/react-guide.en";
+import vue2GuideEn from "../data/md/vue2-guide.en";
+import vue3GuideEn from "../data/md/vue3-guide.en";
 
 import CodeMirror, { EditorView, Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
-import { allPlugins } from "draftly/src";
-import { generateCSS, preview } from "draftly/src";
-import { draftly, DraftlyNode, DraftlyPlugin, ThemeEnum } from "draftly/src";
+import { allPlugins } from "markora/src";
+import { generateCSS, preview } from "markora/src";
+import { markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "markora/src";
 
 // Plugin configuration - dynamic based on allPlugins
 export type PluginConfig = Record<string, boolean>;
@@ -49,7 +57,7 @@ export type PlaygroundConfig = {
     includeBase: boolean;
     sanitize: boolean;
   };
-  // Draftly feature toggles
+  // Markora feature toggles
   features: {
     slashCommands: boolean;
     attachments: boolean;
@@ -80,34 +88,31 @@ const defaultConfig: PlaygroundConfig = {
   plugins: defaultPluginConfig,
 };
 
-const STORAGE_KEY = "draftly-playground-contents";
-const STORAGE_CURRENT_KEY = "draftly-playground-current";
-const STORAGE_VERSION_KEY = "draftly-playground-version";
+const STORAGE_KEY = "markora-playground-contents";
+const STORAGE_CURRENT_KEY = "markora-playground-current";
+const STORAGE_VERSION_KEY = "markora-playground-version";
 const DEBOUNCE_MS = 500;
 
-// Bump this version whenever default content (whatIsDraftly / walkthrough) changes.
+// Bump this version whenever default guide content changes.
 // The app will detect the mismatch and refresh the default entries in localStorage.
-const VERSION = 1;
+const VERSION = 3;
 
-const DEFAULT_CONTENTS: Content[] = [
-  {
-    id: "0",
-    title: "What is Draftly?",
-    content: whatIsDraftly,
-  },
-  {
-    id: "1",
-    title: "Walkthrough",
-    content: walkthrough,
-  },
-];
+const DEFAULT_CONTENT_IDS = new Set(["project-introduction", "vue2-guide", "vue3-guide", "react-guide"]);
 
-const DEFAULT_CONTENT_IDS = new Set(DEFAULT_CONTENTS.map((c) => c.id));
+function buildDefaultContentsFor(locale: "zh" | "en"): Content[] {
+  return buildDefaultContents(locale, {
+    projectIntroduction: { zh: projectIntroduction, en: projectIntroductionEn },
+    vue2Guide: { zh: vue2Guide, en: vue2GuideEn },
+    vue3Guide: { zh: vue3Guide, en: vue3GuideEn },
+    reactGuide: { zh: reactGuide, en: reactGuideEn },
+  });
+}
 
 export type SaveStatus = "idle" | "saving" | "saved";
 
 export default function Page() {
   const { resolvedTheme: theme } = useTheme();
+  const { locale, t } = useLocale();
   const cmTheme = theme?.includes("dark") ? githubDark : githubLight;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [devbarOpen, setDevbarOpen] = useState(false);
@@ -128,7 +133,7 @@ export default function Page() {
 
   const [mode, setMode] = useState<"live" | "view" | "code" | "output">("live");
   const [showNodes, setShowNodes] = useState(false);
-  const [nodes, setNodes] = useState<DraftlyNode[]>([]);
+  const [nodes, setNodes] = useState<MarkoraNode[]>([]);
   const [config, setConfig] = useState<PlaygroundConfig>(defaultConfig);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -153,6 +158,7 @@ export default function Page() {
     const storedCurrent = localStorage.getItem(STORAGE_CURRENT_KEY);
     const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
     const isOutdated = storedVersion !== String(VERSION);
+    const defaultContents = buildDefaultContentsFor(locale);
 
     if (storedContents && !isOutdated) {
       // Version matches – use stored contents as-is
@@ -167,7 +173,7 @@ export default function Page() {
       try {
         const parsed = JSON.parse(storedContents) as Content[];
         const userContents = parsed.filter((c) => !DEFAULT_CONTENT_IDS.has(c.id));
-        const merged = [...DEFAULT_CONTENTS, ...userContents];
+        const merged = [...defaultContents, ...userContents];
         setContents(merged);
         setCurrentContent(0);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
@@ -178,9 +184,9 @@ export default function Page() {
       }
     } else {
       // First visit – seed with defaults
-      setContents(DEFAULT_CONTENTS);
+      setContents(defaultContents);
       setCurrentContent(0);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CONTENTS));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultContents));
       localStorage.setItem(STORAGE_CURRENT_KEY, "0");
       localStorage.setItem(STORAGE_VERSION_KEY, String(VERSION));
     }
@@ -193,7 +199,28 @@ export default function Page() {
     }
 
     setIsLoading(false);
+    // Only run on mount. Locale changes are handled by the effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // When the shell locale changes, swap the built-in sample docs to the
+  // selected language while preserving user-created docs and their content.
+  useEffect(() => {
+    if (isLoading) return;
+    setContents((prev) => {
+      if (prev.length === 0) return prev;
+      const localizedDefaults = buildDefaultContentsFor(locale);
+      const defaultsById = new Map(localizedDefaults.map((c) => [c.id, c]));
+      // Preserve user-created docs and their content; only replace the 4 built-ins.
+      const next = prev.map((c) =>
+        DEFAULT_CONTENT_IDS.has(c.id) && defaultsById.has(c.id) ? defaultsById.get(c.id)! : c
+      );
+      // Ensure any missing built-ins (e.g. user deleted one) are not re-added here.
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   // Debounced save to localStorage
   const saveToStorage = useCallback((data: Content[], current: number) => {
@@ -286,32 +313,6 @@ export default function Page() {
     saveToStorage(newContents, newIndex);
   }
 
-  function deleteContent(id: string) {
-    const index = contents.findIndex((c) => c.id === id);
-    if (index === -1) return;
-
-    const newContents = contents.filter((c) => c.id !== id);
-    setContents(newContents);
-
-    // Adjust currentContent if needed
-    let newCurrent = currentContent;
-    if (newContents.length === 0) {
-      newCurrent = -1;
-    } else if (currentContent >= index) {
-      newCurrent = Math.max(0, currentContent - 1);
-    }
-    setCurrentContent(newCurrent);
-    saveToStorage(newContents, newCurrent);
-  }
-
-  function renameContent(id: string, newTitle: string) {
-    setContents((c) => {
-      const updated = c.map((content) => (content.id === id ? { ...content, title: newTitle } : content));
-      saveToStorage(updated, currentContent);
-      return updated;
-    });
-  }
-
   const editor = useRef<ReactCodeMirrorRef>(null);
   function handleSetCurrentContent(index: number) {
     setCurrentContent(index);
@@ -319,7 +320,7 @@ export default function Page() {
   }
 
   // Build active plugins list based on config
-  const activePlugins = useMemo<DraftlyPlugin[]>(() => {
+  const activePlugins = useMemo<MarkoraPlugin[]>(() => {
     return allPlugins.filter((plugin) => {
       const name = plugin.name.toLowerCase() as keyof PluginConfig;
       return config.plugins[name] ?? true;
@@ -328,7 +329,7 @@ export default function Page() {
 
   const defaultExtensions = useMemo<Extension[]>(
     () =>
-      draftly({
+      markora({
         theme:
           theme && theme !== "system" ? (theme.includes("dark") ? ThemeEnum.DARK : ThemeEnum.LIGHT) : ThemeEnum.AUTO,
         baseStyles: config.editor.baseStyles,
@@ -377,14 +378,14 @@ export default function Page() {
         syntaxTheme: cmTheme,
         sanitize: config.preview.sanitize,
         wrapperTag: "div",
-        wrapperClass: "draftly-preview h-full w-full max-w-[48rem] mx-auto overflow-auto",
+        wrapperClass: "markora-preview h-full w-full max-w-[48rem] mx-auto overflow-auto",
       });
 
       const css = generateCSS({
         theme:
           theme && theme !== "system" ? (theme.includes("dark") ? ThemeEnum.DARK : ThemeEnum.LIGHT) : ThemeEnum.AUTO,
         plugins: activePlugins,
-        wrapperClass: "draftly-preview",
+        wrapperClass: "markora-preview",
         includeBase: config.preview.includeBase,
         syntaxTheme: cmTheme,
       });
@@ -398,7 +399,7 @@ export default function Page() {
     return (
       <div className="min-h-svh h-svh flex flex-col items-center justify-center gap-3">
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
-        <span className="text-muted-foreground font-mono">Loading...</span>
+        <span className="text-muted-foreground font-mono">{t("common.loading")}</span>
       </div>
     );
   }
@@ -440,21 +441,17 @@ export default function Page() {
             }
           )}
         >
-          <Sidebar
-            contents={contents}
-            currentContent={currentContent}
-            setCurrentContent={handleSetCurrentContent}
-            addNewContent={addNewContent}
-            deleteContent={deleteContent}
-            renameContent={renameContent}
-          />
+          <Sidebar contents={contents} currentContent={currentContent} setCurrentContent={handleSetCurrentContent} />
         </div>
 
         {/* Editor */}
         <div
-          className={cn("flex-1 h-full mx-2 border rounded-lg overflow-hidden flex items-center justify-center dark:bg-[#0d1117]", {
-            "ml-0 max-xl:ml-2": sidebarOpen,
-          })}
+          className={cn(
+            "flex-1 h-full mx-2 border rounded-lg overflow-hidden flex items-center justify-center dark:bg-[#0d1117]",
+            {
+              "ml-0 max-xl:ml-2": sidebarOpen,
+            }
+          )}
         >
           {currentContent !== -1 ? (
             mode === "view" ? (
@@ -467,8 +464,8 @@ export default function Page() {
                 <div className="h-full w-full grid grid-rows-2">
                   <div className="h-full w-full flex flex-col border-b-2">
                     <CodeMirror
-                      key={`draftly-output-${mode}`}
-                      id={"draftly-output"}
+                      key={`markora-output-${mode}`}
+                      id={"markora-output"}
                       autoFocus={false}
                       className={"h-full w-full"}
                       height="100%"
@@ -484,8 +481,8 @@ export default function Page() {
                   </div>
                   <div className="h-full w-full flex flex-col border-t-2">
                     <CodeMirror
-                      key={`draftly-output-${mode}`}
-                      id={"draftly-output"}
+                      key={`markora-output-${mode}`}
+                      id={"markora-output"}
                       autoFocus={false}
                       className={"h-full w-full"}
                       height="100%"
@@ -503,8 +500,8 @@ export default function Page() {
               </div>
             ) : (
               <CodeMirror
-                key={`draftly-editor-${mode}`}
-                id={"draftly-editor"}
+                key={`markora-editor-${mode}`}
+                id={"markora-editor"}
                 ref={editor}
                 autoFocus={false}
                 className={"h-full w-full"}
@@ -526,10 +523,10 @@ export default function Page() {
             )
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <span className="text-muted-foreground font-mono whitespace-nowrap">No Content Selected</span>
+              <span className="text-muted-foreground font-mono whitespace-nowrap">{t("empty.noContentSelected")}</span>
               <CreateContentDialog
                 onCreateContent={addNewContent}
-                trigger={<Button className="mt-4">Create New</Button>}
+                trigger={<Button className="mt-4">{t("empty.create")}</Button>}
               />
             </div>
           )}
@@ -546,7 +543,13 @@ export default function Page() {
             }
           )}
         >
-          <Devbar nodes={nodes} setShowNodes={setShowNodes} config={config} setConfig={setConfig} outputTime={outputTime} />
+          <Devbar
+            nodes={nodes}
+            setShowNodes={setShowNodes}
+            config={config}
+            setConfig={setConfig}
+            outputTime={outputTime}
+          />
         </div>
       </main>
 

@@ -26,7 +26,7 @@
     "@uiw/codemirror-theme-github": "^4.25.4",
     "@uiw/codemirror-themes": "^4.25.4",
     "core-js": "^3.49.0",
-    "draftly": "workspace:*",
+    "markora": "workspace:*",
     "style-mod": "^4.1.3",
     "uuid": "^11.1.0",
     "vue": "2.6.14"

@@ -1,5 +1,5 @@
-import { allPlugins } from "draftly/plugins";
-import type { DraftlyPlugin } from "draftly/editor";
+import { allPlugins } from "markora/plugins";
+import type { MarkoraPlugin } from "markora/editor";
 import type { PlaygroundConfig, PluginConfig } from "@/types";
 
 export function createDefaultPluginConfig(): PluginConfig {
@@ -32,6 +32,6 @@ export function createDefaultConfig(): PlaygroundConfig {
   };
 }
 
-export function getActivePlugins(pluginConfig: PluginConfig): DraftlyPlugin[] {
+export function getActivePlugins(pluginConfig: PluginConfig): MarkoraPlugin[] {
   return allPlugins.filter((plugin) => pluginConfig[plugin.name.toLowerCase()] !== false);
 }

@@ -1,19 +1,19 @@
 <template>
   <aside class="devbar-content">
-    <div class="devbar-title">Developer Panel</div>
-    <div v-if="outputTime !== null" class="output-time">Output generated in {{ outputLabel }}</div>
+    <div class="devbar-title">{{ $t("devbar.title") }}</div>
+    <div v-if="outputTime !== null" class="output-time">{{ $t("devbar.outputTime", { ms: outputLabel }) }}</div>
 
     <div class="accordion">
       <section class="accordion-item">
         <button class="accordion-trigger" type="button" @click="toggleSection('editor')">
-          <span>Editor Options</span>
+          <span>{{ $t("devbar.editorOptions") }}</span>
           <span class="chevron" aria-hidden="true">{{ isOpen("editor") ? "^" : "v" }}</span>
         </button>
         <div v-if="isOpen('editor')" class="accordion-content">
           <label v-for="item in editorOptions" :key="item.key" class="switch-row">
             <span class="switch-copy">
-              <span class="switch-label">{{ item.label }}</span>
-              <span class="switch-description">{{ item.description }}</span>
+              <span class="switch-label">{{ $t(item.labelKey) }}</span>
+              <span class="switch-description">{{ $t(item.descKey) }}</span>
             </span>
             <input
               class="switch-input"
@@ -28,30 +28,30 @@
 
       <section class="accordion-item">
         <button class="accordion-trigger" type="button" @click="toggleSection('preview')">
-          <span>Preview Options</span>
+          <span>{{ $t("devbar.previewOptions") }}</span>
           <span class="chevron" aria-hidden="true">{{ isOpen("preview") ? "^" : "v" }}</span>
         </button>
         <div v-if="isOpen('preview')" class="accordion-content">
           <label class="switch-row">
             <span class="switch-copy">
-              <span class="switch-label">Include Base CSS</span>
-              <span class="switch-description">Include base preview styles</span>
+              <span class="switch-label">{{ $t("opt.includeBase.label") }}</span>
+              <span class="switch-description">{{ $t("opt.includeBase.desc") }}</span>
             </span>
             <input class="switch-input" type="checkbox" :checked="config.preview.includeBase" @change="updatePreviewOption('includeBase', $event)" />
             <span class="switch-control" aria-hidden="true" />
           </label>
           <label class="switch-row">
             <span class="switch-copy">
-              <span class="switch-label">Sanitize HTML</span>
-              <span class="switch-description">Sanitize HTML output for security</span>
+              <span class="switch-label">{{ $t("opt.sanitize.label") }}</span>
+              <span class="switch-description">{{ $t("opt.sanitize.desc") }}</span>
             </span>
             <input class="switch-input" type="checkbox" :checked="config.preview.sanitize" @change="updatePreviewOption('sanitize', $event)" />
             <span class="switch-control" aria-hidden="true" />
           </label>
           <div class="option-row">
             <span class="switch-copy">
-              <span class="switch-label">Content Width</span>
-              <span class="switch-description">Adjust Live and View content width</span>
+              <span class="switch-label">{{ $t("devbar.contentWidth") }}</span>
+              <span class="switch-description">{{ $t("devbar.contentWidthDesc") }}</span>
             </span>
             <div class="segmented-control" role="group" aria-label="Content width">
               <button
@@ -62,14 +62,14 @@
                 :class="{ 'segmented-control-button-active': config.preview.contentWidth === item.value }"
                 @click="updateContentWidth(item.value)"
               >
-                {{ item.label }}
+                {{ $t(item.labelKey) }}
               </button>
             </div>
           </div>
           <div class="option-row">
             <span class="switch-copy">
-              <span class="switch-label">Language</span>
-              <span class="switch-description">Adjust Draftly-owned editor UI text</span>
+              <span class="switch-label">{{ $t("devbar.language") }}</span>
+              <span class="switch-description">{{ $t("devbar.languageDesc") }}</span>
             </span>
             <div class="segmented-control" role="group" aria-label="Language">
               <button
@@ -89,14 +89,14 @@
 
       <section class="accordion-item">
         <button class="accordion-trigger" type="button" @click="toggleSection('features')">
-          <span>Feature Options</span>
+          <span>{{ $t("devbar.featureOptions") }}</span>
           <span class="chevron" aria-hidden="true">{{ isOpen("features") ? "^" : "v" }}</span>
         </button>
         <div v-if="isOpen('features')" class="accordion-content">
           <label v-for="item in featureOptions" :key="item.key" class="switch-row">
             <span class="switch-copy">
-              <span class="switch-label">{{ item.label }}</span>
-              <span class="switch-description">{{ item.description }}</span>
+              <span class="switch-label">{{ $t(item.labelKey) }}</span>
+              <span class="switch-description">{{ $t(item.descKey) }}</span>
             </span>
             <input
               class="switch-input"
@@ -111,14 +111,14 @@
 
       <section class="accordion-item">
         <button class="accordion-trigger" type="button" @click="toggleSection('plugins')">
-          <span>Plugins</span>
+          <span>{{ $t("devbar.plugins") }}</span>
           <span class="chevron" aria-hidden="true">{{ isOpen("plugins") ? "^" : "v" }}</span>
         </button>
         <div v-if="isOpen('plugins')" class="accordion-content">
           <label v-for="name in pluginNames" :key="name" class="switch-row">
             <span class="switch-copy">
               <span class="switch-label">{{ name }}</span>
-              <span class="switch-description">Enable {{ name }} plugin</span>
+              <span class="switch-description">{{ $t("opt.plugin.desc", { name }) }}</span>
             </span>
             <input class="switch-input" type="checkbox" :checked="config.plugins[name]" @change="updatePlugin(name, $event)" />
             <span class="switch-control" aria-hidden="true" />
@@ -128,7 +128,7 @@
 
       <section class="accordion-item nodes-section" :class="{ 'nodes-section-open': isOpen('nodes') }">
         <button class="accordion-trigger" type="button" @click="toggleNodes">
-          <span>Nodes <small>(Hide for performance)</small></span>
+          <span>{{ $t("devbar.nodes") }} <small>{{ $t("devbar.nodesHint") }}</small></span>
           <span class="chevron" aria-hidden="true">{{ isOpen("nodes") ? "^" : "v" }}</span>
         </button>
         <div v-if="isOpen('nodes')" class="accordion-content node-content">
@@ -141,7 +141,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import type { DraftlyNode } from "draftly/editor";
+import type { MarkoraNode } from "markora/editor";
 import type { PlaygroundConfig, PlaygroundLocale, PreviewContentWidth } from "@/types";
 
 type EditorOptionKey = keyof PlaygroundConfig["editor"];
@@ -164,7 +164,7 @@ export default Vue.extend({
       required: true,
     },
     nodes: {
-      type: Array as () => DraftlyNode[],
+      type: Array as () => MarkoraNode[],
       required: true,
     },
     outputTime: {
@@ -176,22 +176,22 @@ export default Vue.extend({
     return {
       openSections: ["editor", "preview"] as string[],
       editorOptions: [
-        { key: "baseStyles" as EditorOptionKey, label: "Base Styles", description: "Include default editor styles" },
-        { key: "defaultKeybindings" as EditorOptionKey, label: "Default Keybindings", description: "Enable standard keyboard shortcuts" },
-        { key: "history" as EditorOptionKey, label: "History", description: "Enable undo/redo support" },
-        { key: "indentWithTab" as EditorOptionKey, label: "Indent with Tab", description: "Use Tab key for indentation" },
-        { key: "highlightActiveLine" as EditorOptionKey, label: "Highlight Active Line", description: "Highlight the current line" },
-        { key: "lineWrapping" as EditorOptionKey, label: "Line Wrapping", description: "Wrap long lines" },
+        { key: "baseStyles" as EditorOptionKey, labelKey: "opt.baseStyles.label" as const, descKey: "opt.baseStyles.desc" as const },
+        { key: "defaultKeybindings" as EditorOptionKey, labelKey: "opt.defaultKeybindings.label" as const, descKey: "opt.defaultKeybindings.desc" as const },
+        { key: "history" as EditorOptionKey, labelKey: "opt.history.label" as const, descKey: "opt.history.desc" as const },
+        { key: "indentWithTab" as EditorOptionKey, labelKey: "opt.indentWithTab.label" as const, descKey: "opt.indentWithTab.desc" as const },
+        { key: "highlightActiveLine" as EditorOptionKey, labelKey: "opt.highlightActiveLine.label" as const, descKey: "opt.highlightActiveLine.desc" as const },
+        { key: "lineWrapping" as EditorOptionKey, labelKey: "opt.lineWrapping.label" as const, descKey: "opt.lineWrapping.desc" as const },
       ],
       featureOptions: [
-        { key: "slashCommands" as FeatureOptionKey, label: "Slash Commands", description: "Open the command menu with line-start slash input" },
-        { key: "attachments" as FeatureOptionKey, label: "Attachments", description: "Enable local file selection through media commands" },
-        { key: "pasteDropUploads" as FeatureOptionKey, label: "Paste/Drop Uploads", description: "Upload pasted or dropped files with the mock uploader" },
-        { key: "tableOfContents" as FeatureOptionKey, label: "Table of Contents", description: "Show the built-in right-side document outline" },
+        { key: "slashCommands" as FeatureOptionKey, labelKey: "opt.slashCommands.label" as const, descKey: "opt.slashCommands.desc" as const },
+        { key: "attachments" as FeatureOptionKey, labelKey: "opt.attachments.label" as const, descKey: "opt.attachments.desc" as const },
+        { key: "pasteDropUploads" as FeatureOptionKey, labelKey: "opt.pasteDropUploads.label" as const, descKey: "opt.pasteDropUploads.desc" as const },
+        { key: "tableOfContents" as FeatureOptionKey, labelKey: "opt.tableOfContents.label" as const, descKey: "opt.tableOfContents.desc" as const },
       ],
       contentWidthOptions: [
-        { value: "regular" as PreviewContentWidth, label: "Regular" },
-        { value: "wide" as PreviewContentWidth, label: "Wide" },
+        { value: "regular" as PreviewContentWidth, labelKey: "devbar.contentWidthRegular" as const },
+        { value: "wide" as PreviewContentWidth, labelKey: "devbar.contentWidthWide" as const },
       ],
       localeOptions: [
         { value: "zh-CN" as PlaygroundLocale, label: "中文" },

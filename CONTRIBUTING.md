@@ -1,6 +1,6 @@
-# Contributing to Draftly
+# Contributing to Markora
 
-Thank you for your interest in contributing to Draftly! We welcome contributions from the community and are excited to have you on board.
+Thank you for your interest in contributing to Markora! We welcome contributions from the community and are excited to have you on board.
 
 ## Table of Contents
 
@@ -26,12 +26,12 @@ By participating in this project, you agree to maintain a respectful and inclusi
 1. **Fork the repository** on GitHub.
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/draftly.git
-   cd draftly
+   git clone https://github.com/YOUR_USERNAME/markora.git
+   cd markora
    ```
 3. **Add the upstream remote**:
    ```bash
-   git remote add upstream https://github.com/NeuroNexul/draftly.git
+   git remote add upstream git.com:Refinex-Space/markora.git
    ```
 
 ---
@@ -55,7 +55,7 @@ bun install
 bun dev
 ```
 
-This starts the development server with hot reloading for both the web app and the draftly package.
+This starts the development server with hot reloading for both the web app and the markora package.
 
 ### Build
 
@@ -80,11 +80,11 @@ bun run format
 This is a monorepo managed with [Turborepo](https://turbo.build/repo).
 
 ```
-draftly/
-├── apps/
-│   └── web/              # Next.js web application (playground)
+markora/
+├── playground/
+│   └── react-playground/ # Next.js web application (playground)
 ├── packages/
-│   └── draftly/          # Core library (published to npm)
+│   └── markora/          # Core library (published to npm)
 │       ├── src/
 │       │   ├── editor/   # CodeMirror editor integration
 │       │   ├── plugins/  # Built-in plugins
@@ -175,15 +175,15 @@ Follow the prompts to describe your changes. This creates a file in `.changeset/
 
 When creating a new plugin:
 
-1. Create a new file in `packages/draftly/src/plugins/`.
-2. Extend the `DraftlyPlugin` base class.
-3. Export the plugin from `packages/draftly/src/plugins/index.ts`.
+1. Create a new file in `packages/markora/src/plugins/`.
+2. Extend the `MarkoraPlugin` base class.
+3. Export the plugin from `packages/markora/src/plugins/index.ts`.
 4. Add the plugin to `allPlugins` array if it should be included by default.
 5. Update documentation if needed.
 
 ### Testing
 
-- Test your changes in the playground app (`apps/web`).
+- Test your changes in the playground app (`playground/react-playground`).
 - Ensure the build passes: `bun run build`.
 - Ensure linting passes: `bun run lint`.
 
@@ -191,7 +191,7 @@ When creating a new plugin:
 
 ## Reporting Issues
 
-Found a bug or have a feature request? [Open an issue](https://github.com/NeuroNexul/draftly/issues/new) with:
+Found a bug or have a feature request? [Open an issue](https://github.com/Refinex-Space/markora/issues/new) with:
 
 - **Bug reports**: Steps to reproduce, expected behavior, actual behavior, screenshots if applicable.
 - **Feature requests**: Clear description of the feature and its use case.
@@ -200,6 +200,6 @@ Found a bug or have a feature request? [Open an issue](https://github.com/NeuroN
 
 ## Questions?
 
-Feel free to open a [Discussion](https://github.com/NeuroNexul/draftly/discussions) or reach out to the maintainers.
+Feel free to open a [Discussion](https://github.com/Refinex-Space/markora/discussions) or reach out to the maintainers.
 
 Thank you for contributing! 🎉

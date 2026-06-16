@@ -6,10 +6,13 @@
       :sidebar-open="sidebarOpen"
       :devbar-open="devbarOpen"
       :theme-preference="themePreference"
+      :shell-locale="shellLocale"
+      :theme="theme"
       @toggle-sidebar="sidebarOpen = !sidebarOpen"
       @toggle-devbar="devbarOpen = !devbarOpen"
       @change-mode="mode = $event"
       @change-theme="setThemePreference"
+      @change-locale="setShellLocale"
     />
 
     <main class="playground-main">
@@ -20,9 +23,6 @@
           :contents="contents"
           :current-content="currentContent"
           @select-content="selectContent"
-          @create-content="createContent"
-          @delete-content="deleteContent"
-          @rename-content="renameContent"
         />
       </div>
 
@@ -40,7 +40,7 @@
             @output-change="handleOutputChange"
           />
           <div v-else class="empty-state">
-            <span>No Content Selected</span>
+            <span>{{ $t("empty.noContentSelected") }}</span>
             <CreateContentDialog @create="createContent" />
           </div>
         </div>
@@ -64,16 +64,17 @@
 
 <script lang="ts">
 import Vue from "vue";
-import type { DraftlyNode } from "draftly/editor";
+import type { MarkoraNode } from "markora/editor";
 import CreateContentDialog from "./CreateContentDialog.vue";
 import PlaygroundDevbar from "./Devbar.vue";
 import EditorPane from "./EditorPane.vue";
 import PlaygroundFooter from "./Footer.vue";
 import PlaygroundHeader from "./Header.vue";
 import PlaygroundSidebar from "./Sidebar.vue";
-import { loadPlaygroundSnapshot, savePlaygroundSnapshot } from "@/state/storage";
+import { loadPlaygroundSnapshot, relocalizeContents, savePlaygroundSnapshot } from "@/state/storage";
 import { createDefaultConfig } from "@/state/playgroundConfig";
 import { createContentId, getContentMetrics } from "@/utils/contentMetrics";
+import { setLocale as setShellLocaleStore, type ShellLocale } from "@/i18n";
 import type {
   Content,
   ContentMetrics,
@@ -84,11 +85,6 @@ import type {
   ThemeMode,
   ThemePreference,
 } from "@/types";
-
-interface RenamePayload {
-  id: string;
-  title: string;
-}
 
 export default Vue.extend({
   name: "Playground",
@@ -107,7 +103,7 @@ export default Vue.extend({
       currentContent: snapshot.currentContent,
       mode: "live" as PlaygroundMode,
       config: createDefaultConfig() as PlaygroundConfig,
-      nodes: [] as DraftlyNode[],
+      nodes: [] as MarkoraNode[],
       output: null as PreviewOutput | null,
       outputTime: null as number | null,
       showNodes: false,
@@ -130,6 +126,17 @@ export default Vue.extend({
     },
     showBackdrop(): boolean {
       return !this.isDesktop && (this.sidebarOpen || this.devbarOpen);
+    },
+    // Reads the reactive i18n store so this (and the watcher below) track locale changes.
+    shellLocale(): ShellLocale {
+      return (this as any).$i18nState.locale as ShellLocale;
+    },
+  },
+  watch: {
+    shellLocale(next: ShellLocale) {
+      const result = relocalizeContents(this.contents, this.currentContent, next);
+      this.contents = result.contents;
+      this.currentContent = result.currentContent;
     },
   },
   mounted() {
@@ -173,6 +180,9 @@ export default Vue.extend({
       this.currentContent = index;
       this.saveNow();
     },
+    setShellLocale(locale: ShellLocale) {
+      setShellLocaleStore(locale);
+    },
     createContent(title: string) {
       const nextContent: Content = {
         id: createContentId(),
@@ -181,24 +191,6 @@ export default Vue.extend({
       };
       this.contents = [...this.contents, nextContent];
       this.currentContent = this.contents.length - 1;
-      this.scheduleSave();
-    },
-    deleteContent(id: string) {
-      const index = this.contents.findIndex((content) => content.id === id);
-      if (index === -1) return;
-
-      this.contents = this.contents.filter((content) => content.id !== id);
-      if (this.contents.length === 0) {
-        this.currentContent = -1;
-      } else if (this.currentContent >= index) {
-        this.currentContent = Math.max(0, this.currentContent - 1);
-      }
-      this.scheduleSave();
-    },
-    renameContent(payload: RenamePayload) {
-      this.contents = this.contents.map((content) =>
-        content.id === payload.id ? { ...content, title: payload.title } : content
-      );
       this.scheduleSave();
     },
     updateCurrentContent(content: string) {

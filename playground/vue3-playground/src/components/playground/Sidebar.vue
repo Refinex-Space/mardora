@@ -1,15 +1,5 @@
 <template>
   <aside class="panel-content">
-    <div class="panel-heading">
-      <h2 class="panel-title">Contents</h2>
-      <CreateContentDialog
-        trigger-label="+"
-        trigger-class="panel-action-button"
-        trigger-title="Create content"
-        @create="$emit('create-content', $event)"
-      />
-    </div>
-
     <div class="document-list">
       <div
         v-for="(content, index) in contents"
@@ -20,24 +10,8 @@
         :aria-selected="currentContent === index"
         @click="$emit('select-content', index)"
       >
-        <span class="document-icon" aria-hidden="true">doc</span>
+        <span class="doc-file-icon" aria-hidden="true" v-html="fileTextIcon" />
         <span class="document-title">{{ content.title }}</span>
-        <div class="document-actions">
-          <button class="row-icon-button" type="button" title="Rename" @click.stop="renameContent(content.id, content.title)">
-            edit
-          </button>
-          <button class="row-icon-button danger-action" type="button" title="Delete" @click.stop="$emit('delete-content', content.id)">
-            del
-          </button>
-        </div>
-      </div>
-      <div v-if="contents.length === 0" class="empty-list">
-        <span>No contents yet</span>
-        <CreateContentDialog
-          trigger-label="Create content"
-          trigger-class="button button-secondary"
-          @create="$emit('create-content', $event)"
-        />
       </div>
     </div>
   </aside>
@@ -45,14 +19,13 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
-import CreateContentDialog from "./CreateContentDialog.vue";
 import type { Content } from "@/types";
+
+const FILE_TEXT_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>';
 
 export default defineComponent({
   name: "PlaygroundSidebar",
-  components: {
-    CreateContentDialog,
-  },
   props: {
     contents: {
       type: Array as PropType<Content[]>,
@@ -63,12 +36,10 @@ export default defineComponent({
       required: true,
     },
   },
-  methods: {
-    renameContent(id: string, currentTitle: string) {
-      const nextTitle = window.prompt("Rename document", currentTitle);
-      if (!nextTitle || nextTitle.trim() === currentTitle) return;
-      this.$emit("rename-content", { id, title: nextTitle.trim() });
-    },
+  data() {
+    return {
+      fileTextIcon: FILE_TEXT_ICON,
+    };
   },
 });
 </script>

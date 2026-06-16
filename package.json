@@ -1,15 +1,16 @@
 {
-  "name": "draftly",
-  "version": "0.0.1",
+  "name": "markora",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "harness:check": "python3 ops/harness/check-harness.py .",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build --filter=draftly && changeset publish"
+    "release": "turbo run build --filter=markora && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
@@ -24,7 +25,7 @@
     "node": ">=20"
   },
   "workspaces": [
-    "apps/*",
+    "playground/*",
     "packages/*"
   ]
 }
