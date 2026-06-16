@@ -64,7 +64,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import type { DraftlyNode } from "draftly/editor";
+import type { MarkoraNode } from "markora/editor";
 import CreateContentDialog from "./CreateContentDialog.vue";
 import PlaygroundDevbar from "./Devbar.vue";
 import EditorPane from "./EditorPane.vue";
@@ -107,7 +107,7 @@ export default Vue.extend({
       currentContent: snapshot.currentContent,
       mode: "live" as PlaygroundMode,
       config: createDefaultConfig() as PlaygroundConfig,
-      nodes: [] as DraftlyNode[],
+      nodes: [] as MarkoraNode[],
       output: null as PreviewOutput | null,
       outputTime: null as number | null,
       showNodes: false,

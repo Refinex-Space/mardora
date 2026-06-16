@@ -53,7 +53,7 @@ export default function Header({
         <Button variant="ghost" size="icon" className="size-8 p-1" onClick={() => setSidebarOpen(!sidebarOpen)}>
           {sidebarOpen ? <PanelLeftCloseIcon className="size-5" /> : <PanelLeftOpenIcon className="size-5" />}
         </Button>
-        <h2 className="text-xl font-mono">draftly</h2>
+        <h2 className="text-xl font-mono">markora</h2>
       </div>
       <div className="flex items-center gap-2">
         {saveStatus !== "idle" && (

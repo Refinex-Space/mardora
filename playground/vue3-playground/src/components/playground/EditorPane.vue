@@ -45,13 +45,13 @@ import { css } from "@codemirror/lang-css";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import type { DraftlyNode, DraftlyTocItem } from "draftly/editor";
-import { draftly, ThemeEnum } from "draftly/editor";
-import { extractPreviewTocFromMarkdown, generateCSS, preview } from "draftly/preview";
+import type { MarkoraNode, MarkoraTocItem } from "markora/editor";
+import { markora, ThemeEnum } from "markora/editor";
+import { extractPreviewTocFromMarkdown, generateCSS, preview } from "markora/preview";
 import { getActivePlugins } from "@/state/playgroundConfig";
 import type { Content, PlaygroundConfig, PlaygroundMode, PreviewOutput, ThemeMode } from "@/types";
 
-const previewTocStorageKey = "draftly-vue3-playground:preview-toc-width";
+const previewTocStorageKey = "markora-vue3-playground:preview-toc-width";
 const previewTocMinWidth = 180;
 const previewTocMaxWidth = 360;
 const previewTocDefaultWidth = 240;
@@ -104,7 +104,7 @@ export default defineComponent({
       renderRequest: 0,
       objectUrls: [] as string[],
       previewTocWidth: readPreviewTocWidth(),
-      previewToc: [] as DraftlyTocItem[],
+      previewToc: [] as MarkoraTocItem[],
       previewTocManualActiveUntil: 0,
     };
   },
@@ -174,7 +174,7 @@ export default defineComponent({
     cmTheme() {
       return this.theme === "dark" ? githubDark : githubLight;
     },
-    draftlyTheme() {
+    markoraTheme() {
       return this.theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT;
     },
     destroyViews() {
@@ -239,8 +239,8 @@ export default defineComponent({
           doc: this.content.content,
           extensions: [
             this.cmTheme(),
-            draftly({
-              theme: this.draftlyTheme(),
+            markora({
+              theme: this.markoraTheme(),
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
               plugins: getActivePlugins(this.config.plugins),
@@ -269,7 +269,7 @@ export default defineComponent({
                   file: ["*/*"],
                 },
               },
-              onNodesChange: (nodes: DraftlyNode[]) => {
+              onNodesChange: (nodes: MarkoraNode[]) => {
                 if (this.showNodes) {
                   this.$emit("nodes-change", nodes);
                 }
@@ -288,19 +288,19 @@ export default defineComponent({
       const plugins = getActivePlugins(this.config.plugins);
 
       const htmlOutput = await preview(this.content.content, {
-        theme: this.draftlyTheme(),
+        theme: this.markoraTheme(),
         plugins,
         markdown: [],
         syntaxTheme,
         sanitize: this.config.preview.sanitize,
         wrapperTag: "div",
-        wrapperClass: "draftly-preview vue3-preview",
+        wrapperClass: "markora-preview vue3-preview",
       });
 
       const cssOutput = generateCSS({
-        theme: this.draftlyTheme(),
+        theme: this.markoraTheme(),
         plugins,
-        wrapperClass: "draftly-preview",
+        wrapperClass: "markora-preview",
         includeBase: this.config.preview.includeBase,
         syntaxTheme,
       });
@@ -333,7 +333,7 @@ export default defineComponent({
         onTocChange: this.handleEditorTocChange,
       };
     },
-    handleEditorTocChange(items: DraftlyTocItem[]) {
+    handleEditorTocChange(items: MarkoraTocItem[]) {
       if (Date.now() >= this.previewTocManualActiveUntil) {
         this.previewToc = items;
         return;
@@ -380,7 +380,7 @@ export default defineComponent({
         }),
       });
     },
-    jumpToc(item: DraftlyTocItem) {
+    jumpToc(item: MarkoraTocItem) {
       if (this.mode === "live") {
         this.jumpEditorToc(item);
         return;
@@ -388,7 +388,7 @@ export default defineComponent({
 
       this.jumpPreviewToc(item.id);
     },
-    jumpEditorToc(item: DraftlyTocItem) {
+    jumpEditorToc(item: MarkoraTocItem) {
       if (!this.editorView || typeof item.from !== "number") return;
 
       this.previewTocManualActiveUntil = Date.now() + 650;

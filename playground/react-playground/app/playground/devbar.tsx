@@ -1,13 +1,13 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@workspace/ui/components/accordion";
 import { Switch } from "@workspace/ui/components/switch";
 import { Label } from "@workspace/ui/components/label";
-import { allPlugins, DraftlyNode } from "draftly/src";
+import { allPlugins, MarkoraNode } from "markora/src";
 import React from "react";
 import { PlaygroundConfig } from "./page";
 
 type Props = {
   setShowNodes: (show: boolean) => void;
-  nodes: DraftlyNode[];
+  nodes: MarkoraNode[];
   config: PlaygroundConfig;
   setConfig: React.Dispatch<React.SetStateAction<PlaygroundConfig>>;
   outputTime?: number | null;
@@ -30,7 +30,7 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
     }));
   };
 
-  // Helper to toggle Draftly feature config
+  // Helper to toggle Markora feature config
   const toggleFeatureOption = (key: keyof PlaygroundConfig["features"]) => {
     setConfig((prev) => ({
       ...prev,
@@ -254,7 +254,7 @@ function ConfigSwitch({
   );
 }
 
-function NodeViewer({ nodes, depth = 0 }: { nodes: DraftlyNode[]; depth?: number }) {
+function NodeViewer({ nodes, depth = 0 }: { nodes: MarkoraNode[]; depth?: number }) {
   return (
     <div className="font-mono text-xs">
       {nodes.map((node, idx) => (

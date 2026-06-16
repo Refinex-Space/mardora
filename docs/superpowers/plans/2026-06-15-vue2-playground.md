@@ -2,59 +2,59 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a Vue 2.6 + Vue CLI 4 + Webpack 4 playground app that matches the current Draftly `/playground` capabilities.
+**Goal:** Build a Vue 2.6 + Vue CLI 4 + Webpack 4 playground app that matches the current Markora `/playground` capabilities.
 
-**Architecture:** Add `apps/vue2-playground` as an isolated workspace app. It consumes built `draftly` package exports, manages CodeMirror 6 directly from Vue2 lifecycle hooks, and copies playground data/config locally so the React playground remains untouched.
+**Architecture:** Add `playground/vue2-playground` as an isolated workspace app. It consumes built `markora` package exports, manages CodeMirror 6 directly from Vue2 lifecycle hooks, and copies playground data/config locally so the React playground remains untouched.
 
-**Tech Stack:** Vue 2.6.14, Vue CLI 4.5.19, Webpack 4, TypeScript, CodeMirror 6, Draftly package exports, localStorage, Jest through Vue CLI unit test plugin.
+**Tech Stack:** Vue 2.6.14, Vue CLI 4.5.19, Webpack 4, TypeScript, CodeMirror 6, Markora package exports, localStorage, Jest through Vue CLI unit test plugin.
 
 ---
 
 ## File Structure
 
-- Create `apps/vue2-playground/package.json`: Vue CLI app scripts and dependencies.
-- Create `apps/vue2-playground/babel.config.js`: Vue CLI Babel preset.
-- Create `apps/vue2-playground/tsconfig.json`: TypeScript config for Vue2 SFCs and tests.
-- Create `apps/vue2-playground/vue.config.js`: Webpack 4 compatibility and workspace package resolution.
-- Create `apps/vue2-playground/public/index.html`: Vue CLI HTML shell.
-- Create `apps/vue2-playground/src/main.ts`: Vue app bootstrap.
-- Create `apps/vue2-playground/src/App.vue`: App root that renders the playground.
-- Create `apps/vue2-playground/src/shims-vue.d.ts`: Vue SFC typing.
-- Create `apps/vue2-playground/src/types.ts`: Shared playground types.
-- Create `apps/vue2-playground/src/data/md/what-is-draftly.ts`: Copied first default Markdown document.
-- Create `apps/vue2-playground/src/data/md/walkthrough.ts`: Copied walkthrough Markdown document.
-- Create `apps/vue2-playground/src/data/defaultContents.ts`: Copied default documents and storage version.
-- Create `apps/vue2-playground/src/state/storage.ts`: localStorage load/save helpers.
-- Create `apps/vue2-playground/src/state/playgroundConfig.ts`: default config and plugin toggle helpers.
-- Create `apps/vue2-playground/src/utils/contentMetrics.ts`: word, line, and character counts.
-- Create `apps/vue2-playground/src/components/playground/Playground.vue`: top-level state owner.
-- Create `apps/vue2-playground/src/components/playground/Header.vue`: panel toggles, mode switch, save status.
-- Create `apps/vue2-playground/src/components/playground/Sidebar.vue`: document list and document actions.
-- Create `apps/vue2-playground/src/components/playground/CreateContentDialog.vue`: create-document form.
-- Create `apps/vue2-playground/src/components/playground/EditorPane.vue`: CodeMirror editor, preview, output panes.
-- Create `apps/vue2-playground/src/components/playground/Devbar.vue`: plugin/config toggles and AST view.
-- Create `apps/vue2-playground/src/components/playground/Footer.vue`: counts.
-- Create `apps/vue2-playground/tests/unit/storage.spec.ts`: persistence behavior tests.
-- Create `apps/vue2-playground/tests/unit/playgroundConfig.spec.ts`: plugin/config defaults tests.
-- Create `apps/vue2-playground/tests/unit/contentMetrics.spec.ts`: count behavior tests.
+- Create `playground/vue2-playground/package.json`: Vue CLI app scripts and dependencies.
+- Create `playground/vue2-playground/babel.config.js`: Vue CLI Babel preset.
+- Create `playground/vue2-playground/tsconfig.json`: TypeScript config for Vue2 SFCs and tests.
+- Create `playground/vue2-playground/vue.config.js`: Webpack 4 compatibility and workspace package resolution.
+- Create `playground/vue2-playground/public/index.html`: Vue CLI HTML shell.
+- Create `playground/vue2-playground/src/main.ts`: Vue app bootstrap.
+- Create `playground/vue2-playground/src/App.vue`: App root that renders the playground.
+- Create `playground/vue2-playground/src/shims-vue.d.ts`: Vue SFC typing.
+- Create `playground/vue2-playground/src/types.ts`: Shared playground types.
+- Create `playground/vue2-playground/src/data/md/what-is-markora.ts`: Copied first default Markdown document.
+- Create `playground/vue2-playground/src/data/md/walkthrough.ts`: Copied walkthrough Markdown document.
+- Create `playground/vue2-playground/src/data/defaultContents.ts`: Copied default documents and storage version.
+- Create `playground/vue2-playground/src/state/storage.ts`: localStorage load/save helpers.
+- Create `playground/vue2-playground/src/state/playgroundConfig.ts`: default config and plugin toggle helpers.
+- Create `playground/vue2-playground/src/utils/contentMetrics.ts`: word, line, and character counts.
+- Create `playground/vue2-playground/src/components/playground/Playground.vue`: top-level state owner.
+- Create `playground/vue2-playground/src/components/playground/Header.vue`: panel toggles, mode switch, save status.
+- Create `playground/vue2-playground/src/components/playground/Sidebar.vue`: document list and document actions.
+- Create `playground/vue2-playground/src/components/playground/CreateContentDialog.vue`: create-document form.
+- Create `playground/vue2-playground/src/components/playground/EditorPane.vue`: CodeMirror editor, preview, output panes.
+- Create `playground/vue2-playground/src/components/playground/Devbar.vue`: plugin/config toggles and AST view.
+- Create `playground/vue2-playground/src/components/playground/Footer.vue`: counts.
+- Create `playground/vue2-playground/tests/unit/storage.spec.ts`: persistence behavior tests.
+- Create `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`: plugin/config defaults tests.
+- Create `playground/vue2-playground/tests/unit/contentMetrics.spec.ts`: count behavior tests.
 - Modify `README.md`: add Vue2 playground commands and relationship to the existing Next playground.
 - Modify `turbo.json` only if Vue2 app build/lint tasks need output or cache metadata not already covered.
 
 ## Task 1: Scaffold Vue CLI 4 App Shell
 
 **Files:**
-- Create: `apps/vue2-playground/package.json`
-- Create: `apps/vue2-playground/babel.config.js`
-- Create: `apps/vue2-playground/tsconfig.json`
-- Create: `apps/vue2-playground/vue.config.js`
-- Create: `apps/vue2-playground/public/index.html`
-- Create: `apps/vue2-playground/src/main.ts`
-- Create: `apps/vue2-playground/src/App.vue`
-- Create: `apps/vue2-playground/src/shims-vue.d.ts`
+- Create: `playground/vue2-playground/package.json`
+- Create: `playground/vue2-playground/babel.config.js`
+- Create: `playground/vue2-playground/tsconfig.json`
+- Create: `playground/vue2-playground/vue.config.js`
+- Create: `playground/vue2-playground/public/index.html`
+- Create: `playground/vue2-playground/src/main.ts`
+- Create: `playground/vue2-playground/src/App.vue`
+- Create: `playground/vue2-playground/src/shims-vue.d.ts`
 
 - [ ] **Step 1: Add the Vue2 package manifest**
 
-Create `apps/vue2-playground/package.json` with this content:
+Create `playground/vue2-playground/package.json` with this content:
 
 ```json
 {
@@ -78,7 +78,7 @@ Create `apps/vue2-playground/package.json` with this content:
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.39.11",
     "@uiw/codemirror-theme-github": "^4.25.4",
-    "draftly": "workspace:*",
+    "markora": "workspace:*",
     "uuid": "^13.0.0",
     "vue": "2.6.14"
   },
@@ -104,7 +104,7 @@ Create `apps/vue2-playground/package.json` with this content:
 
 - [ ] **Step 2: Add Vue CLI config files**
 
-Create `apps/vue2-playground/babel.config.js`:
+Create `playground/vue2-playground/babel.config.js`:
 
 ```js
 module.exports = {
@@ -112,7 +112,7 @@ module.exports = {
 };
 ```
 
-Create `apps/vue2-playground/tsconfig.json`:
+Create `playground/vue2-playground/tsconfig.json`:
 
 ```json
 {
@@ -138,13 +138,13 @@ Create `apps/vue2-playground/tsconfig.json`:
 }
 ```
 
-Create `apps/vue2-playground/vue.config.js`:
+Create `playground/vue2-playground/vue.config.js`:
 
 ```js
 const path = require("path");
 
 module.exports = {
-  transpileDependencies: ["draftly", "@codemirror", "@lezer", "style-mod", "uuid"],
+  transpileDependencies: ["markora", "@codemirror", "@lezer", "style-mod", "uuid"],
   configureWebpack: {
     resolve: {
       symlinks: true,
@@ -158,7 +158,7 @@ module.exports = {
 
 - [ ] **Step 3: Add the Vue app entry files**
 
-Create `apps/vue2-playground/public/index.html`:
+Create `playground/vue2-playground/public/index.html`:
 
 ```html
 <!DOCTYPE html>
@@ -167,16 +167,16 @@ Create `apps/vue2-playground/public/index.html`:
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Draftly Vue2 Playground</title>
+    <title>Markora Vue2 Playground</title>
   </head>
   <body>
-    <noscript>JavaScript is required to run Draftly Vue2 Playground.</noscript>
+    <noscript>JavaScript is required to run Markora Vue2 Playground.</noscript>
     <div id="app"></div>
   </body>
 </html>
 ```
 
-Create `apps/vue2-playground/src/main.ts`:
+Create `playground/vue2-playground/src/main.ts`:
 
 ```ts
 import Vue from "vue";
@@ -190,7 +190,7 @@ new Vue({
 }).$mount("#app");
 ```
 
-Create `apps/vue2-playground/src/App.vue`:
+Create `playground/vue2-playground/src/App.vue`:
 
 ```vue
 <template>
@@ -210,7 +210,7 @@ export default Vue.extend({
 </script>
 ```
 
-Create `apps/vue2-playground/src/shims-vue.d.ts`:
+Create `playground/vue2-playground/src/shims-vue.d.ts`:
 
 ```ts
 declare module "*.vue" {
@@ -228,14 +228,14 @@ Run:
 bun install
 ```
 
-Expected: install completes and updates only the root `bun.lock`; no `apps/vue2-playground/package-lock.json` or `apps/vue2-playground/pnpm-lock.yaml` is created.
+Expected: install completes and updates only the root `bun.lock`; no `playground/vue2-playground/package-lock.json` or `playground/vue2-playground/pnpm-lock.yaml` is created.
 
 - [ ] **Step 5: Run the first shell build**
 
 Run:
 
 ```bash
-bun run --cwd apps/vue2-playground build
+bun run --cwd playground/vue2-playground build
 ```
 
 Expected: build fails because `Playground.vue` and `styles.css` do not exist yet. The failure confirms Vue CLI can start from the new app manifest.
@@ -245,7 +245,7 @@ Expected: build fails because `Playground.vue` and `styles.css` do not exist yet
 Run:
 
 ```bash
-git add apps/vue2-playground/package.json apps/vue2-playground/babel.config.js apps/vue2-playground/tsconfig.json apps/vue2-playground/vue.config.js apps/vue2-playground/public/index.html apps/vue2-playground/src/main.ts apps/vue2-playground/src/App.vue apps/vue2-playground/src/shims-vue.d.ts bun.lock
+git add playground/vue2-playground/package.json playground/vue2-playground/babel.config.js playground/vue2-playground/tsconfig.json playground/vue2-playground/vue.config.js playground/vue2-playground/public/index.html playground/vue2-playground/src/main.ts playground/vue2-playground/src/App.vue playground/vue2-playground/src/shims-vue.d.ts bun.lock
 git commit -m "feat(playground): scaffold vue2 playground app"
 ```
 
@@ -254,23 +254,23 @@ Expected: commit succeeds and does not include existing unrelated `README.md` ch
 ## Task 2: Add Shared Types, Default Content, and Pure State Helpers
 
 **Files:**
-- Create: `apps/vue2-playground/src/types.ts`
-- Create: `apps/vue2-playground/src/data/md/what-is-draftly.ts`
-- Create: `apps/vue2-playground/src/data/md/walkthrough.ts`
-- Create: `apps/vue2-playground/src/data/defaultContents.ts`
-- Create: `apps/vue2-playground/src/state/storage.ts`
-- Create: `apps/vue2-playground/src/state/playgroundConfig.ts`
-- Create: `apps/vue2-playground/src/utils/contentMetrics.ts`
-- Create: `apps/vue2-playground/tests/unit/storage.spec.ts`
-- Create: `apps/vue2-playground/tests/unit/playgroundConfig.spec.ts`
-- Create: `apps/vue2-playground/tests/unit/contentMetrics.spec.ts`
+- Create: `playground/vue2-playground/src/types.ts`
+- Create: `playground/vue2-playground/src/data/md/what-is-markora.ts`
+- Create: `playground/vue2-playground/src/data/md/walkthrough.ts`
+- Create: `playground/vue2-playground/src/data/defaultContents.ts`
+- Create: `playground/vue2-playground/src/state/storage.ts`
+- Create: `playground/vue2-playground/src/state/playgroundConfig.ts`
+- Create: `playground/vue2-playground/src/utils/contentMetrics.ts`
+- Create: `playground/vue2-playground/tests/unit/storage.spec.ts`
+- Create: `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`
+- Create: `playground/vue2-playground/tests/unit/contentMetrics.spec.ts`
 
 - [ ] **Step 1: Add shared TypeScript types**
 
-Create `apps/vue2-playground/src/types.ts`:
+Create `playground/vue2-playground/src/types.ts`:
 
 ```ts
-import type { DraftlyNode } from "draftly/editor";
+import type { MarkoraNode } from "markora/editor";
 
 export type PlaygroundMode = "live" | "view" | "code" | "output";
 export type SaveStatus = "idle" | "saving" | "saved";
@@ -309,7 +309,7 @@ export interface PlaygroundStateSnapshot {
   version: number;
 }
 
-export type NodesChangeHandler = (nodes: DraftlyNode[]) => void;
+export type NodesChangeHandler = (nodes: MarkoraNode[]) => void;
 ```
 
 - [ ] **Step 2: Copy default Markdown modules into the Vue2 app**
@@ -317,21 +317,21 @@ export type NodesChangeHandler = (nodes: DraftlyNode[]) => void;
 Run:
 
 ```bash
-mkdir -p apps/vue2-playground/src/data/md
-cp apps/web/app/data/md/what-id-draftly.ts apps/vue2-playground/src/data/md/what-is-draftly.ts
-cp apps/web/app/data/md/walkthrough.ts apps/vue2-playground/src/data/md/walkthrough.ts
+mkdir -p playground/vue2-playground/src/data/md
+cp playground/react-playground/app/data/md/what-id-markora.ts playground/vue2-playground/src/data/md/what-is-markora.ts
+cp playground/react-playground/app/data/md/walkthrough.ts playground/vue2-playground/src/data/md/walkthrough.ts
 ```
 
 Expected: the two Vue2 files export the same default Markdown strings as the existing React playground files.
 
 - [ ] **Step 3: Add default content registry**
 
-Create `apps/vue2-playground/src/data/defaultContents.ts`:
+Create `playground/vue2-playground/src/data/defaultContents.ts`:
 
 
 ```ts
 import type { Content } from "@/types";
-import whatIsDraftly from "./md/what-is-draftly";
+import whatIsMarkora from "./md/what-is-markora";
 import walkthrough from "./md/walkthrough";
 
 export const STORAGE_VERSION = 1;
@@ -339,8 +339,8 @@ export const STORAGE_VERSION = 1;
 export const defaultContents: Content[] = [
   {
     id: "0",
-    title: "What is Draftly?",
-    content: whatIsDraftly,
+    title: "What is Markora?",
+    content: whatIsMarkora,
   },
   {
     id: "1",
@@ -354,14 +354,14 @@ export const defaultContentIds = new Set(defaultContents.map((content) => conten
 
 - [ ] **Step 4: Add config helper tests**
 
-Create `apps/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
+Create `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
 
 ```ts
-import { allPlugins } from "draftly/plugins";
+import { allPlugins } from "markora/plugins";
 import { createDefaultConfig, getActivePlugins } from "@/state/playgroundConfig";
 
 describe("playgroundConfig", () => {
-  it("enables every Draftly plugin by default", () => {
+  it("enables every Markora plugin by default", () => {
     const config = createDefaultConfig();
 
     for (const plugin of allPlugins) {
@@ -383,11 +383,11 @@ describe("playgroundConfig", () => {
 
 - [ ] **Step 5: Add config helpers**
 
-Create `apps/vue2-playground/src/state/playgroundConfig.ts`:
+Create `playground/vue2-playground/src/state/playgroundConfig.ts`:
 
 ```ts
-import { allPlugins } from "draftly/plugins";
-import type { DraftlyPlugin } from "draftly/editor";
+import { allPlugins } from "markora/plugins";
+import type { MarkoraPlugin } from "markora/editor";
 import type { PlaygroundConfig, PluginConfig } from "@/types";
 
 export function createDefaultPluginConfig(): PluginConfig {
@@ -412,14 +412,14 @@ export function createDefaultConfig(): PlaygroundConfig {
   };
 }
 
-export function getActivePlugins(pluginConfig: PluginConfig): DraftlyPlugin[] {
+export function getActivePlugins(pluginConfig: PluginConfig): MarkoraPlugin[] {
   return allPlugins.filter((plugin) => pluginConfig[plugin.name.toLowerCase()] !== false);
 }
 ```
 
 - [ ] **Step 6: Add storage tests**
 
-Create `apps/vue2-playground/tests/unit/storage.spec.ts`:
+Create `playground/vue2-playground/tests/unit/storage.spec.ts`:
 
 ```ts
 import { defaultContents, STORAGE_VERSION } from "@/data/defaultContents";
@@ -476,15 +476,15 @@ describe("storage", () => {
 
 - [ ] **Step 7: Add storage helpers**
 
-Create `apps/vue2-playground/src/state/storage.ts`:
+Create `playground/vue2-playground/src/state/storage.ts`:
 
 ```ts
 import { defaultContentIds, defaultContents, STORAGE_VERSION } from "@/data/defaultContents";
 import type { Content, PlaygroundStateSnapshot } from "@/types";
 
-export const STORAGE_CONTENTS_KEY = "draftly-vue2-playground-contents";
-export const STORAGE_CURRENT_KEY = "draftly-vue2-playground-current";
-export const STORAGE_VERSION_KEY = "draftly-vue2-playground-version";
+export const STORAGE_CONTENTS_KEY = "markora-vue2-playground-contents";
+export const STORAGE_CURRENT_KEY = "markora-vue2-playground-current";
+export const STORAGE_VERSION_KEY = "markora-vue2-playground-version";
 
 function persistSnapshot(contents: Content[], currentContent: number): void {
   localStorage.setItem(STORAGE_CONTENTS_KEY, JSON.stringify(contents));
@@ -537,7 +537,7 @@ export function savePlaygroundSnapshot(contents: Content[], currentContent: numb
 
 - [ ] **Step 8: Add content metric tests**
 
-Create `apps/vue2-playground/tests/unit/contentMetrics.spec.ts`:
+Create `playground/vue2-playground/tests/unit/contentMetrics.spec.ts`:
 
 ```ts
 import { getContentMetrics } from "@/utils/contentMetrics";
@@ -563,7 +563,7 @@ describe("contentMetrics", () => {
 
 - [ ] **Step 9: Add content metric helper**
 
-Create `apps/vue2-playground/src/utils/contentMetrics.ts`:
+Create `playground/vue2-playground/src/utils/contentMetrics.ts`:
 
 ```ts
 export interface ContentMetrics {
@@ -590,7 +590,7 @@ export function getContentMetrics(content: string): ContentMetrics {
 Run:
 
 ```bash
-bun run --cwd apps/vue2-playground test:unit -- --runInBand
+bun run --cwd playground/vue2-playground test:unit -- --runInBand
 ```
 
 Expected: all three unit test files pass.
@@ -600,7 +600,7 @@ Expected: all three unit test files pass.
 Run:
 
 ```bash
-git add apps/vue2-playground/src/types.ts apps/vue2-playground/src/data/md/what-is-draftly.ts apps/vue2-playground/src/data/md/walkthrough.ts apps/vue2-playground/src/data/defaultContents.ts apps/vue2-playground/src/state/storage.ts apps/vue2-playground/src/state/playgroundConfig.ts apps/vue2-playground/src/utils/contentMetrics.ts apps/vue2-playground/tests/unit/storage.spec.ts apps/vue2-playground/tests/unit/playgroundConfig.spec.ts apps/vue2-playground/tests/unit/contentMetrics.spec.ts
+git add playground/vue2-playground/src/types.ts playground/vue2-playground/src/data/md/what-is-markora.ts playground/vue2-playground/src/data/md/walkthrough.ts playground/vue2-playground/src/data/defaultContents.ts playground/vue2-playground/src/state/storage.ts playground/vue2-playground/src/state/playgroundConfig.ts playground/vue2-playground/src/utils/contentMetrics.ts playground/vue2-playground/tests/unit/storage.spec.ts playground/vue2-playground/tests/unit/playgroundConfig.spec.ts playground/vue2-playground/tests/unit/contentMetrics.spec.ts
 git commit -m "feat(playground): add vue2 playground state helpers"
 ```
 
@@ -609,17 +609,17 @@ Expected: commit succeeds with only Vue2 playground helper and test files.
 ## Task 3: Build Vue2 Playground Layout Components
 
 **Files:**
-- Create: `apps/vue2-playground/src/styles.css`
-- Create: `apps/vue2-playground/src/components/playground/Playground.vue`
-- Create: `apps/vue2-playground/src/components/playground/Header.vue`
-- Create: `apps/vue2-playground/src/components/playground/Sidebar.vue`
-- Create: `apps/vue2-playground/src/components/playground/CreateContentDialog.vue`
-- Create: `apps/vue2-playground/src/components/playground/Devbar.vue`
-- Create: `apps/vue2-playground/src/components/playground/Footer.vue`
+- Create: `playground/vue2-playground/src/styles.css`
+- Create: `playground/vue2-playground/src/components/playground/Playground.vue`
+- Create: `playground/vue2-playground/src/components/playground/Header.vue`
+- Create: `playground/vue2-playground/src/components/playground/Sidebar.vue`
+- Create: `playground/vue2-playground/src/components/playground/CreateContentDialog.vue`
+- Create: `playground/vue2-playground/src/components/playground/Devbar.vue`
+- Create: `playground/vue2-playground/src/components/playground/Footer.vue`
 
 - [ ] **Step 1: Add global layout styles**
 
-Create `apps/vue2-playground/src/styles.css` with layout classes for:
+Create `playground/vue2-playground/src/styles.css` with layout classes for:
 
 - fixed-height app shell;
 - header and footer bars;
@@ -633,7 +633,7 @@ Use class names referenced by the Vue components in this task: `.playground-shel
 
 - [ ] **Step 2: Add Header component**
 
-Create `apps/vue2-playground/src/components/playground/Header.vue` with props:
+Create `playground/vue2-playground/src/components/playground/Header.vue` with props:
 
 ```ts
 mode: PlaygroundMode;
@@ -679,7 +679,7 @@ Create `Devbar.vue` with props:
 ```ts
 config: PlaygroundConfig;
 showNodes: boolean;
-nodes: DraftlyNode[];
+nodes: MarkoraNode[];
 outputTime: number | null;
 ```
 
@@ -720,17 +720,17 @@ The temporary central placeholder text should be `Editor integration pending`.
 Run:
 
 ```bash
-bun run --cwd apps/vue2-playground lint
+bun run --cwd playground/vue2-playground lint
 ```
 
-Expected: lint passes for scaffold and layout components. If the CLI prompts to fix issues, rerun with `bun run --cwd apps/vue2-playground lint -- --fix`, inspect the diff, then rerun lint without `--fix`.
+Expected: lint passes for scaffold and layout components. If the CLI prompts to fix issues, rerun with `bun run --cwd playground/vue2-playground lint -- --fix`, inspect the diff, then rerun lint without `--fix`.
 
 - [ ] **Step 8: Commit layout components**
 
 Run:
 
 ```bash
-git add apps/vue2-playground/src/styles.css apps/vue2-playground/src/components/playground/Playground.vue apps/vue2-playground/src/components/playground/Header.vue apps/vue2-playground/src/components/playground/Sidebar.vue apps/vue2-playground/src/components/playground/CreateContentDialog.vue apps/vue2-playground/src/components/playground/Devbar.vue apps/vue2-playground/src/components/playground/Footer.vue
+git add playground/vue2-playground/src/styles.css playground/vue2-playground/src/components/playground/Playground.vue playground/vue2-playground/src/components/playground/Header.vue playground/vue2-playground/src/components/playground/Sidebar.vue playground/vue2-playground/src/components/playground/CreateContentDialog.vue playground/vue2-playground/src/components/playground/Devbar.vue playground/vue2-playground/src/components/playground/Footer.vue
 git commit -m "feat(playground): add vue2 playground layout"
 ```
 
@@ -739,9 +739,9 @@ Expected: commit succeeds with no generated build output.
 ## Task 4: Add CodeMirror Editor, Preview, and Output Modes
 
 **Files:**
-- Create: `apps/vue2-playground/src/components/playground/EditorPane.vue`
-- Modify: `apps/vue2-playground/src/components/playground/Playground.vue`
-- Modify: `apps/vue2-playground/src/styles.css`
+- Create: `playground/vue2-playground/src/components/playground/EditorPane.vue`
+- Modify: `playground/vue2-playground/src/components/playground/Playground.vue`
+- Modify: `playground/vue2-playground/src/styles.css`
 
 - [ ] **Step 1: Add EditorPane component contract**
 
@@ -759,7 +759,7 @@ Emit events:
 
 ```ts
 "change-content" with string
-"nodes-change" with DraftlyNode[]
+"nodes-change" with MarkoraNode[]
 "output-change" with { output: PreviewOutput; outputTime: number | null }
 ```
 
@@ -768,7 +768,7 @@ Emit events:
 In `EditorPane.vue`, create an `EditorView` in `mounted`. Use `EditorState.create()` with these extensions:
 
 ```ts
-draftly({
+markora({
   theme: this.theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT,
   baseStyles: this.config.editor.baseStyles,
   plugins: getActivePlugins(this.config.plugins),
@@ -812,13 +812,13 @@ const html = await preview(markdown, {
   syntaxTheme: this.theme === "dark" ? githubDark : githubLight,
   sanitize: this.config.preview.sanitize,
   wrapperTag: "div",
-  wrapperClass: "draftly-preview",
+  wrapperClass: "markora-preview",
 });
 
 const css = generateCSS({
   theme: this.theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT,
   plugins: getActivePlugins(this.config.plugins),
-  wrapperClass: "draftly-preview",
+  wrapperClass: "markora-preview",
   includeBase: this.config.preview.includeBase,
   syntaxTheme: this.theme === "dark" ? githubDark : githubLight,
 });
@@ -845,46 +845,46 @@ Replace the temporary placeholder in `Playground.vue` with `EditorPane`. Wire:
 - nodes update event to `nodes`;
 - output update event to `output` and `outputTime`.
 
-- [ ] **Step 7: Build Draftly before testing the app**
+- [ ] **Step 7: Build Markora before testing the app**
 
 Run:
 
 ```bash
-bun run --cwd packages/draftly build
+bun run --cwd packages/markora build
 ```
 
-Expected: `packages/draftly/dist` is regenerated successfully.
+Expected: `packages/markora/dist` is regenerated successfully.
 
 - [ ] **Step 8: Run app build**
 
 Run:
 
 ```bash
-bun run --cwd apps/vue2-playground build
+bun run --cwd playground/vue2-playground build
 ```
 
-Expected: Vue CLI production build succeeds and writes `apps/vue2-playground/dist`, which remains ignored by git.
+Expected: Vue CLI production build succeeds and writes `playground/vue2-playground/dist`, which remains ignored by git.
 
 - [ ] **Step 9: Commit editor integration**
 
 Run:
 
 ```bash
-git add apps/vue2-playground/src/components/playground/EditorPane.vue apps/vue2-playground/src/components/playground/Playground.vue apps/vue2-playground/src/styles.css packages/draftly/dist
-git commit -m "feat(playground): integrate draftly in vue2 playground"
+git add playground/vue2-playground/src/components/playground/EditorPane.vue playground/vue2-playground/src/components/playground/Playground.vue playground/vue2-playground/src/styles.css packages/markora/dist
+git commit -m "feat(playground): integrate markora in vue2 playground"
 ```
 
-Expected: commit succeeds. If `packages/draftly/dist` is ignored or unchanged, leave it out of the commit.
+Expected: commit succeeds. If `packages/markora/dist` is ignored or unchanged, leave it out of the commit.
 
 ## Task 5: Complete UX Parity and Responsive Behavior
 
 **Files:**
-- Modify: `apps/vue2-playground/src/components/playground/Playground.vue`
-- Modify: `apps/vue2-playground/src/components/playground/Header.vue`
-- Modify: `apps/vue2-playground/src/components/playground/Sidebar.vue`
-- Modify: `apps/vue2-playground/src/components/playground/Devbar.vue`
-- Modify: `apps/vue2-playground/src/components/playground/EditorPane.vue`
-- Modify: `apps/vue2-playground/src/styles.css`
+- Modify: `playground/vue2-playground/src/components/playground/Playground.vue`
+- Modify: `playground/vue2-playground/src/components/playground/Header.vue`
+- Modify: `playground/vue2-playground/src/components/playground/Sidebar.vue`
+- Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
+- Modify: `playground/vue2-playground/src/components/playground/EditorPane.vue`
+- Modify: `playground/vue2-playground/src/styles.css`
 
 - [ ] **Step 1: Match initial panel behavior**
 
@@ -903,7 +903,7 @@ When `contents.length === 0` or `currentContent === -1`, show an empty state in 
 Run the dev server:
 
 ```bash
-bun run --cwd apps/vue2-playground dev
+bun run --cwd playground/vue2-playground dev
 ```
 
 Expected: Vue CLI serves the app at `http://localhost:3001`.
@@ -913,14 +913,14 @@ Manual checks:
 - create a document named `Scratch`;
 - rename it to `Scratch Renamed`;
 - delete it;
-- select `What is Draftly?`;
+- select `What is Markora?`;
 - reload the page and confirm the selected document persists.
 
 - [ ] **Step 5: Verify mode parity**
 
 At `http://localhost:3001`, check:
 
-- `live` mode renders Draftly rich editing;
+- `live` mode renders Markora rich editing;
 - `code` mode shows raw Markdown editing;
 - `view` mode renders generated preview HTML;
 - `output` mode shows generated HTML and CSS.
@@ -948,7 +948,7 @@ Use browser widths around `390px`, `768px`, and `1440px`. Check:
 Run:
 
 ```bash
-git add apps/vue2-playground/src/components/playground/Playground.vue apps/vue2-playground/src/components/playground/Header.vue apps/vue2-playground/src/components/playground/Sidebar.vue apps/vue2-playground/src/components/playground/Devbar.vue apps/vue2-playground/src/components/playground/EditorPane.vue apps/vue2-playground/src/styles.css
+git add playground/vue2-playground/src/components/playground/Playground.vue playground/vue2-playground/src/components/playground/Header.vue playground/vue2-playground/src/components/playground/Sidebar.vue playground/vue2-playground/src/components/playground/Devbar.vue playground/vue2-playground/src/components/playground/EditorPane.vue playground/vue2-playground/src/styles.css
 git commit -m "feat(playground): complete vue2 playground parity"
 ```
 
@@ -967,18 +967,18 @@ In `README.md`, add a subsection under local development explaining:
 ````md
 ### Vue2 Playground
 
-The repository also includes `apps/vue2-playground`, a Vue 2.6 + Vue CLI 4 + Webpack 4 compatibility playground. It mirrors the main `/playground` capabilities but is implemented independently from the Next.js app.
+The repository also includes `playground/vue2-playground`, a Vue 2.6 + Vue CLI 4 + Webpack 4 compatibility playground. It mirrors the main `/playground` capabilities but is implemented independently from the Next.js app.
 
-Build Draftly first:
+Build Markora first:
 
 ```bash
-bun run --cwd packages/draftly build
+bun run --cwd packages/markora build
 ```
 
 Then start the Vue2 playground:
 
 ```bash
-cd apps/vue2-playground
+cd playground/vue2-playground
 npm run dev
 ```
 
@@ -1001,7 +1001,7 @@ Preserve unrelated existing README edits by applying this section around the cur
 Run:
 
 ```bash
-bun run --cwd apps/vue2-playground test:unit -- --runInBand
+bun run --cwd playground/vue2-playground test:unit -- --runInBand
 ```
 
 Expected: all unit tests pass.
@@ -1011,7 +1011,7 @@ Expected: all unit tests pass.
 Run:
 
 ```bash
-bun run --cwd apps/vue2-playground lint
+bun run --cwd playground/vue2-playground lint
 ```
 
 Expected: lint passes.
@@ -1021,17 +1021,17 @@ Expected: lint passes.
 Run:
 
 ```bash
-bun run --cwd packages/draftly build
+bun run --cwd packages/markora build
 ```
 
-Expected: Draftly package build succeeds.
+Expected: Markora package build succeeds.
 
 - [ ] **Step 5: Run Vue2 production build**
 
 Run:
 
 ```bash
-bun run --cwd apps/vue2-playground build
+bun run --cwd playground/vue2-playground build
 ```
 
 Expected: Vue CLI production build succeeds.
@@ -1044,14 +1044,14 @@ Run:
 bun run build
 ```
 
-Expected: Turbo builds the repository. If this fails only because Vue CLI 4 does not support the root build environment, capture the exact failure, keep `apps/vue2-playground build` as the scoped gate, and document the reason in the final delivery.
+Expected: Turbo builds the repository. If this fails only because Vue CLI 4 does not support the root build environment, capture the exact failure, keep `playground/vue2-playground build` as the scoped gate, and document the reason in the final delivery.
 
 - [ ] **Step 7: Browser verification**
 
 Run:
 
 ```bash
-bun run --cwd apps/vue2-playground dev
+bun run --cwd playground/vue2-playground dev
 ```
 
 Open `http://localhost:3001` and verify:
@@ -1071,8 +1071,8 @@ Open `http://localhost:3001` and verify:
 Run:
 
 ```bash
-test ! -f apps/vue2-playground/package-lock.json
-test ! -f apps/vue2-playground/pnpm-lock.yaml
+test ! -f playground/vue2-playground/package-lock.json
+test ! -f playground/vue2-playground/pnpm-lock.yaml
 git status --short
 ```
 
@@ -1083,7 +1083,7 @@ Expected: no app-local lockfile exists; `dist` and build outputs are not staged.
 Run:
 
 ```bash
-git add README.md turbo.json apps/vue2-playground
+git add README.md turbo.json playground/vue2-playground
 git commit -m "docs(playground): document vue2 playground workflow"
 ```
 
@@ -1092,6 +1092,6 @@ Expected: commit succeeds. If `turbo.json` did not change, omit it from `git add
 ## Self-Review Checklist
 
 - Spec coverage: Tasks cover isolated Vue2 app creation, Vue 2.6 + Vue CLI 4 + Webpack 4 dependencies, package build consumption, full playground parity, separate storage keys, README documentation, and scoped verification.
-- Reserved marker scan: After Task 2, search `apps/vue2-playground` for unfinished-work markers and replace any match with finished source before committing.
+- Reserved marker scan: After Task 2, search `playground/vue2-playground` for unfinished-work markers and replace any match with finished source before committing.
 - Type consistency: `PlaygroundMode`, `PlaygroundConfig`, `Content`, `PreviewOutput`, `PluginConfig`, and `SaveStatus` are defined in `src/types.ts` and reused by components and helpers.
-- Rollback: revert the implementation commits, remove `apps/vue2-playground`, remove the README subsection, and remove any Vue2-specific Turbo metadata.
+- Rollback: revert the implementation commits, remove `playground/vue2-playground`, remove the README subsection, and remove any Vue2-specific Turbo metadata.

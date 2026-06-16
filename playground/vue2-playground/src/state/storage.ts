@@ -1,9 +1,9 @@
 import { defaultContentIds, defaultContents, STORAGE_VERSION } from "@/data/defaultContents";
 import type { Content, PlaygroundStateSnapshot } from "@/types";
 
-export const STORAGE_CONTENTS_KEY = "draftly-vue2-playground-contents";
-export const STORAGE_CURRENT_KEY = "draftly-vue2-playground-current";
-export const STORAGE_VERSION_KEY = "draftly-vue2-playground-version";
+export const STORAGE_CONTENTS_KEY = "markora-vue2-playground-contents";
+export const STORAGE_CURRENT_KEY = "markora-vue2-playground-current";
+export const STORAGE_VERSION_KEY = "markora-vue2-playground-version";
 
 function cloneDefaultContents(): Content[] {
   return defaultContents.map((content) => ({ ...content }));

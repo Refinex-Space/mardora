@@ -1,7 +1,7 @@
 export default `
-# Draftly — 完整指南
+# Markora — 完整指南
 
-**Draftly** 是一款基于 CodeMirror 6 的富 Markdown 编辑器扩展。它将一个标准的代码编辑器转变为美观的、WYSIWYG 风格的书写体验——在你输入时**就地**渲染标题、图片、数学公式、图表等。
+**Markora** 是一款基于 CodeMirror 6 的富 Markdown 编辑器扩展。它将一个标准的代码编辑器转变为美观的、WYSIWYG 风格的书写体验——在你输入时**就地**渲染标题、图片、数学公式、图表等。
 
 本指南涵盖了每一项特性、插件以及 API。让我们开始吧。
 
@@ -11,29 +11,29 @@ export default `
 通过 npm 安装该包：
 
 \`\`\`shell title="npm"
-npm install draftly
+npm install markora
 \`\`\`
 
 #### Peer Dependencies
-Draftly 需要以下 CodeMirror 6 peer dependencies：
+Markora 需要以下 CodeMirror 6 peer dependencies：
 
 \`\`\`shell title="peer deps" line-numbers
 npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
 \`\`\`
 
 ### 最小示例
-\`draftly()\` 函数返回一个 CodeMirror 扩展包。把它放入任意 \`EditorView\` 中：
+\`markora()\` 函数返回一个 CodeMirror 扩展包。把它放入任意 \`EditorView\` 中：
 
 \`\`\`ts title="main.ts" line-numbers caption="这就是让一个富编辑器跑起来所需的全部代码。"
 import { EditorView } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
-import { draftly } from "draftly/editor";
-import { allPlugins } from "draftly/plugins";
+import { markora } from "markora/editor";
+import { allPlugins } from "markora/plugins";
 
 const view = new EditorView({
   state: EditorState.create({
-    doc: "# Hello, Draftly!",
-    extensions: [draftly({ plugins: allPlugins })],
+    doc: "# Hello, Markora!",
+    extensions: [markora({ plugins: allPlugins })],
   }),
   parent: document.getElementById("editor")!,
 });
@@ -41,13 +41,13 @@ const view = new EditorView({
 
 ---
 ## 2. 配置
-\`draftly()\` 函数接收一个 \`DraftlyConfig\` 对象。下面是一个包含全部选项的完整示例：
+\`markora()\` 函数接收一个 \`MarkoraConfig\` 对象。下面是一个包含全部选项的完整示例：
 
 \`\`\`ts title="config.ts" line-numbers {4-15}
-import { draftly } from "draftly/editor";
-import { allPlugins } from "draftly/plugins";
+import { markora } from "markora/editor";
+import { allPlugins } from "markora/plugins";
 
-const extensions = draftly({
+const extensions = markora({
   theme: "auto",                // "auto" | "dark" | "light"
   baseStyles: true,             // 应用默认样式
   plugins: allPlugins,          // 要加载的插件
@@ -61,30 +61,30 @@ const extensions = draftly({
 });
 \`\`\`
 
-> 将 \`disableViewPlugin\` 设为 \`true\` 会把 Draftly 变成一个普通的 Markdown 编辑器——没有装饰、没有 widget，只有原始文本。
+> 将 \`disableViewPlugin\` 设为 \`true\` 会把 Markora 变成一个普通的 Markdown 编辑器——没有装饰、没有 widget，只有原始文本。
 
 ---
 ## 3. 斜杠命令与附件
 
-在空行行首输入 \`/\` 即可打开 Draftly 紧凑的命令菜单。使用方向键在命令间移动，回车插入，Esc 关闭菜单。
+在空行行首输入 \`/\` 即可打开 Markora 紧凑的命令菜单。使用方向键在命令间移动，回车插入，Esc 关闭菜单。
 
 媒体类命令使用浏览器的附件协议。在本 playground 中，上传通过本地 \`blob:\` URL 模拟，因此结果会立即预览。生产环境应用应提供一个 uploader，将文件存储到后端、OSS 或 MinIO 兼容的服务，并返回一个公开 URL。
 
-你也可以将文件粘贴或拖入编辑器。Draftly 会插入一个上传标记，调用配置好的 uploader，并在上传成功后将标记替换为 Markdown 或 HTML。
+你也可以将文件粘贴或拖入编辑器。Markora 会插入一个上传标记，调用配置好的 uploader，并在上传成功后将标记替换为 Markdown 或 HTML。
 
 ---
 ## 4. 模块化导出
-Draftly 提供三个入口，让你只导入所需内容：
+Markora 提供三个入口，让你只导入所需内容：
 
 | 入口               | 提供的内容 |
 |--------------------|-----------|
-| \`draftly/editor\`   | 核心 \`draftly()\` 函数、\`DraftlyPlugin\` 基类、工具函数 |
-| \`draftly/plugins\`  | 所有内置插件 + \`essentialPlugins\` / \`allPlugins\` 集合 |
-| \`draftly/preview\`  | 服务端 \`preview()\` 渲染器 + \`generateCSS()\` |
+| \`markora/editor\`   | 核心 \`markora()\` 函数、\`MarkoraPlugin\` 基类、工具函数 |
+| \`markora/plugins\`  | 所有内置插件 + \`essentialPlugins\` / \`allPlugins\` 集合 |
+| \`markora/preview\`  | 服务端 \`preview()\` 渲染器 + \`generateCSS()\` |
 
 ---
 ## 5. 插件系统
-Draftly 中的每一项特性都是一个 **plugin**。插件继承自抽象类 \`DraftlyPlugin\`，可以：
+Markora 中的每一项特性都是一个 **plugin**。插件继承自抽象类 \`MarkoraPlugin\`，可以：
 
 - **提供装饰** — 应用到编辑器上的 mark、line 和 widget decoration
 - **扩展 Markdown 解析器** — 通过 Lezer 实现自定义的 block/inline 语法
@@ -101,9 +101,9 @@ Draftly 中的每一项特性都是一个 **plugin**。插件继承自抽象类 
 
 #### 创建自定义插件
 \`\`\`ts title="my-plugin.ts" line-numbers caption="一个最小化的自定义插件骨架。"
-import { DraftlyPlugin, DecorationContext } from "draftly/editor";
+import { MarkoraPlugin, DecorationContext } from "markora/editor";
 
-class MyPlugin extends DraftlyPlugin {
+class MyPlugin extends MarkoraPlugin {
   readonly name = "my-plugin";
   readonly version = "1.0.0";
 
@@ -116,7 +116,7 @@ class MyPlugin extends DraftlyPlugin {
 ---
 ## 6. 内置插件 — 完整参考
 
-Draftly 内置了 **12** 个插件。每个插件处理特定的 Markdown 结构，提供键盘快捷键，应用主题，并为预览渲染 HTML。
+Markora 内置了 **12** 个插件。每个插件处理特定的 Markdown 结构，提供键盘快捷键，应用主题，并为预览渲染 HTML。
 
 ---
 ### 6.1 ParagraphPlugin
@@ -154,7 +154,7 @@ Draftly 内置了 **12** 个插件。每个插件处理特定的 Markdown 结构
 
 ---
 ### 6.4 LinkPlugin
-提供完整的 [链接](https://draftly.dev) 支持，带有可交互的悬停提示和智能插入。
+提供完整的 [链接](https://markora.dev) 支持，带有可交互的悬停提示和智能插入。
 
 **特性：**
 - **悬停** 链接可查看包含 URL 的提示
@@ -162,7 +162,7 @@ Draftly 内置了 **12** 个插件。每个插件处理特定的 Markdown 结构
 - **Ctrl+点击** 链接可在新标签页中打开
 - **\`Ctrl/Cmd + K\`** 插入/切换链接
 
-[访问 Draftly](https://github.com/neuronexul/draftly)
+[访问 Markora](https://github.com/Refinex-Space/markora)
 
 ---
 ### 6.5 ListPlugin
@@ -200,7 +200,7 @@ Draftly 内置了 **12** 个插件。每个插件处理特定的 Markdown 结构
 
 **语法：** \`![alt text](url "optional title")\`
 
-![Draftly Placeholder](https://res.cloudinary.com/djoo8ogmp/image/upload/v1746213279/uploaded/image_yjzjdl.png "A beautiful Minecraft sunset")
+![Markora Placeholder](https://res.cloudinary.com/djoo8ogmp/image/upload/v1746213279/uploaded/image_yjzjdl.png "A beautiful Minecraft sunset")
 
 **行为：** 图片始终渲染在语法下方。点击图片时会显示原始 Markdown 以便编辑。损坏的图片会显示一条有用的错误信息。
 
@@ -319,29 +319,29 @@ graph TD
 #### HTML 块
 <div style="text-align: center; padding: 1rem; border-radius: 0.5rem; border: 1px solid currentColor;">
   <strong>这是一个完整的 HTML 块</strong>
-  <p style="margin: 0.5rem 0;">Draftly 会就地渲染它，并在点击时显示原始源码。</p>
+  <p style="margin: 0.5rem 0;">Markora 会就地渲染它，并在点击时显示原始源码。</p>
 </div>
 
 ---
 ## 7. 静态预览（服务端渲染）
-Draftly 的 **preview** 模块可将 Markdown 渲染为语义化 HTML——非常适合服务端渲染、导出或静态站点生成。
+Markora 的 **preview** 模块可将 Markdown 渲染为语义化 HTML——非常适合服务端渲染、导出或静态站点生成。
 
 \`\`\`ts title="preview-example.ts" line-numbers caption="在服务端将 Markdown 渲染为 HTML。"
-import { preview } from "draftly/preview";
-import { allPlugins } from "draftly/plugins";
+import { preview } from "markora/preview";
+import { allPlugins } from "markora/plugins";
 
 const html = await preview("# Hello World\\n\\nSome **bold** text.", {
   plugins: allPlugins,
-  wrapperClass: "draftly-preview",
+  wrapperClass: "markora-preview",
   wrapperTag: "article",
   sanitize: true,
   theme: "auto",
 });
 
 console.log(html);
-// <article class="draftly-preview">
-//   <div class="cm-draftly-line-h1"><h1 class="cm-draftly-h1">Hello World</h1></div>
-//   <p class="cm-draftly-paragraph">Some <span class="cm-draftly-strong">bold</span> text.</p>
+// <article class="markora-preview">
+//   <div class="cm-markora-line-h1"><h1 class="cm-markora-h1">Hello World</h1></div>
+//   <p class="cm-markora-paragraph">Some <span class="cm-markora-strong">bold</span> text.</p>
 // </article>
 \`\`\`
 
@@ -349,13 +349,13 @@ console.log(html);
 使用 \`generateCSS()\` 为预览提取所有插件样式：
 
 \`\`\`ts title="css-gen.ts" line-numbers
-import { generateCSS } from "draftly/preview";
-import { allPlugins } from "draftly/plugins";
+import { generateCSS } from "markora/preview";
+import { allPlugins } from "markora/plugins";
 
 const css = generateCSS({
   plugins: allPlugins,
   theme: "auto",
-  wrapperClass: "draftly-preview",
+  wrapperClass: "markora-preview",
   includeBase: true,
 });
 \`\`\`
@@ -371,7 +371,7 @@ const css = generateCSS({
 | \`light\`   | 当 theme 为 \`"light"\` 时 |
 
 \`\`\`ts title="theme-example.ts" line-numbers caption="插件主题在内部是如何组织的。"
-import { createTheme } from "draftly/editor";
+import { createTheme } from "markora/editor";
 
 const myTheme = createTheme({
   default: {
@@ -415,18 +415,18 @@ const myTheme = createTheme({
 
 ---
 ## 10. 架构概览
-Draftly 基于清晰、分层的架构构建：
+Markora 基于清晰、分层的架构构建：
 
 \`\`\`mermaid
 graph LR
-    A[draftly/editor] --> B[DraftlyPlugin]
+    A[markora/editor] --> B[MarkoraPlugin]
     A --> C[View Plugin]
     A --> D[Theme System]
     B --> E[Decorations]
     B --> F[Markdown Parser]
     B --> G[Keymaps]
     B --> H[renderToHTML]
-    H --> I[draftly/preview]
+    H --> I[markora/preview]
     I --> J[PreviewRenderer]
     I --> K[generateCSS]
 \`\`\`
@@ -439,7 +439,7 @@ graph LR
 
 ---
 ## 11. 总结
-Draftly 兼具两者之长：**Markdown 的精确性** 与 **WYSIWYG 编辑器的流畅性**。凭借其模块化的插件系统、完整的键盘快捷键覆盖、dark/light 主题，以及编辑器 + 预览的双重渲染——它是现代 Markdown 编辑的完整解决方案。
+Markora 兼具两者之长：**Markdown 的精确性** 与 **WYSIWYG 编辑器的流畅性**。凭借其模块化的插件系统、完整的键盘快捷键覆盖、dark/light 主题，以及编辑器 + 预览的双重渲染——它是现代 Markdown 编辑的完整解决方案。
 
 | 特性               | 状态 |
 |-------------------|--------|

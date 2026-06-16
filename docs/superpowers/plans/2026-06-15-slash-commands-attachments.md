@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a compact Notion-like slash command menu and a framework-agnostic browser attachment upload protocol to Draftly, then verify it in both React and Vue2 playgrounds.
+**Goal:** Add a compact Notion-like slash command menu and a framework-agnostic browser attachment upload protocol to Markora, then verify it in both React and Vue2 playgrounds.
 
-**Architecture:** Implement two focused core modules under `packages/draftly/src/editor`: `slash` owns command matching, menu state, menu DOM, and command execution; `attachments` owns file kind detection, upload markers, upload result formatting, paste/drop/file selection, and async replacement. The existing `draftly()` entry point composes both modules through optional config, while React and Vue2 playgrounds provide mock uploaders that return local `blob:` URLs.
+**Architecture:** Implement two focused core modules under `packages/markora/src/editor`: `slash` owns command matching, menu state, menu DOM, and command execution; `attachments` owns file kind detection, upload markers, upload result formatting, paste/drop/file selection, and async replacement. The existing `markora()` entry point composes both modules through optional config, while React and Vue2 playgrounds provide mock uploaders that return local `blob:` URLs.
 
 **Tech Stack:** TypeScript, CodeMirror 6 `ViewPlugin`, `EditorView.domEventHandlers`, Bun test for core helper coverage, Next.js React playground, Vue 2.6 + Vue CLI 4 playground.
 
@@ -12,49 +12,49 @@
 
 ## File Structure
 
-- Create `packages/draftly/src/editor/slash/types.ts`: public slash command types and menu config.
-- Create `packages/draftly/src/editor/slash/default-commands.ts`: default basic block and media command definitions.
-- Create `packages/draftly/src/editor/slash/query.ts`: line-start trigger detection and command filtering.
-- Create `packages/draftly/src/editor/slash/insertions.ts`: reusable Markdown insertion helpers.
-- Create `packages/draftly/src/editor/slash/menu.ts`: framework-free compact menu DOM renderer.
-- Create `packages/draftly/src/editor/slash/theme.ts`: compact Notion-like slash menu theme.
-- Create `packages/draftly/src/editor/slash/extension.ts`: CodeMirror extension and view plugin for slash command lifecycle.
-- Create `packages/draftly/src/editor/slash/index.ts`: slash module exports.
-- Create `packages/draftly/src/editor/attachments/types.ts`: public attachment types and config.
-- Create `packages/draftly/src/editor/attachments/format.ts`: file kind detection, accept matching, output formatting, and upload marker formatting.
-- Create `packages/draftly/src/editor/attachments/extension.ts`: CodeMirror extension for file picking, paste, drop, and async upload replacement.
-- Create `packages/draftly/src/editor/attachments/index.ts`: attachment module exports.
-- Modify `packages/draftly/src/editor/draftly.ts`: add `slashCommands` and `attachments` config and compose extensions.
-- Modify `packages/draftly/src/editor/index.ts`: export slash and attachment APIs.
-- Modify `packages/draftly/package.json`: add a `test` script for Bun unit tests.
-- Create `packages/draftly/tests/slash-query.spec.ts`: slash trigger and filtering tests.
-- Create `packages/draftly/tests/slash-insertions.spec.ts`: basic command insertion tests.
-- Create `packages/draftly/tests/attachments-format.spec.ts`: attachment kind, accept, marker, and output formatting tests.
-- Create `packages/draftly/tests/attachments-upload.spec.ts`: async marker replacement behavior tests.
-- Modify `apps/web/app/playground/page.tsx`: pass slash and attachment config with mock uploader.
-- Modify `apps/web/app/playground/devbar.tsx`: add slash/attachment/paste-drop toggles.
-- Modify `apps/web/app/data/md/walkthrough.ts`: add usage documentation for the React playground.
-- Modify `apps/vue2-playground/src/types.ts`: add playground config toggles for slash and attachments.
-- Modify `apps/vue2-playground/src/state/playgroundConfig.ts`: add default feature toggles.
-- Modify `apps/vue2-playground/src/components/playground/Devbar.vue`: add Vue2 devbar switches.
-- Modify `apps/vue2-playground/src/components/playground/EditorPane.vue`: pass slash and attachment config with mock uploader.
-- Modify `apps/vue2-playground/src/shims-draftly.d.ts`: update temporary type declarations only if package exports are still unavailable to Vue CLI 4 during local development.
-- Modify `apps/vue2-playground/src/data/md/walkthrough.ts`: add usage documentation for the Vue2 playground.
-- Modify `packages/draftly/README.md`: document slash commands and attachment uploader integration.
-- Modify `packages/draftly/CHANGELOG.md`: add the unreleased feature summary.
+- Create `packages/markora/src/editor/slash/types.ts`: public slash command types and menu config.
+- Create `packages/markora/src/editor/slash/default-commands.ts`: default basic block and media command definitions.
+- Create `packages/markora/src/editor/slash/query.ts`: line-start trigger detection and command filtering.
+- Create `packages/markora/src/editor/slash/insertions.ts`: reusable Markdown insertion helpers.
+- Create `packages/markora/src/editor/slash/menu.ts`: framework-free compact menu DOM renderer.
+- Create `packages/markora/src/editor/slash/theme.ts`: compact Notion-like slash menu theme.
+- Create `packages/markora/src/editor/slash/extension.ts`: CodeMirror extension and view plugin for slash command lifecycle.
+- Create `packages/markora/src/editor/slash/index.ts`: slash module exports.
+- Create `packages/markora/src/editor/attachments/types.ts`: public attachment types and config.
+- Create `packages/markora/src/editor/attachments/format.ts`: file kind detection, accept matching, output formatting, and upload marker formatting.
+- Create `packages/markora/src/editor/attachments/extension.ts`: CodeMirror extension for file picking, paste, drop, and async upload replacement.
+- Create `packages/markora/src/editor/attachments/index.ts`: attachment module exports.
+- Modify `packages/markora/src/editor/markora.ts`: add `slashCommands` and `attachments` config and compose extensions.
+- Modify `packages/markora/src/editor/index.ts`: export slash and attachment APIs.
+- Modify `packages/markora/package.json`: add a `test` script for Bun unit tests.
+- Create `packages/markora/tests/slash-query.spec.ts`: slash trigger and filtering tests.
+- Create `packages/markora/tests/slash-insertions.spec.ts`: basic command insertion tests.
+- Create `packages/markora/tests/attachments-format.spec.ts`: attachment kind, accept, marker, and output formatting tests.
+- Create `packages/markora/tests/attachments-upload.spec.ts`: async marker replacement behavior tests.
+- Modify `playground/react-playground/app/playground/page.tsx`: pass slash and attachment config with mock uploader.
+- Modify `playground/react-playground/app/playground/devbar.tsx`: add slash/attachment/paste-drop toggles.
+- Modify `playground/react-playground/app/data/md/walkthrough.ts`: add usage documentation for the React playground.
+- Modify `playground/vue2-playground/src/types.ts`: add playground config toggles for slash and attachments.
+- Modify `playground/vue2-playground/src/state/playgroundConfig.ts`: add default feature toggles.
+- Modify `playground/vue2-playground/src/components/playground/Devbar.vue`: add Vue2 devbar switches.
+- Modify `playground/vue2-playground/src/components/playground/EditorPane.vue`: pass slash and attachment config with mock uploader.
+- Modify `playground/vue2-playground/src/shims-markora.d.ts`: update temporary type declarations only if package exports are still unavailable to Vue CLI 4 during local development.
+- Modify `playground/vue2-playground/src/data/md/walkthrough.ts`: add usage documentation for the Vue2 playground.
+- Modify `packages/markora/README.md`: document slash commands and attachment uploader integration.
+- Modify `packages/markora/CHANGELOG.md`: add the unreleased feature summary.
 
 ## Task 1: Add Core Test Entry and Slash Query Helpers
 
 **Files:**
-- Modify: `packages/draftly/package.json`
-- Create: `packages/draftly/src/editor/slash/types.ts`
-- Create: `packages/draftly/src/editor/slash/query.ts`
-- Create: `packages/draftly/src/editor/slash/index.ts`
-- Create: `packages/draftly/tests/slash-query.spec.ts`
+- Modify: `packages/markora/package.json`
+- Create: `packages/markora/src/editor/slash/types.ts`
+- Create: `packages/markora/src/editor/slash/query.ts`
+- Create: `packages/markora/src/editor/slash/index.ts`
+- Create: `packages/markora/tests/slash-query.spec.ts`
 
-- [ ] **Step 1: Add the draftly core test script**
+- [ ] **Step 1: Add the markora core test script**
 
-Modify `packages/draftly/package.json` scripts to include `test`:
+Modify `packages/markora/package.json` scripts to include `test`:
 
 ```json
 {
@@ -70,14 +70,14 @@ Modify `packages/draftly/package.json` scripts to include `test`:
 
 - [ ] **Step 2: Write failing slash query tests**
 
-Create `packages/draftly/tests/slash-query.spec.ts`:
+Create `packages/markora/tests/slash-query.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
 import { detectSlashQuery, filterSlashCommands } from "../src/editor/slash";
-import type { DraftlySlashCommand } from "../src/editor/slash";
+import type { MarkoraSlashCommand } from "../src/editor/slash";
 
-const commands: DraftlySlashCommand[] = [
+const commands: MarkoraSlashCommand[] = [
   {
     id: "paragraph",
     group: "basic",
@@ -150,55 +150,55 @@ describe("filterSlashCommands", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- slash-query.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- slash-query.spec.ts
 ```
 
-Expected: FAIL because `packages/draftly/src/editor/slash` does not exist.
+Expected: FAIL because `packages/markora/src/editor/slash` does not exist.
 
 - [ ] **Step 4: Add slash types and query helpers**
 
-Create `packages/draftly/src/editor/slash/types.ts`:
+Create `packages/markora/src/editor/slash/types.ts`:
 
 ```ts
 import type { EditorView } from "@codemirror/view";
 
-export type DraftlySlashCommandGroup = "basic" | "media";
+export type MarkoraSlashCommandGroup = "basic" | "media";
 
-export type DraftlySlashCommandContext = {
+export type MarkoraSlashCommandContext = {
   view: EditorView;
   queryRange: { from: number; to: number };
 };
 
-export type DraftlySlashCommand = {
+export type MarkoraSlashCommand = {
   id: string;
-  group: DraftlySlashCommandGroup;
+  group: MarkoraSlashCommandGroup;
   title: string;
   aliases: string[];
   icon: string;
   hint: string;
-  run: (context: DraftlySlashCommandContext) => boolean;
+  run: (context: MarkoraSlashCommandContext) => boolean;
 };
 
-export type DraftlySlashQuery = {
+export type MarkoraSlashQuery = {
   from: number;
   to: number;
   query: string;
 };
 
-export type DraftlySlashCommandsConfig = {
+export type MarkoraSlashCommandsConfig = {
   enabled?: boolean;
-  commands?: DraftlySlashCommand[];
+  commands?: MarkoraSlashCommand[];
 };
 ```
 
-Create `packages/draftly/src/editor/slash/query.ts`:
+Create `packages/markora/src/editor/slash/query.ts`:
 
 ```ts
-import type { DraftlySlashCommand, DraftlySlashQuery } from "./types";
+import type { MarkoraSlashCommand, MarkoraSlashQuery } from "./types";
 
 const slashLinePattern = /^\/([^\s]*)$/;
 
-export function detectSlashQuery(documentText: string, cursorPosition: number): DraftlySlashQuery | null {
+export function detectSlashQuery(documentText: string, cursorPosition: number): MarkoraSlashQuery | null {
   const safeCursor = Math.max(0, Math.min(cursorPosition, documentText.length));
   const lineStart = documentText.lastIndexOf("\n", safeCursor - 1) + 1;
   const lineTextBeforeCursor = documentText.slice(lineStart, safeCursor);
@@ -215,7 +215,7 @@ export function detectSlashQuery(documentText: string, cursorPosition: number): 
   };
 }
 
-export function filterSlashCommands(commands: readonly DraftlySlashCommand[], query: string): DraftlySlashCommand[] {
+export function filterSlashCommands(commands: readonly MarkoraSlashCommand[], query: string): MarkoraSlashCommand[] {
   const normalizedQuery = query.trim().toLocaleLowerCase();
 
   if (!normalizedQuery) {
@@ -231,7 +231,7 @@ export function filterSlashCommands(commands: readonly DraftlySlashCommand[], qu
 }
 ```
 
-Create `packages/draftly/src/editor/slash/index.ts`:
+Create `packages/markora/src/editor/slash/index.ts`:
 
 ```ts
 export * from "./types";
@@ -243,7 +243,7 @@ export * from "./query";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- slash-query.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- slash-query.spec.ts
 ```
 
 Expected: PASS for all slash query tests.
@@ -251,21 +251,21 @@ Expected: PASS for all slash query tests.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add packages/draftly/package.json packages/draftly/src/editor/slash packages/draftly/tests/slash-query.spec.ts
+git add packages/markora/package.json packages/markora/src/editor/slash packages/markora/tests/slash-query.spec.ts
 git commit -m "test(editor): 添加斜杆命令查询测试"
 ```
 
 ## Task 2: Add Slash Command Insertion Helpers and Defaults
 
 **Files:**
-- Create: `packages/draftly/src/editor/slash/insertions.ts`
-- Create: `packages/draftly/src/editor/slash/default-commands.ts`
-- Modify: `packages/draftly/src/editor/slash/index.ts`
-- Create: `packages/draftly/tests/slash-insertions.spec.ts`
+- Create: `packages/markora/src/editor/slash/insertions.ts`
+- Create: `packages/markora/src/editor/slash/default-commands.ts`
+- Modify: `packages/markora/src/editor/slash/index.ts`
+- Create: `packages/markora/tests/slash-insertions.spec.ts`
 
 - [ ] **Step 1: Write failing insertion tests**
 
-Create `packages/draftly/tests/slash-insertions.spec.ts`:
+Create `packages/markora/tests/slash-insertions.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -330,33 +330,33 @@ describe("defaultSlashCommands", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- slash-insertions.spec.ts
 ```
 
 Expected: FAIL because `buildSlashReplacement` and `defaultSlashCommands` are not exported.
 
 - [ ] **Step 3: Add insertion helpers**
 
-Create `packages/draftly/src/editor/slash/insertions.ts`:
+Create `packages/markora/src/editor/slash/insertions.ts`:
 
 ```ts
 import type { ChangeSpec } from "@codemirror/state";
-import type { DraftlySlashQuery } from "./types";
+import type { MarkoraSlashQuery } from "./types";
 
-export type DraftlySlashReplacementTemplate = {
+export type MarkoraSlashReplacementTemplate = {
   marker: string;
   cursorOffset: number;
 };
 
-export type DraftlySlashReplacement = {
+export type MarkoraSlashReplacement = {
   changes: ChangeSpec;
   selectionAnchor: number;
 };
 
 export function buildSlashReplacement(
-  template: DraftlySlashReplacementTemplate,
-  query: DraftlySlashQuery
-): DraftlySlashReplacement {
+  template: MarkoraSlashReplacementTemplate,
+  query: MarkoraSlashQuery
+): MarkoraSlashReplacement {
   return {
     changes: {
       from: query.from,
@@ -370,17 +370,17 @@ export function buildSlashReplacement(
 
 - [ ] **Step 4: Add default command definitions**
 
-Create `packages/draftly/src/editor/slash/default-commands.ts`:
+Create `packages/markora/src/editor/slash/default-commands.ts`:
 
 ```ts
-import type { DraftlySlashCommand } from "./types";
+import type { MarkoraSlashCommand } from "./types";
 import { buildSlashReplacement } from "./insertions";
 
 function markdownCommand(
-  command: Omit<DraftlySlashCommand, "run">,
+  command: Omit<MarkoraSlashCommand, "run">,
   marker: string,
   cursorOffset: number = marker.length
-): DraftlySlashCommand {
+): MarkoraSlashCommand {
   return {
     ...command,
     run: ({ view, queryRange }) => {
@@ -396,7 +396,7 @@ function markdownCommand(
   };
 }
 
-export const defaultSlashCommands: DraftlySlashCommand[] = [
+export const defaultSlashCommands: MarkoraSlashCommand[] = [
   markdownCommand({ id: "paragraph", group: "basic", title: "文本", aliases: ["text", "plain"], icon: "T", hint: "" }, "", 0),
   markdownCommand({ id: "heading-1", group: "basic", title: "标题 1", aliases: ["h1", "heading1"], icon: "H1", hint: "#" }, "# "),
   markdownCommand({ id: "heading-2", group: "basic", title: "标题 2", aliases: ["h2", "heading2"], icon: "H2", hint: "##" }, "## "),
@@ -424,7 +424,7 @@ export const defaultSlashCommands: DraftlySlashCommand[] = [
 
 - [ ] **Step 5: Export insertion helpers and defaults**
 
-Modify `packages/draftly/src/editor/slash/index.ts`:
+Modify `packages/markora/src/editor/slash/index.ts`:
 
 ```ts
 export * from "./types";
@@ -438,7 +438,7 @@ export * from "./default-commands";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- slash-insertions.spec.ts
 ```
 
 Expected: PASS.
@@ -446,21 +446,21 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/draftly/src/editor/slash packages/draftly/tests/slash-insertions.spec.ts
+git add packages/markora/src/editor/slash packages/markora/tests/slash-insertions.spec.ts
 git commit -m "feat(editor): 添加默认斜杆命令"
 ```
 
 ## Task 3: Add Attachment Formatting Helpers
 
 **Files:**
-- Create: `packages/draftly/src/editor/attachments/types.ts`
-- Create: `packages/draftly/src/editor/attachments/format.ts`
-- Create: `packages/draftly/src/editor/attachments/index.ts`
-- Create: `packages/draftly/tests/attachments-format.spec.ts`
+- Create: `packages/markora/src/editor/attachments/types.ts`
+- Create: `packages/markora/src/editor/attachments/format.ts`
+- Create: `packages/markora/src/editor/attachments/index.ts`
+- Create: `packages/markora/tests/attachments-format.spec.ts`
 
 - [ ] **Step 1: Write failing attachment formatting tests**
 
-Create `packages/draftly/tests/attachments-format.spec.ts`:
+Create `packages/markora/tests/attachments-format.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -502,10 +502,10 @@ describe("formatAttachmentMarkdown", () => {
 describe("createUploadMarker", () => {
   it("creates stable visible upload markers", () => {
     expect(createUploadMarker({ taskId: "task-1", kind: "image", name: "a.png", state: "uploading" })).toBe(
-      "![a.png](draftly-upload://task-1)"
+      "![a.png](markora-upload://task-1)"
     );
     expect(createUploadMarker({ taskId: "task-1", kind: "file", name: "a.pdf", state: "failed" })).toBe(
-      "[Upload failed: a.pdf](draftly-upload://task-1)"
+      "[Upload failed: a.pdf](markora-upload://task-1)"
     );
   });
 });
@@ -524,50 +524,50 @@ describe("isAcceptedAttachment", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- attachments-format.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- attachments-format.spec.ts
 ```
 
-Expected: FAIL because `packages/draftly/src/editor/attachments` does not exist.
+Expected: FAIL because `packages/markora/src/editor/attachments` does not exist.
 
 - [ ] **Step 3: Add attachment types**
 
-Create `packages/draftly/src/editor/attachments/types.ts`:
+Create `packages/markora/src/editor/attachments/types.ts`:
 
 ```ts
-export type DraftlyAttachmentKind = "image" | "video" | "audio" | "file";
+export type MarkoraAttachmentKind = "image" | "video" | "audio" | "file";
 
-export type DraftlyAttachmentUploadSource = "slash" | "paste" | "drop" | "api";
+export type MarkoraAttachmentUploadSource = "slash" | "paste" | "drop" | "api";
 
-export type DraftlyAttachmentUploadContext = {
-  kind: DraftlyAttachmentKind;
-  source: DraftlyAttachmentUploadSource;
+export type MarkoraAttachmentUploadContext = {
+  kind: MarkoraAttachmentKind;
+  source: MarkoraAttachmentUploadSource;
   documentText: string;
   selection: { from: number; to: number };
 };
 
-export type DraftlyAttachmentUploadResult = {
+export type MarkoraAttachmentUploadResult = {
   url: string;
   name?: string;
   title?: string;
   mimeType?: string;
 };
 
-export type DraftlyAttachmentUploader = (
+export type MarkoraAttachmentUploader = (
   file: File,
-  context: DraftlyAttachmentUploadContext
-) => Promise<DraftlyAttachmentUploadResult>;
+  context: MarkoraAttachmentUploadContext
+) => Promise<MarkoraAttachmentUploadResult>;
 
-export type DraftlyAttachmentAccept = Partial<Record<DraftlyAttachmentKind, string[]>>;
+export type MarkoraAttachmentAccept = Partial<Record<MarkoraAttachmentKind, string[]>>;
 
-export type DraftlyAttachmentsConfig = {
+export type MarkoraAttachmentsConfig = {
   enabled?: boolean;
-  uploader?: DraftlyAttachmentUploader;
-  accept?: DraftlyAttachmentAccept;
+  uploader?: MarkoraAttachmentUploader;
+  accept?: MarkoraAttachmentAccept;
   enablePaste?: boolean;
   enableDrop?: boolean;
 };
 
-export type DraftlyFileLike = {
+export type MarkoraFileLike = {
   name: string;
   type: string;
 };
@@ -575,28 +575,28 @@ export type DraftlyFileLike = {
 
 - [ ] **Step 4: Add attachment formatting helpers**
 
-Create `packages/draftly/src/editor/attachments/format.ts`:
+Create `packages/markora/src/editor/attachments/format.ts`:
 
 ```ts
-import type { DraftlyAttachmentKind, DraftlyAttachmentUploadResult, DraftlyFileLike } from "./types";
+import type { MarkoraAttachmentKind, MarkoraAttachmentUploadResult, MarkoraFileLike } from "./types";
 
-export type DraftlyUploadMarkerState = "uploading" | "failed";
+export type MarkoraUploadMarkerState = "uploading" | "failed";
 
-export type DraftlyUploadMarkerInput = {
+export type MarkoraUploadMarkerInput = {
   taskId: string;
-  kind: DraftlyAttachmentKind;
+  kind: MarkoraAttachmentKind;
   name: string;
-  state: DraftlyUploadMarkerState;
+  state: MarkoraUploadMarkerState;
 };
 
-export function detectAttachmentKind(file: DraftlyFileLike): DraftlyAttachmentKind {
+export function detectAttachmentKind(file: MarkoraFileLike): MarkoraAttachmentKind {
   if (file.type.startsWith("image/")) return "image";
   if (file.type.startsWith("video/")) return "video";
   if (file.type.startsWith("audio/")) return "audio";
   return "file";
 }
 
-export function isAcceptedAttachment(file: DraftlyFileLike, acceptRules: readonly string[]): boolean {
+export function isAcceptedAttachment(file: MarkoraFileLike, acceptRules: readonly string[]): boolean {
   if (acceptRules.includes("*/*")) return true;
 
   return acceptRules.some((rule) => {
@@ -612,21 +612,21 @@ export function isAcceptedAttachment(file: DraftlyFileLike, acceptRules: readonl
   });
 }
 
-export function createUploadMarker(input: DraftlyUploadMarkerInput): string {
+export function createUploadMarker(input: MarkoraUploadMarkerInput): string {
   if (input.state === "failed") {
-    return `[Upload failed: ${input.name}](draftly-upload://${input.taskId})`;
+    return `[Upload failed: ${input.name}](markora-upload://${input.taskId})`;
   }
 
   if (input.kind === "image") {
-    return `![${input.name}](draftly-upload://${input.taskId})`;
+    return `![${input.name}](markora-upload://${input.taskId})`;
   }
 
-  return `[Uploading ${input.name}](draftly-upload://${input.taskId})`;
+  return `[Uploading ${input.name}](markora-upload://${input.taskId})`;
 }
 
 export function formatAttachmentMarkdown(
-  kind: DraftlyAttachmentKind,
-  result: DraftlyAttachmentUploadResult
+  kind: MarkoraAttachmentKind,
+  result: MarkoraAttachmentUploadResult
 ): string {
   const name = result.name || "attachment";
 
@@ -648,7 +648,7 @@ export function formatAttachmentMarkdown(
 
 - [ ] **Step 5: Export attachment helpers**
 
-Create `packages/draftly/src/editor/attachments/index.ts`:
+Create `packages/markora/src/editor/attachments/index.ts`:
 
 ```ts
 export * from "./types";
@@ -660,7 +660,7 @@ export * from "./format";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- attachments-format.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- attachments-format.spec.ts
 ```
 
 Expected: PASS.
@@ -668,20 +668,20 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/draftly/src/editor/attachments packages/draftly/tests/attachments-format.spec.ts
+git add packages/markora/src/editor/attachments packages/markora/tests/attachments-format.spec.ts
 git commit -m "feat(editor): 添加附件格式化协议"
 ```
 
 ## Task 4: Add Attachment Upload Extension
 
 **Files:**
-- Create: `packages/draftly/src/editor/attachments/extension.ts`
-- Modify: `packages/draftly/src/editor/attachments/index.ts`
-- Create: `packages/draftly/tests/attachments-upload.spec.ts`
+- Create: `packages/markora/src/editor/attachments/extension.ts`
+- Modify: `packages/markora/src/editor/attachments/index.ts`
+- Create: `packages/markora/tests/attachments-upload.spec.ts`
 
 - [ ] **Step 1: Write failing async upload tests**
 
-Create `packages/draftly/tests/attachments-upload.spec.ts`:
+Create `packages/markora/tests/attachments-upload.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -731,7 +731,7 @@ describe("uploadAttachmentFile", () => {
       },
     });
 
-    expect(view.state.doc.toString()).toContain("[Upload failed: a.pdf](draftly-upload://");
+    expect(view.state.doc.toString()).toContain("[Upload failed: a.pdf](markora-upload://");
     view.destroy();
   });
 
@@ -765,14 +765,14 @@ describe("uploadAttachmentFile", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- attachments-upload.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- attachments-upload.spec.ts
 ```
 
 Expected: FAIL because `uploadAttachmentFile` is not exported.
 
 - [ ] **Step 3: Add upload extension utilities**
 
-Create `packages/draftly/src/editor/attachments/extension.ts`:
+Create `packages/markora/src/editor/attachments/extension.ts`:
 
 ```ts
 import { EditorSelection, Extension } from "@codemirror/state";
@@ -784,19 +784,19 @@ import {
   isAcceptedAttachment,
 } from "./format";
 import type {
-  DraftlyAttachmentKind,
-  DraftlyAttachmentsConfig,
-  DraftlyAttachmentUploadSource,
-  DraftlyAttachmentUploader,
+  MarkoraAttachmentKind,
+  MarkoraAttachmentsConfig,
+  MarkoraAttachmentUploadSource,
+  MarkoraAttachmentUploader,
 } from "./types";
 
 let uploadSequence = 0;
 
-export type DraftlyUploadAttachmentOptions = {
-  kind?: DraftlyAttachmentKind;
-  source: DraftlyAttachmentUploadSource;
+export type MarkoraUploadAttachmentOptions = {
+  kind?: MarkoraAttachmentKind;
+  source: MarkoraAttachmentUploadSource;
   range?: { from: number; to: number };
-  uploader: DraftlyAttachmentUploader;
+  uploader: MarkoraAttachmentUploader;
 };
 
 function nextUploadTaskId(): string {
@@ -806,7 +806,7 @@ function nextUploadTaskId(): string {
 
 function findMarkerRange(view: EditorView, taskId: string): { from: number; to: number } | null {
   const doc = view.state.doc.toString();
-  const marker = `draftly-upload://${taskId}`;
+  const marker = `markora-upload://${taskId}`;
   const markerIndex = doc.indexOf(marker);
 
   if (markerIndex === -1) {
@@ -820,7 +820,7 @@ function findMarkerRange(view: EditorView, taskId: string): { from: number; to: 
 export async function uploadAttachmentFile(
   view: EditorView,
   file: File,
-  options: DraftlyUploadAttachmentOptions
+  options: MarkoraUploadAttachmentOptions
 ): Promise<void> {
   const kind = options.kind ?? detectAttachmentKind(file);
   const range = options.range ?? {
@@ -884,8 +884,8 @@ function getFilesFromEvent(event: ClipboardEvent | DragEvent): File[] {
 function uploadFilesFromEvent(
   view: EditorView,
   event: ClipboardEvent | DragEvent,
-  source: DraftlyAttachmentUploadSource,
-  config: Required<Pick<DraftlyAttachmentsConfig, "uploader">> & DraftlyAttachmentsConfig
+  source: MarkoraAttachmentUploadSource,
+  config: Required<Pick<MarkoraAttachmentsConfig, "uploader">> & MarkoraAttachmentsConfig
 ): boolean {
   const files = getFilesFromEvent(event);
   if (files.length === 0) {
@@ -912,7 +912,7 @@ function uploadFilesFromEvent(
   return true;
 }
 
-export function attachments(config: DraftlyAttachmentsConfig = {}): Extension[] {
+export function attachments(config: MarkoraAttachmentsConfig = {}): Extension[] {
   if (config.enabled === false || !config.uploader) {
     return [];
   }
@@ -945,7 +945,7 @@ export function attachments(config: DraftlyAttachmentsConfig = {}): Extension[] 
 
 - [ ] **Step 4: Export upload utilities**
 
-Modify `packages/draftly/src/editor/attachments/index.ts`:
+Modify `packages/markora/src/editor/attachments/index.ts`:
 
 ```ts
 export * from "./types";
@@ -958,7 +958,7 @@ export * from "./extension";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- attachments-upload.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- attachments-upload.spec.ts
 ```
 
 Expected: PASS.
@@ -966,61 +966,61 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add packages/draftly/src/editor/attachments packages/draftly/tests/attachments-upload.spec.ts
+git add packages/markora/src/editor/attachments packages/markora/tests/attachments-upload.spec.ts
 git commit -m "feat(editor): 添加附件上传扩展"
 ```
 
 ## Task 5: Add Slash Menu View Extension
 
 **Files:**
-- Create: `packages/draftly/src/editor/slash/menu.ts`
-- Create: `packages/draftly/src/editor/slash/theme.ts`
-- Create: `packages/draftly/src/editor/slash/extension.ts`
-- Modify: `packages/draftly/src/editor/slash/index.ts`
-- Modify: `packages/draftly/src/editor/slash/default-commands.ts`
+- Create: `packages/markora/src/editor/slash/menu.ts`
+- Create: `packages/markora/src/editor/slash/theme.ts`
+- Create: `packages/markora/src/editor/slash/extension.ts`
+- Modify: `packages/markora/src/editor/slash/index.ts`
+- Modify: `packages/markora/src/editor/slash/default-commands.ts`
 
 - [ ] **Step 1: Add media command dispatch support**
 
-Modify `packages/draftly/src/editor/slash/types.ts` so `DraftlySlashCommandsConfig` can connect media commands to attachments:
+Modify `packages/markora/src/editor/slash/types.ts` so `MarkoraSlashCommandsConfig` can connect media commands to attachments:
 
 ```ts
 import type { EditorView } from "@codemirror/view";
-import type { DraftlyAttachmentKind } from "../attachments";
+import type { MarkoraAttachmentKind } from "../attachments";
 
-export type DraftlySlashCommandGroup = "basic" | "media";
+export type MarkoraSlashCommandGroup = "basic" | "media";
 
-export type DraftlySlashCommandContext = {
+export type MarkoraSlashCommandContext = {
   view: EditorView;
   queryRange: { from: number; to: number };
-  requestAttachment?: (kind: DraftlyAttachmentKind, context: DraftlySlashCommandContext) => boolean;
+  requestAttachment?: (kind: MarkoraAttachmentKind, context: MarkoraSlashCommandContext) => boolean;
 };
 
-export type DraftlySlashCommand = {
+export type MarkoraSlashCommand = {
   id: string;
-  group: DraftlySlashCommandGroup;
+  group: MarkoraSlashCommandGroup;
   title: string;
   aliases: string[];
   icon: string;
   hint: string;
-  run: (context: DraftlySlashCommandContext) => boolean;
+  run: (context: MarkoraSlashCommandContext) => boolean;
 };
 
-export type DraftlySlashQuery = {
+export type MarkoraSlashQuery = {
   from: number;
   to: number;
   query: string;
 };
 
-export type DraftlySlashCommandsConfig = {
+export type MarkoraSlashCommandsConfig = {
   enabled?: boolean;
-  commands?: DraftlySlashCommand[];
+  commands?: MarkoraSlashCommand[];
 };
 ```
 
-Modify the four media commands in `packages/draftly/src/editor/slash/default-commands.ts`:
+Modify the four media commands in `packages/markora/src/editor/slash/default-commands.ts`:
 
 ```ts
-function mediaCommand(command: Omit<DraftlySlashCommand, "run">, kind: "image" | "video" | "audio" | "file"): DraftlySlashCommand {
+function mediaCommand(command: Omit<MarkoraSlashCommand, "run">, kind: "image" | "video" | "audio" | "file"): MarkoraSlashCommand {
   return {
     ...command,
     run: (context) => {
@@ -1061,56 +1061,56 @@ mediaCommand({ id: "audio", group: "media", title: "音频", aliases: ["audio"],
 
 - [ ] **Step 2: Add the compact menu renderer**
 
-Create `packages/draftly/src/editor/slash/menu.ts`:
+Create `packages/markora/src/editor/slash/menu.ts`:
 
 ```ts
-import type { DraftlySlashCommand } from "./types";
+import type { MarkoraSlashCommand } from "./types";
 
-export type DraftlySlashMenuState = {
-  commands: DraftlySlashCommand[];
+export type MarkoraSlashMenuState = {
+  commands: MarkoraSlashCommand[];
   activeIndex: number;
 };
 
-export type DraftlySlashMenuCallbacks = {
+export type MarkoraSlashMenuCallbacks = {
   onHover: (index: number) => void;
   onSelect: (index: number) => void;
 };
 
-const groupLabels: Record<DraftlySlashCommand["group"], string> = {
+const groupLabels: Record<MarkoraSlashCommand["group"], string> = {
   basic: "基本区块",
   media: "媒体",
 };
 
 export function createSlashMenuElement(
-  state: DraftlySlashMenuState,
-  callbacks: DraftlySlashMenuCallbacks
+  state: MarkoraSlashMenuState,
+  callbacks: MarkoraSlashMenuCallbacks
 ): HTMLElement {
   const root = document.createElement("div");
-  root.className = "cm-draftly-slash-menu";
+  root.className = "cm-markora-slash-menu";
   root.setAttribute("role", "listbox");
 
   if (state.commands.length === 0) {
     const empty = document.createElement("div");
-    empty.className = "cm-draftly-slash-empty";
+    empty.className = "cm-markora-slash-empty";
     empty.textContent = "没有匹配的命令";
     root.appendChild(empty);
     return root;
   }
 
-  let currentGroup: DraftlySlashCommand["group"] | null = null;
+  let currentGroup: MarkoraSlashCommand["group"] | null = null;
 
   for (const [index, command] of state.commands.entries()) {
     if (command.group !== currentGroup) {
       currentGroup = command.group;
       const label = document.createElement("div");
-      label.className = "cm-draftly-slash-group";
+      label.className = "cm-markora-slash-group";
       label.textContent = groupLabels[currentGroup];
       root.appendChild(label);
     }
 
     const item = document.createElement("button");
     item.type = "button";
-    item.className = index === state.activeIndex ? "cm-draftly-slash-item cm-draftly-slash-item-active" : "cm-draftly-slash-item";
+    item.className = index === state.activeIndex ? "cm-markora-slash-item cm-markora-slash-item-active" : "cm-markora-slash-item";
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(index === state.activeIndex));
     item.addEventListener("mouseenter", () => callbacks.onHover(index));
@@ -1120,15 +1120,15 @@ export function createSlashMenuElement(
     });
 
     const icon = document.createElement("span");
-    icon.className = "cm-draftly-slash-icon";
+    icon.className = "cm-markora-slash-icon";
     icon.textContent = command.icon;
 
     const title = document.createElement("span");
-    title.className = "cm-draftly-slash-title";
+    title.className = "cm-markora-slash-title";
     title.textContent = command.title;
 
     const hint = document.createElement("span");
-    hint.className = "cm-draftly-slash-hint";
+    hint.className = "cm-markora-slash-hint";
     hint.textContent = command.hint;
 
     item.append(icon, title, hint);
@@ -1136,7 +1136,7 @@ export function createSlashMenuElement(
   }
 
   const footer = document.createElement("div");
-  footer.className = "cm-draftly-slash-footer";
+  footer.className = "cm-markora-slash-footer";
   footer.innerHTML = "<span>关闭菜单</span><span>esc</span>";
   root.appendChild(footer);
 
@@ -1146,25 +1146,25 @@ export function createSlashMenuElement(
 
 - [ ] **Step 3: Add the slash extension**
 
-Create `packages/draftly/src/editor/slash/extension.ts`:
+Create `packages/markora/src/editor/slash/extension.ts`:
 
 ```ts
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Extension } from "@codemirror/state";
 import { EditorView as CodeMirrorEditorView } from "@codemirror/view";
-import type { DraftlyAttachmentKind, DraftlyAttachmentUploader } from "../attachments";
+import type { MarkoraAttachmentKind, MarkoraAttachmentUploader } from "../attachments";
 import { uploadAttachmentFile } from "../attachments";
 import { defaultSlashCommands } from "./default-commands";
 import { detectSlashQuery, filterSlashCommands } from "./query";
 import { createSlashMenuElement } from "./menu";
 import { slashMenuTheme } from "./theme";
-import type { DraftlySlashCommand, DraftlySlashCommandsConfig, DraftlySlashQuery } from "./types";
+import type { MarkoraSlashCommand, MarkoraSlashCommandsConfig, MarkoraSlashQuery } from "./types";
 
-export type DraftlySlashRuntimeConfig = DraftlySlashCommandsConfig & {
-  attachmentUploader?: DraftlyAttachmentUploader;
+export type MarkoraSlashRuntimeConfig = MarkoraSlashCommandsConfig & {
+  attachmentUploader?: MarkoraAttachmentUploader;
 };
 
-function requestFile(kind: DraftlyAttachmentKind): Promise<File | null> {
+function requestFile(kind: MarkoraAttachmentKind): Promise<File | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
@@ -1176,14 +1176,14 @@ function requestFile(kind: DraftlyAttachmentKind): Promise<File | null> {
 }
 
 class SlashCommandViewPlugin {
-  private query: DraftlySlashQuery | null = null;
-  private commands: DraftlySlashCommand[] = [];
+  private query: MarkoraSlashQuery | null = null;
+  private commands: MarkoraSlashCommand[] = [];
   private activeIndex = 0;
   private menu: HTMLElement | null = null;
 
   constructor(
     private readonly view: EditorView,
-    private readonly config: Required<Pick<DraftlySlashRuntimeConfig, "commands">> & DraftlySlashRuntimeConfig
+    private readonly config: Required<Pick<MarkoraSlashRuntimeConfig, "commands">> & MarkoraSlashRuntimeConfig
   ) {
     this.updateState();
   }
@@ -1232,7 +1232,7 @@ class SlashCommandViewPlugin {
     });
   }
 
-  private requestAttachment(kind: DraftlyAttachmentKind, queryRange: { from: number; to: number }): boolean {
+  private requestAttachment(kind: MarkoraAttachmentKind, queryRange: { from: number; to: number }): boolean {
     if (!this.config.attachmentUploader) {
       return false;
     }
@@ -1298,7 +1298,7 @@ class SlashCommandViewPlugin {
   }
 }
 
-export function slashCommands(config: DraftlySlashRuntimeConfig = {}): Extension[] {
+export function slashCommands(config: MarkoraSlashRuntimeConfig = {}): Extension[] {
   if (config.enabled === false) {
     return [];
   }
@@ -1351,13 +1351,13 @@ export function slashCommands(config: DraftlySlashRuntimeConfig = {}): Extension
 
 - [ ] **Step 4: Add compact slash menu theme**
 
-Create `packages/draftly/src/editor/slash/theme.ts`:
+Create `packages/markora/src/editor/slash/theme.ts`:
 
 ```ts
 import { EditorView } from "@codemirror/view";
 
 export const slashMenuTheme = EditorView.baseTheme({
-  ".cm-draftly-slash-menu": {
+  ".cm-markora-slash-menu": {
     position: "fixed",
     zIndex: "1000",
     width: "328px",
@@ -1365,18 +1365,18 @@ export const slashMenuTheme = EditorView.baseTheme({
     overflowY: "auto",
     border: "1px solid rgba(120, 113, 108, 0.22)",
     borderRadius: "12px",
-    background: "var(--draftly-slash-bg, #ffffff)",
+    background: "var(--markora-slash-bg, #ffffff)",
     boxShadow: "0 18px 48px rgba(15, 23, 42, 0.16)",
     padding: "8px 0 0",
     fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
   },
-  ".cm-draftly-slash-group": {
+  ".cm-markora-slash-group": {
     padding: "8px 14px 6px",
-    color: "var(--draftly-slash-muted, #a8a29e)",
+    color: "var(--markora-slash-muted, #a8a29e)",
     fontSize: "12px",
     fontWeight: "700",
   },
-  ".cm-draftly-slash-item": {
+  ".cm-markora-slash-item": {
     display: "grid",
     gridTemplateColumns: "34px 1fr auto",
     alignItems: "center",
@@ -1385,20 +1385,20 @@ export const slashMenuTheme = EditorView.baseTheme({
     border: "0",
     padding: "0 14px",
     background: "transparent",
-    color: "var(--draftly-slash-fg, #27272a)",
+    color: "var(--markora-slash-fg, #27272a)",
     textAlign: "left",
     cursor: "default",
   },
-  ".cm-draftly-slash-item-active": {
-    background: "var(--draftly-slash-active, #f4f4f5)",
+  ".cm-markora-slash-item-active": {
+    background: "var(--markora-slash-active, #f4f4f5)",
   },
-  ".cm-draftly-slash-icon": {
-    color: "var(--draftly-slash-icon, #3f3f46)",
+  ".cm-markora-slash-icon": {
+    color: "var(--markora-slash-icon, #3f3f46)",
     fontSize: "14px",
     fontWeight: "650",
     textAlign: "center",
   },
-  ".cm-draftly-slash-title": {
+  ".cm-markora-slash-title": {
     overflow: "hidden",
     color: "inherit",
     fontSize: "14px",
@@ -1406,13 +1406,13 @@ export const slashMenuTheme = EditorView.baseTheme({
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
-  ".cm-draftly-slash-hint": {
+  ".cm-markora-slash-hint": {
     marginLeft: "12px",
-    color: "var(--draftly-slash-muted, #a8a29e)",
+    color: "var(--markora-slash-muted, #a8a29e)",
     fontSize: "12px",
     fontWeight: "600",
   },
-  ".cm-draftly-slash-footer": {
+  ".cm-markora-slash-footer": {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1420,32 +1420,32 @@ export const slashMenuTheme = EditorView.baseTheme({
     marginTop: "6px",
     borderTop: "1px solid rgba(120, 113, 108, 0.18)",
     padding: "0 14px",
-    color: "var(--draftly-slash-fg, #27272a)",
+    color: "var(--markora-slash-fg, #27272a)",
     fontSize: "14px",
   },
-  ".cm-draftly-slash-footer span:last-child": {
-    color: "var(--draftly-slash-muted, #a8a29e)",
+  ".cm-markora-slash-footer span:last-child": {
+    color: "var(--markora-slash-muted, #a8a29e)",
     fontSize: "12px",
     fontWeight: "650",
   },
-  ".cm-draftly-slash-empty": {
+  ".cm-markora-slash-empty": {
     padding: "14px",
-    color: "var(--draftly-slash-muted, #a8a29e)",
+    color: "var(--markora-slash-muted, #a8a29e)",
     fontSize: "13px",
   },
-  "&dark .cm-draftly-slash-menu": {
-    "--draftly-slash-bg": "#18181b",
-    "--draftly-slash-fg": "#f4f4f5",
-    "--draftly-slash-muted": "#a1a1aa",
-    "--draftly-slash-active": "#27272a",
-    "--draftly-slash-icon": "#e4e4e7",
+  "&dark .cm-markora-slash-menu": {
+    "--markora-slash-bg": "#18181b",
+    "--markora-slash-fg": "#f4f4f5",
+    "--markora-slash-muted": "#a1a1aa",
+    "--markora-slash-active": "#27272a",
+    "--markora-slash-icon": "#e4e4e7",
   },
 });
 ```
 
 - [ ] **Step 5: Export slash extension and theme**
 
-Modify `packages/draftly/src/editor/slash/index.ts`:
+Modify `packages/markora/src/editor/slash/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1462,8 +1462,8 @@ export * from "./extension";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test
-pnpm --config.package-manager-strict=false --filter draftly typecheck
+pnpm --config.package-manager-strict=false --filter markora test
+pnpm --config.package-manager-strict=false --filter markora typecheck
 ```
 
 Expected: tests PASS and typecheck PASS.
@@ -1471,27 +1471,27 @@ Expected: tests PASS and typecheck PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/draftly/src/editor/slash
+git add packages/markora/src/editor/slash
 git commit -m "feat(editor): 添加斜杆菜单扩展"
 ```
 
-## Task 6: Compose Slash and Attachments in `draftly()`
+## Task 6: Compose Slash and Attachments in `markora()`
 
 **Files:**
-- Modify: `packages/draftly/src/editor/draftly.ts`
-- Modify: `packages/draftly/src/editor/index.ts`
-- Modify: `packages/draftly/tests/slash-insertions.spec.ts`
+- Modify: `packages/markora/src/editor/markora.ts`
+- Modify: `packages/markora/src/editor/index.ts`
+- Modify: `packages/markora/tests/slash-insertions.spec.ts`
 
 - [ ] **Step 1: Add config coverage test**
 
-Append to `packages/draftly/tests/slash-insertions.spec.ts`:
+Append to `packages/markora/tests/slash-insertions.spec.ts`:
 
 ```ts
-import { draftly } from "../src/editor";
+import { markora } from "../src/editor";
 
-describe("draftly extension composition", () => {
+describe("markora extension composition", () => {
   it("returns extensions when slash commands and attachments are enabled", () => {
-    const extensions = draftly({
+    const extensions = markora({
       slashCommands: { enabled: true },
       attachments: {
         enabled: true,
@@ -1504,7 +1504,7 @@ describe("draftly extension composition", () => {
   });
 
   it("allows slash commands and attachments to be disabled", () => {
-    const extensions = draftly({
+    const extensions = markora({
       slashCommands: { enabled: false },
       attachments: { enabled: false },
     });
@@ -1519,33 +1519,33 @@ describe("draftly extension composition", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test -- slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --filter markora test -- slash-insertions.spec.ts
 ```
 
-Expected: FAIL because `DraftlyConfig` does not include `slashCommands` and `attachments`.
+Expected: FAIL because `MarkoraConfig` does not include `slashCommands` and `attachments`.
 
 - [ ] **Step 3: Add config fields and compose extensions**
 
-Modify imports at the top of `packages/draftly/src/editor/draftly.ts`:
+Modify imports at the top of `packages/markora/src/editor/markora.ts`:
 
 ```ts
-import type { DraftlySlashCommandsConfig } from "./slash";
+import type { MarkoraSlashCommandsConfig } from "./slash";
 import { slashCommands } from "./slash";
-import type { DraftlyAttachmentsConfig } from "./attachments";
+import type { MarkoraAttachmentsConfig } from "./attachments";
 import { attachments } from "./attachments";
 ```
 
-Add fields to `DraftlyConfig`:
+Add fields to `MarkoraConfig`:
 
 ```ts
   /** Slash command menu configuration */
-  slashCommands?: DraftlySlashCommandsConfig;
+  slashCommands?: MarkoraSlashCommandsConfig;
 
   /** Browser attachment upload configuration */
-  attachments?: DraftlyAttachmentsConfig;
+  attachments?: MarkoraAttachmentsConfig;
 ```
 
-Destructure the fields inside `draftly()`:
+Destructure the fields inside `markora()`:
 
 ```ts
     slashCommands: configSlashCommands = { enabled: true },
@@ -1568,7 +1568,7 @@ The `composedExtensions` section should include the new entries:
   const composedExtensions: Extension[] = [
     Prec.high(markdownSupport),
     Prec.high(keymap.of(markdownKeymap)),
-    draftlyExtensions,
+    markoraExtensions,
     baseExtensions,
     slashCommands({
       ...configSlashCommands,
@@ -1584,10 +1584,10 @@ The `composedExtensions` section should include the new entries:
 
 - [ ] **Step 4: Export new modules from editor index**
 
-Modify `packages/draftly/src/editor/index.ts`:
+Modify `packages/markora/src/editor/index.ts`:
 
 ```ts
-export * from "./draftly";
+export * from "./markora";
 export * from "./plugin";
 export * from "./utils";
 export * from "./theme";
@@ -1595,17 +1595,17 @@ export * from "./slash";
 export * from "./attachments";
 ```
 
-Keep `packages/draftly/src/index.ts` unchanged if it already exports `./editor`.
+Keep `packages/markora/src/index.ts` unchanged if it already exports `./editor`.
 
 - [ ] **Step 5: Run core checks**
 
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test
-pnpm --config.package-manager-strict=false --filter draftly lint
-pnpm --config.package-manager-strict=false --filter draftly typecheck
-pnpm --config.package-manager-strict=false --filter draftly build
+pnpm --config.package-manager-strict=false --filter markora test
+pnpm --config.package-manager-strict=false --filter markora lint
+pnpm --config.package-manager-strict=false --filter markora typecheck
+pnpm --config.package-manager-strict=false --filter markora build
 ```
 
 Expected: PASS for tests, lint, typecheck, and build.
@@ -1613,20 +1613,20 @@ Expected: PASS for tests, lint, typecheck, and build.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add packages/draftly/src/editor packages/draftly/tests/slash-insertions.spec.ts
+git add packages/markora/src/editor packages/markora/tests/slash-insertions.spec.ts
 git commit -m "feat(editor): 集成斜杆菜单与附件配置"
 ```
 
 ## Task 7: Integrate React Playground
 
 **Files:**
-- Modify: `apps/web/app/playground/page.tsx`
-- Modify: `apps/web/app/playground/devbar.tsx`
-- Modify: `apps/web/app/data/md/walkthrough.ts`
+- Modify: `playground/react-playground/app/playground/page.tsx`
+- Modify: `playground/react-playground/app/playground/devbar.tsx`
+- Modify: `playground/react-playground/app/data/md/walkthrough.ts`
 
 - [ ] **Step 1: Add playground config fields**
 
-Modify the `PlaygroundConfig` type in `apps/web/app/playground/page.tsx`:
+Modify the `PlaygroundConfig` type in `playground/react-playground/app/playground/page.tsx`:
 
 ```ts
 export type PlaygroundConfig = {
@@ -1678,7 +1678,7 @@ const defaultConfig: PlaygroundConfig = {
 
 - [ ] **Step 2: Add mock uploader lifecycle**
 
-Add these refs and helper inside `Page()` in `apps/web/app/playground/page.tsx`:
+Add these refs and helper inside `Page()` in `playground/react-playground/app/playground/page.tsx`:
 
 ```ts
 const objectUrlsRef = useRef<string[]>([]);
@@ -1703,9 +1703,9 @@ useEffect(() => {
 }, []);
 ```
 
-- [ ] **Step 3: Pass slash and attachment config to `draftly()`**
+- [ ] **Step 3: Pass slash and attachment config to `markora()`**
 
-Modify the `draftly({ ... })` call in `apps/web/app/playground/page.tsx`:
+Modify the `markora({ ... })` call in `playground/react-playground/app/playground/page.tsx`:
 
 ```ts
 slashCommands: {
@@ -1729,7 +1729,7 @@ Add `mockUploader` and `config.features` to the `useMemo` dependency list for `d
 
 - [ ] **Step 4: Add feature switches to the React devbar**
 
-In `apps/web/app/playground/devbar.tsx`, add a "Feature Options" accordion section using the existing switch row pattern:
+In `playground/react-playground/app/playground/devbar.tsx`, add a "Feature Options" accordion section using the existing switch row pattern:
 
 ```tsx
 <AccordionItem value="features">
@@ -1774,16 +1774,16 @@ In `apps/web/app/playground/devbar.tsx`, add a "Feature Options" accordion secti
 
 - [ ] **Step 5: Document React playground behavior**
 
-Append this section to `apps/web/app/data/md/walkthrough.ts` near the editor feature overview:
+Append this section to `playground/react-playground/app/data/md/walkthrough.ts` near the editor feature overview:
 
 ```md
 ## Slash Commands and Attachments
 
-Type \`/\` at the start of an empty line to open Draftly's compact command menu. Use arrow keys to move through commands, Enter to insert, and Esc to close the menu.
+Type \`/\` at the start of an empty line to open Markora's compact command menu. Use arrow keys to move through commands, Enter to insert, and Esc to close the menu.
 
 Media commands use the browser attachment protocol. In this playground, uploads are mocked with local \`blob:\` URLs so the result previews immediately. Production apps should provide an uploader that stores the file in a backend, OSS, or MinIO-compatible service and returns a public URL.
 
-You can also paste or drag files into the editor. Draftly inserts an upload marker, calls the configured uploader, and replaces the marker with Markdown or HTML when the upload succeeds.
+You can also paste or drag files into the editor. Markora inserts an upload marker, calls the configured uploader, and replaces the marker with Markdown or HTML when the upload succeeds.
 ```
 
 - [ ] **Step 6: Run React checks**
@@ -1800,23 +1800,23 @@ Expected: typecheck PASS and build PASS. If `next lint` is unavailable in Next 1
 - [ ] **Step 7: Commit**
 
 ```bash
-git add apps/web/app/playground/page.tsx apps/web/app/playground/devbar.tsx apps/web/app/data/md/walkthrough.ts
+git add playground/react-playground/app/playground/page.tsx playground/react-playground/app/playground/devbar.tsx playground/react-playground/app/data/md/walkthrough.ts
 git commit -m "feat(playground): 接入斜杆菜单与附件上传"
 ```
 
 ## Task 8: Integrate Vue2 Playground
 
 **Files:**
-- Modify: `apps/vue2-playground/src/types.ts`
-- Modify: `apps/vue2-playground/src/state/playgroundConfig.ts`
-- Modify: `apps/vue2-playground/src/components/playground/Devbar.vue`
-- Modify: `apps/vue2-playground/src/components/playground/EditorPane.vue`
-- Modify: `apps/vue2-playground/src/shims-draftly.d.ts`
-- Modify: `apps/vue2-playground/src/data/md/walkthrough.ts`
+- Modify: `playground/vue2-playground/src/types.ts`
+- Modify: `playground/vue2-playground/src/state/playgroundConfig.ts`
+- Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
+- Modify: `playground/vue2-playground/src/components/playground/EditorPane.vue`
+- Modify: `playground/vue2-playground/src/shims-markora.d.ts`
+- Modify: `playground/vue2-playground/src/data/md/walkthrough.ts`
 
 - [ ] **Step 1: Add Vue2 feature config types**
 
-Modify `apps/vue2-playground/src/types.ts` so `PlaygroundConfig` contains:
+Modify `playground/vue2-playground/src/types.ts` so `PlaygroundConfig` contains:
 
 ```ts
   features: {
@@ -1828,7 +1828,7 @@ Modify `apps/vue2-playground/src/types.ts` so `PlaygroundConfig` contains:
 
 - [ ] **Step 2: Add Vue2 default feature config**
 
-Modify `apps/vue2-playground/src/state/playgroundConfig.ts` default config:
+Modify `playground/vue2-playground/src/state/playgroundConfig.ts` default config:
 
 ```ts
 features: {
@@ -1838,7 +1838,7 @@ features: {
 },
 ```
 
-Update the unit test in `apps/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
+Update the unit test in `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
 
 ```ts
 it("enables slash commands and attachment features by default", () => {
@@ -1852,7 +1852,7 @@ it("enables slash commands and attachment features by default", () => {
 
 - [ ] **Step 3: Add mock uploader to `EditorPane.vue`**
 
-In `apps/vue2-playground/src/components/playground/EditorPane.vue`, add `objectUrls` to `data()`:
+In `playground/vue2-playground/src/components/playground/EditorPane.vue`, add `objectUrls` to `data()`:
 
 ```ts
 objectUrls: [] as string[],
@@ -1883,7 +1883,7 @@ async mockUploader(file: File) {
 
 - [ ] **Step 4: Pass slash and attachment config in Vue2**
 
-Modify the `draftly({ ... })` call in `EditorPane.vue`:
+Modify the `markora({ ... })` call in `EditorPane.vue`:
 
 ```ts
 slashCommands: {
@@ -1903,34 +1903,34 @@ attachments: {
 },
 ```
 
-- [ ] **Step 5: Update Vue2 draftly shim if needed**
+- [ ] **Step 5: Update Vue2 markora shim if needed**
 
-If Vue2 lint or build cannot see the new package exports, update `apps/vue2-playground/src/shims-draftly.d.ts` inside `declare module "draftly/editor"`:
+If Vue2 lint or build cannot see the new package exports, update `playground/vue2-playground/src/shims-markora.d.ts` inside `declare module "markora/editor"`:
 
 ```ts
-  export type DraftlyAttachmentKind = "image" | "video" | "audio" | "file";
+  export type MarkoraAttachmentKind = "image" | "video" | "audio" | "file";
 
-  export type DraftlyAttachmentUploadContext = {
-    kind: DraftlyAttachmentKind;
+  export type MarkoraAttachmentUploadContext = {
+    kind: MarkoraAttachmentKind;
     source: "slash" | "paste" | "drop" | "api";
     documentText: string;
     selection: { from: number; to: number };
   };
 
-  export type DraftlyAttachmentUploadResult = {
+  export type MarkoraAttachmentUploadResult = {
     url: string;
     name?: string;
     title?: string;
     mimeType?: string;
   };
 
-  export type DraftlyAttachmentUploader = (
+  export type MarkoraAttachmentUploader = (
     file: File,
-    context: DraftlyAttachmentUploadContext
-  ) => Promise<DraftlyAttachmentUploadResult>;
+    context: MarkoraAttachmentUploadContext
+  ) => Promise<MarkoraAttachmentUploadResult>;
 ```
 
-And extend the `draftly(config?: { ... })` shape:
+And extend the `markora(config?: { ... })` shape:
 
 ```ts
     slashCommands?: {
@@ -1938,16 +1938,16 @@ And extend the `draftly(config?: { ... })` shape:
     };
     attachments?: {
       enabled?: boolean;
-      uploader?: DraftlyAttachmentUploader;
+      uploader?: MarkoraAttachmentUploader;
       enablePaste?: boolean;
       enableDrop?: boolean;
-      accept?: Partial<Record<DraftlyAttachmentKind, string[]>>;
+      accept?: Partial<Record<MarkoraAttachmentKind, string[]>>;
     };
 ```
 
 - [ ] **Step 6: Add feature switches to `Devbar.vue`**
 
-In `apps/vue2-playground/src/components/playground/Devbar.vue`, add a "Feature Options" section with three switch rows following the existing section pattern:
+In `playground/vue2-playground/src/components/playground/Devbar.vue`, add a "Feature Options" section with three switch rows following the existing section pattern:
 
 ```vue
 <div class="devbar-section">
@@ -2009,14 +2009,14 @@ updateFeature(key: "slashCommands" | "attachments" | "pasteDropUploads", value: 
 
 - [ ] **Step 7: Document Vue2 playground behavior**
 
-Append this section to `apps/vue2-playground/src/data/md/walkthrough.ts`:
+Append this section to `playground/vue2-playground/src/data/md/walkthrough.ts`:
 
 ```md
 ## Slash Commands and Attachments
 
-Type \`/\` at the start of an empty line to open Draftly's compact command menu. Use arrow keys to move through commands, Enter to insert, and Esc to close the menu.
+Type \`/\` at the start of an empty line to open Markora's compact command menu. Use arrow keys to move through commands, Enter to insert, and Esc to close the menu.
 
-This Vue2 playground uses the same core Draftly attachment protocol as the React playground. Uploads are mocked with local \`blob:\` URLs, so they are useful for local preview but are not persistent. Production Vue2 integrations should provide an uploader that stores the file in a backend, OSS, or MinIO-compatible service and returns a URL.
+This Vue2 playground uses the same core Markora attachment protocol as the React playground. Uploads are mocked with local \`blob:\` URLs, so they are useful for local preview but are not persistent. Production Vue2 integrations should provide an uploader that stores the file in a backend, OSS, or MinIO-compatible service and returns a URL.
 
 Pasted and dropped files also use this uploader when Paste/Drop Uploads is enabled.
 ```
@@ -2036,30 +2036,30 @@ Expected: unit tests PASS, lint PASS, build PASS.
 - [ ] **Step 9: Commit**
 
 ```bash
-git add apps/vue2-playground/src apps/vue2-playground/tests/unit/playgroundConfig.spec.ts
+git add playground/vue2-playground/src playground/vue2-playground/tests/unit/playgroundConfig.spec.ts
 git commit -m "feat(playground): 在 Vue2 演示站点接入斜杆菜单"
 ```
 
 ## Task 9: Document Core Integration
 
 **Files:**
-- Modify: `packages/draftly/README.md`
-- Modify: `packages/draftly/CHANGELOG.md`
+- Modify: `packages/markora/README.md`
+- Modify: `packages/markora/CHANGELOG.md`
 
 - [ ] **Step 1: Add README integration docs**
 
-Add this section to `packages/draftly/README.md` after the basic editor setup:
+Add this section to `packages/markora/README.md` after the basic editor setup:
 
 ````md
 ## Slash Commands
 
-Draftly includes a compact slash command menu for common Markdown blocks. Type `/` at the start of an empty line or line-start query to open the menu.
+Markora includes a compact slash command menu for common Markdown blocks. Type `/` at the start of an empty line or line-start query to open the menu.
 
 ```ts
-import { draftly } from "draftly/editor";
-import { allPlugins } from "draftly/plugins";
+import { markora } from "markora/editor";
+import { allPlugins } from "markora/plugins";
 
-const extensions = draftly({
+const extensions = markora({
   plugins: allPlugins,
   slashCommands: {
     enabled: true,
@@ -2071,10 +2071,10 @@ The default menu includes text, headings 1-6, quote, ordered list, unordered lis
 
 ## Attachments
 
-Attachment uploads are provided by the host application. Draftly receives a browser `File`, calls your uploader, and inserts Markdown or HTML when the upload succeeds.
+Attachment uploads are provided by the host application. Markora receives a browser `File`, calls your uploader, and inserts Markdown or HTML when the upload succeeds.
 
 ```ts
-const extensions = draftly({
+const extensions = markora({
   attachments: {
     enabled: true,
     uploader: async (file, context) => {
@@ -2109,7 +2109,7 @@ Images are inserted as `![name](url)`, videos as `<video src="url" controls></vi
 
 - [ ] **Step 2: Add changelog entry**
 
-Add this entry near the top of `packages/draftly/CHANGELOG.md`:
+Add this entry near the top of `packages/markora/CHANGELOG.md`:
 
 ```md
 ## Unreleased
@@ -2123,8 +2123,8 @@ Add this entry near the top of `packages/draftly/CHANGELOG.md`:
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly typecheck
-pnpm --config.package-manager-strict=false --filter draftly build
+pnpm --config.package-manager-strict=false --filter markora typecheck
+pnpm --config.package-manager-strict=false --filter markora build
 ```
 
 Expected: typecheck PASS and build PASS.
@@ -2132,7 +2132,7 @@ Expected: typecheck PASS and build PASS.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add packages/draftly/README.md packages/draftly/CHANGELOG.md
+git add packages/markora/README.md packages/markora/CHANGELOG.md
 git commit -m "docs(editor): 说明斜杆菜单与附件上传协议"
 ```
 
@@ -2147,10 +2147,10 @@ git commit -m "docs(editor): 说明斜杆菜单与附件上传协议"
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter draftly test
-pnpm --config.package-manager-strict=false --filter draftly lint
-pnpm --config.package-manager-strict=false --filter draftly typecheck
-pnpm --config.package-manager-strict=false --filter draftly build
+pnpm --config.package-manager-strict=false --filter markora test
+pnpm --config.package-manager-strict=false --filter markora lint
+pnpm --config.package-manager-strict=false --filter markora typecheck
+pnpm --config.package-manager-strict=false --filter markora build
 pnpm --config.package-manager-strict=false --filter web typecheck
 pnpm --config.package-manager-strict=false --filter web build
 pnpm --config.package-manager-strict=false --filter vue2-playground test:unit
@@ -2209,7 +2209,7 @@ Run:
 ```bash
 git status --short
 git diff --stat HEAD
-git diff -- packages/draftly/src/editor/draftly.ts packages/draftly/src/editor/slash packages/draftly/src/editor/attachments
+git diff -- packages/markora/src/editor/markora.ts packages/markora/src/editor/slash packages/markora/src/editor/attachments
 ```
 
 Expected:

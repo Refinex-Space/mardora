@@ -69,7 +69,7 @@
           <div class="option-row">
             <span class="switch-copy">
               <span class="switch-label">Language</span>
-              <span class="switch-description">Adjust Draftly-owned editor UI text</span>
+              <span class="switch-description">Adjust Markora-owned editor UI text</span>
             </span>
             <div class="segmented-control" role="group" aria-label="Language">
               <button
@@ -141,7 +141,7 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
-import type { DraftlyNode } from "draftly/editor";
+import type { MarkoraNode } from "markora/editor";
 import type { PlaygroundConfig, PlaygroundLocale, PreviewContentWidth } from "@/types";
 
 type EditorOptionKey = keyof PlaygroundConfig["editor"];
@@ -164,7 +164,7 @@ export default defineComponent({
       required: true,
     },
     nodes: {
-      type: Array as PropType<DraftlyNode[]>,
+      type: Array as PropType<MarkoraNode[]>,
       required: true,
     },
     outputTime: {

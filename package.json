@@ -1,5 +1,5 @@
 {
-  "name": "draftly",
+  "name": "markora",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build --filter=draftly && changeset publish"
+    "release": "turbo run build --filter=markora && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
@@ -24,7 +24,7 @@
     "node": ">=20"
   },
   "workspaces": [
-    "apps/*",
+    "playground/*",
     "packages/*"
   ]
 }

@@ -4,7 +4,7 @@
       <button class="toolbar-icon-button" type="button" title="Toggle contents" @click="$emit('toggle-sidebar')">
         <span class="icon-panel" :class="{ 'icon-panel-open': sidebarOpen }" aria-hidden="true" />
       </button>
-      <span class="brand">draftly</span>
+      <span class="brand">markora</span>
     </div>
 
     <div class="header-actions">

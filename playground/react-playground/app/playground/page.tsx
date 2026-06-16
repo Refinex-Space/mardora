@@ -14,16 +14,16 @@ import Sidebar from "./sidebar";
 import { Content } from "./types";
 import CreateContentDialog from "./create-content-dialog";
 
-import whatIsDraftly from "../data/md/what-id-draftly";
+import whatIsMarkora from "../data/md/what-id-markora";
 import walkthrough from "../data/md/walkthrough";
 
 import CodeMirror, { EditorView, Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
-import { allPlugins } from "draftly/src";
-import { generateCSS, preview } from "draftly/src";
-import { draftly, DraftlyNode, DraftlyPlugin, ThemeEnum } from "draftly/src";
+import { allPlugins } from "markora/src";
+import { generateCSS, preview } from "markora/src";
+import { markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "markora/src";
 
 // Plugin configuration - dynamic based on allPlugins
 export type PluginConfig = Record<string, boolean>;
@@ -49,7 +49,7 @@ export type PlaygroundConfig = {
     includeBase: boolean;
     sanitize: boolean;
   };
-  // Draftly feature toggles
+  // Markora feature toggles
   features: {
     slashCommands: boolean;
     attachments: boolean;
@@ -80,20 +80,20 @@ const defaultConfig: PlaygroundConfig = {
   plugins: defaultPluginConfig,
 };
 
-const STORAGE_KEY = "draftly-playground-contents";
-const STORAGE_CURRENT_KEY = "draftly-playground-current";
-const STORAGE_VERSION_KEY = "draftly-playground-version";
+const STORAGE_KEY = "markora-playground-contents";
+const STORAGE_CURRENT_KEY = "markora-playground-current";
+const STORAGE_VERSION_KEY = "markora-playground-version";
 const DEBOUNCE_MS = 500;
 
-// Bump this version whenever default content (whatIsDraftly / walkthrough) changes.
+// Bump this version whenever default content (whatIsMarkora / walkthrough) changes.
 // The app will detect the mismatch and refresh the default entries in localStorage.
 const VERSION = 1;
 
 const DEFAULT_CONTENTS: Content[] = [
   {
     id: "0",
-    title: "What is Draftly?",
-    content: whatIsDraftly,
+    title: "What is Markora?",
+    content: whatIsMarkora,
   },
   {
     id: "1",
@@ -128,7 +128,7 @@ export default function Page() {
 
   const [mode, setMode] = useState<"live" | "view" | "code" | "output">("live");
   const [showNodes, setShowNodes] = useState(false);
-  const [nodes, setNodes] = useState<DraftlyNode[]>([]);
+  const [nodes, setNodes] = useState<MarkoraNode[]>([]);
   const [config, setConfig] = useState<PlaygroundConfig>(defaultConfig);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -319,7 +319,7 @@ export default function Page() {
   }
 
   // Build active plugins list based on config
-  const activePlugins = useMemo<DraftlyPlugin[]>(() => {
+  const activePlugins = useMemo<MarkoraPlugin[]>(() => {
     return allPlugins.filter((plugin) => {
       const name = plugin.name.toLowerCase() as keyof PluginConfig;
       return config.plugins[name] ?? true;
@@ -328,7 +328,7 @@ export default function Page() {
 
   const defaultExtensions = useMemo<Extension[]>(
     () =>
-      draftly({
+      markora({
         theme:
           theme && theme !== "system" ? (theme.includes("dark") ? ThemeEnum.DARK : ThemeEnum.LIGHT) : ThemeEnum.AUTO,
         baseStyles: config.editor.baseStyles,
@@ -377,14 +377,14 @@ export default function Page() {
         syntaxTheme: cmTheme,
         sanitize: config.preview.sanitize,
         wrapperTag: "div",
-        wrapperClass: "draftly-preview h-full w-full max-w-[48rem] mx-auto overflow-auto",
+        wrapperClass: "markora-preview h-full w-full max-w-[48rem] mx-auto overflow-auto",
       });
 
       const css = generateCSS({
         theme:
           theme && theme !== "system" ? (theme.includes("dark") ? ThemeEnum.DARK : ThemeEnum.LIGHT) : ThemeEnum.AUTO,
         plugins: activePlugins,
-        wrapperClass: "draftly-preview",
+        wrapperClass: "markora-preview",
         includeBase: config.preview.includeBase,
         syntaxTheme: cmTheme,
       });
@@ -467,8 +467,8 @@ export default function Page() {
                 <div className="h-full w-full grid grid-rows-2">
                   <div className="h-full w-full flex flex-col border-b-2">
                     <CodeMirror
-                      key={`draftly-output-${mode}`}
-                      id={"draftly-output"}
+                      key={`markora-output-${mode}`}
+                      id={"markora-output"}
                       autoFocus={false}
                       className={"h-full w-full"}
                       height="100%"
@@ -484,8 +484,8 @@ export default function Page() {
                   </div>
                   <div className="h-full w-full flex flex-col border-t-2">
                     <CodeMirror
-                      key={`draftly-output-${mode}`}
-                      id={"draftly-output"}
+                      key={`markora-output-${mode}`}
+                      id={"markora-output"}
                       autoFocus={false}
                       className={"h-full w-full"}
                       height="100%"
@@ -503,8 +503,8 @@ export default function Page() {
               </div>
             ) : (
               <CodeMirror
-                key={`draftly-editor-${mode}`}
-                id={"draftly-editor"}
+                key={`markora-editor-${mode}`}
+                id={"markora-editor"}
                 ref={editor}
                 autoFocus={false}
                 className={"h-full w-full"}

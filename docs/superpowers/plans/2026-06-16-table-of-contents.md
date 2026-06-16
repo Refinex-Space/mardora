@@ -1,68 +1,68 @@
-# Draftly Table of Contents Implementation Plan
+# Markora Table of Contents Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build Draftly's default built-in table-of-contents panel for Live and View modes, while allowing consumers to disable the default UI and use `onTocChange` data for custom rendering.
+**Goal:** Build Markora's default built-in table-of-contents panel for Live and View modes, while allowing consumers to disable the default UI and use `onTocChange` data for custom rendering.
 
-**Architecture:** Add a focused `packages/draftly/src/editor/table-of-contents` module for shared types, slugging, storage, Live extraction, panel DOM, theme, and the CodeMirror extension. Add preview-side TOC helpers and heading-id support so View mode uses the same heading id rules. Wire the feature into `draftly()` by default and into the Vue2 playground feature switches.
+**Architecture:** Add a focused `packages/markora/src/editor/table-of-contents` module for shared types, slugging, storage, Live extraction, panel DOM, theme, and the CodeMirror extension. Add preview-side TOC helpers and heading-id support so View mode uses the same heading id rules. Wire the feature into `markora()` by default and into the Vue2 playground feature switches.
 
-**Tech Stack:** TypeScript, CodeMirror 6 ViewPlugin, Lezer Markdown syntax tree, Draftly preview renderer, Vue 2.6 playground, Bun tests, tsup.
+**Tech Stack:** TypeScript, CodeMirror 6 ViewPlugin, Lezer Markdown syntax tree, Markora preview renderer, Vue 2.6 playground, Bun tests, tsup.
 
 ---
 
 ## File Structure
 
-- Create `packages/draftly/src/editor/table-of-contents/types.ts`
-  Public `DraftlyTocConfig`, `DraftlyTocItem`, resolved config, and internal panel state types.
-- Create `packages/draftly/src/editor/table-of-contents/slug.ts`
+- Create `packages/markora/src/editor/table-of-contents/types.ts`
+  Public `MarkoraTocConfig`, `MarkoraTocItem`, resolved config, and internal panel state types.
+- Create `packages/markora/src/editor/table-of-contents/slug.ts`
   Shared heading id generation for Live and View modes.
-- Create `packages/draftly/src/editor/table-of-contents/storage.ts`
+- Create `packages/markora/src/editor/table-of-contents/storage.ts`
   Optional localStorage persistence for panel `expanded` and `width`.
-- Create `packages/draftly/src/editor/table-of-contents/extract.ts`
+- Create `packages/markora/src/editor/table-of-contents/extract.ts`
   Extract `h2-h6` headings from CodeMirror/Lezer state.
-- Create `packages/draftly/src/editor/table-of-contents/panel.ts`
+- Create `packages/markora/src/editor/table-of-contents/panel.ts`
   Build the built-in DOM panel and wire click, toggle, and resize callbacks.
-- Create `packages/draftly/src/editor/table-of-contents/theme.ts`
+- Create `packages/markora/src/editor/table-of-contents/theme.ts`
   Built-in panel CSS.
-- Create `packages/draftly/src/editor/table-of-contents/extension.ts`
+- Create `packages/markora/src/editor/table-of-contents/extension.ts`
   Live-mode ViewPlugin for TOC data, active item, panel render, click jump, and resize state.
-- Create `packages/draftly/src/editor/table-of-contents/index.ts`
+- Create `packages/markora/src/editor/table-of-contents/index.ts`
   Public exports for editor consumers.
-- Modify `packages/draftly/src/editor/draftly.ts`
+- Modify `packages/markora/src/editor/markora.ts`
   Add `toc` config, default it on, and include the TOC extension.
-- Modify `packages/draftly/src/editor/index.ts`
+- Modify `packages/markora/src/editor/index.ts`
   Export the TOC module.
-- Create `packages/draftly/src/preview/toc.ts`
+- Create `packages/markora/src/preview/toc.ts`
   Generate preview TOC items from Markdown and attach heading ids to rendered preview DOM.
-- Modify `packages/draftly/src/preview/types.ts`
+- Modify `packages/markora/src/preview/types.ts`
   Add optional TOC context fields.
-- Modify `packages/draftly/src/preview/context.ts`
+- Modify `packages/markora/src/preview/context.ts`
   Pass heading id lookup through `PreviewContext`.
-- Modify `packages/draftly/src/preview/renderer.ts`
+- Modify `packages/markora/src/preview/renderer.ts`
   Compute heading ids before rendering and expose them through preview context.
-- Modify `packages/draftly/src/plugins/heading-plugin.ts`
+- Modify `packages/markora/src/plugins/heading-plugin.ts`
   Add `id` attributes for `h2-h6` when preview context provides one.
-- Modify `packages/draftly/src/preview/index.ts`
+- Modify `packages/markora/src/preview/index.ts`
   Export preview TOC helpers.
-- Create `packages/draftly/tests/toc-slug-storage.spec.ts`
+- Create `packages/markora/tests/toc-slug-storage.spec.ts`
   Cover slugging, duplicate ids, config defaults, and storage.
-- Create `packages/draftly/tests/toc-extract.spec.ts`
+- Create `packages/markora/tests/toc-extract.spec.ts`
   Cover Live extraction from Markdown syntax tree.
-- Create `packages/draftly/tests/toc-preview.spec.ts`
+- Create `packages/markora/tests/toc-preview.spec.ts`
   Cover preview TOC extraction and heading ids.
-- Create `packages/draftly/tests/toc-panel.spec.ts`
+- Create `packages/markora/tests/toc-panel.spec.ts`
   Cover panel DOM states and interaction callbacks.
-- Modify `packages/draftly/src/editor/icons/index.ts`
+- Modify `packages/markora/src/editor/icons/index.ts`
   Add `table-of-contents` and a collapse/expand icon if missing.
-- Modify `apps/vue2-playground/src/types.ts`
+- Modify `playground/vue2-playground/src/types.ts`
   Add `features.tableOfContents`.
-- Modify `apps/vue2-playground/src/state/playgroundConfig.ts`
+- Modify `playground/vue2-playground/src/state/playgroundConfig.ts`
   Default TOC feature on.
-- Modify `apps/vue2-playground/src/components/playground/Devbar.vue`
+- Modify `playground/vue2-playground/src/components/playground/Devbar.vue`
   Add the Feature Options switch.
-- Modify `apps/vue2-playground/src/components/playground/EditorPane.vue`
+- Modify `playground/vue2-playground/src/components/playground/EditorPane.vue`
   Pass `toc` config to Live mode and render built-in View-mode TOC around preview.
-- Modify `apps/vue2-playground/src/styles.css`
+- Modify `playground/vue2-playground/src/styles.css`
   Reserve the right-side in-editor space and keep the playground frame stable.
 
 ---
@@ -70,15 +70,15 @@
 ## Task 1: Shared TOC Types, Config, Slugging, And Storage
 
 **Files:**
-- Create: `packages/draftly/src/editor/table-of-contents/types.ts`
-- Create: `packages/draftly/src/editor/table-of-contents/slug.ts`
-- Create: `packages/draftly/src/editor/table-of-contents/storage.ts`
-- Create: `packages/draftly/src/editor/table-of-contents/index.ts`
-- Create: `packages/draftly/tests/toc-slug-storage.spec.ts`
+- Create: `packages/markora/src/editor/table-of-contents/types.ts`
+- Create: `packages/markora/src/editor/table-of-contents/slug.ts`
+- Create: `packages/markora/src/editor/table-of-contents/storage.ts`
+- Create: `packages/markora/src/editor/table-of-contents/index.ts`
+- Create: `packages/markora/tests/toc-slug-storage.spec.ts`
 
 - [ ] **Step 1: Write failing tests for slugging, config defaults, and storage**
 
-Create `packages/draftly/tests/toc-slug-storage.spec.ts`:
+Create `packages/markora/tests/toc-slug-storage.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -145,9 +145,9 @@ describe("toc panel storage", () => {
       setItem: (key: string, value: string) => storage.set(key, value),
     };
 
-    writeTocPanelState("draftly:toc", { expanded: false, width: 320 }, adapter);
+    writeTocPanelState("markora:toc", { expanded: false, width: 320 }, adapter);
 
-    expect(readTocPanelState("draftly:toc", adapter)).toEqual({ expanded: false, width: 320 });
+    expect(readTocPanelState("markora:toc", adapter)).toEqual({ expanded: false, width: 320 });
   });
 });
 ```
@@ -157,32 +157,32 @@ describe("toc panel storage", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-slug-storage.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-slug-storage.spec.ts
 ```
 
 Expected: FAIL because `../src/editor/table-of-contents` does not exist.
 
 - [ ] **Step 3: Implement shared types**
 
-Create `packages/draftly/src/editor/table-of-contents/types.ts`:
+Create `packages/markora/src/editor/table-of-contents/types.ts`:
 
 ```ts
-export type DraftlyTocLevel = 2 | 3 | 4 | 5 | 6;
+export type MarkoraTocLevel = 2 | 3 | 4 | 5 | 6;
 
-export interface DraftlyTocItem {
+export interface MarkoraTocItem {
   id: string;
-  level: DraftlyTocLevel;
+  level: MarkoraTocLevel;
   text: string;
   from?: number;
   to?: number;
   active: boolean;
 }
 
-export interface DraftlyTocConfig {
+export interface MarkoraTocConfig {
   enabled?: boolean;
-  onTocChange?: (items: DraftlyTocItem[]) => void;
-  minLevel?: DraftlyTocLevel;
-  maxLevel?: DraftlyTocLevel;
+  onTocChange?: (items: MarkoraTocItem[]) => void;
+  minLevel?: MarkoraTocLevel;
+  maxLevel?: MarkoraTocLevel;
   defaultExpanded?: boolean;
   defaultWidth?: number;
   minWidth?: number;
@@ -190,11 +190,11 @@ export interface DraftlyTocConfig {
   storageKey?: string;
 }
 
-export interface ResolvedDraftlyTocConfig {
+export interface ResolvedMarkoraTocConfig {
   enabled: boolean;
-  onTocChange?: (items: DraftlyTocItem[]) => void;
-  minLevel: DraftlyTocLevel;
-  maxLevel: DraftlyTocLevel;
+  onTocChange?: (items: MarkoraTocItem[]) => void;
+  minLevel: MarkoraTocLevel;
+  maxLevel: MarkoraTocLevel;
   defaultExpanded: boolean;
   defaultWidth: number;
   minWidth: number;
@@ -215,25 +215,25 @@ export interface TocStorageAdapter {
 
 - [ ] **Step 4: Implement config and slug utilities**
 
-Create `packages/draftly/src/editor/table-of-contents/slug.ts`:
+Create `packages/markora/src/editor/table-of-contents/slug.ts`:
 
 ```ts
-import type { DraftlyTocConfig, ResolvedDraftlyTocConfig } from "./types";
+import type { MarkoraTocConfig, ResolvedMarkoraTocConfig } from "./types";
 
 const defaultMinWidth = 180;
 const defaultMaxWidth = 360;
 const defaultWidth = 240;
 
-export function clampTocWidth(width: number, config: Pick<ResolvedDraftlyTocConfig, "minWidth" | "maxWidth">): number {
+export function clampTocWidth(width: number, config: Pick<ResolvedMarkoraTocConfig, "minWidth" | "maxWidth">): number {
   return Math.min(Math.max(width, config.minWidth), config.maxWidth);
 }
 
-export function resolveTocConfig(config: DraftlyTocConfig = {}): ResolvedDraftlyTocConfig {
+export function resolveTocConfig(config: MarkoraTocConfig = {}): ResolvedMarkoraTocConfig {
   const minWidth = Math.max(120, config.minWidth ?? defaultMinWidth);
   const maxWidth = Math.max(minWidth, config.maxWidth ?? defaultMaxWidth);
   const minLevel = config.minLevel ?? 2;
   const maxLevel = config.maxLevel ?? 6;
-  const resolved: ResolvedDraftlyTocConfig = {
+  const resolved: ResolvedMarkoraTocConfig = {
     enabled: config.enabled !== false,
     onTocChange: config.onTocChange,
     minLevel: minLevel <= maxLevel ? minLevel : maxLevel,
@@ -269,7 +269,7 @@ export function createTocSlugger(): (text: string) => string {
 
 - [ ] **Step 5: Implement storage helpers**
 
-Create `packages/draftly/src/editor/table-of-contents/storage.ts`:
+Create `packages/markora/src/editor/table-of-contents/storage.ts`:
 
 ```ts
 import type { TocPanelState, TocStorageAdapter } from "./types";
@@ -308,7 +308,7 @@ export function writeTocPanelState(
 
 - [ ] **Step 6: Add module exports**
 
-Create `packages/draftly/src/editor/table-of-contents/index.ts`:
+Create `packages/markora/src/editor/table-of-contents/index.ts`:
 
 ```ts
 export * from "./types";
@@ -321,7 +321,7 @@ export * from "./storage";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-slug-storage.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-slug-storage.spec.ts
 ```
 
 Expected: PASS for `toc-slug-storage.spec.ts`.
@@ -329,7 +329,7 @@ Expected: PASS for `toc-slug-storage.spec.ts`.
 - [ ] **Step 8: Commit Task 1**
 
 ```bash
-git add packages/draftly/src/editor/table-of-contents packages/draftly/tests/toc-slug-storage.spec.ts
+git add packages/markora/src/editor/table-of-contents packages/markora/tests/toc-slug-storage.spec.ts
 git commit -m "feat(editor): 添加目录配置与基础工具"
 ```
 
@@ -338,13 +338,13 @@ git commit -m "feat(editor): 添加目录配置与基础工具"
 ## Task 2: Live Mode Heading Extraction
 
 **Files:**
-- Create: `packages/draftly/src/editor/table-of-contents/extract.ts`
-- Modify: `packages/draftly/src/editor/table-of-contents/index.ts`
-- Create: `packages/draftly/tests/toc-extract.spec.ts`
+- Create: `packages/markora/src/editor/table-of-contents/extract.ts`
+- Modify: `packages/markora/src/editor/table-of-contents/index.ts`
+- Create: `packages/markora/tests/toc-extract.spec.ts`
 
 - [ ] **Step 1: Write failing extraction tests**
 
-Create `packages/draftly/tests/toc-extract.spec.ts`:
+Create `packages/markora/tests/toc-extract.spec.ts`:
 
 ```ts
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
@@ -404,29 +404,29 @@ describe("extractTocItemsFromState", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-extract.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-extract.spec.ts
 ```
 
 Expected: FAIL because `extractTocItemsFromState` is not exported.
 
 - [ ] **Step 3: Implement Live extraction**
 
-Create `packages/draftly/src/editor/table-of-contents/extract.ts`:
+Create `packages/markora/src/editor/table-of-contents/extract.ts`:
 
 ```ts
 import type { EditorState } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import type { SyntaxNodeRef } from "@lezer/common";
-import type { DraftlyTocConfig, DraftlyTocItem, DraftlyTocLevel } from "./types";
+import type { MarkoraTocConfig, MarkoraTocItem, MarkoraTocLevel } from "./types";
 import { createTocSlugger, resolveTocConfig } from "./slug";
 
 const headingPattern = /^ATXHeading([1-6])$/;
 
-function headingLevel(node: SyntaxNodeRef): DraftlyTocLevel | null {
+function headingLevel(node: SyntaxNodeRef): MarkoraTocLevel | null {
   const match = headingPattern.exec(node.name);
   if (!match) return null;
   const level = Number(match[1]);
-  return level >= 2 && level <= 6 ? (level as DraftlyTocLevel) : null;
+  return level >= 2 && level <= 6 ? (level as MarkoraTocLevel) : null;
 }
 
 function stripMarkdownInline(text: string): string {
@@ -441,10 +441,10 @@ function stripMarkdownInline(text: string): string {
     .trim();
 }
 
-export function extractTocItemsFromState(state: EditorState, config: DraftlyTocConfig = {}): DraftlyTocItem[] {
+export function extractTocItemsFromState(state: EditorState, config: MarkoraTocConfig = {}): MarkoraTocItem[] {
   const resolved = resolveTocConfig(config);
   const slug = createTocSlugger();
-  const items: DraftlyTocItem[] = [];
+  const items: MarkoraTocItem[] = [];
 
   syntaxTree(state).iterate({
     enter: (node) => {
@@ -469,7 +469,7 @@ export function extractTocItemsFromState(state: EditorState, config: DraftlyTocC
 
 - [ ] **Step 4: Export extraction**
 
-Modify `packages/draftly/src/editor/table-of-contents/index.ts`:
+Modify `packages/markora/src/editor/table-of-contents/index.ts`:
 
 ```ts
 export * from "./types";
@@ -483,7 +483,7 @@ export * from "./extract";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-extract.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-extract.spec.ts
 ```
 
 Expected: PASS for extraction tests.
@@ -491,7 +491,7 @@ Expected: PASS for extraction tests.
 - [ ] **Step 6: Commit Task 2**
 
 ```bash
-git add packages/draftly/src/editor/table-of-contents packages/draftly/tests/toc-extract.spec.ts
+git add packages/markora/src/editor/table-of-contents packages/markora/tests/toc-extract.spec.ts
 git commit -m "feat(editor): 提取文档目录标题数据"
 ```
 
@@ -500,15 +500,15 @@ git commit -m "feat(editor): 提取文档目录标题数据"
 ## Task 3: Built-In TOC Panel DOM And Theme
 
 **Files:**
-- Create: `packages/draftly/src/editor/table-of-contents/panel.ts`
-- Create: `packages/draftly/src/editor/table-of-contents/theme.ts`
-- Modify: `packages/draftly/src/editor/table-of-contents/index.ts`
-- Modify: `packages/draftly/src/editor/icons/index.ts`
-- Create: `packages/draftly/tests/toc-panel.spec.ts`
+- Create: `packages/markora/src/editor/table-of-contents/panel.ts`
+- Create: `packages/markora/src/editor/table-of-contents/theme.ts`
+- Modify: `packages/markora/src/editor/table-of-contents/index.ts`
+- Modify: `packages/markora/src/editor/icons/index.ts`
+- Create: `packages/markora/tests/toc-panel.spec.ts`
 
 - [ ] **Step 1: Write failing panel tests**
 
-Create `packages/draftly/tests/toc-panel.spec.ts`:
+Create `packages/markora/tests/toc-panel.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -533,13 +533,13 @@ describe("createTocPanelElement", () => {
       }
     );
 
-    expect(panel.className).toContain("cm-draftly-toc");
-    expect(panel.getAttribute("data-draftly-toc-expanded")).toBe("true");
-    expect(panel.querySelectorAll(".cm-draftly-toc-item").length).toBe(2);
-    expect(panel.querySelector(".cm-draftly-toc-item-active")?.textContent).toContain("Intro");
-    expect(panel.querySelector('[data-draftly-toc-level="3"]')?.textContent).toContain("Details");
+    expect(panel.className).toContain("cm-markora-toc");
+    expect(panel.getAttribute("data-markora-toc-expanded")).toBe("true");
+    expect(panel.querySelectorAll(".cm-markora-toc-item").length).toBe(2);
+    expect(panel.querySelector(".cm-markora-toc-item-active")?.textContent).toContain("Intro");
+    expect(panel.querySelector('[data-markora-toc-level="3"]')?.textContent).toContain("Details");
 
-    panel.querySelector<HTMLButtonElement>(".cm-draftly-toc-item")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    panel.querySelector<HTMLButtonElement>(".cm-markora-toc-item")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
     expect(calls).toEqual(["intro"]);
   });
@@ -550,7 +550,7 @@ describe("createTocPanelElement", () => {
       { onSelect: () => undefined, onToggle: () => undefined, onResizeStart: () => undefined }
     );
 
-    expect(panel.getAttribute("data-draftly-toc-expanded")).toBe("false");
+    expect(panel.getAttribute("data-markora-toc-expanded")).toBe("false");
     expect(panel.textContent).toContain("目录");
   });
 });
@@ -561,14 +561,14 @@ describe("createTocPanelElement", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-panel.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-panel.spec.ts
 ```
 
 Expected: FAIL because `createTocPanelElement` does not exist.
 
 - [ ] **Step 3: Add the table-of-contents icon**
 
-Modify `packages/draftly/src/editor/icons/index.ts` by adding this icon entry to the built-in icon map:
+Modify `packages/markora/src/editor/icons/index.ts` by adding this icon entry to the built-in icon map:
 
 ```ts
 "table-of-contents": [
@@ -583,35 +583,35 @@ Modify `packages/draftly/src/editor/icons/index.ts` by adding this icon entry to
 
 - [ ] **Step 4: Implement panel DOM builder**
 
-Create `packages/draftly/src/editor/table-of-contents/panel.ts`:
+Create `packages/markora/src/editor/table-of-contents/panel.ts`:
 
 ```ts
-import { createDraftlyIcon } from "../icons";
-import type { DraftlyTocItem } from "./types";
+import { createMarkoraIcon } from "../icons";
+import type { MarkoraTocItem } from "./types";
 
 export interface TocPanelRenderState {
   expanded: boolean;
   width: number;
-  items: DraftlyTocItem[];
+  items: MarkoraTocItem[];
 }
 
 export interface TocPanelCallbacks {
-  onSelect(item: DraftlyTocItem): void;
+  onSelect(item: MarkoraTocItem): void;
   onToggle(): void;
   onResizeStart(event: MouseEvent): void;
 }
 
 function appendIcon(parent: HTMLElement, name: string): void {
-  const icon = createDraftlyIcon(name);
+  const icon = createMarkoraIcon(name);
   if (icon) parent.appendChild(icon);
 }
 
 function createHeader(callbacks: TocPanelCallbacks): HTMLElement {
   const header = document.createElement("div");
-  header.className = "cm-draftly-toc-header";
+  header.className = "cm-markora-toc-header";
 
   const title = document.createElement("div");
-  title.className = "cm-draftly-toc-title";
+  title.className = "cm-markora-toc-title";
   appendIcon(title, "table-of-contents");
   const text = document.createElement("span");
   text.textContent = "目录";
@@ -619,7 +619,7 @@ function createHeader(callbacks: TocPanelCallbacks): HTMLElement {
 
   const toggle = document.createElement("button");
   toggle.type = "button";
-  toggle.className = "cm-draftly-toc-toggle";
+  toggle.className = "cm-markora-toc-toggle";
   toggle.setAttribute("aria-label", "Toggle table of contents");
   toggle.textContent = "‹";
   toggle.addEventListener("click", callbacks.onToggle);
@@ -631,7 +631,7 @@ function createHeader(callbacks: TocPanelCallbacks): HTMLElement {
 function createCollapsed(callbacks: TocPanelCallbacks): HTMLElement {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "cm-draftly-toc-collapsed";
+  button.className = "cm-markora-toc-collapsed";
   button.setAttribute("aria-label", "Open table of contents");
   appendIcon(button, "table-of-contents");
   const label = document.createElement("span");
@@ -641,12 +641,12 @@ function createCollapsed(callbacks: TocPanelCallbacks): HTMLElement {
   return button;
 }
 
-function createItem(item: DraftlyTocItem, callbacks: TocPanelCallbacks): HTMLButtonElement {
+function createItem(item: MarkoraTocItem, callbacks: TocPanelCallbacks): HTMLButtonElement {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = item.active ? "cm-draftly-toc-item cm-draftly-toc-item-active" : "cm-draftly-toc-item";
-  button.dataset.draftlyTocId = item.id;
-  button.dataset.draftlyTocLevel = String(item.level);
+  button.className = item.active ? "cm-markora-toc-item cm-markora-toc-item-active" : "cm-markora-toc-item";
+  button.dataset.markoraTocId = item.id;
+  button.dataset.markoraTocLevel = String(item.level);
   button.title = item.text;
   button.textContent = item.text;
   button.addEventListener("click", () => callbacks.onSelect(item));
@@ -655,12 +655,12 @@ function createItem(item: DraftlyTocItem, callbacks: TocPanelCallbacks): HTMLBut
 
 export function createTocPanelElement(state: TocPanelRenderState, callbacks: TocPanelCallbacks): HTMLElement {
   const root = document.createElement("aside");
-  root.className = "cm-draftly-toc";
-  root.dataset.draftlyTocExpanded = String(state.expanded);
-  root.style.setProperty("--draftly-toc-width", `${state.width}px`);
+  root.className = "cm-markora-toc";
+  root.dataset.markoraTocExpanded = String(state.expanded);
+  root.style.setProperty("--markora-toc-width", `${state.width}px`);
 
   const resize = document.createElement("div");
-  resize.className = "cm-draftly-toc-resize";
+  resize.className = "cm-markora-toc-resize";
   resize.addEventListener("mousedown", callbacks.onResizeStart);
   root.appendChild(resize);
 
@@ -672,10 +672,10 @@ export function createTocPanelElement(state: TocPanelRenderState, callbacks: Toc
   root.appendChild(createHeader(callbacks));
 
   const list = document.createElement("nav");
-  list.className = "cm-draftly-toc-list";
+  list.className = "cm-markora-toc-list";
   if (state.items.length === 0) {
     const empty = document.createElement("div");
-    empty.className = "cm-draftly-toc-empty";
+    empty.className = "cm-markora-toc-empty";
     empty.textContent = "暂无目录";
     list.appendChild(empty);
   } else {
@@ -688,28 +688,28 @@ export function createTocPanelElement(state: TocPanelRenderState, callbacks: Toc
 
 - [ ] **Step 5: Implement panel theme**
 
-Create `packages/draftly/src/editor/table-of-contents/theme.ts`:
+Create `packages/markora/src/editor/table-of-contents/theme.ts`:
 
 ```ts
 import { EditorView } from "@codemirror/view";
 
 export const tocTheme = EditorView.baseTheme({
-  ".cm-draftly-toc": {
+  ".cm-markora-toc": {
     position: "relative",
-    flex: "0 0 var(--draftly-toc-width, 240px)",
-    width: "var(--draftly-toc-width, 240px)",
+    flex: "0 0 var(--markora-toc-width, 240px)",
+    width: "var(--markora-toc-width, 240px)",
     minWidth: "0",
     height: "100%",
-    borderLeft: "1px solid var(--draftly-toc-border, #e4e4e7)",
-    background: "var(--draftly-toc-bg, #ffffff)",
-    color: "var(--draftly-toc-fg, #27272a)",
+    borderLeft: "1px solid var(--markora-toc-border, #e4e4e7)",
+    background: "var(--markora-toc-bg, #ffffff)",
+    color: "var(--markora-toc-fg, #27272a)",
     userSelect: "none",
   },
-  ".cm-draftly-toc[data-draftly-toc-expanded='false']": {
+  ".cm-markora-toc[data-markora-toc-expanded='false']": {
     flexBasis: "42px",
     width: "42px",
   },
-  ".cm-draftly-toc-resize": {
+  ".cm-markora-toc-resize": {
     position: "absolute",
     top: "0",
     bottom: "0",
@@ -717,50 +717,50 @@ export const tocTheme = EditorView.baseTheme({
     width: "6px",
     cursor: "col-resize",
   },
-  ".cm-draftly-toc-resize::after": {
+  ".cm-markora-toc-resize::after": {
     position: "absolute",
     top: "40%",
     left: "2px",
     width: "2px",
     height: "58px",
     borderRadius: "999px",
-    background: "var(--draftly-toc-handle, #d4d4d8)",
+    background: "var(--markora-toc-handle, #d4d4d8)",
     content: "''",
   },
-  ".cm-draftly-toc-header": {
+  ".cm-markora-toc-header": {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     height: "44px",
     padding: "0 10px 0 14px",
   },
-  ".cm-draftly-toc-title": {
+  ".cm-markora-toc-title": {
     display: "inline-flex",
     alignItems: "center",
     gap: "8px",
     fontSize: "13px",
     fontWeight: "600",
   },
-  ".cm-draftly-toc-title svg, .cm-draftly-toc-collapsed svg": {
+  ".cm-markora-toc-title svg, .cm-markora-toc-collapsed svg": {
     width: "16px",
     height: "16px",
   },
-  ".cm-draftly-toc-toggle, .cm-draftly-toc-collapsed, .cm-draftly-toc-item": {
+  ".cm-markora-toc-toggle, .cm-markora-toc-collapsed, .cm-markora-toc-item": {
     border: "0",
     background: "transparent",
     color: "inherit",
     cursor: "default",
     font: "inherit",
   },
-  ".cm-draftly-toc-toggle": {
+  ".cm-markora-toc-toggle": {
     width: "28px",
     height: "28px",
     borderRadius: "6px",
   },
-  ".cm-draftly-toc-toggle:hover, .cm-draftly-toc-collapsed:hover, .cm-draftly-toc-item:hover": {
-    background: "var(--draftly-toc-hover, #f4f4f5)",
+  ".cm-markora-toc-toggle:hover, .cm-markora-toc-collapsed:hover, .cm-markora-toc-item:hover": {
+    background: "var(--markora-toc-hover, #f4f4f5)",
   },
-  ".cm-draftly-toc-collapsed": {
+  ".cm-markora-toc-collapsed": {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -768,15 +768,15 @@ export const tocTheme = EditorView.baseTheme({
     gap: "6px",
     width: "100%",
     height: "100%",
-    color: "var(--draftly-toc-muted, #71717a)",
+    color: "var(--markora-toc-muted, #71717a)",
     fontSize: "12px",
   },
-  ".cm-draftly-toc-list": {
+  ".cm-markora-toc-list": {
     overflow: "auto",
     height: "calc(100% - 44px)",
     padding: "4px 10px 16px 12px",
   },
-  ".cm-draftly-toc-item": {
+  ".cm-markora-toc-item": {
     display: "block",
     width: "100%",
     overflow: "hidden",
@@ -784,42 +784,42 @@ export const tocTheme = EditorView.baseTheme({
     padding: "0 8px",
     borderLeft: "2px solid transparent",
     borderRadius: "6px",
-    color: "var(--draftly-toc-muted, #71717a)",
+    color: "var(--markora-toc-muted, #71717a)",
     lineHeight: "30px",
     textAlign: "left",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
-  ".cm-draftly-toc-item[data-draftly-toc-level='3']": { paddingLeft: "18px" },
-  ".cm-draftly-toc-item[data-draftly-toc-level='4']": { paddingLeft: "28px" },
-  ".cm-draftly-toc-item[data-draftly-toc-level='5']": { paddingLeft: "38px" },
-  ".cm-draftly-toc-item[data-draftly-toc-level='6']": { paddingLeft: "48px" },
-  ".cm-draftly-toc-item-active": {
-    borderLeftColor: "var(--draftly-toc-active, #18181b)",
-    background: "var(--draftly-toc-hover, #f4f4f5)",
-    color: "var(--draftly-toc-active, #18181b)",
+  ".cm-markora-toc-item[data-markora-toc-level='3']": { paddingLeft: "18px" },
+  ".cm-markora-toc-item[data-markora-toc-level='4']": { paddingLeft: "28px" },
+  ".cm-markora-toc-item[data-markora-toc-level='5']": { paddingLeft: "38px" },
+  ".cm-markora-toc-item[data-markora-toc-level='6']": { paddingLeft: "48px" },
+  ".cm-markora-toc-item-active": {
+    borderLeftColor: "var(--markora-toc-active, #18181b)",
+    background: "var(--markora-toc-hover, #f4f4f5)",
+    color: "var(--markora-toc-active, #18181b)",
     fontWeight: "600",
   },
-  ".cm-draftly-toc-empty": {
+  ".cm-markora-toc-empty": {
     padding: "12px 8px",
-    color: "var(--draftly-toc-muted, #71717a)",
+    color: "var(--markora-toc-muted, #71717a)",
     fontSize: "13px",
   },
-  "&dark .cm-draftly-toc": {
-    "--draftly-toc-bg": "#18181b",
-    "--draftly-toc-fg": "#f4f4f5",
-    "--draftly-toc-border": "#3f3f46",
-    "--draftly-toc-handle": "#52525b",
-    "--draftly-toc-hover": "#27272a",
-    "--draftly-toc-muted": "#a1a1aa",
-    "--draftly-toc-active": "#f4f4f5",
+  "&dark .cm-markora-toc": {
+    "--markora-toc-bg": "#18181b",
+    "--markora-toc-fg": "#f4f4f5",
+    "--markora-toc-border": "#3f3f46",
+    "--markora-toc-handle": "#52525b",
+    "--markora-toc-hover": "#27272a",
+    "--markora-toc-muted": "#a1a1aa",
+    "--markora-toc-active": "#f4f4f5",
   },
 });
 ```
 
 - [ ] **Step 6: Export panel and theme**
 
-Modify `packages/draftly/src/editor/table-of-contents/index.ts`:
+Modify `packages/markora/src/editor/table-of-contents/index.ts`:
 
 ```ts
 export * from "./types";
@@ -835,7 +835,7 @@ export * from "./theme";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-panel.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-panel.spec.ts
 ```
 
 Expected: PASS for panel tests.
@@ -843,28 +843,28 @@ Expected: PASS for panel tests.
 - [ ] **Step 8: Commit Task 3**
 
 ```bash
-git add packages/draftly/src/editor/icons/index.ts packages/draftly/src/editor/table-of-contents packages/draftly/tests/toc-panel.spec.ts
+git add packages/markora/src/editor/icons/index.ts packages/markora/src/editor/table-of-contents packages/markora/tests/toc-panel.spec.ts
 git commit -m "feat(editor): 添加内置目录面板"
 ```
 
 ---
 
-## Task 4: Live Mode TOC Extension And Core Draftly Config
+## Task 4: Live Mode TOC Extension And Core Markora Config
 
 **Files:**
-- Create: `packages/draftly/src/editor/table-of-contents/extension.ts`
-- Modify: `packages/draftly/src/editor/table-of-contents/index.ts`
-- Modify: `packages/draftly/src/editor/draftly.ts`
-- Modify: `packages/draftly/src/editor/index.ts`
-- Create: `packages/draftly/tests/toc-extension.spec.ts`
+- Create: `packages/markora/src/editor/table-of-contents/extension.ts`
+- Modify: `packages/markora/src/editor/table-of-contents/index.ts`
+- Modify: `packages/markora/src/editor/markora.ts`
+- Modify: `packages/markora/src/editor/index.ts`
+- Create: `packages/markora/tests/toc-extension.spec.ts`
 
 - [ ] **Step 1: Write failing composition tests**
 
-Create `packages/draftly/tests/toc-extension.spec.ts`:
+Create `packages/markora/tests/toc-extension.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
-import { draftly } from "../src/editor";
+import { markora } from "../src/editor";
 import { tableOfContents } from "../src/editor/table-of-contents";
 
 describe("tableOfContents extension composition", () => {
@@ -878,8 +878,8 @@ describe("tableOfContents extension composition", () => {
     expect(tableOfContents({ enabled: false, onTocChange: (items) => calls.push(items) }).length).toBeGreaterThan(0);
   });
 
-  it("is included by draftly by default", () => {
-    expect(draftly().flat(Infinity).length).toBeGreaterThan(0);
+  it("is included by markora by default", () => {
+    expect(markora().flat(Infinity).length).toBeGreaterThan(0);
   });
 });
 ```
@@ -889,14 +889,14 @@ describe("tableOfContents extension composition", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-extension.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-extension.spec.ts
 ```
 
 Expected: FAIL because `tableOfContents` is not exported.
 
 - [ ] **Step 3: Implement Live extension**
 
-Create `packages/draftly/src/editor/table-of-contents/extension.ts`:
+Create `packages/markora/src/editor/table-of-contents/extension.ts`:
 
 ```ts
 import { EditorSelection, Extension, Prec } from "@codemirror/state";
@@ -906,19 +906,19 @@ import { createTocPanelElement } from "./panel";
 import { clampTocWidth, resolveTocConfig } from "./slug";
 import { readTocPanelState, writeTocPanelState } from "./storage";
 import { tocTheme } from "./theme";
-import type { DraftlyTocConfig, DraftlyTocItem, ResolvedDraftlyTocConfig, TocPanelState } from "./types";
+import type { MarkoraTocConfig, MarkoraTocItem, ResolvedMarkoraTocConfig, TocPanelState } from "./types";
 
-function sameItems(a: DraftlyTocItem[], b: DraftlyTocItem[]): boolean {
+function sameItems(a: MarkoraTocItem[], b: MarkoraTocItem[]): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
 class TocViewPlugin {
   private panel: HTMLElement | null = null;
-  private config: ResolvedDraftlyTocConfig;
+  private config: ResolvedMarkoraTocConfig;
   private panelState: TocPanelState;
-  private items: DraftlyTocItem[] = [];
+  private items: MarkoraTocItem[] = [];
 
-  constructor(private readonly view: EditorView, rawConfig: DraftlyTocConfig) {
+  constructor(private readonly view: EditorView, rawConfig: MarkoraTocConfig) {
     this.config = resolveTocConfig(rawConfig);
     const stored = readTocPanelState(this.config.storageKey);
     this.panelState = {
@@ -950,7 +950,7 @@ class TocViewPlugin {
     this.render();
   }
 
-  private withActive(items: DraftlyTocItem[]): DraftlyTocItem[] {
+  private withActive(items: MarkoraTocItem[]): MarkoraTocItem[] {
     if (items.length === 0) return [];
     const viewportTop = this.view.scrollDOM.getBoundingClientRect().top + 24;
     let activeIndex = 0;
@@ -985,7 +985,7 @@ class TocViewPlugin {
     this.panel = nextPanel;
   }
 
-  private selectItem(item: DraftlyTocItem): void {
+  private selectItem(item: MarkoraTocItem): void {
     if (typeof item.from !== "number") return;
     this.view.dispatch({
       selection: EditorSelection.cursor(item.from),
@@ -1010,7 +1010,7 @@ class TocViewPlugin {
     const startX = event.clientX;
     const startWidth = this.panelState.width;
     const doc = this.view.dom.ownerDocument;
-    doc.body.classList.add("cm-draftly-toc-resizing");
+    doc.body.classList.add("cm-markora-toc-resizing");
 
     const move = (moveEvent: MouseEvent) => {
       const nextWidth = clampTocWidth(startWidth - (moveEvent.clientX - startX), this.config);
@@ -1018,7 +1018,7 @@ class TocViewPlugin {
       this.render();
     };
     const up = () => {
-      doc.body.classList.remove("cm-draftly-toc-resizing");
+      doc.body.classList.remove("cm-markora-toc-resizing");
       doc.removeEventListener("mousemove", move);
       doc.removeEventListener("mouseup", up);
       this.persistPanelState();
@@ -1029,7 +1029,7 @@ class TocViewPlugin {
   }
 }
 
-export function tableOfContents(config: DraftlyTocConfig = {}): Extension[] {
+export function tableOfContents(config: MarkoraTocConfig = {}): Extension[] {
   return [
     tocTheme,
     Prec.low(
@@ -1041,7 +1041,7 @@ export function tableOfContents(config: DraftlyTocConfig = {}): Extension[] {
 
 - [ ] **Step 4: Export the extension**
 
-Modify `packages/draftly/src/editor/table-of-contents/index.ts`:
+Modify `packages/markora/src/editor/table-of-contents/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1053,10 +1053,10 @@ export * from "./theme";
 export * from "./extension";
 ```
 
-Modify `packages/draftly/src/editor/index.ts`:
+Modify `packages/markora/src/editor/index.ts`:
 
 ```ts
-export * from "./draftly";
+export * from "./markora";
 export * from "./plugin";
 export * from "./utils";
 export * from "./theme";
@@ -1067,23 +1067,23 @@ export * from "./selection-toolbar";
 export * from "./table-of-contents";
 ```
 
-- [ ] **Step 5: Wire into draftly config**
+- [ ] **Step 5: Wire into markora config**
 
-Modify `packages/draftly/src/editor/draftly.ts`:
+Modify `packages/markora/src/editor/markora.ts`:
 
 ```ts
-import type { DraftlyTocConfig } from "./table-of-contents";
+import type { MarkoraTocConfig } from "./table-of-contents";
 import { tableOfContents } from "./table-of-contents";
 ```
 
-Add this to `DraftlyConfig`:
+Add this to `MarkoraConfig`:
 
 ```ts
 /** Table of contents configuration */
-toc?: DraftlyTocConfig;
+toc?: MarkoraTocConfig;
 ```
 
-Add this default in `draftly()` destructuring:
+Add this default in `markora()` destructuring:
 
 ```ts
 toc: configToc = { enabled: true },
@@ -1100,8 +1100,8 @@ tableOfContents(configToc),
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-extension.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-extension.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
 ```
 
 Expected: tests PASS and typecheck exits 0.
@@ -1109,7 +1109,7 @@ Expected: tests PASS and typecheck exits 0.
 - [ ] **Step 7: Commit Task 4**
 
 ```bash
-git add packages/draftly/src/editor packages/draftly/tests/toc-extension.spec.ts
+git add packages/markora/src/editor packages/markora/tests/toc-extension.spec.ts
 git commit -m "feat(editor): 默认启用内置目录扩展"
 ```
 
@@ -1118,17 +1118,17 @@ git commit -m "feat(editor): 默认启用内置目录扩展"
 ## Task 5: Preview TOC Data And Heading IDs
 
 **Files:**
-- Create: `packages/draftly/src/preview/toc.ts`
-- Modify: `packages/draftly/src/preview/types.ts`
-- Modify: `packages/draftly/src/preview/context.ts`
-- Modify: `packages/draftly/src/preview/renderer.ts`
-- Modify: `packages/draftly/src/plugins/heading-plugin.ts`
-- Modify: `packages/draftly/src/preview/index.ts`
-- Create: `packages/draftly/tests/toc-preview.spec.ts`
+- Create: `packages/markora/src/preview/toc.ts`
+- Modify: `packages/markora/src/preview/types.ts`
+- Modify: `packages/markora/src/preview/context.ts`
+- Modify: `packages/markora/src/preview/renderer.ts`
+- Modify: `packages/markora/src/plugins/heading-plugin.ts`
+- Modify: `packages/markora/src/preview/index.ts`
+- Create: `packages/markora/tests/toc-preview.spec.ts`
 
 - [ ] **Step 1: Write failing preview tests**
 
-Create `packages/draftly/tests/toc-preview.spec.ts`:
+Create `packages/markora/tests/toc-preview.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -1163,23 +1163,23 @@ describe("preview table of contents", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-preview.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-preview.spec.ts
 ```
 
 Expected: FAIL because `extractPreviewTocFromMarkdown` and heading ids do not exist.
 
 - [ ] **Step 3: Implement preview TOC extraction**
 
-Create `packages/draftly/src/preview/toc.ts`:
+Create `packages/markora/src/preview/toc.ts`:
 
 ```ts
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorState } from "@codemirror/state";
 import type { MarkdownConfig } from "@lezer/markdown";
-import type { DraftlyTocConfig, DraftlyTocItem } from "../editor/table-of-contents";
+import type { MarkoraTocConfig, MarkoraTocItem } from "../editor/table-of-contents";
 import { extractTocItemsFromState } from "../editor/table-of-contents";
 
-export function extractPreviewTocFromMarkdown(doc: string, config: DraftlyTocConfig = {}, markdownConfig: MarkdownConfig[] = []): DraftlyTocItem[] {
+export function extractPreviewTocFromMarkdown(doc: string, config: MarkoraTocConfig = {}, markdownConfig: MarkdownConfig[] = []): MarkoraTocItem[] {
   const state = EditorState.create({
     doc,
     extensions: [markdown({ base: markdownLanguage, extensions: markdownConfig })],
@@ -1190,14 +1190,14 @@ export function extractPreviewTocFromMarkdown(doc: string, config: DraftlyTocCon
 
 - [ ] **Step 4: Extend preview context types**
 
-Modify `packages/draftly/src/preview/types.ts` to add `headingIdForNode` to `PreviewContext`:
+Modify `packages/markora/src/preview/types.ts` to add `headingIdForNode` to `PreviewContext`:
 
 ```ts
 /** Return a stable heading id for TOC-aware heading renderers */
 headingIdForNode?(node: import("@lezer/common").SyntaxNode): string | null;
 ```
 
-Modify `packages/draftly/src/preview/context.ts` so `createPreviewContext` accepts and returns this optional function:
+Modify `packages/markora/src/preview/context.ts` so `createPreviewContext` accepts and returns this optional function:
 
 ```ts
 export function createPreviewContext(
@@ -1221,7 +1221,7 @@ export function createPreviewContext(
 
 - [ ] **Step 5: Compute heading ids in PreviewRenderer**
 
-Modify `packages/draftly/src/preview/renderer.ts`:
+Modify `packages/markora/src/preview/renderer.ts`:
 
 ```ts
 import { EditorState } from "@codemirror/state";
@@ -1255,7 +1255,7 @@ return await this.renderNode(tree.topNode);
 
 - [ ] **Step 6: Add heading ids in HeadingPlugin preview HTML**
 
-Modify `packages/draftly/src/plugins/heading-plugin.ts` imports:
+Modify `packages/markora/src/plugins/heading-plugin.ts` imports:
 
 ```ts
 import type { PreviewContext } from "../preview/types";
@@ -1287,7 +1287,7 @@ override renderToHTML(node: SyntaxNode, children: string, ctx: PreviewContext): 
 
 - [ ] **Step 7: Export preview helper**
 
-Modify `packages/draftly/src/preview/index.ts`:
+Modify `packages/markora/src/preview/index.ts`:
 
 ```ts
 export { extractPreviewTocFromMarkdown } from "./toc";
@@ -1298,8 +1298,8 @@ export { extractPreviewTocFromMarkdown } from "./toc";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly test tests/toc-preview.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-preview.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
 ```
 
 Expected: tests PASS and typecheck exits 0.
@@ -1307,7 +1307,7 @@ Expected: tests PASS and typecheck exits 0.
 - [ ] **Step 9: Commit Task 5**
 
 ```bash
-git add packages/draftly/src/preview packages/draftly/src/plugins/heading-plugin.ts packages/draftly/tests/toc-preview.spec.ts
+git add packages/markora/src/preview packages/markora/src/plugins/heading-plugin.ts packages/markora/tests/toc-preview.spec.ts
 git commit -m "feat(preview): 支持预览目录数据与标题锚点"
 ```
 
@@ -1316,15 +1316,15 @@ git commit -m "feat(preview): 支持预览目录数据与标题锚点"
 ## Task 6: Vue2 Playground Integration
 
 **Files:**
-- Modify: `apps/vue2-playground/src/types.ts`
-- Modify: `apps/vue2-playground/src/state/playgroundConfig.ts`
-- Modify: `apps/vue2-playground/src/components/playground/Devbar.vue`
-- Modify: `apps/vue2-playground/src/components/playground/EditorPane.vue`
-- Modify: `apps/vue2-playground/src/styles.css`
+- Modify: `playground/vue2-playground/src/types.ts`
+- Modify: `playground/vue2-playground/src/state/playgroundConfig.ts`
+- Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
+- Modify: `playground/vue2-playground/src/components/playground/EditorPane.vue`
+- Modify: `playground/vue2-playground/src/styles.css`
 
 - [ ] **Step 1: Add feature type and default**
 
-Modify `apps/vue2-playground/src/types.ts`:
+Modify `playground/vue2-playground/src/types.ts`:
 
 ```ts
 features: {
@@ -1335,7 +1335,7 @@ features: {
 };
 ```
 
-Modify `apps/vue2-playground/src/state/playgroundConfig.ts`:
+Modify `playground/vue2-playground/src/state/playgroundConfig.ts`:
 
 ```ts
 features: {
@@ -1348,7 +1348,7 @@ features: {
 
 - [ ] **Step 2: Add Devbar feature switch**
 
-Modify `apps/vue2-playground/src/components/playground/Devbar.vue` `featureOptions`:
+Modify `playground/vue2-playground/src/components/playground/Devbar.vue` `featureOptions`:
 
 ```ts
 featureOptions: [
@@ -1361,12 +1361,12 @@ featureOptions: [
 
 - [ ] **Step 3: Pass Live TOC config**
 
-Modify the `draftly({ ... })` call in `apps/vue2-playground/src/components/playground/EditorPane.vue`:
+Modify the `markora({ ... })` call in `playground/vue2-playground/src/components/playground/EditorPane.vue`:
 
 ```ts
 toc: {
   enabled: this.config.features.tableOfContents && this.mode === "live",
-  storageKey: "draftly-vue2-playground:toc",
+  storageKey: "markora-vue2-playground:toc",
 },
 ```
 
@@ -1411,14 +1411,14 @@ to:
 Modify `EditorPane.vue` imports:
 
 ```ts
-import type { DraftlyNode, DraftlyTocItem } from "draftly/editor";
-import { extractPreviewTocFromMarkdown } from "draftly/preview";
+import type { MarkoraNode, MarkoraTocItem } from "markora/editor";
+import { extractPreviewTocFromMarkdown } from "markora/preview";
 ```
 
 Add data:
 
 ```ts
-previewToc: [] as DraftlyTocItem[],
+previewToc: [] as MarkoraTocItem[],
 ```
 
 At the end of `renderPreview()`, after `this.previewOutput = ...`, add:
@@ -1444,7 +1444,7 @@ jumpPreviewToc(id: string) {
 
 - [ ] **Step 6: Add playground styles**
 
-Modify `apps/vue2-playground/src/styles.css`:
+Modify `playground/vue2-playground/src/styles.css`:
 
 ```css
 .preview-with-toc {
@@ -1532,7 +1532,7 @@ Expected: build exits 0. Existing Vue CLI asset-size warnings are acceptable.
 - [ ] **Step 8: Commit Task 6**
 
 ```bash
-git add apps/vue2-playground/src
+git add playground/vue2-playground/src
 git commit -m "feat(playground): 演示内置目录能力"
 ```
 
@@ -1548,10 +1548,10 @@ git commit -m "feat(playground): 演示内置目录能力"
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/draftly typecheck
-pnpm --config.package-manager-strict=false --dir packages/draftly test
-pnpm --config.package-manager-strict=false --dir packages/draftly build
-pnpm --config.package-manager-strict=false --dir packages/draftly lint
+pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/markora test
+pnpm --config.package-manager-strict=false --dir packages/markora build
+pnpm --config.package-manager-strict=false --dir packages/markora lint
 pnpm --config.package-manager-strict=false --filter vue2-playground build
 git diff --check
 ```
@@ -1610,7 +1610,7 @@ In Developer Panel > Feature Options, turn off Table of Contents and verify:
 If browser QA required code changes, commit them:
 
 ```bash
-git add packages/draftly apps/vue2-playground
+git add packages/markora playground/vue2-playground
 git commit -m "fix(editor): 完善目录交互验证问题"
 ```
 

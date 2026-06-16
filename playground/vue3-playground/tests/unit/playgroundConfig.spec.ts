@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { createDefaultConfig, getActivePlugins } from "../../src/state/playgroundConfig";
 
 describe("playgroundConfig", () => {
-  it("enables Draftly plugins by default", () => {
+  it("enables Markora plugins by default", () => {
     const config = createDefaultConfig();
     const activePlugins = getActivePlugins(config.plugins);
 
