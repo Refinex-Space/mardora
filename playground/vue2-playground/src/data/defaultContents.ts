@@ -1,19 +1,31 @@
 import type { Content } from "@/types";
-import whatIsMarkora from "./md/what-is-markora";
-import walkthrough from "./md/walkthrough";
+import projectIntroduction from "./md/project-introduction";
+import reactGuide from "./md/react-guide";
+import vue2Guide from "./md/vue2-guide";
+import vue3Guide from "./md/vue3-guide";
 
-export const STORAGE_VERSION = 1;
+export const STORAGE_VERSION = 2;
 
 export const defaultContents: Content[] = [
   {
-    id: "0",
-    title: "What is Markora?",
-    content: whatIsMarkora,
+    id: "project-introduction",
+    title: "项目介绍",
+    content: projectIntroduction,
   },
   {
-    id: "1",
-    title: "Walkthrough",
-    content: walkthrough,
+    id: "vue2-guide",
+    title: "Ve2 接入指南",
+    content: vue2Guide,
+  },
+  {
+    id: "vue3-guide",
+    title: "Vue3 接入指南",
+    content: vue3Guide,
+  },
+  {
+    id: "react-guide",
+    title: "React 接入指南",
+    content: reactGuide,
   },
 ];
 

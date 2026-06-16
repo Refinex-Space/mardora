@@ -14,8 +14,10 @@ import Sidebar from "./sidebar";
 import { Content } from "./types";
 import CreateContentDialog from "./create-content-dialog";
 
-import whatIsMarkora from "../data/md/what-id-markora";
-import walkthrough from "../data/md/walkthrough";
+import projectIntroduction from "../data/md/project-introduction";
+import reactGuide from "../data/md/react-guide";
+import vue2Guide from "../data/md/vue2-guide";
+import vue3Guide from "../data/md/vue3-guide";
 
 import CodeMirror, { EditorView, Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
@@ -85,20 +87,30 @@ const STORAGE_CURRENT_KEY = "markora-playground-current";
 const STORAGE_VERSION_KEY = "markora-playground-version";
 const DEBOUNCE_MS = 500;
 
-// Bump this version whenever default content (whatIsMarkora / walkthrough) changes.
+// Bump this version whenever default guide content changes.
 // The app will detect the mismatch and refresh the default entries in localStorage.
-const VERSION = 1;
+const VERSION = 2;
 
 const DEFAULT_CONTENTS: Content[] = [
   {
-    id: "0",
-    title: "What is Markora?",
-    content: whatIsMarkora,
+    id: "project-introduction",
+    title: "项目介绍",
+    content: projectIntroduction,
   },
   {
-    id: "1",
-    title: "Walkthrough",
-    content: walkthrough,
+    id: "vue2-guide",
+    title: "Ve2 接入指南",
+    content: vue2Guide,
+  },
+  {
+    id: "vue3-guide",
+    title: "Vue3 接入指南",
+    content: vue3Guide,
+  },
+  {
+    id: "react-guide",
+    title: "React 接入指南",
+    content: reactGuide,
   },
 ];
 
@@ -452,9 +464,12 @@ export default function Page() {
 
         {/* Editor */}
         <div
-          className={cn("flex-1 h-full mx-2 border rounded-lg overflow-hidden flex items-center justify-center dark:bg-[#0d1117]", {
-            "ml-0 max-xl:ml-2": sidebarOpen,
-          })}
+          className={cn(
+            "flex-1 h-full mx-2 border rounded-lg overflow-hidden flex items-center justify-center dark:bg-[#0d1117]",
+            {
+              "ml-0 max-xl:ml-2": sidebarOpen,
+            }
+          )}
         >
           {currentContent !== -1 ? (
             mode === "view" ? (
@@ -546,7 +561,13 @@ export default function Page() {
             }
           )}
         >
-          <Devbar nodes={nodes} setShowNodes={setShowNodes} config={config} setConfig={setConfig} outputTime={outputTime} />
+          <Devbar
+            nodes={nodes}
+            setShowNodes={setShowNodes}
+            config={config}
+            setConfig={setConfig}
+            outputTime={outputTime}
+          />
         </div>
       </main>
 

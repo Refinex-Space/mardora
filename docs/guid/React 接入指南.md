@@ -1,0 +1,394 @@
+# React 接入指南
+
+本文面向 React 项目，目标是接入一个与 React playground 同等质量的 Markora 编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、主题切换、本地持久化和节点调试。
+
+React playground 使用 `@uiw/react-codemirror` 包装 CodeMirror。你也可以直接手动创建 `EditorView`，但如果应用已经使用 React，`@uiw/react-codemirror` 可以减少生命周期样板代码。
+
+## 1. 安装依赖
+
+```shell
+npm install markora
+npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
+```
+
+React 组件和输出视图需要：
+
+```shell
+npm install @uiw/react-codemirror @uiw/codemirror-theme-github @codemirror/lang-html @codemirror/lang-css
+```
+
+如果你使用 Next.js App Router，编辑器组件需要是 client component：
+
+```tsx
+"use client";
+```
+
+## 2. 定义内容与配置
+
+```tsx
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import CodeMirror, { EditorView, Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
+import { html } from "@codemirror/lang-html";
+import { css } from "@codemirror/lang-css";
+import { markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "markora/editor";
+import { allPlugins } from "markora/plugins";
+import { generateCSS, preview } from "markora/preview";
+
+type Content = {
+  id: string;
+  title: string;
+  content: string;
+};
+
+type PlaygroundMode = "live" | "view" | "code" | "output";
+type PluginConfig = Record<string, boolean>;
+
+type PlaygroundConfig = {
+  editor: {
+    baseStyles: boolean;
+    defaultKeybindings: boolean;
+    history: boolean;
+    indentWithTab: boolean;
+    highlightActiveLine: boolean;
+    lineWrapping: boolean;
+  };
+  preview: {
+    includeBase: boolean;
+    sanitize: boolean;
+  };
+  features: {
+    slashCommands: boolean;
+    attachments: boolean;
+    pasteDropUploads: boolean;
+    selectionToolbar: boolean;
+    tableOfContents: boolean;
+  };
+  plugins: PluginConfig;
+};
+
+const defaultPluginConfig: PluginConfig = Object.fromEntries(
+  allPlugins.map((plugin) => [plugin.name.toLowerCase(), true])
+);
+
+const defaultConfig: PlaygroundConfig = {
+  editor: {
+    baseStyles: true,
+    defaultKeybindings: true,
+    history: true,
+    indentWithTab: true,
+    highlightActiveLine: true,
+    lineWrapping: true,
+  },
+  preview: {
+    includeBase: true,
+    sanitize: true,
+  },
+  features: {
+    slashCommands: true,
+    attachments: true,
+    pasteDropUploads: true,
+    selectionToolbar: true,
+    tableOfContents: true,
+  },
+  plugins: defaultPluginConfig,
+};
+```
+
+## 3. 组织默认文章
+
+React playground 使用固定 id 和版本号刷新默认文章：
+
+```tsx
+const STORAGE_KEY = "markora-playground-contents";
+const STORAGE_CURRENT_KEY = "markora-playground-current";
+const STORAGE_VERSION_KEY = "markora-playground-version";
+const STORAGE_VERSION = 2;
+
+const DEFAULT_CONTENTS: Content[] = [
+  { id: "project-introduction", title: "项目介绍", content: projectIntroduction },
+  { id: "vue2-guide", title: "Ve2 接入指南", content: vue2Guide },
+  { id: "vue3-guide", title: "Vue3 接入指南", content: vue3Guide },
+  { id: "react-guide", title: "React 接入指南", content: reactGuide },
+];
+
+const DEFAULT_CONTENT_IDS = new Set(DEFAULT_CONTENTS.map((content) => content.id));
+```
+
+当默认文章变化时提高 `STORAGE_VERSION`。版本不匹配时，用新默认文章替换固定 id，并保留用户自建文章。
+
+## 4. 准备上传和插件状态
+
+```tsx
+export function MarkoraReactEditor() {
+  const [contents, setContents] = useState<Content[]>(DEFAULT_CONTENTS);
+  const [currentContent, setCurrentContent] = useState(0);
+  const [mode, setMode] = useState<PlaygroundMode>("live");
+  const [config, setConfig] = useState<PlaygroundConfig>(defaultConfig);
+  const [nodes, setNodes] = useState<MarkoraNode[]>([]);
+  const [output, setOutput] = useState<{ html: string; css: string } | null>(null);
+  const editor = useRef<ReactCodeMirrorRef>(null);
+  const objectUrlsRef = useRef<string[]>([]);
+
+  const theme = "light";
+  const cmTheme = theme === "dark" ? githubDark : githubLight;
+  const markoraTheme = theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT;
+
+  const mockUploader = useCallback(async (file: File) => {
+    const url = URL.createObjectURL(file);
+    objectUrlsRef.current.push(url);
+    return {
+      url,
+      name: file.name,
+      mimeType: file.type,
+    };
+  }, []);
+
+  const activePlugins = useMemo<MarkoraPlugin[]>(() => {
+    return allPlugins.filter((plugin) => {
+      const name = plugin.name.toLowerCase();
+      return config.plugins[name] ?? true;
+    });
+  }, [config.plugins]);
+
+  useEffect(() => {
+    return () => {
+      for (const url of objectUrlsRef.current) {
+        URL.revokeObjectURL(url);
+      }
+      objectUrlsRef.current = [];
+    };
+  }, []);
+}
+```
+
+生产 uploader 应上传到后端、对象存储或 CDN，并返回长期可访问 URL。`blob:` URL 只适合 playground 或本地 demo。
+
+## 5. 创建 Markora 扩展
+
+```tsx
+const extensions = useMemo<Extension[]>(
+  () =>
+    markora({
+      theme: markoraTheme,
+      baseStyles: config.editor.baseStyles,
+      plugins: activePlugins,
+      markdown: [],
+      extensions: [],
+      keymap: [],
+      disableViewPlugin: mode === "code",
+      defaultKeybindings: config.editor.defaultKeybindings,
+      history: config.editor.history,
+      indentWithTab: config.editor.indentWithTab,
+      highlightActiveLine: config.editor.highlightActiveLine,
+      lineWrapping: config.editor.lineWrapping,
+      slashCommands: {
+        enabled: config.features.slashCommands,
+      },
+      selectionToolbar: {
+        enabled: config.features.selectionToolbar,
+      },
+      toc: {
+        enabled: mode === "live" && config.features.tableOfContents,
+      },
+      attachments: {
+        enabled: config.features.attachments,
+        uploader: config.features.attachments ? mockUploader : undefined,
+        enablePaste: config.features.pasteDropUploads,
+        enableDrop: config.features.pasteDropUploads,
+        accept: {
+          image: ["image/*"],
+          video: ["video/*"],
+          audio: ["audio/*"],
+          file: ["*/*"],
+        },
+      },
+      onNodesChange: (nextNodes) => {
+        setNodes(nextNodes);
+      },
+    }),
+  [activePlugins, config.editor, config.features, markoraTheme, mockUploader, mode]
+);
+```
+
+React 中最关键的是让 `extensions` 只在真正相关的配置变化时重算。不要把正在输入的 Markdown 文本放进 `useMemo` 依赖，否则会导致不必要的扩展重建。
+
+## 6. 渲染编辑器
+
+```tsx
+const current = contents[currentContent];
+
+return (
+  <main className="markora-shell">
+    {mode === "view" && output ? (
+      <div className="preview-host">
+        <style>{output.css}</style>
+        <div dangerouslySetInnerHTML={{ __html: output.html }} />
+      </div>
+    ) : mode === "output" && output ? (
+      <div className="output-grid">
+        <CodeMirror
+          value={output.html}
+          theme={cmTheme}
+          extensions={[html(), EditorView.lineWrapping, EditorView.editable.of(false)]}
+          editable={false}
+        />
+        <CodeMirror
+          value={output.css}
+          theme={cmTheme}
+          extensions={[css(), EditorView.lineWrapping, EditorView.editable.of(false)]}
+          editable={false}
+        />
+      </div>
+    ) : (
+      <CodeMirror
+        ref={editor}
+        value={current.content}
+        theme={cmTheme}
+        extensions={extensions}
+        basicSetup={false}
+        onChange={(value) => {
+          setContents((items) =>
+            items.map((item, index) => (index === currentContent ? { ...item, content: value } : item))
+          );
+        }}
+      />
+    )}
+  </main>
+);
+```
+
+`basicSetup={false}` 可以避免 `@uiw/react-codemirror` 默认能力与 Markora 自己组装的 CodeMirror 能力重复。需要额外扩展时，通过 `markora({ extensions: [...] })` 或外层 `extensions={[...extensions, extra]}` 加入。
+
+## 7. 生成预览输出
+
+```tsx
+useEffect(() => {
+  if (!["view", "output"].includes(mode)) return;
+
+  let cancelled = false;
+
+  (async () => {
+    const markdown = contents[currentContent]?.content || "";
+
+    const htmlOutput = await preview(markdown, {
+      theme: markoraTheme,
+      plugins: activePlugins,
+      markdown: [],
+      syntaxTheme: cmTheme,
+      sanitize: config.preview.sanitize,
+      wrapperTag: "div",
+      wrapperClass: "markora-preview",
+    });
+
+    const cssOutput = generateCSS({
+      theme: markoraTheme,
+      plugins: activePlugins,
+      wrapperClass: "markora-preview",
+      includeBase: config.preview.includeBase,
+      syntaxTheme: cmTheme,
+    });
+
+    if (!cancelled) {
+      setOutput({ html: htmlOutput, css: cssOutput });
+    }
+  })();
+
+  return () => {
+    cancelled = true;
+  };
+}, [activePlugins, cmTheme, config.preview, contents, currentContent, markoraTheme, mode]);
+```
+
+`preview()` 和 `generateCSS()` 必须使用同一组插件、主题和 syntax theme。否则编辑态、预览态和输出态会出现视觉或 HTML 行为不一致。
+
+## 8. 本地持久化
+
+```tsx
+useEffect(() => {
+  const storedContents = localStorage.getItem(STORAGE_KEY);
+  const storedCurrent = localStorage.getItem(STORAGE_CURRENT_KEY);
+  const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
+  const isOutdated = storedVersion !== String(STORAGE_VERSION);
+
+  if (storedContents && !isOutdated) {
+    setContents(JSON.parse(storedContents) as Content[]);
+    setCurrentContent(Number.parseInt(storedCurrent || "0", 10));
+    return;
+  }
+
+  if (storedContents && isOutdated) {
+    const parsed = JSON.parse(storedContents) as Content[];
+    const userContents = parsed.filter((content) => !DEFAULT_CONTENT_IDS.has(content.id));
+    const merged = [...DEFAULT_CONTENTS, ...userContents];
+    setContents(merged);
+    setCurrentContent(0);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    localStorage.setItem(STORAGE_CURRENT_KEY, "0");
+    localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CONTENTS));
+  localStorage.setItem(STORAGE_CURRENT_KEY, "0");
+  localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
+}, []);
+```
+
+保存时建议 debounce，避免每次输入都同步写 localStorage。
+
+## 9. 插件体系
+
+React 接入使用同一套 `MarkoraPlugin`：
+
+```tsx
+import type { DecorationContext } from "markora/editor";
+import { MarkoraPlugin } from "markora/editor";
+
+class MentionPlugin extends MarkoraPlugin {
+  readonly name = "mention";
+  readonly version = "1.0.0";
+
+  buildDecorations(ctx: DecorationContext): void {
+    // 读取 ctx.view.state.doc，向 ctx.decorations 追加 Decoration。
+  }
+}
+```
+
+插件可同时覆盖：
+
+- `getExtensions()`：添加 CodeMirror 扩展。
+- `getMarkdownConfig()`：扩展 Lezer Markdown 语法。
+- `getKeymap()`：添加快捷键。
+- `buildDecorations()`：贡献编辑态 decoration。
+- `renderToHTML()`：贡献 preview HTML。
+- `getPreviewStyles()`：贡献 preview CSS。
+
+业务中可以把自定义插件和内置插件合并：
+
+```tsx
+const plugins = useMemo(() => [...activePlugins, new MentionPlugin()], [activePlugins]);
+```
+
+## 10. 支持的 API 标准
+
+React 接入推荐直接使用：
+
+- `markora/editor`：`markora()`、`ThemeEnum`、`MarkoraPlugin`、`MarkoraNode`、TOC/attachment/selection toolbar 类型。
+- `markora/plugins`：`allPlugins`、`essentialPlugins` 和单个插件类。
+- `markora/preview`：`preview()`、`generateCSS()`、`extractPreviewTocFromMarkdown()`。
+- CodeMirror 6：`Extension`、`EditorView`、`EditorState`、`KeyBinding`、`updateListener`。
+- Lezer Markdown：插件级 `MarkdownConfig`。
+- React：`useMemo` 管理扩展、`useEffect` 管理 preview 和持久化、`useRef` 管理 editor 引用和资源释放。
+- Browser API：`File`、`FormData`、paste、drop、`URL.createObjectURL`。
+
+## 11. 验收清单
+
+- 编辑、源码、预览、输出模式都能切换。
+- React state 与 CodeMirror value 双向同步，没有输入卡顿或重建抖动。
+- `allPlugins` 全启用时，标题、列表、表格、图片、代码块、数学公式、Mermaid、HTML、Emoji 都能显示。
+- slash commands、选区工具栏、附件上传、paste/drop 按配置开关生效。
+- 预览 HTML/CSS 与当前插件、主题、syntax theme 一致。
+- 输出模式能查看完整 HTML 和 CSS。
+- 卸载时释放 `blob:` URL。
+- 默认文章变更后提升 storage version，旧缓存能刷新默认文章并保留用户文章。
