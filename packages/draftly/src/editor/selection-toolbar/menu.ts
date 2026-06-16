@@ -142,16 +142,6 @@ function appendLinkPanel(
   const actions = document.createElement("div");
   actions.className = "cm-draftly-selection-toolbar-link-actions";
 
-  const follow = document.createElement("button");
-  follow.type = "button";
-  follow.className = "cm-draftly-selection-toolbar-follow";
-  follow.textContent = "Follow Link  ⌘ + click";
-  follow.addEventListener("mousedown", (event) => {
-    event.preventDefault();
-    callbacks.onLinkOpen();
-  });
-  actions.appendChild(follow);
-
   appendLinkAction(actions, state.link.copied ? "Copied" : "Copy link", "copy", callbacks.onLinkCopy);
   appendLinkAction(actions, "Open link", "external-link", callbacks.onLinkOpen);
   if (state.link.canRemove) appendLinkAction(actions, "Remove link", "trash-2", callbacks.onLinkRemove, true);
@@ -164,7 +154,10 @@ function appendLinkPanel(
     root.appendChild(error);
   }
   root.appendChild(actions);
-  queueMicrotask(() => url.focus());
+  queueMicrotask(() => {
+    title.focus();
+    title.select();
+  });
 }
 
 export function createSelectionToolbarElement(
@@ -177,7 +170,11 @@ export function createSelectionToolbarElement(
       ? "cm-draftly-selection-toolbar"
       : "cm-draftly-selection-toolbar cm-draftly-selection-toolbar-panel";
   root.setAttribute("role", "toolbar");
-  root.addEventListener("mousedown", (event) => event.preventDefault());
+  root.addEventListener("mousedown", (event) => {
+    const target = event.target;
+    if (target instanceof HTMLElement && target.closest(".cm-draftly-selection-toolbar-link-input")) return;
+    event.preventDefault();
+  });
 
   if (state.panel === "toolbar") {
     appendToolbarButtons(root, state.buttons, callbacks);

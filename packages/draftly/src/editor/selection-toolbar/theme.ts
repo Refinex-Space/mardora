@@ -66,19 +66,17 @@ export const selectionToolbarTheme = EditorView.baseTheme({
   ".cm-draftly-selection-toolbar-link-actions": {
     display: "flex",
     alignItems: "center",
+    justifyContent: "flex-end",
     gap: "6px",
   },
-  ".cm-draftly-selection-toolbar-follow": {
-    marginRight: "auto",
-    border: "0",
-    background: "transparent",
-    color: "var(--draftly-selection-toolbar-link, #2563eb)",
-    cursor: "default",
-    fontSize: "14px",
-    padding: "0 4px",
+  ".cm-draftly-selection-toolbar-link-button:hover": {
+    background: "var(--draftly-selection-toolbar-active, #f4f4f5)",
   },
   ".cm-draftly-selection-toolbar-link-button-danger": {
     color: "var(--draftly-selection-toolbar-danger, #dc2626)",
+  },
+  ".cm-draftly-selection-toolbar-link-button-danger:hover": {
+    background: "var(--draftly-selection-toolbar-danger-bg, #fee2e2)",
   },
   ".cm-draftly-selection-toolbar-error": {
     color: "var(--draftly-selection-toolbar-danger, #dc2626)",
@@ -112,5 +110,6 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     "--draftly-selection-toolbar-muted": "#a1a1aa",
     "--draftly-selection-toolbar-link": "#60a5fa",
     "--draftly-selection-toolbar-danger": "#f87171",
+    "--draftly-selection-toolbar-danger-bg": "rgba(248, 113, 113, 0.18)",
   },
 });
