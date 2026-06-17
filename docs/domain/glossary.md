@@ -8,10 +8,10 @@ referenced_by: AGENTS.md#knowledge-map
 # Domain Glossary
 
 - Markora: a framework-agnostic Markdown editor and preview toolkit built on CodeMirror 6.
-- Core package: `packages/markora`, the published `markora` npm package.
+- Core package: `packages/markora`, the published `@refinex/markora` npm package.
 - Plugin: a `MarkoraPlugin` implementation that can provide editor decorations, keymaps, Markdown parsing config, preview HTML, and preview CSS.
-- Editor mode: interactive CodeMirror editing through `markora/editor`.
-- Preview mode: static HTML/CSS generation through `markora/preview`.
+- Editor mode: interactive CodeMirror editing through `@refinex/markora/editor`.
+- Preview mode: static HTML/CSS generation through `@refinex/markora/preview`.
 - Slash commands: line-start `/` command menu for inserting Markdown blocks or triggering media commands.
 - Attachments: browser file selection, paste, or drop integration that calls an application-provided uploader and replaces upload markers with Markdown or HTML.
 - Selection toolbar: floating selected-text toolbar for inline formatting, links, colors, highlights, and list conversion.

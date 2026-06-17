@@ -14,7 +14,7 @@ referenced_by: docs/README.md#superpowers-specs
 ## Goal
 
 Refactor the Header action bar so every control is **icon-only** with a hover
-tooltip, and replace the "markora" wordmark with a **theme-aware inline logo**.
+tooltip, and replace the "Markora" wordmark with a **theme-aware inline logo**.
 Click behavior (dropdowns) stays unchanged.
 
 ## Decisions (from AskUserQuestion)
@@ -30,13 +30,13 @@ Click behavior (dropdowns) stays unchanged.
 
 All from `lucide-react` (React) / inline SVG markup (Vue):
 
-| Action                    | Icon                  |
-| ------------------------- | --------------------- |
-| Sidebar toggle (left)     | `PanelLeftClose`      |
-| Language                  | `Languages`           |
-| Theme                     | `Palette`             |
-| Mode                      | `GalleryHorizontalEnd`|
-| Devbar toggle (right)     | `PanelRightClose`     |
+| Action                | Icon                   |
+| --------------------- | ---------------------- |
+| Sidebar toggle (left) | `PanelLeftClose`       |
+| Language              | `Languages`            |
+| Theme                 | `Palette`              |
+| Mode                  | `GalleryHorizontalEnd` |
+| Devbar toggle (right) | `PanelRightClose`      |
 
 Note: the sidebar-toggle and devbar-toggle icons are single icons regardless of
 open/closed state (consistent with "icon-only" — the tooltip text indicates the
@@ -63,7 +63,7 @@ The new `header.toggleSidebar` key is added to all three playgrounds' locale dic
 ## Trigger button shape
 
 - React: each dropdown trigger becomes `<Button variant="ghost" size="icon"
-  className="size-8">`. The `<img>`/icon inside is `size-4`-ish. No label text,
+className="size-8">`. The `<img>`/icon inside is `size-4`-ish. No label text,
   no visible chevron (the dropdown still opens on click). Theme/Mode/Language
   dropdowns keep their `<DropdownMenuContent>` with labels + check, unchanged.
 - Vue: toolbar buttons keep their existing `toolbar-button` class but the inner
@@ -79,8 +79,8 @@ The new `header.toggleSidebar` key is added to all three playgrounds' locale dic
     theme resolves to dark.
   - `LOGO_LIGHT_SVG` = the light-mode logo (dark paths on light bg) — shown when
     light.
-  Source: the existing `public/markora-logo-dark.svg` / `markora-logo-light.svg`
-  path data (already in the repo for React).
+    Source: the existing `public/markora-logo-dark.svg` / `markora-logo-light.svg`
+    path data (already in the repo for React).
 - **React (`Header`):** render `<span dangerouslySetInnerHTML={{__html: logo}} />`
   (or inline JSX paths) where `logo` picks the variant from `useTheme().resolvedTheme`.
   Size ~`size-7`. Replace the `<h2 className="text-xl font-mono">markora</h2>`.
@@ -93,7 +93,7 @@ The new `header.toggleSidebar` key is added to all three playgrounds' locale dic
 ## Out of scope
 
 - Tooltips on Sidebar/Devbar icon buttons (only Header per decision).
-- Changing the ThemeSwitcher/ModeSwitcher dropdown *contents* (labels + check) —
+- Changing the ThemeSwitcher/ModeSwitcher dropdown _contents_ (labels + check) —
   only the trigger becomes icon-only.
 - Logo on the React landing page (already done in an earlier change).
 

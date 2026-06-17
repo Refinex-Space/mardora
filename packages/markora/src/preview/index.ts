@@ -1,5 +1,5 @@
 /**
- * markora/preview - Static HTML rendering for markdown
+ * @refinex/markora/preview - Static HTML rendering for markdown
  *
  * @packageDocumentation
  */
@@ -14,12 +14,12 @@ export { extractPreviewTocFromMarkdown } from "./toc";
 
 // Types
 export type {
-	PreviewConfig,
-	PreviewContext,
-	GenerateCSSConfig,
-	SyntaxThemeInput,
-	NodeRenderer,
-	NodeRendererMap,
+  PreviewConfig,
+  PreviewContext,
+  GenerateCSSConfig,
+  SyntaxThemeInput,
+  NodeRenderer,
+  NodeRendererMap,
 } from "./types";
 
 // Utilities

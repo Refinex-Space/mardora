@@ -52,6 +52,7 @@ New files under `app/i18n/`:
   locale label), uses the same `DropdownMenu` UI primitives as `ThemeSwitcher`.
 
 Wiring:
+
 - `app/layout.tsx`: wrap children in `<LocaleProvider>` (inside `<Providers>`).
 - `app/playground/header.tsx`: insert `<LanguageSwitcher />` **before**
   `<ThemeSwitcher />`.
@@ -69,8 +70,9 @@ New files under `src/i18n/`:
   (returns `{ t, locale, setLocale }`).
 
 Wiring:
+
 - `Header.vue`: add a new dropdown (matching existing theme/mode dropdown markup
-  + `closeMenus` outside-click handler) before the theme dropdown. Labels via `t()`.
+  - `closeMenus` outside-click handler) before the theme dropdown. Labels via `t()`.
 - Replace strings in `Header.vue`, `Sidebar.vue`, `Devbar.vue` (only the shell
   strings; the existing Language segmented control stays — it sets
   `config.locale` for the Markora editor, independent of shell locale),
@@ -95,6 +97,7 @@ CreateContentDialog).
 ### Message key set (shared shape across all 3)
 
 Roughly:
+
 - `header.selectMode`, `header.selectTheme`, `header.selectLanguage`
 - `header.saving`, `header.saved`
 - `header.hideDevbar`, `header.showDevbar`
@@ -140,7 +143,7 @@ New `defaultContents(locale: ShellLocale)` returns the 4 docs with translated
 entries (matched by id: `project-introduction | vue2-guide | vue3-guide |
 react-guide`) with the other locale's version, **preserving user-created docs
 and any edits the user made to non-default docs**. Default docs that the user
-has *edited* are still swapped to the new language (they're scaffold docs; the
+has _edited_ are still swapped to the new language (they're scaffold docs; the
 version bump already treats them as refreshable). This is the simplest correct
 behavior and matches the existing version-refresh semantics.
 

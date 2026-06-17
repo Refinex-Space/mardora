@@ -19,7 +19,10 @@ class TocViewPlugin {
   private renderFrame: number | null = null;
   private readonly measureKey = {};
 
-  constructor(private readonly view: EditorView, rawConfig: MarkoraTocConfig) {
+  constructor(
+    private readonly view: EditorView,
+    rawConfig: MarkoraTocConfig
+  ) {
     this.config = resolveTocConfig(rawConfig);
     const stored = readTocPanelState(this.config.storageKey);
     this.panelState = {

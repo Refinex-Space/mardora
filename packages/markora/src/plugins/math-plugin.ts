@@ -288,7 +288,7 @@ export class MathPlugin extends DecorationPlugin {
    * with single dollars (selected -> $selected$).
    */
   override getExtensions(): Extension[] {
-    return [createWrapSelectionInputHandler({ "$": "$" })];
+    return [createWrapSelectionInputHandler({ $: "$" })];
   }
 
   /**

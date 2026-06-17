@@ -7,9 +7,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "markora/editor": fileURLToPath(new URL("../../packages/markora/dist/editor/index.js", import.meta.url)),
-      "markora/preview": fileURLToPath(new URL("../../packages/markora/dist/preview/index.js", import.meta.url)),
-      "markora/plugins": fileURLToPath(new URL("../../packages/markora/dist/plugins/index.js", import.meta.url)),
+      "@refinex/markora/editor": fileURLToPath(new URL("../../packages/markora/dist/editor/index.js", import.meta.url)),
+      "@refinex/markora/preview": fileURLToPath(new URL("../../packages/markora/dist/preview/index.js", import.meta.url)),
+      "@refinex/markora/plugins": fileURLToPath(new URL("../../packages/markora/dist/plugins/index.js", import.meta.url)),
       markora: fileURLToPath(new URL("../../packages/markora/dist/index.js", import.meta.url)),
     },
   },

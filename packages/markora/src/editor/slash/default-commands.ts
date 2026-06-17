@@ -137,7 +137,11 @@ export function getDefaultSlashCommands(locale: MarkoraLocale = "zh-CN"): Markor
     markdownCommand(commandMeta(locale, "ordered-list", "basic", "list-ordered", "1."), "1. "),
     markdownCommand(commandMeta(locale, "unordered-list", "basic", "list", "-"), "- "),
     markdownCommand(commandMeta(locale, "task-list", "basic", "list-todo", "[]"), "- [ ] "),
-    markdownCommand(commandMeta(locale, "table", "basic", "table", "| |"), "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n", 2),
+    markdownCommand(
+      commandMeta(locale, "table", "basic", "table", "| |"),
+      "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n",
+      2
+    ),
     markdownCommand(commandMeta(locale, "divider", "basic", "minus", "---"), "---\n"),
     markdownCommand(commandMeta(locale, "link", "basic", "link", "[]()"), "[]()", 1),
     mediaCommand(commandMeta(locale, "file", "media", "file", "file"), "file"),

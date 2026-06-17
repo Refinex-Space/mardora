@@ -77,6 +77,7 @@ referenced_by: docs/README.md#superpowers-plans
 ## Task 1: Shared TOC Types, Config, Slugging, And Storage
 
 **Files:**
+
 - Create: `packages/markora/src/editor/table-of-contents/types.ts`
 - Create: `packages/markora/src/editor/table-of-contents/slug.ts`
 - Create: `packages/markora/src/editor/table-of-contents/storage.ts`
@@ -286,7 +287,10 @@ function defaultStorage(): TocStorageAdapter | null {
   return window.localStorage;
 }
 
-export function readTocPanelState(storageKey?: string, storage: TocStorageAdapter | null = defaultStorage()): TocPanelState | null {
+export function readTocPanelState(
+  storageKey?: string,
+  storage: TocStorageAdapter | null = defaultStorage()
+): TocPanelState | null {
   if (!storageKey || !storage) return null;
   try {
     const raw = storage.getItem(storageKey);
@@ -345,6 +349,7 @@ git commit -m "feat(editor): 添加目录配置与基础工具"
 ## Task 2: Live Mode Heading Extraction
 
 **Files:**
+
 - Create: `packages/markora/src/editor/table-of-contents/extract.ts`
 - Modify: `packages/markora/src/editor/table-of-contents/index.ts`
 - Create: `packages/markora/tests/toc-extract.spec.ts`
@@ -369,7 +374,9 @@ function stateFromDoc(doc: string): EditorState {
 
 describe("extractTocItemsFromState", () => {
   it("extracts only h2-h6 by default", () => {
-    const state = stateFromDoc(["# Title", "## Intro", "### Details", "###### Deep", "####### Not a heading"].join("\n\n"));
+    const state = stateFromDoc(
+      ["# Title", "## Intro", "### Details", "###### Deep", "####### Not a heading"].join("\n\n")
+    );
 
     expect(extractTocItemsFromState(state)).toEqual([
       expect.objectContaining({ id: "intro", level: 2, text: "Intro", active: false }),
@@ -381,7 +388,10 @@ describe("extractTocItemsFromState", () => {
   it("respects configured heading levels", () => {
     const state = stateFromDoc(["## Intro", "### Details", "#### Deep"].join("\n\n"));
 
-    expect(extractTocItemsFromState(state, { minLevel: 3, maxLevel: 4 }).map((item) => item.text)).toEqual(["Details", "Deep"]);
+    expect(extractTocItemsFromState(state, { minLevel: 3, maxLevel: 4 }).map((item) => item.text)).toEqual([
+      "Details",
+      "Deep",
+    ]);
   });
 
   it("strips markdown markers and skips empty headings", () => {
@@ -507,6 +517,7 @@ git commit -m "feat(editor): 提取文档目录标题数据"
 ## Task 3: Built-In TOC Panel DOM And Theme
 
 **Files:**
+
 - Create: `packages/markora/src/editor/table-of-contents/panel.ts`
 - Create: `packages/markora/src/editor/table-of-contents/theme.ts`
 - Modify: `packages/markora/src/editor/table-of-contents/index.ts`
@@ -546,7 +557,9 @@ describe("createTocPanelElement", () => {
     expect(panel.querySelector(".cm-markora-toc-item-active")?.textContent).toContain("Intro");
     expect(panel.querySelector('[data-markora-toc-level="3"]')?.textContent).toContain("Details");
 
-    panel.querySelector<HTMLButtonElement>(".cm-markora-toc-item")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    panel
+      .querySelector<HTMLButtonElement>(".cm-markora-toc-item")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
     expect(calls).toEqual(["intro"]);
   });
@@ -859,6 +872,7 @@ git commit -m "feat(editor): 添加内置目录面板"
 ## Task 4: Live Mode TOC Extension And Core Markora Config
 
 **Files:**
+
 - Create: `packages/markora/src/editor/table-of-contents/extension.ts`
 - Modify: `packages/markora/src/editor/table-of-contents/index.ts`
 - Modify: `packages/markora/src/editor/markora.ts`
@@ -925,7 +939,10 @@ class TocViewPlugin {
   private panelState: TocPanelState;
   private items: MarkoraTocItem[] = [];
 
-  constructor(private readonly view: EditorView, rawConfig: MarkoraTocConfig) {
+  constructor(
+    private readonly view: EditorView,
+    rawConfig: MarkoraTocConfig
+  ) {
     this.config = resolveTocConfig(rawConfig);
     const stored = readTocPanelState(this.config.storageKey);
     this.panelState = {
@@ -1037,12 +1054,7 @@ class TocViewPlugin {
 }
 
 export function tableOfContents(config: MarkoraTocConfig = {}): Extension[] {
-  return [
-    tocTheme,
-    Prec.low(
-      ViewPlugin.define((view) => new TocViewPlugin(view, config))
-    ),
-  ];
+  return [tocTheme, Prec.low(ViewPlugin.define((view) => new TocViewPlugin(view, config)))];
 }
 ```
 
@@ -1125,6 +1137,7 @@ git commit -m "feat(editor): 默认启用内置目录扩展"
 ## Task 5: Preview TOC Data And Heading IDs
 
 **Files:**
+
 - Create: `packages/markora/src/preview/toc.ts`
 - Modify: `packages/markora/src/preview/types.ts`
 - Modify: `packages/markora/src/preview/context.ts`
@@ -1186,7 +1199,11 @@ import type { MarkdownConfig } from "@lezer/markdown";
 import type { MarkoraTocConfig, MarkoraTocItem } from "../editor/table-of-contents";
 import { extractTocItemsFromState } from "../editor/table-of-contents";
 
-export function extractPreviewTocFromMarkdown(doc: string, config: MarkoraTocConfig = {}, markdownConfig: MarkdownConfig[] = []): MarkoraTocItem[] {
+export function extractPreviewTocFromMarkdown(
+  doc: string,
+  config: MarkoraTocConfig = {},
+  markdownConfig: MarkdownConfig[] = []
+): MarkoraTocItem[] {
   const state = EditorState.create({
     doc,
     extensions: [markdown({ base: markdownLanguage, extensions: markdownConfig })],
@@ -1323,6 +1340,7 @@ git commit -m "feat(preview): 支持预览目录数据与标题锚点"
 ## Task 6: Vue2 Playground Integration
 
 **Files:**
+
 - Modify: `playground/vue2-playground/src/types.ts`
 - Modify: `playground/vue2-playground/src/state/playgroundConfig.ts`
 - Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
@@ -1339,7 +1357,7 @@ features: {
   attachments: boolean;
   pasteDropUploads: boolean;
   tableOfContents: boolean;
-};
+}
 ```
 
 Modify `playground/vue2-playground/src/state/playgroundConfig.ts`:
@@ -1418,8 +1436,8 @@ to:
 Modify `EditorPane.vue` imports:
 
 ```ts
-import type { MarkoraNode, MarkoraTocItem } from "markora/editor";
-import { extractPreviewTocFromMarkdown } from "markora/preview";
+import type { MarkoraNode, MarkoraTocItem } from "@refinex/markora/editor";
+import { extractPreviewTocFromMarkdown } from "@refinex/markora/preview";
 ```
 
 Add data:
@@ -1514,10 +1532,18 @@ Modify `playground/vue2-playground/src/styles.css`:
   font-weight: 600;
 }
 
-.vue2-preview-toc-item[data-level="3"] { padding-left: 16px; }
-.vue2-preview-toc-item[data-level="4"] { padding-left: 26px; }
-.vue2-preview-toc-item[data-level="5"] { padding-left: 36px; }
-.vue2-preview-toc-item[data-level="6"] { padding-left: 46px; }
+.vue2-preview-toc-item[data-level="3"] {
+  padding-left: 16px;
+}
+.vue2-preview-toc-item[data-level="4"] {
+  padding-left: 26px;
+}
+.vue2-preview-toc-item[data-level="5"] {
+  padding-left: 36px;
+}
+.vue2-preview-toc-item[data-level="6"] {
+  padding-left: 46px;
+}
 
 .vue2-preview-toc-empty {
   padding: 12px 18px;
@@ -1548,6 +1574,7 @@ git commit -m "feat(playground): 演示内置目录能力"
 ## Task 7: Full Verification And Browser QA
 
 **Files:**
+
 - Verify all modified source and test files.
 
 - [ ] **Step 1: Run package checks**

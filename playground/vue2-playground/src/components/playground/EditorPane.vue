@@ -45,9 +45,9 @@ import { css } from "@codemirror/lang-css";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import type { MarkoraNode, MarkoraTocItem } from "markora/editor";
-import { markora, ThemeEnum } from "markora/editor";
-import { extractPreviewTocFromMarkdown, generateCSS, preview } from "markora/preview";
+import type { MarkoraNode, MarkoraTocItem } from "@refinex/markora/editor";
+import { markora, ThemeEnum } from "@refinex/markora/editor";
+import { extractPreviewTocFromMarkdown, generateCSS, preview } from "@refinex/markora/preview";
 import { getActivePlugins } from "@/state/playgroundConfig";
 import type { Content, PlaygroundConfig, PlaygroundMode, PreviewOutput, ThemeMode } from "@/types";
 
@@ -166,7 +166,8 @@ export default Vue.extend({
     previewTocStyle(): Record<string, string> {
       return {
         "--vue2-preview-toc-width": `${this.previewTocWidth}px`,
-        "--vue2-content-max-width": this.config.preview.contentWidth === "wide" ? wideContentWidth : regularContentWidth,
+        "--vue2-content-max-width":
+          this.config.preview.contentWidth === "wide" ? wideContentWidth : regularContentWidth,
       };
     },
   },

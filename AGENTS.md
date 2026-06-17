@@ -25,7 +25,7 @@ Markora is a Bun workspace and Turborepo monorepo for a framework-agnostic CodeM
 
 - Keep `packages/markora` framework-agnostic; do not add React, Vue, Radix, playground UI, backend upload, OSS, S3, or asset-manager dependencies to the core package unless the task explicitly requires it.
 - Treat `packages/markora` public exports and `MarkoraConfig` as package API; API changes need tests and docs updates, and published behavior changes usually need a Changeset.
-- Vue2 and Vue3 playgrounds consume package exports such as `markora/editor`; React playground may use `markora/src` for local iteration, so do not assume all playground imports are equivalent.
+- Vue2 and Vue3 playgrounds consume package exports such as `@refinex/markora/editor`; React playground may use `@refinex/markora/src` for local iteration, so do not assume all playground imports are equivalent.
 - Do not edit generated output such as `dist`, `.next`, `.turbo`, or `node_modules` as source.
 - Do not write secrets, tokens, production credentials, or real uploaded file URLs into docs, tests, logs, screenshots, or fixtures.
 

@@ -39,6 +39,7 @@ referenced_by: docs/README.md#superpowers-plans
 ## Task 1: Core Locale Types and Slash Menu Messages
 
 **Files:**
+
 - Create: `packages/markora/src/editor/i18n.ts`
 - Modify: `packages/markora/src/editor/index.ts`
 - Modify: `packages/markora/src/editor/slash/types.ts`
@@ -160,7 +161,10 @@ describe("slash i18n", () => {
 
   it("renders Chinese slash menu chrome by default", () => {
     installFakeDom();
-    const menu = createSlashMenuElement({ commands, activeIndex: 0, messages: getSlashMessages("zh-CN") }, { onHover: () => undefined, onSelect: () => undefined });
+    const menu = createSlashMenuElement(
+      { commands, activeIndex: 0, messages: getSlashMessages("zh-CN") },
+      { onHover: () => undefined, onSelect: () => undefined }
+    );
 
     expect(menu.textContent).toContain("基本区块");
     expect(menu.textContent).toContain("媒体");
@@ -169,7 +173,10 @@ describe("slash i18n", () => {
 
   it("renders English slash menu chrome", () => {
     installFakeDom();
-    const menu = createSlashMenuElement({ commands: [], activeIndex: 0, messages: getSlashMessages("en-US") }, { onHover: () => undefined, onSelect: () => undefined });
+    const menu = createSlashMenuElement(
+      { commands: [], activeIndex: 0, messages: getSlashMessages("en-US") },
+      { onHover: () => undefined, onSelect: () => undefined }
+    );
 
     expect(menu.textContent).toContain("No matching commands");
   });
@@ -342,6 +349,7 @@ git commit -m "feat(i18n): 添加 slash 菜单基础文案字典"
 ## Task 2: Locale-Aware Default Slash Commands
 
 **Files:**
+
 - Modify: `packages/markora/src/editor/slash/default-commands.ts`
 - Test: `packages/markora/tests/slash-i18n.spec.ts`
 - Test: `packages/markora/tests/slash-query.spec.ts`
@@ -461,7 +469,13 @@ const commandCopy: Record<MarkoraLocale, Record<string, LocalizedSlashCommandCop
 Use a helper to build command metadata:
 
 ```ts
-function commandMeta(locale: MarkoraLocale, id: string, group: MarkoraSlashCommand["group"], icon: string, hint: string): Omit<MarkoraSlashCommand, "run"> {
+function commandMeta(
+  locale: MarkoraLocale,
+  id: string,
+  group: MarkoraSlashCommand["group"],
+  icon: string,
+  hint: string
+): Omit<MarkoraSlashCommand, "run"> {
   const copy = commandCopy[locale][id];
   if (!copy) {
     throw new Error(`Missing slash command copy: ${locale}:${id}`);
@@ -494,7 +508,11 @@ export function getDefaultSlashCommands(locale: MarkoraLocale = "zh-CN"): Markor
     markdownCommand(commandMeta(locale, "ordered-list", "basic", "list-ordered", "1."), "1. "),
     markdownCommand(commandMeta(locale, "unordered-list", "basic", "list", "-"), "- "),
     markdownCommand(commandMeta(locale, "task-list", "basic", "list-todo", "[]"), "- [ ] "),
-    markdownCommand(commandMeta(locale, "table", "basic", "table", "| |"), "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n", 2),
+    markdownCommand(
+      commandMeta(locale, "table", "basic", "table", "| |"),
+      "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n",
+      2
+    ),
     markdownCommand(commandMeta(locale, "divider", "basic", "minus", "---"), "---\n"),
     markdownCommand(commandMeta(locale, "link", "basic", "link", "[]()"), "[]()", 1),
     mediaCommand(commandMeta(locale, "file", "media", "file", "file"), "file"),
@@ -531,6 +549,7 @@ git commit -m "feat(i18n): 支持 slash 默认命令中英文文案"
 ## Task 3: Wire Locale Through Slash Extension and Markora Config
 
 **Files:**
+
 - Modify: `packages/markora/src/editor/slash/extension.ts`
 - Modify: `packages/markora/src/editor/markora.ts`
 - Test: `packages/markora/tests/slash-i18n.spec.ts`
@@ -590,7 +609,12 @@ import type { MarkoraLocale } from "../i18n";
 import { resolveMarkoraLocale } from "../i18n";
 import { getDefaultSlashCommands } from "./default-commands";
 import { createSlashMenuElement, getSlashMessages } from "./menu";
-import type { MarkoraSlashCommand, MarkoraSlashCommandsConfig, MarkoraSlashMessages, MarkoraSlashQuery } from "./types";
+import type {
+  MarkoraSlashCommand,
+  MarkoraSlashCommandsConfig,
+  MarkoraSlashMessages,
+  MarkoraSlashQuery,
+} from "./types";
 ```
 
 Update runtime config:
@@ -724,6 +748,7 @@ git commit -m "feat(i18n): 串联 Markora locale 到 slash 菜单"
 ## Task 4: Vue2 Playground Language Control
 
 **Files:**
+
 - Modify: `playground/vue2-playground/src/types.ts`
 - Modify: `playground/vue2-playground/src/state/playgroundConfig.ts`
 - Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
@@ -736,22 +761,22 @@ git commit -m "feat(i18n): 串联 Markora locale 到 slash 菜单"
 Modify `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
 
 ```ts
-  it("defaults to Chinese locale", () => {
-    const config = createDefaultConfig();
+it("defaults to Chinese locale", () => {
+  const config = createDefaultConfig();
 
-    expect(config.locale).toBe("zh-CN");
+  expect(config.locale).toBe("zh-CN");
+});
+
+it("enables slash commands, attachment uploads, and table of contents by default", () => {
+  const config = createDefaultConfig();
+
+  expect(config.features).toEqual({
+    slashCommands: true,
+    attachments: true,
+    pasteDropUploads: true,
+    tableOfContents: true,
   });
-
-  it("enables slash commands, attachment uploads, and table of contents by default", () => {
-    const config = createDefaultConfig();
-
-    expect(config.features).toEqual({
-      slashCommands: true,
-      attachments: true,
-      pasteDropUploads: true,
-      tableOfContents: true,
-    });
-  });
+});
 ```
 
 Replace the old `enables slash commands and attachment uploads by default` test with the updated version above.
@@ -777,7 +802,7 @@ export type PlaygroundLocale = "zh-CN" | "en-US";
 Add to `PlaygroundConfig`:
 
 ```ts
-  locale: PlaygroundLocale;
+locale: PlaygroundLocale;
 ```
 
 Modify `playground/vue2-playground/src/state/playgroundConfig.ts`:
@@ -909,6 +934,7 @@ git commit -m "feat(playground): 增加 slash 菜单语言调试项"
 ## Task 5: Browser Verification and Final Checks
 
 **Files:**
+
 - No new source files expected.
 - Validate: `packages/markora`, `playground/vue2-playground`, browser at `http://localhost:3001/`.
 

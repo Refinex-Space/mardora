@@ -13,7 +13,7 @@ Add a second playground site for Markora based on Vue 2.6, Vue CLI 4, and Webpac
 
 ## Context
 
-The repository is a Bun workspace with Turborepo. The existing playground lives in `playground/react-playground/app/playground` and is implemented with Next.js, React, `@uiw/react-codemirror`, and direct `markora/src` imports. The new playground should live in a separate workspace app and validate Markora in a legacy Vue CLI 4 + Webpack 4 integration environment.
+The repository is a Bun workspace with Turborepo. The existing playground lives in `playground/react-playground/app/playground` and is implemented with Next.js, React, `@uiw/react-codemirror`, and direct `@refinex/markora/src` imports. The new playground should live in a separate workspace app and validate Markora in a legacy Vue CLI 4 + Webpack 4 integration environment.
 
 ## Constraints
 
@@ -21,7 +21,7 @@ The repository is a Bun workspace with Turborepo. The existing playground lives 
 - Add the new app under `playground/vue2-playground`.
 - Do not add a separate `package-lock.json` or `pnpm-lock.yaml`.
 - Do not refactor or share logic with the existing React playground.
-- Depend on `markora: "workspace:*"` and consume the package build output, not `markora/src`.
+- Depend on `@refinex/markora: "workspace:*"` and consume the package build output, not `@refinex/markora/src`.
 - Expose familiar Vue CLI commands from the app package, including `npm run dev`, `npm run build`, and `npm run lint`.
 - Keep localStorage keys separate from the existing React playground.
 
@@ -31,7 +31,7 @@ Create `playground/vue2-playground` as an independent workspace app. It will con
 
 The app will copy the existing playground's default Markdown examples and configuration defaults into its own source tree. This keeps the Vue2 playground free to evolve independently and avoids touching `playground/react-playground/app/playground`.
 
-The app will import Markora from package exports such as `markora`, `markora/preview`, and `markora/plugins` after `packages/markora` has been built. Documentation will state that developers should build or watch `packages/markora` before starting the Vue2 playground.
+The app will import Markora from package exports such as `@refinex/markora`, `@refinex/markora/preview`, and `@refinex/markora/plugins` after `packages/markora` has been built. Documentation will state that developers should build or watch `packages/markora` before starting the Vue2 playground.
 
 ## Components
 

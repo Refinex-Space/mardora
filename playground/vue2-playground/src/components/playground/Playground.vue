@@ -19,11 +19,7 @@
       <div v-if="showBackdrop" class="backdrop" @click="closePanels" />
 
       <div class="sidebar-panel" :class="sidebarOpen ? 'panel-open' : 'panel-closed'">
-        <PlaygroundSidebar
-          :contents="contents"
-          :current-content="currentContent"
-          @select-content="selectContent"
-        />
+        <PlaygroundSidebar :contents="contents" :current-content="currentContent" @select-content="selectContent" />
       </div>
 
       <section class="editor-panel">
@@ -64,7 +60,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import type { MarkoraNode } from "markora/editor";
+import type { MarkoraNode } from "@refinex/markora/editor";
 import CreateContentDialog from "./CreateContentDialog.vue";
 import PlaygroundDevbar from "./Devbar.vue";
 import EditorPane from "./EditorPane.vue";

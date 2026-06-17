@@ -29,9 +29,9 @@ import CodeMirror, { EditorView, Extension, ReactCodeMirrorRef } from "@uiw/reac
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
-import { allPlugins } from "markora/src";
-import { generateCSS, preview } from "markora/src";
-import { markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "markora/src";
+import { allPlugins } from "@refinex/markora/src";
+import { generateCSS, preview } from "@refinex/markora/src";
+import { markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "@refinex/markora/src";
 
 // Plugin configuration - dynamic based on allPlugins
 export type PluginConfig = Record<string, boolean>;

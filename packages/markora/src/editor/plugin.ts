@@ -132,6 +132,7 @@ export abstract class MarkoraPlugin {
    * @param ctx - Decoration context with view and decoration array
    */
   buildDecorations(_ctx: DecorationContext): void {
+    void _ctx;
     // Default implementation does nothing
     // Subclasses override to add decorations
   }
@@ -165,6 +166,7 @@ export abstract class MarkoraPlugin {
    * @param view - The EditorView instance
    */
   onViewReady(_view: EditorView): void {
+    void _view;
     // Default implementation does nothing
   }
 
@@ -175,6 +177,7 @@ export abstract class MarkoraPlugin {
    * @param update - The ViewUpdate with change information
    */
   onViewUpdate(_update: ViewUpdate): void {
+    void _update;
     // Default implementation does nothing
   }
 
@@ -199,7 +202,7 @@ export abstract class MarkoraPlugin {
   }
 
   // ============================================
-  // PREVIEW RENDERING METHODS (for markora/preview)
+  // PREVIEW RENDERING METHODS (for @refinex/markora/preview)
   // ============================================
 
   /**

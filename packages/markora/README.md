@@ -19,7 +19,7 @@ Applications remain responsible for layout, state management, persistence, auth,
 ## Installation
 
 ```bash
-npm install markora
+npm install @refinex/markora
 npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
 ```
 
@@ -34,8 +34,8 @@ npm install @codemirror/lang-html @codemirror/lang-css @uiw/codemirror-theme-git
 ```ts
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { markora, ThemeEnum } from "markora/editor";
-import { allPlugins } from "markora/plugins";
+import { markora, ThemeEnum } from "@refinex/markora/editor";
+import { allPlugins } from "@refinex/markora/plugins";
 
 const parent = document.getElementById("editor");
 
@@ -63,9 +63,9 @@ const view = new EditorView({
 ## Static Preview
 
 ```ts
-import { ThemeEnum } from "markora/editor";
-import { allPlugins } from "markora/plugins";
-import { generateCSS, preview } from "markora/preview";
+import { ThemeEnum } from "@refinex/markora/editor";
+import { allPlugins } from "@refinex/markora/plugins";
+import { generateCSS, preview } from "@refinex/markora/preview";
 
 const html = await preview("# Hello", {
   theme: ThemeEnum.LIGHT,
@@ -87,13 +87,13 @@ Use the same `plugins`, `theme`, syntax theme, and `wrapperClass` for `preview()
 
 ## Public Entrypoints
 
-| Entrypoint        | Purpose                                                                                    |
-| ----------------- | ------------------------------------------------------------------------------------------ |
-| `markora`         | Aggregate export for quick experiments.                                                    |
-| `markora/editor`  | Editor factory, config types, theme, i18n, attachments, slash, selection toolbar, and TOC. |
-| `markora/plugins` | Built-in plugins and `allPlugins`.                                                         |
-| `markora/preview` | Static HTML, CSS, and preview TOC helpers.                                                 |
-| `markora/lib`     | Lower-level input helpers.                                                                 |
+| Entrypoint                 | Purpose                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| `@refinex/markora`         | Aggregate export for quick experiments.                                                    |
+| `@refinex/markora/editor`  | Editor factory, config types, theme, i18n, attachments, slash, selection toolbar, and TOC. |
+| `@refinex/markora/plugins` | Built-in plugins and `allPlugins`.                                                         |
+| `@refinex/markora/preview` | Static HTML, CSS, and preview TOC helpers.                                                 |
+| `@refinex/markora/lib`     | Lower-level input helpers.                                                                 |
 
 ## Documentation
 

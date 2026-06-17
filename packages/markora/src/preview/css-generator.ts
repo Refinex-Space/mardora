@@ -17,8 +17,8 @@ const baseStyles = `.markora-preview {
  *
  * @example
  * ```ts
- * import { generateCSS } from 'markora/preview';
- * import { HeadingPlugin, ListPlugin } from 'markora/plugins';
+ * import { generateCSS } from '@refinex/markora/preview';
+ * import { HeadingPlugin, ListPlugin } from '@refinex/markora/plugins';
  *
  * const css = generateCSS({
  *   plugins: [new HeadingPlugin(), new ListPlugin()],

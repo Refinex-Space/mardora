@@ -23,7 +23,7 @@ referenced_by: docs/README.md#product-and-integration-guides
 ## 2. 安装依赖
 
 ```shell
-npm install markora
+npm install @refinex/markora
 npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
 npm install @codemirror/lang-html @codemirror/lang-css @uiw/codemirror-theme-github
 ```
@@ -93,7 +93,7 @@ Vue 2 项目还需要自己的构建环境，例如 `vue@2`、`vue-template-comp
 ## 4. 配置模型
 
 ```ts
-import { allPlugins } from "markora/plugins";
+import { allPlugins } from "@refinex/markora/plugins";
 
 export type PluginConfig = Record<string, boolean>;
 
@@ -163,9 +163,9 @@ import { css } from "@codemirror/lang-css";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import type { MarkoraAttachmentUploadContext, MarkoraNode, MarkoraTocItem } from "markora/editor";
-import { markora, ThemeEnum } from "markora/editor";
-import { extractPreviewTocFromMarkdown, generateCSS, preview } from "markora/preview";
+import type { MarkoraAttachmentUploadContext, MarkoraNode, MarkoraTocItem } from "@refinex/markora/editor";
+import { markora, ThemeEnum } from "@refinex/markora/editor";
+import { extractPreviewTocFromMarkdown, generateCSS, preview } from "@refinex/markora/preview";
 import { defaultConfig, getActivePlugins } from "./playground-config";
 
 type Mode = "live" | "code" | "view" | "output";
@@ -453,7 +453,7 @@ export default Vue.extend({
 
 Vue 2 接入时，附件上传要明确区分 Markora 与业务后端职责。
 
-| 项目     | Markora 负责                            | 业务负责                          |
+| 项目     | Markora 负责                           | 业务负责                          |
 | -------- | --------------------------------------- | --------------------------------- |
 | 文件来源 | slash 选择、paste、drop。               | 决定是否开启 paste/drop。         |
 | 类型判断 | 根据 MIME 判断 image/video/audio/file。 | 限制业务允许的 MIME、后缀、大小。 |
@@ -500,8 +500,8 @@ async function productionUploader(file: File, context: MarkoraAttachmentUploadCo
 Vue 2 不需要特殊插件写法。自定义插件仍然继承 `MarkoraPlugin`：
 
 ```ts
-import type { DecorationContext } from "markora/editor";
-import { MarkoraPlugin } from "markora/editor";
+import type { DecorationContext } from "@refinex/markora/editor";
+import { MarkoraPlugin } from "@refinex/markora/editor";
 
 export class AuditPlugin extends MarkoraPlugin {
   readonly name = "audit";

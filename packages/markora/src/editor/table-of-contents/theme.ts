@@ -6,8 +6,7 @@ export const tocTheme = EditorView.baseTheme({
   },
   ".cm-markora .cm-scroller": {
     boxSizing: "border-box",
-    paddingRight:
-      "calc(var(--markora-toc-layout-width, 0px) + var(--markora-toc-scrollbar-gutter, 0px))",
+    paddingRight: "calc(var(--markora-toc-layout-width, 0px) + var(--markora-toc-scrollbar-gutter, 0px))",
     scrollbarGutter: "stable",
   },
   ".cm-markora .cm-scroller::-webkit-scrollbar-track": {

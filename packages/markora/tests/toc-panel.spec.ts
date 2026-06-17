@@ -45,9 +45,7 @@ class FakeElement {
 
   getAttribute(name: string): string | null {
     if (name.startsWith("data-")) {
-      const key = name
-        .slice(5)
-        .replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+      const key = name.slice(5).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
       return this.dataset[key] ?? null;
     }
     return this.attrs.get(name) ?? null;
@@ -137,7 +135,9 @@ describe("createTocPanelElement", () => {
     expect(panel.querySelector(".cm-markora-toc-item-active")?.textContent).toContain("Intro");
     expect(panel.querySelector('[data-markora-toc-level="3"]')?.textContent).toContain("Details");
 
-    panel.querySelector<HTMLButtonElement>(".cm-markora-toc-item")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    panel
+      .querySelector<HTMLButtonElement>(".cm-markora-toc-item")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
     expect(calls).toEqual(["intro"]);
   });

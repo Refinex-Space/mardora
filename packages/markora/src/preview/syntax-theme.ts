@@ -22,6 +22,7 @@ export function generateSyntaxThemeCSS(
   syntaxTheme: SyntaxThemeInput | SyntaxThemeInput[] | undefined,
   _wrapperClass: string
 ): string {
+  void _wrapperClass;
   if (!syntaxTheme) return "";
 
   const styles = extractRuntimeHighlightStyles(syntaxTheme);
@@ -37,8 +38,7 @@ export function generateSyntaxThemeCSS(
 
   if (!cssChunks.length) return "";
 
-  return Array.from(new Set(cssChunks))
-    .join("\n");
+  return Array.from(new Set(cssChunks)).join("\n");
 }
 
 export function resolveSyntaxHighlighters(
@@ -60,7 +60,9 @@ export function resolveSyntaxHighlighters(
   return Array.from(new Set(resolved));
 }
 
-function extractRuntimeHighlightStyles(input: SyntaxThemeInput | SyntaxThemeInput[] | undefined): RuntimeHighlightStyle[] {
+function extractRuntimeHighlightStyles(
+  input: SyntaxThemeInput | SyntaxThemeInput[] | undefined
+): RuntimeHighlightStyle[] {
   if (!input) return [];
 
   const values = Array.isArray(input) ? input : [input];

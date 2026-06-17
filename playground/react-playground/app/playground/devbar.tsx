@@ -1,7 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@workspace/ui/components/accordion";
 import { Switch } from "@workspace/ui/components/switch";
 import { Label } from "@workspace/ui/components/label";
-import { allPlugins, MarkoraNode } from "markora/src";
+import { allPlugins, MarkoraNode } from "@refinex/markora/src";
 import React from "react";
 import { useLocale } from "../i18n/LocaleContext";
 import { PlaygroundConfig } from "./page";

@@ -1,4 +1,4 @@
-import type { MarkoraNode } from "markora/editor";
+import type { MarkoraNode } from "@refinex/markora/editor";
 
 export type PlaygroundMode = "live" | "view" | "code" | "output";
 export type SaveStatus = "idle" | "saving" | "saved";

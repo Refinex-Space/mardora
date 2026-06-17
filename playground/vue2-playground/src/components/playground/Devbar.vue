@@ -37,7 +37,12 @@
               <span class="switch-label">{{ $t("opt.includeBase.label") }}</span>
               <span class="switch-description">{{ $t("opt.includeBase.desc") }}</span>
             </span>
-            <input class="switch-input" type="checkbox" :checked="config.preview.includeBase" @change="updatePreviewOption('includeBase', $event)" />
+            <input
+              class="switch-input"
+              type="checkbox"
+              :checked="config.preview.includeBase"
+              @change="updatePreviewOption('includeBase', $event)"
+            />
             <span class="switch-control" aria-hidden="true" />
           </label>
           <label class="switch-row">
@@ -45,7 +50,12 @@
               <span class="switch-label">{{ $t("opt.sanitize.label") }}</span>
               <span class="switch-description">{{ $t("opt.sanitize.desc") }}</span>
             </span>
-            <input class="switch-input" type="checkbox" :checked="config.preview.sanitize" @change="updatePreviewOption('sanitize', $event)" />
+            <input
+              class="switch-input"
+              type="checkbox"
+              :checked="config.preview.sanitize"
+              @change="updatePreviewOption('sanitize', $event)"
+            />
             <span class="switch-control" aria-hidden="true" />
           </label>
           <div class="option-row">
@@ -120,7 +130,12 @@
               <span class="switch-label">{{ name }}</span>
               <span class="switch-description">{{ $t("opt.plugin.desc", { name }) }}</span>
             </span>
-            <input class="switch-input" type="checkbox" :checked="config.plugins[name]" @change="updatePlugin(name, $event)" />
+            <input
+              class="switch-input"
+              type="checkbox"
+              :checked="config.plugins[name]"
+              @change="updatePlugin(name, $event)"
+            />
             <span class="switch-control" aria-hidden="true" />
           </label>
         </div>
@@ -128,7 +143,9 @@
 
       <section class="accordion-item nodes-section" :class="{ 'nodes-section-open': isOpen('nodes') }">
         <button class="accordion-trigger" type="button" @click="toggleNodes">
-          <span>{{ $t("devbar.nodes") }} <small>{{ $t("devbar.nodesHint") }}</small></span>
+          <span
+            >{{ $t("devbar.nodes") }} <small>{{ $t("devbar.nodesHint") }}</small></span
+          >
           <span class="chevron" aria-hidden="true">{{ isOpen("nodes") ? "^" : "v" }}</span>
         </button>
         <div v-if="isOpen('nodes')" class="accordion-content node-content">
@@ -141,7 +158,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import type { MarkoraNode } from "markora/editor";
+import type { MarkoraNode } from "@refinex/markora/editor";
 import type { PlaygroundConfig, PlaygroundLocale, PreviewContentWidth } from "@/types";
 
 type EditorOptionKey = keyof PlaygroundConfig["editor"];
@@ -176,18 +193,58 @@ export default Vue.extend({
     return {
       openSections: ["editor", "preview"] as string[],
       editorOptions: [
-        { key: "baseStyles" as EditorOptionKey, labelKey: "opt.baseStyles.label" as const, descKey: "opt.baseStyles.desc" as const },
-        { key: "defaultKeybindings" as EditorOptionKey, labelKey: "opt.defaultKeybindings.label" as const, descKey: "opt.defaultKeybindings.desc" as const },
-        { key: "history" as EditorOptionKey, labelKey: "opt.history.label" as const, descKey: "opt.history.desc" as const },
-        { key: "indentWithTab" as EditorOptionKey, labelKey: "opt.indentWithTab.label" as const, descKey: "opt.indentWithTab.desc" as const },
-        { key: "highlightActiveLine" as EditorOptionKey, labelKey: "opt.highlightActiveLine.label" as const, descKey: "opt.highlightActiveLine.desc" as const },
-        { key: "lineWrapping" as EditorOptionKey, labelKey: "opt.lineWrapping.label" as const, descKey: "opt.lineWrapping.desc" as const },
+        {
+          key: "baseStyles" as EditorOptionKey,
+          labelKey: "opt.baseStyles.label" as const,
+          descKey: "opt.baseStyles.desc" as const,
+        },
+        {
+          key: "defaultKeybindings" as EditorOptionKey,
+          labelKey: "opt.defaultKeybindings.label" as const,
+          descKey: "opt.defaultKeybindings.desc" as const,
+        },
+        {
+          key: "history" as EditorOptionKey,
+          labelKey: "opt.history.label" as const,
+          descKey: "opt.history.desc" as const,
+        },
+        {
+          key: "indentWithTab" as EditorOptionKey,
+          labelKey: "opt.indentWithTab.label" as const,
+          descKey: "opt.indentWithTab.desc" as const,
+        },
+        {
+          key: "highlightActiveLine" as EditorOptionKey,
+          labelKey: "opt.highlightActiveLine.label" as const,
+          descKey: "opt.highlightActiveLine.desc" as const,
+        },
+        {
+          key: "lineWrapping" as EditorOptionKey,
+          labelKey: "opt.lineWrapping.label" as const,
+          descKey: "opt.lineWrapping.desc" as const,
+        },
       ],
       featureOptions: [
-        { key: "slashCommands" as FeatureOptionKey, labelKey: "opt.slashCommands.label" as const, descKey: "opt.slashCommands.desc" as const },
-        { key: "attachments" as FeatureOptionKey, labelKey: "opt.attachments.label" as const, descKey: "opt.attachments.desc" as const },
-        { key: "pasteDropUploads" as FeatureOptionKey, labelKey: "opt.pasteDropUploads.label" as const, descKey: "opt.pasteDropUploads.desc" as const },
-        { key: "tableOfContents" as FeatureOptionKey, labelKey: "opt.tableOfContents.label" as const, descKey: "opt.tableOfContents.desc" as const },
+        {
+          key: "slashCommands" as FeatureOptionKey,
+          labelKey: "opt.slashCommands.label" as const,
+          descKey: "opt.slashCommands.desc" as const,
+        },
+        {
+          key: "attachments" as FeatureOptionKey,
+          labelKey: "opt.attachments.label" as const,
+          descKey: "opt.attachments.desc" as const,
+        },
+        {
+          key: "pasteDropUploads" as FeatureOptionKey,
+          labelKey: "opt.pasteDropUploads.label" as const,
+          descKey: "opt.pasteDropUploads.desc" as const,
+        },
+        {
+          key: "tableOfContents" as FeatureOptionKey,
+          labelKey: "opt.tableOfContents.label" as const,
+          descKey: "opt.tableOfContents.desc" as const,
+        },
       ],
       contentWidthOptions: [
         { value: "regular" as PreviewContentWidth, labelKey: "devbar.contentWidthRegular" as const },

@@ -11,12 +11,12 @@ referenced_by: AGENTS.md#knowledge-map
 
 `packages/markora/package.json` exposes:
 
-- `markora`
-- `markora/editor`
-- `markora/plugins`
-- `markora/preview`
-- `markora/lib`
-- `markora/src` and `markora/src/*` for source-level local use
+- `@refinex/markora`
+- `@refinex/markora/editor`
+- `@refinex/markora/plugins`
+- `@refinex/markora/preview`
+- `@refinex/markora/lib`
+- `@refinex/markora/src` and `@refinex/markora/src/*` for source-level local use
 
 When changing public behavior, update the relevant export barrel and verify generated declarations through the core build.
 
@@ -31,7 +31,7 @@ When changing public behavior, update the relevant export barrel and verify gene
 
 ## Peer Dependencies
 
-CodeMirror packages are peer dependencies of `markora`. Do not hide required CodeMirror peer requirements inside playground-only docs.
+CodeMirror packages are peer dependencies of `@refinex/markora`. Do not hide required CodeMirror peer requirements inside playground-only docs.
 
 ## Framework Integrations
 

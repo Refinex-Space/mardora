@@ -23,7 +23,7 @@ referenced_by: AGENTS.md#knowledge-map
 - Format TypeScript, TSX, and Markdown: `bun run format`
 - Create a Changeset: `bun run changeset`
 - Version packages from Changesets: `bun run version-packages`
-- Release `markora`: `bun run release`
+- Release `@refinex/markora`: `bun run release`
 - Run Harness governance checks: `bun run harness:check`
 
 ## Package Commands

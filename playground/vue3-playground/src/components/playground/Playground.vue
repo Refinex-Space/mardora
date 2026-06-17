@@ -19,11 +19,7 @@
       <div v-if="showBackdrop" class="backdrop" @click="closePanels" />
 
       <div class="sidebar-panel" :class="sidebarOpen ? 'panel-open' : 'panel-closed'">
-        <PlaygroundSidebar
-          :contents="contents"
-          :current-content="currentContent"
-          @select-content="selectContent"
-        />
+        <PlaygroundSidebar :contents="contents" :current-content="currentContent" @select-content="selectContent" />
       </div>
 
       <section class="editor-panel">
@@ -64,18 +60,14 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import type { MarkoraNode } from "markora/editor";
+import type { MarkoraNode } from "@refinex/markora/editor";
 import CreateContentDialog from "./CreateContentDialog.vue";
 import PlaygroundDevbar from "./Devbar.vue";
 import EditorPane from "./EditorPane.vue";
 import PlaygroundFooter from "./Footer.vue";
 import PlaygroundHeader from "./Header.vue";
 import PlaygroundSidebar from "./Sidebar.vue";
-import {
-  loadPlaygroundSnapshot,
-  relocalizeContents,
-  savePlaygroundSnapshot,
-} from "@/state/storage";
+import { loadPlaygroundSnapshot, relocalizeContents, savePlaygroundSnapshot } from "@/state/storage";
 import { createDefaultConfig } from "@/state/playgroundConfig";
 import { createContentId, getContentMetrics } from "@/utils/contentMetrics";
 import { locale as shellLocaleRef, setLocale as setShellLocaleStore } from "@/i18n";
