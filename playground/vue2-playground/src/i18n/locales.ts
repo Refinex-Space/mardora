@@ -72,6 +72,8 @@ export type MessageKey =
   | "opt.sanitize.desc"
   | "opt.slashCommands.label"
   | "opt.slashCommands.desc"
+  | "opt.selectionToolbar.label"
+  | "opt.selectionToolbar.desc"
   | "opt.attachments.label"
   | "opt.attachments.desc"
   | "opt.pasteDropUploads.label"
@@ -153,6 +155,8 @@ const zh: Dict = {
   "opt.sanitize.desc": "净化 HTML 输出以提升安全性",
   "opt.slashCommands.label": "斜杠命令",
   "opt.slashCommands.desc": "行首输入斜杠打开命令菜单",
+  "opt.selectionToolbar.label": "选区工具栏",
+  "opt.selectionToolbar.desc": "选中文本后显示浮动格式工具栏",
   "opt.attachments.label": "附件",
   "opt.attachments.desc": "通过媒体命令选择本地文件",
   "opt.pasteDropUploads.label": "粘贴 / 拖拽上传",
@@ -235,6 +239,8 @@ const en: Dict = {
   "opt.sanitize.desc": "Sanitize HTML output for security",
   "opt.slashCommands.label": "Slash Commands",
   "opt.slashCommands.desc": "Open the command menu with line-start slash input",
+  "opt.selectionToolbar.label": "Selection Toolbar",
+  "opt.selectionToolbar.desc": "Show the floating format toolbar after selecting text",
   "opt.attachments.label": "Attachments",
   "opt.attachments.desc": "Enable local file selection through media commands",
   "opt.pasteDropUploads.label": "Paste/Drop Uploads",

@@ -34,7 +34,7 @@
     },
     "packages/markora": {
       "name": "@refinex/markora",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@lezer/common": "1.5.2",
         "@lezer/highlight": "1.2.3",

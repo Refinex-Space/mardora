@@ -60,6 +60,7 @@ export type PlaygroundConfig = {
   // Markora feature toggles
   features: {
     slashCommands: boolean;
+    selectionToolbar: boolean;
     attachments: boolean;
     pasteDropUploads: boolean;
   };
@@ -82,6 +83,7 @@ const defaultConfig: PlaygroundConfig = {
   },
   features: {
     slashCommands: true,
+    selectionToolbar: true,
     attachments: true,
     pasteDropUploads: true,
   },
@@ -345,6 +347,9 @@ export default function Page() {
         lineWrapping: config.editor.lineWrapping,
         slashCommands: {
           enabled: config.features.slashCommands,
+        },
+        selectionToolbar: {
+          enabled: config.features.selectionToolbar,
         },
         attachments: {
           enabled: config.features.attachments,
