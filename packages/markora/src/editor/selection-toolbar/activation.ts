@@ -8,11 +8,5 @@ export type NativeSelectionActivationInput = {
 
 /** Returns whether a browser native selection should activate the toolbar. */
 export function canActivateFromNativeSelection(input: NativeSelectionActivationInput): boolean {
-  return (
-    !input.editorSelectionEmpty &&
-    !input.nativeSelectionCollapsed &&
-    input.anchorInEditor &&
-    input.focusInEditor &&
-    input.rangeCount > 0
-  );
+  return !input.nativeSelectionCollapsed && input.anchorInEditor && input.focusInEditor && input.rangeCount > 0;
 }

@@ -90,6 +90,23 @@ class TableBreakWidget extends WidgetType {
   }
 }
 
+class TableCaretWidget extends WidgetType {
+  /** Reuses the same caret widget shape across table cells. */
+  override eq(): boolean {
+    return true;
+  }
+
+  /** Renders a lightweight caret for table cells where CodeMirror's native cursor cannot be placed. */
+  toDOM(): HTMLElement {
+    const span = document.createElement("span");
+    span.className = "cm-markora-table-caret";
+    span.setAttribute("aria-hidden", "true");
+    return span;
+  }
+}
+
+const tableCaretWidget = new TableCaretWidget();
+
 class TableControlsWidget extends WidgetType {
   constructor(
     private readonly onAddRow: (view: EditorView) => void,
@@ -693,6 +710,125 @@ function collectBreakRanges(tableInfo: TableInfo): Array<{ from: number; to: num
   return ranges;
 }
 
+/** Returns the character offset of a DOM text position inside a rendered cell. */
+function getTextOffsetInsideCell(cellElement: Element, targetNode: Node, targetOffset: number): number | null {
+  const document = cellElement.ownerDocument;
+  const walker = document.createTreeWalker(cellElement, NodeFilter.SHOW_TEXT);
+  let offset = 0;
+  let current = walker.nextNode();
+
+  while (current) {
+    const textLength = current.textContent?.length || 0;
+    if (current === targetNode) {
+      return offset + Math.min(targetOffset, textLength);
+    }
+
+    offset += textLength;
+    current = walker.nextNode();
+  }
+
+  return null;
+}
+
+/** Reads the browser caret position at a click point inside the rendered cell. */
+function getCellTextOffsetFromPoint(cellElement: Element, x: number, y: number): number | null {
+  const measuredOffset = getMeasuredCellTextOffsetFromPoint(cellElement, x, y);
+  if (measuredOffset !== null) {
+    return measuredOffset;
+  }
+
+  const document = cellElement.ownerDocument;
+  const caretDocument = document as Document & {
+    caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null;
+    caretRangeFromPoint?: (x: number, y: number) => { startContainer: Node; startOffset: number } | null;
+  };
+
+  const caretPosition = caretDocument.caretPositionFromPoint?.(x, y);
+  if (caretPosition && cellElement.contains(caretPosition.offsetNode)) {
+    return getTextOffsetInsideCell(cellElement, caretPosition.offsetNode, caretPosition.offset);
+  }
+
+  const caretRange = caretDocument.caretRangeFromPoint?.(x, y);
+  if (caretRange && cellElement.contains(caretRange.startContainer)) {
+    return getTextOffsetInsideCell(cellElement, caretRange.startContainer, caretRange.startOffset);
+  }
+
+  return null;
+}
+
+/** Measures rendered text boxes to find the nearest insertion offset inside a table cell. */
+function getMeasuredCellTextOffsetFromPoint(cellElement: Element, x: number, y: number): number | null {
+  const document = cellElement.ownerDocument;
+  const walker = document.createTreeWalker(cellElement, NodeFilter.SHOW_TEXT);
+  let absoluteOffset = 0;
+  let best: { offset: number; score: number } | null = null;
+  let current = walker.nextNode();
+
+  while (current) {
+    const text = current.textContent || "";
+    for (let index = 0; index < text.length; index++) {
+      const range = document.createRange();
+      range.setStart(current, index);
+      range.setEnd(current, index + 1);
+
+      for (const rect of Array.from(range.getClientRects())) {
+        if (rect.width === 0 && rect.height === 0) {
+          continue;
+        }
+
+        const verticalDistance = y < rect.top ? rect.top - y : y > rect.bottom ? y - rect.bottom : 0;
+        const boundaryOffset = x <= rect.left + rect.width / 2 ? absoluteOffset + index : absoluteOffset + index + 1;
+        const boundaryX = boundaryOffset === absoluteOffset + index ? rect.left : rect.right;
+        const horizontalDistance = Math.abs(x - boundaryX);
+        const score = verticalDistance * 10000 + horizontalDistance;
+
+        if (!best || score < best.score) {
+          best = { offset: boundaryOffset, score };
+        }
+      }
+
+      range.detach();
+    }
+
+    absoluteOffset += text.length;
+    current = walker.nextNode();
+  }
+
+  return best?.offset ?? null;
+}
+
+/** Maps a rendered table-cell coordinate back to the editable markdown content range. */
+function getTableCellPositionFromPoint(view: EditorView, cellElement: Element, x: number, y: number): number | null {
+  const contentFrom = Number(cellElement.getAttribute("data-markora-content-from"));
+  const contentTo = Number(cellElement.getAttribute("data-markora-content-to"));
+  if (!Number.isFinite(contentFrom) || !Number.isFinite(contentTo)) {
+    return null;
+  }
+
+  const coordinatePosition = view.posAtCoords({ x, y }, false);
+  const textOffset = getCellTextOffsetFromPoint(cellElement, x, y);
+  const fallbackPosition = textOffset === null ? contentFrom : contentFrom + textOffset;
+  const position =
+    textOffset !== null
+      ? fallbackPosition
+      : coordinatePosition !== null && coordinatePosition >= contentFrom && coordinatePosition <= contentTo
+        ? coordinatePosition
+        : fallbackPosition;
+
+  return Math.max(contentFrom, Math.min(position, Math.max(contentFrom, contentTo)));
+}
+
+/** Finds a rendered table cell at a viewport point and maps it back to a document position. */
+function getTablePositionFromPoint(view: EditorView, x: number, y: number): number | null {
+  const element = view.dom.ownerDocument.elementFromPoint(x, y);
+  const cellElement = element?.closest(".cm-markora-table-cell");
+  if (!cellElement || !view.dom.contains(cellElement)) {
+    return view.posAtCoords({ x, y }, false);
+  }
+
+  return getTableCellPositionFromPoint(view, cellElement, x, y);
+}
+
 const lineDecorations = {
   header: Decoration.line({ class: "cm-markora-table-row cm-markora-table-header-row" }),
   delimiter: Decoration.line({ class: "cm-markora-table-row cm-markora-table-delimiter-row" }),
@@ -700,34 +836,32 @@ const lineDecorations = {
   last: Decoration.line({ class: "cm-markora-table-row-last" }),
 };
 
-const cellDecorations = {
-  "th-left": Decoration.mark({ class: "cm-markora-table-cell cm-markora-table-th" }),
-  "th-center": Decoration.mark({ class: "cm-markora-table-cell cm-markora-table-th cm-markora-table-cell-center" }),
-  "th-right": Decoration.mark({ class: "cm-markora-table-cell cm-markora-table-th cm-markora-table-cell-right" }),
-  "th-left-last": Decoration.mark({ class: "cm-markora-table-cell cm-markora-table-th cm-markora-table-cell-last" }),
-  "th-center-last": Decoration.mark({
-    class: "cm-markora-table-cell cm-markora-table-th cm-markora-table-cell-center cm-markora-table-cell-last",
-  }),
-  "th-right-last": Decoration.mark({
-    class: "cm-markora-table-cell cm-markora-table-th cm-markora-table-cell-right cm-markora-table-cell-last",
-  }),
-  "td-left": Decoration.mark({ class: "cm-markora-table-cell" }),
-  "td-center": Decoration.mark({ class: "cm-markora-table-cell cm-markora-table-cell-center" }),
-  "td-right": Decoration.mark({ class: "cm-markora-table-cell cm-markora-table-cell-right" }),
-  "td-left-last": Decoration.mark({ class: "cm-markora-table-cell cm-markora-table-cell-last" }),
-  "td-center-last": Decoration.mark({
-    class: "cm-markora-table-cell cm-markora-table-cell-center cm-markora-table-cell-last",
-  }),
-  "td-right-last": Decoration.mark({
-    class: "cm-markora-table-cell cm-markora-table-cell-right cm-markora-table-cell-last",
-  }),
-} as const;
+function getCellClassName(isHeader: boolean, alignment: Alignment, isLastCell: boolean): string {
+  return [
+    "cm-markora-table-cell",
+    isHeader ? "cm-markora-table-th" : "",
+    alignment === "center" ? "cm-markora-table-cell-center" : "",
+    alignment === "right" ? "cm-markora-table-cell-right" : "",
+    isLastCell ? "cm-markora-table-cell-last" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
 
-type CellDecorationKey = keyof typeof cellDecorations;
-
-function getCellDecoration(isHeader: boolean, alignment: Alignment, isLastCell: boolean): Decoration {
-  const key = `${isHeader ? "th" : "td"}-${alignment}${isLastCell ? "-last" : ""}` as CellDecorationKey;
-  return cellDecorations[key];
+function getCellDecoration(
+  isHeader: boolean,
+  alignment: Alignment,
+  isLastCell: boolean,
+  cell: TableCellInfo
+): Decoration {
+  return Decoration.mark({
+    class: getCellClassName(isHeader, alignment, isLastCell),
+    attributes: {
+      "data-markora-table-cell": "true",
+      "data-markora-content-from": String(cell.contentFrom),
+      "data-markora-content-to": String(cell.contentTo),
+    },
+  });
 }
 
 export class TablePlugin extends DecorationPlugin {
@@ -764,6 +898,7 @@ export class TablePlugin extends DecorationPlugin {
       EditorView.blockWrappers.of((view) => this.computeBlockWrappers(view)),
       EditorView.atomicRanges.of((view) => this.computeAtomicRanges(view)),
       EditorView.domEventHandlers({
+        mousedown: (event, view) => this.handleTableMouseDown(view, event),
         keydown: (event, view) => this.handleDomKeydown(view, event),
       }),
     ];
@@ -848,6 +983,82 @@ export class TablePlugin extends DecorationPlugin {
     }
 
     return handled;
+  }
+
+  /** Maps a single pointer-down on rendered table cells back to the editable markdown cell content. */
+  private handleTableMouseDown(view: EditorView, event: MouseEvent): boolean {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.detail !== 1 ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey
+    ) {
+      return false;
+    }
+
+    const target = event.target instanceof Element ? event.target.closest(".cm-markora-table-cell") : null;
+    if (!target || !view.dom.contains(target)) {
+      return false;
+    }
+
+    const anchor = getTableCellPositionFromPoint(view, target, event.clientX, event.clientY);
+    if (anchor === null) {
+      return false;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let dragging = false;
+    const ownerDocument = view.dom.ownerDocument;
+
+    const move = (moveEvent: MouseEvent) => {
+      if ((moveEvent.buttons & 1) === 0) {
+        return;
+      }
+
+      moveEvent.preventDefault();
+      const distance = Math.abs(moveEvent.clientX - startX) + Math.abs(moveEvent.clientY - startY);
+      if (distance > 3) {
+        dragging = true;
+      }
+
+      if (!dragging) {
+        return;
+      }
+
+      const head = getTablePositionFromPoint(view, moveEvent.clientX, moveEvent.clientY);
+      if (head === null) {
+        return;
+      }
+
+      view.dispatch({
+        selection: { anchor, head },
+        annotations: repairSelectionAnnotation.of(true),
+        scrollIntoView: false,
+      });
+    };
+
+    const up = () => {
+      ownerDocument.removeEventListener("mousemove", move, true);
+      ownerDocument.removeEventListener("mouseup", up, true);
+    };
+
+    ownerDocument.addEventListener("mousemove", move, true);
+    ownerDocument.addEventListener("mouseup", up, true);
+
+    view.focus();
+    view.dispatch({
+      selection: { anchor },
+      annotations: repairSelectionAnnotation.of(true),
+      scrollIntoView: false,
+    });
+    return true;
   }
 
   /** Builds the visual table decorations for every parsed table block. */
@@ -996,8 +1207,11 @@ export class TablePlugin extends DecorationPlugin {
         continue;
       }
 
-      this.decorateLine(decorations, line.from, line.text, tableInfo.alignments, isHeader);
+      const rowCells = tableInfo.cellsByRow.find((row) => row[0]?.lineNumber === lineNumber) || [];
+      this.decorateLine(decorations, line.from, line.text, tableInfo.alignments, isHeader, rowCells);
     }
+
+    this.decorateTableCaret(view, decorations, tableInfo);
 
     decorations.push(
       Decoration.widget({
@@ -1020,13 +1234,34 @@ export class TablePlugin extends DecorationPlugin {
     );
   }
 
+  /** Draws an explicit caret inside table cells because table layout can hide CodeMirror's native cursor. */
+  private decorateTableCaret(view: EditorView, decorations: Range<Decoration>[], tableInfo: TableInfo): void {
+    const selection = view.state.selection.main;
+    if (!selection.empty || selection.head < tableInfo.from || selection.head > tableInfo.to) {
+      return;
+    }
+
+    const cell = findCellAtPosition(tableInfo, selection.head);
+    if (!cell || selection.head < cell.contentFrom || selection.head > cell.contentTo) {
+      return;
+    }
+
+    decorations.push(
+      Decoration.widget({
+        widget: tableCaretWidget,
+        side: -1,
+      }).range(selection.head)
+    );
+  }
+
   /** Applies the visual cell decorations for a single table row line. */
   private decorateLine(
     decorations: Range<Decoration>[],
     lineFrom: number,
     lineText: string,
     alignments: Alignment[],
-    isHeader: boolean
+    isHeader: boolean,
+    rowCells: TableCellInfo[]
   ): void {
     const pipes = getPipePositions(lineText);
     if (pipes.length < 2) {
@@ -1052,12 +1287,15 @@ export class TablePlugin extends DecorationPlugin {
         decorations.push(pipeReplace.range(absoluteFrom + visible.endOffset, absoluteTo));
       }
 
-      decorations.push(
-        getCellDecoration(isHeader, alignments[columnIndex] || "left", columnIndex === pipes.length - 2).range(
-          absoluteFrom,
-          absoluteTo
-        )
-      );
+      const cell = rowCells[columnIndex];
+      if (cell) {
+        decorations.push(
+          getCellDecoration(isHeader, alignments[columnIndex] || "left", columnIndex === pipes.length - 2, cell).range(
+            absoluteFrom,
+            absoluteTo
+          )
+        );
+      }
 
       let match: RegExpExecArray | null;
       const regex = new RegExp(BREAK_TAG_REGEX);
@@ -1659,6 +1897,16 @@ const theme = createTheme({
 
       "& .cm-markora-table-break": {
         display: "inline",
+      },
+
+      "& .cm-markora-table-caret": {
+        display: "inline-block",
+        width: "1px",
+        height: "1.2em",
+        margin: "0 -0.5px",
+        verticalAlign: "-0.15em",
+        backgroundColor: "var(--color-foreground, #111827)",
+        pointerEvents: "none",
       },
 
       "& .cm-markora-table-controls-anchor": {

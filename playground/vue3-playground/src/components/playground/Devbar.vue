@@ -231,6 +231,11 @@ export default defineComponent({
           descKey: "opt.slashCommands.desc" as const,
         },
         {
+          key: "selectionToolbar" as FeatureOptionKey,
+          labelKey: "opt.selectionToolbar.label" as const,
+          descKey: "opt.selectionToolbar.desc" as const,
+        },
+        {
           key: "attachments" as FeatureOptionKey,
           labelKey: "opt.attachments.label" as const,
           descKey: "opt.attachments.desc" as const,

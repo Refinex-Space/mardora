@@ -31,6 +31,7 @@ export interface PlaygroundConfig {
   };
   features: {
     slashCommands: boolean;
+    selectionToolbar: boolean;
     attachments: boolean;
     pasteDropUploads: boolean;
     tableOfContents: boolean;

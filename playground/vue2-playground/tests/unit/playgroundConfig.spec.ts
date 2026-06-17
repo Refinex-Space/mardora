@@ -22,11 +22,12 @@ describe("playgroundConfig", () => {
     expect(config.locale).toBe("zh-CN");
   });
 
-  it("enables slash commands, attachment uploads, and table of contents by default", () => {
+  it("enables slash commands, selection toolbar, attachment uploads, and table of contents by default", () => {
     const config = createDefaultConfig();
 
     expect(config.features).toEqual({
       slashCommands: true,
+      selectionToolbar: true,
       attachments: true,
       pasteDropUploads: true,
       tableOfContents: true,

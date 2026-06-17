@@ -257,6 +257,9 @@ export default defineComponent({
               slashCommands: {
                 enabled: this.config.features.slashCommands,
               },
+              selectionToolbar: {
+                enabled: this.config.features.selectionToolbar,
+              },
               toc: this.editorTocConfig(),
               attachments: {
                 enabled: this.config.features.attachments,

@@ -174,6 +174,13 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
                 onCheckedChange={() => toggleFeatureOption("slashCommands")}
               />
               <ConfigSwitch
+                id="selectionToolbar"
+                label={t("opt.selectionToolbar.label")}
+                description={t("opt.selectionToolbar.desc")}
+                checked={config.features.selectionToolbar}
+                onCheckedChange={() => toggleFeatureOption("selectionToolbar")}
+              />
+              <ConfigSwitch
                 id="attachments"
                 label={t("opt.attachments.label")}
                 description={t("opt.attachments.desc")}
