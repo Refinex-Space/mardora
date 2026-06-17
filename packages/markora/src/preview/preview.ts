@@ -11,8 +11,8 @@ import { PreviewConfig } from "./types";
  *
  * @example
  * ```ts
- * import { preview } from 'markora/preview';
- * import { HeadingPlugin, ListPlugin } from 'markora/plugins';
+ * import { preview } from '@refinex/markora/preview';
+ * import { HeadingPlugin, ListPlugin } from '@refinex/markora/plugins';
  *
  * const html = preview('# Hello World', {
  *   plugins: [new HeadingPlugin(), new ListPlugin()],

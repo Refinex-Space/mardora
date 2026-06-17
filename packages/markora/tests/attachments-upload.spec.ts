@@ -41,7 +41,8 @@ class FakeEditorView implements MarkoraAttachmentEditorView {
       this.applyChange(changes.from, changes.to ?? changes.from, changes.insert ?? "");
     }
 
-    const anchor = spec.selection && "anchor" in spec.selection ? spec.selection.anchor : this.state.selection.main.from;
+    const anchor =
+      spec.selection && "anchor" in spec.selection ? spec.selection.anchor : this.state.selection.main.from;
     this.state = this.createState(this.text, anchor);
   }
 

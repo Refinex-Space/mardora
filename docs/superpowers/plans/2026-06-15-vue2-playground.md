@@ -11,7 +11,7 @@ referenced_by: docs/README.md#superpowers-plans
 
 **Goal:** Build a Vue 2.6 + Vue CLI 4 + Webpack 4 playground app that matches the current Markora `/playground` capabilities.
 
-**Architecture:** Add `playground/vue2-playground` as an isolated workspace app. It consumes built `markora` package exports, manages CodeMirror 6 directly from Vue2 lifecycle hooks, and copies playground data/config locally so the React playground remains untouched.
+**Architecture:** Add `playground/vue2-playground` as an isolated workspace app. It consumes built `@refinex/markora` package exports, manages CodeMirror 6 directly from Vue2 lifecycle hooks, and copies playground data/config locally so the React playground remains untouched.
 
 **Tech Stack:** Vue 2.6.14, Vue CLI 4.5.19, Webpack 4, TypeScript, CodeMirror 6, Markora package exports, localStorage, Jest through Vue CLI unit test plugin.
 
@@ -50,6 +50,7 @@ referenced_by: docs/README.md#superpowers-plans
 ## Task 1: Scaffold Vue CLI 4 App Shell
 
 **Files:**
+
 - Create: `playground/vue2-playground/package.json`
 - Create: `playground/vue2-playground/babel.config.js`
 - Create: `playground/vue2-playground/tsconfig.json`
@@ -85,7 +86,7 @@ Create `playground/vue2-playground/package.json` with this content:
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.39.11",
     "@uiw/codemirror-theme-github": "^4.25.4",
-    "markora": "workspace:*",
+    "@refinex/markora": "workspace:*",
     "uuid": "^13.0.0",
     "vue": "2.6.14"
   },
@@ -151,7 +152,7 @@ Create `playground/vue2-playground/vue.config.js`:
 const path = require("path");
 
 module.exports = {
-  transpileDependencies: ["markora", "@codemirror", "@lezer", "style-mod", "uuid"],
+  transpileDependencies: ["@refinex/markora", "@codemirror", "@lezer", "style-mod", "uuid"],
   configureWebpack: {
     resolve: {
       symlinks: true,
@@ -261,6 +262,7 @@ Expected: commit succeeds and does not include existing unrelated `README.md` ch
 ## Task 2: Add Shared Types, Default Content, and Pure State Helpers
 
 **Files:**
+
 - Create: `playground/vue2-playground/src/types.ts`
 - Create: `playground/vue2-playground/src/data/md/what-is-markora.ts`
 - Create: `playground/vue2-playground/src/data/md/walkthrough.ts`
@@ -277,7 +279,7 @@ Expected: commit succeeds and does not include existing unrelated `README.md` ch
 Create `playground/vue2-playground/src/types.ts`:
 
 ```ts
-import type { MarkoraNode } from "markora/editor";
+import type { MarkoraNode } from "@refinex/markora/editor";
 
 export type PlaygroundMode = "live" | "view" | "code" | "output";
 export type SaveStatus = "idle" | "saving" | "saved";
@@ -335,7 +337,6 @@ Expected: the two Vue2 files export the same default Markdown strings as the exi
 
 Create `playground/vue2-playground/src/data/defaultContents.ts`:
 
-
 ```ts
 import type { Content } from "@/types";
 import whatIsMarkora from "./md/what-is-markora";
@@ -364,7 +365,7 @@ export const defaultContentIds = new Set(defaultContents.map((content) => conten
 Create `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
 
 ```ts
-import { allPlugins } from "markora/plugins";
+import { allPlugins } from "@refinex/markora/plugins";
 import { createDefaultConfig, getActivePlugins } from "@/state/playgroundConfig";
 
 describe("playgroundConfig", () => {
@@ -393,8 +394,8 @@ describe("playgroundConfig", () => {
 Create `playground/vue2-playground/src/state/playgroundConfig.ts`:
 
 ```ts
-import { allPlugins } from "markora/plugins";
-import type { MarkoraPlugin } from "markora/editor";
+import { allPlugins } from "@refinex/markora/plugins";
+import type { MarkoraPlugin } from "@refinex/markora/editor";
 import type { PlaygroundConfig, PluginConfig } from "@/types";
 
 export function createDefaultPluginConfig(): PluginConfig {
@@ -616,6 +617,7 @@ Expected: commit succeeds with only Vue2 playground helper and test files.
 ## Task 3: Build Vue2 Playground Layout Components
 
 **Files:**
+
 - Create: `playground/vue2-playground/src/styles.css`
 - Create: `playground/vue2-playground/src/components/playground/Playground.vue`
 - Create: `playground/vue2-playground/src/components/playground/Header.vue`
@@ -746,6 +748,7 @@ Expected: commit succeeds with no generated build output.
 ## Task 4: Add CodeMirror Editor, Preview, and Output Modes
 
 **Files:**
+
 - Create: `playground/vue2-playground/src/components/playground/EditorPane.vue`
 - Modify: `playground/vue2-playground/src/components/playground/Playground.vue`
 - Modify: `playground/vue2-playground/src/styles.css`
@@ -793,7 +796,7 @@ markora({
       this.$emit("nodes-change", nodes);
     }
   },
-})
+});
 ```
 
 Add a CodeMirror update listener that emits `"change-content"` when the document changes.
@@ -886,6 +889,7 @@ Expected: commit succeeds. If `packages/markora/dist` is ignored or unchanged, l
 ## Task 5: Complete UX Parity and Responsive Behavior
 
 **Files:**
+
 - Modify: `playground/vue2-playground/src/components/playground/Playground.vue`
 - Modify: `playground/vue2-playground/src/components/playground/Header.vue`
 - Modify: `playground/vue2-playground/src/components/playground/Sidebar.vue`
@@ -964,6 +968,7 @@ Expected: commit succeeds with only Vue2 playground source changes.
 ## Task 6: Add README Instructions and Final Verification
 
 **Files:**
+
 - Modify: `README.md`
 - Modify: `turbo.json` only if required by observed verification output
 
@@ -993,12 +998,12 @@ The Vue CLI dev server listens on `http://localhost:3001`.
 
 Useful commands:
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start the Vue CLI development server. |
-| `npm run build` | Build the Vue2 playground. |
-| `npm run lint` | Lint the Vue2 playground. |
-| `npm run test:unit` | Run Vue2 playground unit tests. |
+| Command             | Description                           |
+| ------------------- | ------------------------------------- |
+| `npm run dev`       | Start the Vue CLI development server. |
+| `npm run build`     | Build the Vue2 playground.            |
+| `npm run lint`      | Lint the Vue2 playground.             |
+| `npm run test:unit` | Run Vue2 playground unit tests.       |
 ````
 
 Preserve unrelated existing README edits by applying this section around the current local-development content rather than rewriting the file.

@@ -4,10 +4,7 @@ const defaultMinWidth = 180;
 const defaultMaxWidth = 360;
 const defaultWidth = 240;
 
-export function clampTocWidth(
-  width: number,
-  config: Pick<ResolvedMarkoraTocConfig, "minWidth" | "maxWidth">
-): number {
+export function clampTocWidth(width: number, config: Pick<ResolvedMarkoraTocConfig, "minWidth" | "maxWidth">): number {
   return Math.min(Math.max(width, config.minWidth), config.maxWidth);
 }
 

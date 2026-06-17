@@ -54,6 +54,7 @@ referenced_by: docs/README.md#superpowers-plans
 ### Task 1: Add Toolbar Icon Names
 
 **Files:**
+
 - Modify: `packages/markora/src/editor/icons/index.ts`
 - Test: `packages/markora/tests/slash-insertions.spec.ts`
 
@@ -63,22 +64,24 @@ Append this test to the existing `describe("defaultSlashCommands", ...)` block o
 
 ```ts
 it("contains built-in icons required by the selection toolbar", () => {
-  expect([
-    "bold",
-    "italic",
-    "strikethrough",
-    "underline",
-    "code",
-    "highlighter",
-    "baseline",
-    "link",
-    "list-ordered",
-    "list",
-    "list-todo",
-    "copy",
-    "external-link",
-    "trash-2",
-  ].every((icon) => hasMarkoraIcon(icon))).toBe(true);
+  expect(
+    [
+      "bold",
+      "italic",
+      "strikethrough",
+      "underline",
+      "code",
+      "highlighter",
+      "baseline",
+      "link",
+      "list-ordered",
+      "list",
+      "list-todo",
+      "copy",
+      "external-link",
+      "trash-2",
+    ].every((icon) => hasMarkoraIcon(icon))
+  ).toBe(true);
 });
 ```
 
@@ -190,6 +193,7 @@ git commit -m "feat(editor): 补充选区工具条内置图标"
 ### Task 2: Implement Positioning Pure Function
 
 **Files:**
+
 - Create: `packages/markora/src/editor/selection-toolbar/types.ts`
 - Create: `packages/markora/src/editor/selection-toolbar/position.ts`
 - Create: `packages/markora/src/editor/selection-toolbar/index.ts`
@@ -414,6 +418,7 @@ git commit -m "feat(editor): 添加选区工具条定位计算"
 ### Task 3: Implement Document Transformation Commands
 
 **Files:**
+
 - Modify: `packages/markora/src/editor/selection-toolbar/types.ts`
 - Create: `packages/markora/src/editor/selection-toolbar/commands.ts`
 - Modify: `packages/markora/src/editor/selection-toolbar/index.ts`
@@ -701,12 +706,9 @@ function markerFor(kind: SelectionToolbarListKind, order: number): string {
   return "- ";
 }
 
-export function buildListChange(input: {
-  doc: string;
-  from: number;
-  to: number;
-  kind: SelectionToolbarListKind;
-}): { changes: TextChange[] } {
+export function buildListChange(input: { doc: string; from: number; to: number; kind: SelectionToolbarListKind }): {
+  changes: TextChange[];
+} {
   const changes: TextChange[] = [];
   let order = 1;
 
@@ -780,6 +782,7 @@ git commit -m "feat(editor): 添加选区工具条文本转换命令"
 ### Task 4: Render Toolbar Menu, Link Panel, and Color Panel
 
 **Files:**
+
 - Modify: `packages/markora/src/editor/selection-toolbar/types.ts`
 - Create: `packages/markora/src/editor/selection-toolbar/menu.ts`
 - Create: `packages/markora/src/editor/selection-toolbar/theme.ts`
@@ -870,12 +873,12 @@ function divider(): HTMLSpanElement {
   return element;
 }
 
-function appendToolbarButtons(root: HTMLElement, buttons: SelectionToolbarButton[], callbacks: SelectionToolbarMenuCallbacks): void {
-  const groups: SelectionToolbarButton[][] = [
-    buttons.slice(0, 7),
-    buttons.slice(7, 8),
-    buttons.slice(8),
-  ];
+function appendToolbarButtons(
+  root: HTMLElement,
+  buttons: SelectionToolbarButton[],
+  callbacks: SelectionToolbarMenuCallbacks
+): void {
+  const groups: SelectionToolbarButton[][] = [buttons.slice(0, 7), buttons.slice(7, 8), buttons.slice(8)];
 
   groups.forEach((group, index) => {
     if (index > 0) root.appendChild(divider());
@@ -902,7 +905,12 @@ function paletteButton(
   return element;
 }
 
-function appendPalette(root: HTMLElement, title: string, items: SelectionToolbarPaletteItem[], callback: (value: string | null) => void): void {
+function appendPalette(
+  root: HTMLElement,
+  title: string,
+  items: SelectionToolbarPaletteItem[],
+  callback: (value: string | null) => void
+): void {
   const group = document.createElement("div");
   group.className = "cm-markora-selection-toolbar-palette-group";
 
@@ -920,7 +928,11 @@ function appendPalette(root: HTMLElement, title: string, items: SelectionToolbar
   root.appendChild(group);
 }
 
-function appendLinkPanel(root: HTMLElement, state: SelectionToolbarMenuState, callbacks: SelectionToolbarMenuCallbacks): void {
+function appendLinkPanel(
+  root: HTMLElement,
+  state: SelectionToolbarMenuState,
+  callbacks: SelectionToolbarMenuCallbacks
+): void {
   const title = document.createElement("input");
   title.className = "cm-markora-selection-toolbar-link-input";
   title.setAttribute("aria-label", "Link title");
@@ -962,7 +974,10 @@ function appendLinkPanel(root: HTMLElement, state: SelectionToolbarMenuState, ca
     if (label === "Remove link" && !state.link.canRemove) continue;
     const button = document.createElement("button");
     button.type = "button";
-    button.className = label === "Remove link" ? "cm-markora-selection-toolbar-link-button cm-markora-selection-toolbar-link-button-danger" : "cm-markora-selection-toolbar-link-button";
+    button.className =
+      label === "Remove link"
+        ? "cm-markora-selection-toolbar-link-button cm-markora-selection-toolbar-link-button-danger"
+        : "cm-markora-selection-toolbar-link-button";
     button.setAttribute("aria-label", label);
     const svg = createMarkoraIcon(icon);
     if (svg) button.appendChild(svg);
@@ -1169,6 +1184,7 @@ git commit -m "feat(editor): 渲染选区工具条界面"
 ### Task 5: Wire Toolbar ViewPlugin Into Markora
 
 **Files:**
+
 - Create: `packages/markora/src/editor/selection-toolbar/extension.ts`
 - Modify: `packages/markora/src/editor/selection-toolbar/index.ts`
 - Modify: `packages/markora/src/editor/markora.ts`
@@ -1194,12 +1210,7 @@ Create `packages/markora/src/editor/selection-toolbar/extension.ts`:
 ```ts
 import { Extension, Prec } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
-import {
-  buildInlineFormatChange,
-  buildLinkChange,
-  buildListChange,
-  parseSelectedLink,
-} from "./commands";
+import { buildInlineFormatChange, buildLinkChange, buildListChange, parseSelectedLink } from "./commands";
 import { createSelectionToolbarElement } from "./menu";
 import { computeSelectionToolbarLayout } from "./position";
 import { selectionToolbarTheme } from "./theme";
@@ -1329,7 +1340,10 @@ class SelectionToolbarViewPlugin {
     const range = this.savedRange;
     if (!range) return;
     const renderVersion = ++this.renderVersion;
-    const floating = this.panel === "toolbar" ? { width: toolbarWidth, height: toolbarHeight } : { width: panelWidth, height: panelHeight };
+    const floating =
+      this.panel === "toolbar"
+        ? { width: toolbarWidth, height: toolbarHeight }
+        : { width: panelWidth, height: panelHeight };
     this.removeMenu();
 
     this.view.requestMeasure({
@@ -1378,7 +1392,11 @@ class SelectionToolbarViewPlugin {
   }
 
   private dispatchResult(result: { changes: unknown; selection?: unknown }): void {
-    this.view.dispatch({ changes: result.changes as never, selection: result.selection as never, scrollIntoView: true });
+    this.view.dispatch({
+      changes: result.changes as never,
+      selection: result.selection as never,
+      scrollIntoView: true,
+    });
     this.view.focus();
     this.close();
   }
@@ -1405,10 +1423,13 @@ class SelectionToolbarViewPlugin {
     }
     if (id === "ordered-list" || id === "unordered-list" || id === "task-list") {
       const kind = id === "ordered-list" ? "ordered" : id === "task-list" ? "task" : "unordered";
-      this.dispatchResult(buildListChange({ doc: this.view.state.doc.toString(), from: range.from, to: range.to, kind }));
+      this.dispatchResult(
+        buildListChange({ doc: this.view.state.doc.toString(), from: range.from, to: range.to, kind })
+      );
       return;
     }
-    const marker = id === "bold" ? "**" : id === "italic" ? "*" : id === "strike" ? "~~" : id === "code" ? "`" : undefined;
+    const marker =
+      id === "bold" ? "**" : id === "italic" ? "*" : id === "strike" ? "~~" : id === "code" ? "`" : undefined;
     const result =
       id === "underline"
         ? buildInlineFormatChange({ doc: this.view.state.doc.toString(), from: range.from, to: range.to, htmlTag: "u" })
@@ -1419,14 +1440,26 @@ class SelectionToolbarViewPlugin {
   private applyColor(value: string | null): void {
     const range = this.savedRange;
     if (!range || !value) return;
-    this.dispatchResult(buildInlineFormatChange({ doc: this.view.state.doc.toString(), from: range.from, to: range.to, spanStyle: { property: "color", value } }));
+    this.dispatchResult(
+      buildInlineFormatChange({
+        doc: this.view.state.doc.toString(),
+        from: range.from,
+        to: range.to,
+        spanStyle: { property: "color", value },
+      })
+    );
   }
 
   private applyHighlight(value: string | null): void {
     const range = this.savedRange;
     if (!range) return;
     const result = value
-      ? buildInlineFormatChange({ doc: this.view.state.doc.toString(), from: range.from, to: range.to, spanStyle: { property: "background-color", value } })
+      ? buildInlineFormatChange({
+          doc: this.view.state.doc.toString(),
+          from: range.from,
+          to: range.to,
+          spanStyle: { property: "background-color", value },
+        })
       : buildInlineFormatChange({ doc: this.view.state.doc.toString(), from: range.from, to: range.to, marker: "==" });
     this.dispatchResult(result);
   }
@@ -1446,7 +1479,9 @@ class SelectionToolbarViewPlugin {
   private removeLink(): void {
     const range = this.savedRange;
     if (!range) return;
-    this.dispatchResult(buildLinkChange({ from: range.from, to: range.to, title: this.link.title || range.text, url: "", remove: true }));
+    this.dispatchResult(
+      buildLinkChange({ from: range.from, to: range.to, title: this.link.title || range.text, url: "", remove: true })
+    );
   }
 
   private async copyLink(): Promise<void> {
@@ -1546,6 +1581,7 @@ git commit -m "feat(editor): 接入选中文本工具条扩展"
 ### Task 6: Harden UX Details and State Guards
 
 **Files:**
+
 - Modify: `packages/markora/src/editor/selection-toolbar/commands.ts`
 - Modify: `packages/markora/src/editor/selection-toolbar/extension.ts`
 - Modify: `packages/markora/src/editor/selection-toolbar/theme.ts`
@@ -1616,7 +1652,9 @@ export function buildInlineFormatChange(input: InlineFormatInput): TextCommandRe
 
   if (input.clear) {
     const tagPattern = input.spanStyle
-      ? new RegExp(`^<span style="${escapeRegExp(input.spanStyle.property)}: ${escapeRegExp(input.spanStyle.value)}">([\\s\\S]*)<\\/span>$`)
+      ? new RegExp(
+          `^<span style="${escapeRegExp(input.spanStyle.property)}: ${escapeRegExp(input.spanStyle.value)}">([\\s\\S]*)<\\/span>$`
+        )
       : input.htmlTag
         ? new RegExp(`^<${input.htmlTag}>([\\s\\S]*)<\\/${input.htmlTag}>$`)
         : null;
@@ -1683,10 +1721,10 @@ In `packages/markora/src/editor/selection-toolbar/extension.ts`, add:
 At the top of `dispatchResult`, add:
 
 ```ts
-    if (!this.isSavedRangeCurrent()) {
-      this.close();
-      return;
-    }
+if (!this.isSavedRangeCurrent()) {
+  this.close();
+  return;
+}
 ```
 
 - [ ] **Step 6: Make Escape close panel or toolbar**
@@ -1741,6 +1779,7 @@ git commit -m "fix(editor): 加固选区工具条状态边界"
 ### Task 7: Build and Verify Vue2 Playground Runtime
 
 **Files:**
+
 - Modify only if type errors require it: `playground/vue2-playground/src/shims-markora.d.ts`
 - Runtime build output: `packages/markora/dist` generated by build and typically ignored by git.
 
@@ -1819,6 +1858,7 @@ If no files changed, skip this commit.
 ### Task 8: Final Review and Delivery
 
 **Files:**
+
 - Review all files changed since the plan started.
 
 - [ ] **Step 1: Inspect git status**

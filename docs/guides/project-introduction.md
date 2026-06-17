@@ -32,10 +32,10 @@ Markora 的定位很明确：它是一个基于 CodeMirror 6 的 Markdown 编辑
 
 ## 2. 安装与 peer dependencies
 
-Markora 发布包名为 `markora`。CodeMirror 6 是 peer dependencies，业务项目必须显式安装。
+Markora 发布包名为 `@refinex/markora`。CodeMirror 6 是 peer dependencies，业务项目必须显式安装。
 
 ```shell
-npm install markora
+npm install @refinex/markora
 npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
 ```
 
@@ -47,13 +47,13 @@ npm install @codemirror/lang-html @codemirror/lang-css @uiw/codemirror-theme-git
 
 ## 3. 导出入口
 
-| 导出入口          | 推荐用途                                                         | 典型导入                                                    |
-| ----------------- | ---------------------------------------------------------------- | ----------------------------------------------------------- |
-| `markora`         | 聚合入口，适合快速验证。                                         | `import { markora, allPlugins } from "markora";`            |
-| `markora/editor`  | 编辑器核心、配置类型、主题、i18n、附件、slash、TOC、选区工具栏。 | `import { markora, ThemeEnum } from "markora/editor";`      |
-| `markora/plugins` | 内置插件与插件集合。                                             | `import { allPlugins, CodePlugin } from "markora/plugins";` |
-| `markora/preview` | 静态 HTML、CSS、目录提取。                                       | `import { preview, generateCSS } from "markora/preview";`   |
-| `markora/lib`     | 底层输入处理工具。                                               | 按需使用。                                                  |
+| 导出入口                   | 推荐用途                                                         | 典型导入                                                             |
+| -------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `@refinex/markora`         | 聚合入口，适合快速验证。                                         | `import { markora, allPlugins } from "@refinex/markora";`            |
+| `@refinex/markora/editor`  | 编辑器核心、配置类型、主题、i18n、附件、slash、TOC、选区工具栏。 | `import { markora, ThemeEnum } from "@refinex/markora/editor";`      |
+| `@refinex/markora/plugins` | 内置插件与插件集合。                                             | `import { allPlugins, CodePlugin } from "@refinex/markora/plugins";` |
+| `@refinex/markora/preview` | 静态 HTML、CSS、目录提取。                                       | `import { preview, generateCSS } from "@refinex/markora/preview";`   |
+| `@refinex/markora/lib`     | 底层输入处理工具。                                               | 按需使用。                                                           |
 
 发布产物提供 ESM、CJS 和 TypeScript declarations。生产项目建议使用子路径导入，减少不必要的依赖面。
 
@@ -62,8 +62,8 @@ npm install @codemirror/lang-html @codemirror/lang-css @uiw/codemirror-theme-git
 ```ts
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { markora, ThemeEnum } from "markora/editor";
-import { allPlugins } from "markora/plugins";
+import { markora, ThemeEnum } from "@refinex/markora/editor";
+import { allPlugins } from "@refinex/markora/plugins";
 
 const parent = document.getElementById("editor");
 
@@ -167,7 +167,7 @@ Markora 的附件能力是“上传入口 + Markdown 替换协议”，不是存
 ### 6.5 生产 uploader 示例
 
 ```ts
-import type { MarkoraAttachmentUploader } from "markora/editor";
+import type { MarkoraAttachmentUploader } from "@refinex/markora/editor";
 
 export const uploader: MarkoraAttachmentUploader = async (file, context) => {
   // 业务侧必须自行做安全校验；Markora 只负责把 File 交给这里。
@@ -323,8 +323,8 @@ Preview 用于把 Markdown 生成可展示或可保存的 HTML/CSS。
 
 ```ts
 import type { SyntaxNode } from "@lezer/common";
-import type { DecorationContext } from "markora/editor";
-import { MarkoraPlugin } from "markora/editor";
+import type { DecorationContext } from "@refinex/markora/editor";
+import { MarkoraPlugin } from "@refinex/markora/editor";
 
 export class MentionPlugin extends MarkoraPlugin {
   readonly name = "mention";

@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "module": "esnext",
     "moduleResolution": "bundler",
+    "types": ["node"],
     "paths": {
       "@workspace/markora/*": ["./src/*"]
     }

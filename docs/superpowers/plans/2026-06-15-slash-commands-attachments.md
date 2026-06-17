@@ -53,6 +53,7 @@ referenced_by: docs/README.md#superpowers-plans
 ## Task 1: Add Core Test Entry and Slash Query Helpers
 
 **Files:**
+
 - Modify: `packages/markora/package.json`
 - Create: `packages/markora/src/editor/slash/types.ts`
 - Create: `packages/markora/src/editor/slash/query.ts`
@@ -230,9 +231,7 @@ export function filterSlashCommands(commands: readonly MarkoraSlashCommand[], qu
   }
 
   return commands.filter((command) => {
-    const searchable = [command.title, command.id, command.hint, ...command.aliases]
-      .join(" ")
-      .toLocaleLowerCase();
+    const searchable = [command.title, command.id, command.hint, ...command.aliases].join(" ").toLocaleLowerCase();
     return searchable.includes(normalizedQuery);
   });
 }
@@ -265,6 +264,7 @@ git commit -m "test(editor): 添加斜杆命令查询测试"
 ## Task 2: Add Slash Command Insertion Helpers and Defaults
 
 **Files:**
+
 - Create: `packages/markora/src/editor/slash/insertions.ts`
 - Create: `packages/markora/src/editor/slash/default-commands.ts`
 - Modify: `packages/markora/src/editor/slash/index.ts`
@@ -404,28 +404,92 @@ function markdownCommand(
 }
 
 export const defaultSlashCommands: MarkoraSlashCommand[] = [
-  markdownCommand({ id: "paragraph", group: "basic", title: "文本", aliases: ["text", "plain"], icon: "T", hint: "" }, "", 0),
-  markdownCommand({ id: "heading-1", group: "basic", title: "标题 1", aliases: ["h1", "heading1"], icon: "H1", hint: "#" }, "# "),
-  markdownCommand({ id: "heading-2", group: "basic", title: "标题 2", aliases: ["h2", "heading2"], icon: "H2", hint: "##" }, "## "),
-  markdownCommand({ id: "heading-3", group: "basic", title: "标题 3", aliases: ["h3", "heading3"], icon: "H3", hint: "###" }, "### "),
-  markdownCommand({ id: "heading-4", group: "basic", title: "标题 4", aliases: ["h4", "heading4"], icon: "H4", hint: "####" }, "#### "),
-  markdownCommand({ id: "heading-5", group: "basic", title: "标题 5", aliases: ["h5", "heading5"], icon: "H5", hint: "#####" }, "##### "),
-  markdownCommand({ id: "heading-6", group: "basic", title: "标题 6", aliases: ["h6", "heading6"], icon: "H6", hint: "######" }, "###### "),
-  markdownCommand({ id: "quote", group: "basic", title: "引用", aliases: ["quote", "blockquote"], icon: "“", hint: ">" }, "> "),
-  markdownCommand({ id: "ordered-list", group: "basic", title: "有序列表", aliases: ["ol", "ordered"], icon: "1.", hint: "1." }, "1. "),
-  markdownCommand({ id: "unordered-list", group: "basic", title: "无顺列表", aliases: ["ul", "bullet", "unordered"], icon: "•", hint: "-" }, "- "),
-  markdownCommand({ id: "task-list", group: "basic", title: "待办清单", aliases: ["todo", "task", "check"], icon: "☑", hint: "[]" }, "- [ ] "),
+  markdownCommand(
+    { id: "paragraph", group: "basic", title: "文本", aliases: ["text", "plain"], icon: "T", hint: "" },
+    "",
+    0
+  ),
+  markdownCommand(
+    { id: "heading-1", group: "basic", title: "标题 1", aliases: ["h1", "heading1"], icon: "H1", hint: "#" },
+    "# "
+  ),
+  markdownCommand(
+    { id: "heading-2", group: "basic", title: "标题 2", aliases: ["h2", "heading2"], icon: "H2", hint: "##" },
+    "## "
+  ),
+  markdownCommand(
+    { id: "heading-3", group: "basic", title: "标题 3", aliases: ["h3", "heading3"], icon: "H3", hint: "###" },
+    "### "
+  ),
+  markdownCommand(
+    { id: "heading-4", group: "basic", title: "标题 4", aliases: ["h4", "heading4"], icon: "H4", hint: "####" },
+    "#### "
+  ),
+  markdownCommand(
+    { id: "heading-5", group: "basic", title: "标题 5", aliases: ["h5", "heading5"], icon: "H5", hint: "#####" },
+    "##### "
+  ),
+  markdownCommand(
+    { id: "heading-6", group: "basic", title: "标题 6", aliases: ["h6", "heading6"], icon: "H6", hint: "######" },
+    "###### "
+  ),
+  markdownCommand(
+    { id: "quote", group: "basic", title: "引用", aliases: ["quote", "blockquote"], icon: "“", hint: ">" },
+    "> "
+  ),
+  markdownCommand(
+    { id: "ordered-list", group: "basic", title: "有序列表", aliases: ["ol", "ordered"], icon: "1.", hint: "1." },
+    "1. "
+  ),
+  markdownCommand(
+    {
+      id: "unordered-list",
+      group: "basic",
+      title: "无顺列表",
+      aliases: ["ul", "bullet", "unordered"],
+      icon: "•",
+      hint: "-",
+    },
+    "- "
+  ),
+  markdownCommand(
+    { id: "task-list", group: "basic", title: "待办清单", aliases: ["todo", "task", "check"], icon: "☑", hint: "[]" },
+    "- [ ] "
+  ),
   markdownCommand(
     { id: "table", group: "basic", title: "表格", aliases: ["table"], icon: "▦", hint: "| |" },
     "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n",
     2
   ),
-  markdownCommand({ id: "divider", group: "basic", title: "分隔线", aliases: ["hr", "divider"], icon: "—", hint: "---" }, "---\n"),
-  markdownCommand({ id: "link", group: "basic", title: "链接", aliases: ["link", "url"], icon: "↗", hint: "[]()" }, "[]()", 1),
-  markdownCommand({ id: "file", group: "media", title: "文件", aliases: ["file"], icon: "▤", hint: "file" }, "[filename](url)", 1),
-  markdownCommand({ id: "image", group: "media", title: "图片", aliases: ["image", "img", "tu"], icon: "▧", hint: "img" }, "![image](url)", 2),
-  markdownCommand({ id: "video", group: "media", title: "视频", aliases: ["video"], icon: "▶", hint: "video" }, '<video src="url" controls></video>', 12),
-  markdownCommand({ id: "audio", group: "media", title: "音频", aliases: ["audio"], icon: "♪", hint: "audio" }, '<audio src="url" controls></audio>', 12),
+  markdownCommand(
+    { id: "divider", group: "basic", title: "分隔线", aliases: ["hr", "divider"], icon: "—", hint: "---" },
+    "---\n"
+  ),
+  markdownCommand(
+    { id: "link", group: "basic", title: "链接", aliases: ["link", "url"], icon: "↗", hint: "[]()" },
+    "[]()",
+    1
+  ),
+  markdownCommand(
+    { id: "file", group: "media", title: "文件", aliases: ["file"], icon: "▤", hint: "file" },
+    "[filename](url)",
+    1
+  ),
+  markdownCommand(
+    { id: "image", group: "media", title: "图片", aliases: ["image", "img", "tu"], icon: "▧", hint: "img" },
+    "![image](url)",
+    2
+  ),
+  markdownCommand(
+    { id: "video", group: "media", title: "视频", aliases: ["video"], icon: "▶", hint: "video" },
+    '<video src="url" controls></video>',
+    12
+  ),
+  markdownCommand(
+    { id: "audio", group: "media", title: "音频", aliases: ["audio"], icon: "♪", hint: "audio" },
+    '<audio src="url" controls></audio>',
+    12
+  ),
 ];
 ```
 
@@ -460,6 +524,7 @@ git commit -m "feat(editor): 添加默认斜杆命令"
 ## Task 3: Add Attachment Formatting Helpers
 
 **Files:**
+
 - Create: `packages/markora/src/editor/attachments/types.ts`
 - Create: `packages/markora/src/editor/attachments/format.ts`
 - Create: `packages/markora/src/editor/attachments/index.ts`
@@ -489,7 +554,9 @@ describe("detectAttachmentKind", () => {
 
 describe("formatAttachmentMarkdown", () => {
   it("formats image markdown with and without title", () => {
-    expect(formatAttachmentMarkdown("image", { url: "https://cdn/a.png", name: "a.png" })).toBe("![a.png](https://cdn/a.png)");
+    expect(formatAttachmentMarkdown("image", { url: "https://cdn/a.png", name: "a.png" })).toBe(
+      "![a.png](https://cdn/a.png)"
+    );
     expect(formatAttachmentMarkdown("image", { url: "https://cdn/a.png", name: "a.png", title: "A" })).toBe(
       '![a.png](https://cdn/a.png "A")'
     );
@@ -502,7 +569,9 @@ describe("formatAttachmentMarkdown", () => {
     expect(formatAttachmentMarkdown("audio", { url: "https://cdn/a.mp3", name: "a.mp3" })).toBe(
       '<audio src="https://cdn/a.mp3" controls></audio>'
     );
-    expect(formatAttachmentMarkdown("file", { url: "https://cdn/a.pdf", name: "a.pdf" })).toBe("[a.pdf](https://cdn/a.pdf)");
+    expect(formatAttachmentMarkdown("file", { url: "https://cdn/a.pdf", name: "a.pdf" })).toBe(
+      "[a.pdf](https://cdn/a.pdf)"
+    );
   });
 });
 
@@ -631,10 +700,7 @@ export function createUploadMarker(input: MarkoraUploadMarkerInput): string {
   return `[Uploading ${input.name}](markora-upload://${input.taskId})`;
 }
 
-export function formatAttachmentMarkdown(
-  kind: MarkoraAttachmentKind,
-  result: MarkoraAttachmentUploadResult
-): string {
+export function formatAttachmentMarkdown(kind: MarkoraAttachmentKind, result: MarkoraAttachmentUploadResult): string {
   const name = result.name || "attachment";
 
   if (kind === "image") {
@@ -682,6 +748,7 @@ git commit -m "feat(editor): 添加附件格式化协议"
 ## Task 4: Add Attachment Upload Extension
 
 **Files:**
+
 - Create: `packages/markora/src/editor/attachments/extension.ts`
 - Modify: `packages/markora/src/editor/attachments/index.ts`
 - Create: `packages/markora/tests/attachments-upload.spec.ts`
@@ -784,12 +851,7 @@ Create `packages/markora/src/editor/attachments/extension.ts`:
 ```ts
 import { EditorSelection, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import {
-  createUploadMarker,
-  detectAttachmentKind,
-  formatAttachmentMarkdown,
-  isAcceptedAttachment,
-} from "./format";
+import { createUploadMarker, detectAttachmentKind, formatAttachmentMarkdown, isAcceptedAttachment } from "./format";
 import type {
   MarkoraAttachmentKind,
   MarkoraAttachmentsConfig,
@@ -980,6 +1042,7 @@ git commit -m "feat(editor): 添加附件上传扩展"
 ## Task 5: Add Slash Menu View Extension
 
 **Files:**
+
 - Create: `packages/markora/src/editor/slash/menu.ts`
 - Create: `packages/markora/src/editor/slash/theme.ts`
 - Create: `packages/markora/src/editor/slash/extension.ts`
@@ -1027,7 +1090,10 @@ export type MarkoraSlashCommandsConfig = {
 Modify the four media commands in `packages/markora/src/editor/slash/default-commands.ts`:
 
 ```ts
-function mediaCommand(command: Omit<MarkoraSlashCommand, "run">, kind: "image" | "video" | "audio" | "file"): MarkoraSlashCommand {
+function mediaCommand(
+  command: Omit<MarkoraSlashCommand, "run">,
+  kind: "image" | "video" | "audio" | "file"
+): MarkoraSlashCommand {
   return {
     ...command,
     run: (context) => {
@@ -1117,7 +1183,8 @@ export function createSlashMenuElement(
 
     const item = document.createElement("button");
     item.type = "button";
-    item.className = index === state.activeIndex ? "cm-markora-slash-item cm-markora-slash-item-active" : "cm-markora-slash-item";
+    item.className =
+      index === state.activeIndex ? "cm-markora-slash-item cm-markora-slash-item-active" : "cm-markora-slash-item";
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(index === state.activeIndex));
     item.addEventListener("mouseenter", () => callbacks.onHover(index));
@@ -1175,8 +1242,7 @@ function requestFile(kind: MarkoraAttachmentKind): Promise<File | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept =
-      kind === "image" ? "image/*" : kind === "video" ? "video/*" : kind === "audio" ? "audio/*" : "*/*";
+    input.accept = kind === "image" ? "image/*" : kind === "video" ? "video/*" : kind === "audio" ? "audio/*" : "*/*";
     input.addEventListener("change", () => resolve(input.files?.[0] ?? null), { once: true });
     input.click();
   });
@@ -1485,6 +1551,7 @@ git commit -m "feat(editor): 添加斜杆菜单扩展"
 ## Task 6: Compose Slash and Attachments in `markora()`
 
 **Files:**
+
 - Modify: `packages/markora/src/editor/markora.ts`
 - Modify: `packages/markora/src/editor/index.ts`
 - Modify: `packages/markora/tests/slash-insertions.spec.ts`
@@ -1572,21 +1639,21 @@ Add extension composition before `pluginExtensions`:
 The `composedExtensions` section should include the new entries:
 
 ```ts
-  const composedExtensions: Extension[] = [
-    Prec.high(markdownSupport),
-    Prec.high(keymap.of(markdownKeymap)),
-    markoraExtensions,
-    baseExtensions,
-    slashCommands({
-      ...configSlashCommands,
-      attachmentUploader: configAttachments.uploader,
-    }),
-    attachments(configAttachments),
-    pluginExtensions,
-    pluginKeymaps.length > 0 ? keymap.of(pluginKeymaps) : [],
-    configKeymap.length > 0 ? keymap.of(configKeymap) : [],
-    extensions,
-  ];
+const composedExtensions: Extension[] = [
+  Prec.high(markdownSupport),
+  Prec.high(keymap.of(markdownKeymap)),
+  markoraExtensions,
+  baseExtensions,
+  slashCommands({
+    ...configSlashCommands,
+    attachmentUploader: configAttachments.uploader,
+  }),
+  attachments(configAttachments),
+  pluginExtensions,
+  pluginKeymaps.length > 0 ? keymap.of(pluginKeymaps) : [],
+  configKeymap.length > 0 ? keymap.of(configKeymap) : [],
+  extensions,
+];
 ```
 
 - [ ] **Step 4: Export new modules from editor index**
@@ -1627,6 +1694,7 @@ git commit -m "feat(editor): 集成斜杆菜单与附件配置"
 ## Task 7: Integrate React Playground
 
 **Files:**
+
 - Modify: `playground/react-playground/app/playground/page.tsx`
 - Modify: `playground/react-playground/app/playground/devbar.tsx`
 - Modify: `playground/react-playground/app/data/md/walkthrough.ts`
@@ -1814,6 +1882,7 @@ git commit -m "feat(playground): 接入斜杆菜单与附件上传"
 ## Task 8: Integrate Vue2 Playground
 
 **Files:**
+
 - Modify: `playground/vue2-playground/src/types.ts`
 - Modify: `playground/vue2-playground/src/state/playgroundConfig.ts`
 - Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
@@ -1826,11 +1895,11 @@ git commit -m "feat(playground): 接入斜杆菜单与附件上传"
 Modify `playground/vue2-playground/src/types.ts` so `PlaygroundConfig` contains:
 
 ```ts
-  features: {
-    slashCommands: boolean;
-    attachments: boolean;
-    pasteDropUploads: boolean;
-  };
+features: {
+  slashCommands: boolean;
+  attachments: boolean;
+  pasteDropUploads: boolean;
+}
 ```
 
 - [ ] **Step 2: Add Vue2 default feature config**
@@ -1912,29 +1981,29 @@ attachments: {
 
 - [ ] **Step 5: Update Vue2 markora shim if needed**
 
-If Vue2 lint or build cannot see the new package exports, update `playground/vue2-playground/src/shims-markora.d.ts` inside `declare module "markora/editor"`:
+If Vue2 lint or build cannot see the new package exports, update `playground/vue2-playground/src/shims-markora.d.ts` inside `declare module "@refinex/markora/editor"`:
 
 ```ts
-  export type MarkoraAttachmentKind = "image" | "video" | "audio" | "file";
+export type MarkoraAttachmentKind = "image" | "video" | "audio" | "file";
 
-  export type MarkoraAttachmentUploadContext = {
-    kind: MarkoraAttachmentKind;
-    source: "slash" | "paste" | "drop" | "api";
-    documentText: string;
-    selection: { from: number; to: number };
-  };
+export type MarkoraAttachmentUploadContext = {
+  kind: MarkoraAttachmentKind;
+  source: "slash" | "paste" | "drop" | "api";
+  documentText: string;
+  selection: { from: number; to: number };
+};
 
-  export type MarkoraAttachmentUploadResult = {
-    url: string;
-    name?: string;
-    title?: string;
-    mimeType?: string;
-  };
+export type MarkoraAttachmentUploadResult = {
+  url: string;
+  name?: string;
+  title?: string;
+  mimeType?: string;
+};
 
-  export type MarkoraAttachmentUploader = (
-    file: File,
-    context: MarkoraAttachmentUploadContext
-  ) => Promise<MarkoraAttachmentUploadResult>;
+export type MarkoraAttachmentUploader = (
+  file: File,
+  context: MarkoraAttachmentUploadContext
+) => Promise<MarkoraAttachmentUploadResult>;
 ```
 
 And extend the `markora(config?: { ... })` shape:
@@ -2050,6 +2119,7 @@ git commit -m "feat(playground): 在 Vue2 演示站点接入斜杆菜单"
 ## Task 9: Document Core Integration
 
 **Files:**
+
 - Modify: `packages/markora/README.md`
 - Modify: `packages/markora/CHANGELOG.md`
 
@@ -2063,8 +2133,8 @@ Add this section to `packages/markora/README.md` after the basic editor setup:
 Markora includes a compact slash command menu for common Markdown blocks. Type `/` at the start of an empty line or line-start query to open the menu.
 
 ```ts
-import { markora } from "markora/editor";
-import { allPlugins } from "markora/plugins";
+import { markora } from "@refinex/markora/editor";
+import { allPlugins } from "@refinex/markora/plugins";
 
 const extensions = markora({
   plugins: allPlugins,
@@ -2146,6 +2216,7 @@ git commit -m "docs(editor): 说明斜杆菜单与附件上传协议"
 ## Task 10: Final Verification and Browser QA
 
 **Files:**
+
 - No source files expected.
 - Use Browser plugin for local React and Vue2 playground checks.
 

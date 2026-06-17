@@ -1,4 +1,4 @@
-declare module "markora/editor" {
+declare module "@refinex/markora/editor" {
   export type MarkoraNode = {
     from: number;
     to: number;
@@ -84,14 +84,14 @@ declare module "markora/editor" {
   export function tableOfContents(config?: MarkoraTocConfig): unknown;
 }
 
-declare module "markora/plugins" {
+declare module "@refinex/markora/plugins" {
   export const allPlugins: Array<{
     readonly name: string;
     readonly version: string;
   }>;
 }
 
-declare module "markora/preview" {
+declare module "@refinex/markora/preview" {
   export function preview(
     markdown: string,
     config?: {
@@ -119,5 +119,5 @@ declare module "markora/preview" {
     syntaxTheme?: unknown;
   }): string;
 
-  export function extractPreviewTocFromMarkdown(markdown: string): import("markora/editor").MarkoraTocItem[];
+  export function extractPreviewTocFromMarkdown(markdown: string): import("@refinex/markora/editor").MarkoraTocItem[];
 }

@@ -15,7 +15,7 @@ referenced_by: AGENTS.md#knowledge-map
 
 ## Preview Rendering
 
-`markora/preview` defaults to sanitized output. Changes to sanitization, raw HTML handling, Mermaid, KaTeX, or plugin rendering need focused security review and tests for unsafe input.
+`@refinex/markora/preview` defaults to sanitized output. Changes to sanitization, raw HTML handling, Mermaid, KaTeX, or plugin rendering need focused security review and tests for unsafe input.
 
 ## Attachments And Uploads
 

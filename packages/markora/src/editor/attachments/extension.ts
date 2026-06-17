@@ -114,7 +114,8 @@ export async function uploadAttachmentFile(
 }
 
 function getFilesFromEvent(event: ClipboardEvent | DragEvent): File[] {
-  const files = event.type === "paste" ? (event as ClipboardEvent).clipboardData?.files : (event as DragEvent).dataTransfer?.files;
+  const files =
+    event.type === "paste" ? (event as ClipboardEvent).clipboardData?.files : (event as DragEvent).dataTransfer?.files;
   return files ? Array.from(files) : [];
 }
 

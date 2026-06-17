@@ -71,8 +71,8 @@ describe("selection toolbar link commands", () => {
   });
 
   it("deletes a markdown link back to plain text", () => {
-    expect(buildLinkChange({ from: 0, to: 28, title: "Markora", url: "", remove: true })).toEqual({
-      changes: { from: 0, to: 28, insert: "Markora" },
+    expect(buildLinkChange({ from: 0, to: 30, title: "Markora", url: "", remove: true })).toEqual({
+      changes: { from: 0, to: 30, insert: "Markora" },
       selection: { anchor: 0, head: 7 },
     });
   });

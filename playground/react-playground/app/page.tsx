@@ -6,13 +6,7 @@ export default function Page() {
       <div className="flex flex-col items-center gap-12">
         {/* Logo — dark variant (white) on the dark landing page */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/markora-logo-dark.svg"
-          alt="Markora"
-          width={96}
-          height={96}
-          className="size-24"
-        />
+        <img src="/markora-logo-dark.svg" alt="Markora" width={96} height={96} className="size-24" />
         <h1 className="text-5xl tracking-tight font-light lowercase">markora</h1>
 
         {/* Tagline */}

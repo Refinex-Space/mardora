@@ -105,7 +105,7 @@ export interface MarkoraConfig {
  * ```ts
  * import { EditorView } from '@codemirror/view';
  * import { EditorState } from '@codemirror/state';
- * import { markora } from 'markora';
+ * import { markora } from '@refinex/markora';
  *
  * const view = new EditorView({
  *   state: EditorState.create({

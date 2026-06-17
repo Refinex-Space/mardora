@@ -1,11 +1,17 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { defaultContents, STORAGE_VERSION } from "../../src/data/defaultContents";
-import {
-  loadPlaygroundSnapshot,
-  STORAGE_CONTENTS_KEY,
-  STORAGE_CURRENT_KEY,
-  STORAGE_VERSION_KEY,
-} from "../../src/state/storage";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+mock.module("vue", () => ({
+  reactive: <T extends object>(value: T): T => value,
+  computed: <T>(getter: () => T) => ({
+    get value(): T {
+      return getter();
+    },
+  }),
+}));
+
+const { defaultContents, STORAGE_VERSION } = await import("../../src/data/defaultContents");
+const { loadPlaygroundSnapshot, STORAGE_CONTENTS_KEY, STORAGE_CURRENT_KEY, STORAGE_VERSION_KEY } =
+  await import("../../src/state/storage");
 
 class MemoryStorage {
   private values = new Map<string, string>();

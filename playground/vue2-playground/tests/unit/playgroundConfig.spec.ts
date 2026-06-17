@@ -1,5 +1,9 @@
-import { describe, expect, it } from "bun:test";
-import { createDefaultConfig, getActivePlugins } from "../../src/state/playgroundConfig";
+import { describe, expect, it, mock } from "bun:test";
+import { allPlugins } from "../../../../packages/markora/src/plugins";
+
+mock.module("@refinex/markora/plugins", () => ({ allPlugins }));
+
+const { createDefaultConfig, getActivePlugins } = await import("../../src/state/playgroundConfig");
 
 describe("playgroundConfig", () => {
   it("enables Markora plugins by default", () => {

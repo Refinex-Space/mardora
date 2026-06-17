@@ -136,26 +136,26 @@ export const defaultSlashCommands = getDefaultSlashCommands("zh-CN");
 
 Localized titles:
 
-| Command | zh-CN | en-US |
-| --- | --- | --- |
-| paragraph | 文本 | Text |
-| heading-1 | 标题 1 | Heading 1 |
-| heading-2 | 标题 2 | Heading 2 |
-| heading-3 | 标题 3 | Heading 3 |
-| heading-4 | 标题 4 | Heading 4 |
-| heading-5 | 标题 5 | Heading 5 |
-| heading-6 | 标题 6 | Heading 6 |
-| quote | 引用 | Quote |
-| ordered-list | 有序列表 | Numbered list |
+| Command        | zh-CN        | en-US         |
+| -------------- | ------------ | ------------- |
+| paragraph      | 文本         | Text          |
+| heading-1      | 标题 1       | Heading 1     |
+| heading-2      | 标题 2       | Heading 2     |
+| heading-3      | 标题 3       | Heading 3     |
+| heading-4      | 标题 4       | Heading 4     |
+| heading-5      | 标题 5       | Heading 5     |
+| heading-6      | 标题 6       | Heading 6     |
+| quote          | 引用         | Quote         |
+| ordered-list   | 有序列表     | Numbered list |
 | unordered-list | 项目符号列表 | Bulleted list |
-| task-list | 待办清单 | To-do list |
-| table | 表格 | Table |
-| divider | 分隔线 | Divider |
-| link | 链接 | Link |
-| file | 文件 | File |
-| image | 图片 | Image |
-| video | 视频 | Video |
-| audio | 音频 | Audio |
+| task-list      | 待办清单     | To-do list    |
+| table          | 表格         | Table         |
+| divider        | 分隔线       | Divider       |
+| link           | 链接         | Link          |
+| file           | 文件         | File          |
+| image          | 图片         | Image         |
+| video          | 视频         | Video         |
+| audio          | 音频         | Audio         |
 
 The Markdown markers and insertion templates do not change.
 

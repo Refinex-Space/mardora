@@ -74,7 +74,11 @@ export function loadPlaygroundSnapshot(): PlaygroundStateSnapshot {
 // Re-swap the built-in sample docs to the requested locale, preserving
 // user-created docs and the current selection. Used when the shell language
 // switcher changes the locale at runtime.
-export function relocalizeContents(contents: Content[], currentContent: number, locale: ShellLocale): {
+export function relocalizeContents(
+  contents: Content[],
+  currentContent: number,
+  locale: ShellLocale
+): {
   contents: Content[];
   currentContent: number;
 } {
@@ -83,9 +87,10 @@ export function relocalizeContents(contents: Content[], currentContent: number, 
   const defaultsById = new Map(localizedDefaults.map((c) => [c.id, c]));
   // Preserve the current selection target id so we stay on the same doc.
   const targetId = currentContent >= 0 ? contents[currentContent]?.id : undefined;
-  const next = contents.map((c) =>
-    defaultContentIds.has(c.id) && defaultsById.has(c.id) ? { ...defaultsById.get(c.id)! } : c
-  );
+  const next = contents.map((c) => {
+    const defaultContent = defaultsById.get(c.id);
+    return defaultContentIds.has(c.id) && defaultContent ? { ...defaultContent } : c;
+  });
   let nextCurrent = currentContent;
   if (targetId) {
     const idx = next.findIndex((c) => c.id === targetId);

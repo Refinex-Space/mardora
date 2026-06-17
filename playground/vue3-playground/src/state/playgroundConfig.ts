@@ -1,5 +1,5 @@
-import { allPlugins } from "markora/plugins";
-import type { MarkoraPlugin } from "markora/editor";
+import { allPlugins } from "@refinex/markora/plugins";
+import type { MarkoraPlugin } from "@refinex/markora/editor";
 import type { PlaygroundConfig, PluginConfig } from "@/types";
 
 export function createDefaultPluginConfig(): PluginConfig {

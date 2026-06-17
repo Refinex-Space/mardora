@@ -254,11 +254,7 @@ const en: Dict = {
 
 export const messages: Record<ShellLocale, Dict> = { zh, en };
 
-export function translate(
-  locale: ShellLocale,
-  key: MessageKey,
-  vars?: Record<string, string | number>
-): string {
+export function translate(locale: ShellLocale, key: MessageKey, vars?: Record<string, string | number>): string {
   const template = messages[locale][key] ?? messages[DEFAULT_SHELL_LOCALE][key] ?? key;
   if (!vars) return template;
   return template.replace(/\{(\w+)\}/g, (_, name: string) =>

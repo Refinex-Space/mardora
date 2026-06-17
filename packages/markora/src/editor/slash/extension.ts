@@ -9,7 +9,12 @@ import { createSlashMenuElement, getSlashMessages } from "./menu";
 import { computeSlashMenuLayout } from "./position";
 import { detectSlashQuery, filterSlashCommands } from "./query";
 import { slashMenuTheme } from "./theme";
-import type { MarkoraSlashCommand, MarkoraSlashCommandsConfig, MarkoraSlashMessages, MarkoraSlashQuery } from "./types";
+import type {
+  MarkoraSlashCommand,
+  MarkoraSlashCommandsConfig,
+  MarkoraSlashMessages,
+  MarkoraSlashQuery,
+} from "./types";
 
 export type MarkoraSlashRuntimeConfig = MarkoraSlashCommandsConfig & {
   attachmentUploader?: MarkoraAttachmentUploader | undefined;

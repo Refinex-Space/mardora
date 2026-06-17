@@ -380,9 +380,7 @@ export class CodePlugin extends DecorationPlugin {
     if (firstTokenMatch && firstTokenMatch[1]) {
       const firstToken = firstTokenMatch[1];
       const normalizedToken = firstToken.toLowerCase();
-      const isLineNumberDirective = /^(?:line-numbers|linenumbers|showlinenumbers)(?:\{\d+\})?$/.test(
-        normalizedToken
-      );
+      const isLineNumberDirective = /^(?:line-numbers|linenumbers|showlinenumbers)(?:\{\d+\})?$/.test(normalizedToken);
       const isKnownDirective =
         isLineNumberDirective ||
         normalizedToken === "copy" ||
@@ -627,14 +625,7 @@ export class CodePlugin extends DecorationPlugin {
       }
 
       if (!isFenceLine && infoProps.diff) {
-        this.decorateDiffLine(
-          line,
-          codeLineIndex,
-          diffStates,
-          cursorInRange,
-          !infoProps.showLineNumbers,
-          decorations
-        );
+        this.decorateDiffLine(line, codeLineIndex, diffStates, cursorInRange, !infoProps.showLineNumbers, decorations);
       }
 
       if (!isFenceLine && infoProps.highlightLines) {
@@ -864,16 +855,10 @@ export class CodePlugin extends DecorationPlugin {
         : [];
       const lineNumWidth = String(Math.max(...previewLineNumbers, startLineNum)).length;
       const previewOldLineNumWidth = String(
-        Math.max(
-          ...previewDiffLineNumbers.map((numbers) => numbers.oldLine ?? 0),
-          startLineNum
-        )
+        Math.max(...previewDiffLineNumbers.map((numbers) => numbers.oldLine ?? 0), startLineNum)
       ).length;
       const previewNewLineNumWidth = String(
-        Math.max(
-          ...previewDiffLineNumbers.map((numbers) => numbers.newLine ?? 0),
-          startLineNum
-        )
+        Math.max(...previewDiffLineNumbers.map((numbers) => numbers.newLine ?? 0), startLineNum)
       ).length;
       const previewContentLines = props.diff ? diffStates.map((state) => state.content) : codeLines;
       const highlightedLines = await this.highlightCodeLines(

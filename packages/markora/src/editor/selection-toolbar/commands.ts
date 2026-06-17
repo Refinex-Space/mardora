@@ -126,12 +126,9 @@ function markerFor(kind: SelectionToolbarListKind, order: number): string {
   return "- ";
 }
 
-export function buildListChange(input: {
-  doc: string;
-  from: number;
-  to: number;
-  kind: SelectionToolbarListKind;
-}): { changes: TextChange[] } {
+export function buildListChange(input: { doc: string; from: number; to: number; kind: SelectionToolbarListKind }): {
+  changes: TextChange[];
+} {
   const changes: TextChange[] = [];
   let order = 1;
 

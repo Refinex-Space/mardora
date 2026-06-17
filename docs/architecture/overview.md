@@ -11,7 +11,7 @@ Markora is a Bun workspace managed by Turborepo. The repository combines the pub
 
 ## Workspace Layout
 
-- `packages/markora`: published `markora` package. It owns the framework-agnostic CodeMirror 6 editor extension, built-in Markdown plugins, static preview renderer, and low-level input helpers.
+- `packages/markora`: published `@refinex/markora` package. It owns the framework-agnostic CodeMirror 6 editor extension, built-in Markdown plugins, static preview renderer, and low-level input helpers.
 - `packages/ui`: private React UI primitives used by the React playground.
 - `packages/eslint-config` and `packages/typescript-config`: shared workspace configuration packages.
 - `playground/react-playground`: Next.js playground for interactive Markora validation and user-facing guide content.
@@ -24,16 +24,16 @@ Markora is a Bun workspace managed by Turborepo. The repository combines the pub
 
 Main public areas:
 
-- `markora/editor`: editor configuration, CodeMirror extension composition, slash commands, attachments, selection toolbar, i18n, and table of contents.
-- `markora/plugins`: built-in Markdown rendering plugins.
-- `markora/preview`: static HTML/CSS preview renderer and preview TOC helpers.
-- `markora/lib`: lower-level input helpers.
+- `@refinex/markora/editor`: editor configuration, CodeMirror extension composition, slash commands, attachments, selection toolbar, i18n, and table of contents.
+- `@refinex/markora/plugins`: built-in Markdown rendering plugins.
+- `@refinex/markora/preview`: static HTML/CSS preview renderer and preview TOC helpers.
+- `@refinex/markora/lib`: lower-level input helpers.
 
 ## Playground Boundaries
 
 Playgrounds demonstrate integration quality and may own framework-specific shell UI, localStorage state, mock uploaders, guide sample content, and playground-only controls.
 
-React playground currently imports from `markora/src` for local iteration. Vue playgrounds import package exports such as `markora/editor`, `markora/plugins`, and `markora/preview`; when those exports are stale, build or watch `packages/markora` first.
+React playground currently imports from `@refinex/markora/src` for local iteration. Vue playgrounds import package exports such as `@refinex/markora/editor`, `@refinex/markora/plugins`, and `@refinex/markora/preview`; when those exports are stale, build or watch `packages/markora` first.
 
 ## Feature Placement
 

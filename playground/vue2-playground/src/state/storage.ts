@@ -82,9 +82,10 @@ export function relocalizeContents(
   const localizedDefaults = buildDefaultContents(locale);
   const defaultsById = new Map(localizedDefaults.map((c) => [c.id, c]));
   const targetId = currentContent >= 0 ? contents[currentContent]?.id : undefined;
-  const next = contents.map((c) =>
-    defaultContentIds.has(c.id) && defaultsById.has(c.id) ? { ...defaultsById.get(c.id)! } : c
-  );
+  const next = contents.map((c) => {
+    const defaultContent = defaultsById.get(c.id);
+    return defaultContentIds.has(c.id) && defaultContent ? { ...defaultContent } : c;
+  });
   let nextCurrent = currentContent;
   if (targetId) {
     const idx = next.findIndex((c) => c.id === targetId);
