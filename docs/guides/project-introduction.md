@@ -1,6 +1,6 @@
 ---
 owner: refinex
-updated: 2026-06-16
+updated: 2026-06-18
 status: active
 referenced_by: docs/README.md#product-and-integration-guides
 ---
@@ -20,7 +20,7 @@ Markora 的定位很明确：它是一个基于 CodeMirror 6 的 Markdown 编辑
 | CodeMirror 6 扩展组装 | 是               | `markora()` 返回 `Extension[]`，可直接放入 `EditorState.create()`。                                      |
 | Markdown 解析         | 是               | 基于 `@codemirror/lang-markdown` 与 Lezer Markdown，支持插件追加 `MarkdownConfig`。                      |
 | 编辑态所见即所得装饰  | 是               | 由内置 view plugin 与各个 `MarkoraPlugin` 生成 decoration/widget。                                       |
-| 内置 Markdown 插件    | 是               | 覆盖段落、标题、行内格式、链接、列表、表格、HTML、图片、数学公式、Mermaid、代码块、引用、分割线、Emoji。 |
+| 内置 Markdown 插件    | 是               | 覆盖段落、标题、行内格式、链接、列表、表格、HTML、图片、数学公式、Mermaid、代码块、引用、分割线、Emoji。表格支持 Live 模式行列句柄菜单。 |
 | Slash commands        | 是               | 行首输入 `/` 打开命令菜单，可插入基础 Markdown 或触发附件选择。                                          |
 | 附件上传入口          | 是               | 提供文件选择、粘贴、拖拽接入点，调用业务传入的 `uploader`，成功后替换为 Markdown/HTML。                  |
 | 附件存储服务          | 否               | Markora 不上传到 OSS/S3/后端，也不签名 URL；这些必须由业务 `uploader` 实现。                             |
@@ -358,7 +358,7 @@ export class MentionPlugin extends MarkoraPlugin {
 | `InlinePlugin`    | 粗体、斜体、删除线、高亮、上标、下标。                   | 是                     |
 | `LinkPlugin`      | Markdown 链接、链接快捷键、preview 链接。                | 是                     |
 | `ListPlugin`      | 无序、有序、任务列表。                                   | 是                     |
-| `TablePlugin`     | GFM 表格解析、编辑态表格、preview 表格。                 | 是                     |
+| `TablePlugin`     | GFM 表格解析、编辑态表格、preview 表格，以及 Live 模式行列句柄菜单。行列菜单支持插入、移动、复制、删除行列和删除表格；这些 UI 状态不会写入浏览器文本选区。 | 是                     |
 | `HTMLPlugin`      | HTML block/tag/comment。                                 | 是                     |
 | `ImagePlugin`     | 图片语法、figure/figcaption、图片快捷键。                | 是                     |
 | `MathPlugin`      | 行内数学、块级数学，基于 KaTeX。                         | 是                     |

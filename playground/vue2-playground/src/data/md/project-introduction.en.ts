@@ -81,7 +81,7 @@ export default [
   "| `InlinePlugin`    | Bold, italic, strikethrough, highlight, superscript, subscript, inline-format shortcuts.    |",
   "| `LinkPlugin`      | Markdown links, shortcuts, hover/open interactions, preview link rendering.                 |",
   "| `ListPlugin`      | Unordered lists, ordered lists, task lists, nested lists, and shortcuts.                    |",
-  "| `TablePlugin`     | GFM table parsing, edit-state decorations, preview table output.                            |",
+  "| `TablePlugin`     | GFM table parsing, edit-state tables, preview table output, and Live-mode row/column handle menus. Row and column menus support insert, move, copy, delete, and delete-table actions without writing row/column UI state into the browser text selection. |",
   "| `HTMLPlugin`      | HTML blocks, HTML tags, comments, and other native Markdown HTML capabilities.              |",
   "| `ImagePlugin`     | Image syntax, figure/figcaption, broken state, image-insertion shortcut.                    |",
   "| `MathPlugin`      | Inline math, block math, rendered with KaTeX.                                               |",
