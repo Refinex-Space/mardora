@@ -29,9 +29,11 @@ When changing public behavior, update the relevant export barrel and verify gene
 - README or guide updates when integrators need to know about the option.
 - A Changeset when published package consumers are affected.
 
-## Peer Dependencies
+## Runtime Dependencies
 
-CodeMirror packages are peer dependencies of `@refinex/markora`. Do not hide required CodeMirror peer requirements inside playground-only docs.
+Core CodeMirror packages used by Markora are regular dependencies of `@refinex/markora` and are pinned by the Markora package. Do not document them as required externally installed packages.
+
+Optional playground-only output panel packages, such as `@codemirror/lang-html`, `@codemirror/lang-css`, and `@uiw/codemirror-theme-github`, must remain clearly optional and app-owned.
 
 ## Framework Integrations
 

@@ -20,21 +20,14 @@ Applications remain responsible for layout, state management, persistence, auth,
 
 ```bash
 npm install @refinex/markora
-npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
 ```
 
-Optional playground-style output panels usually also use:
-
-```bash
-npm install @codemirror/lang-html @codemirror/lang-css @uiw/codemirror-theme-github
-```
+Markora installs the CodeMirror 6 runtime packages it uses as pinned dependencies and re-exports common editor APIs from `@refinex/markora/editor`. Install additional CodeMirror language/theme packages only when your application builds optional output panels like the playground.
 
 ## Quick Start
 
 ```ts
-import { EditorState } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
-import { markora, ThemeEnum } from "@refinex/markora/editor";
+import { EditorState, EditorView, markora, ThemeEnum } from "@refinex/markora/editor";
 import { allPlugins } from "@refinex/markora/plugins";
 
 const parent = document.getElementById("editor");

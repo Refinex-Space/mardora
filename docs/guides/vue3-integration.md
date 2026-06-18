@@ -1,6 +1,6 @@
 ---
 owner: refinex
-updated: 2026-06-16
+updated: 2026-06-18
 status: active
 referenced_by: docs/README.md#product-and-integration-guides
 ---
@@ -24,9 +24,9 @@ referenced_by: docs/README.md#product-and-integration-guides
 
 ```shell
 npm install @refinex/markora
-npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
-npm install @codemirror/lang-html @codemirror/lang-css @uiw/codemirror-theme-github
 ```
+
+下面的 HTML/CSS 输出面板示例会用到 `@codemirror/lang-html`、`@codemirror/lang-css` 和 `@uiw/codemirror-theme-github`；只有保留该面板时才需要按需安装。
 
 Markora 不提供 Vue 3 组件封装。直接使用 CodeMirror 6 API 更可控，也更接近 playground。
 
@@ -96,11 +96,9 @@ Markora 不提供 Vue 3 组件封装。直接使用 CodeMirror 6 API 更可控�
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
-import { EditorState } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import type { MarkoraAttachmentUploadContext, MarkoraNode, MarkoraTocItem } from "@refinex/markora/editor";
-import { markora, ThemeEnum } from "@refinex/markora/editor";
+import { EditorState, EditorView, markora, ThemeEnum } from "@refinex/markora/editor";
 import { allPlugins } from "@refinex/markora/plugins";
 import { extractPreviewTocFromMarkdown, generateCSS, preview } from "@refinex/markora/preview";
 
