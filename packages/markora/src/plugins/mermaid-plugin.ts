@@ -2,6 +2,8 @@ import { Decoration, EditorView, WidgetType } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { DecorationContext, DecorationPlugin } from "../editor/plugin";
 import { createTheme, ThemeEnum } from "../editor";
+import { createMediaPreviewButton } from "../editor/media-lightbox";
+import { mediaLightboxTheme } from "../editor/media-lightbox-theme";
 import { SyntaxNode } from "@lezer/common";
 import { tags } from "@lezer/highlight";
 import type { MarkdownConfig, BlockParser, Line, BlockContext } from "@lezer/markdown";
@@ -105,7 +107,7 @@ class MermaidBlockWidget extends WidgetType {
 
   toDOM(view: EditorView) {
     const div = document.createElement("div");
-    div.className = "cm-markora-mermaid-rendered";
+    div.className = "cm-markora-mermaid-rendered cm-markora-media-preview";
     div.style.cursor = "pointer";
 
     // Show loading state initially
@@ -119,6 +121,12 @@ class MermaidBlockWidget extends WidgetType {
         div.innerHTML = `<span>[Mermaid Error: ${error}]</span>`;
       } else {
         div.innerHTML = svg;
+        div.appendChild(
+          createMediaPreviewButton(div.ownerDocument, {
+            label: "放大查看 Mermaid 图",
+            content: () => ({ kind: "html", html: svg, title: "Mermaid 图" }),
+          })
+        );
       }
     });
 
@@ -379,7 +387,7 @@ export class MermaidPlugin extends DecorationPlugin {
 /**
  * Theme for mermaid styling
  */
-const theme = createTheme({
+const mermaidTheme = createTheme({
   default: {
     // Raw mermaid block lines (monospace)
     ".cm-markora-mermaid-block:not(.cm-markora-mermaid-block-rendered)": {
@@ -497,4 +505,9 @@ const theme = createTheme({
       color: "#f85149",
     },
   },
+});
+
+const theme = (theme: Parameters<typeof mermaidTheme>[0]) => ({
+  ...mermaidTheme(theme),
+  ...mediaLightboxTheme(theme),
 });

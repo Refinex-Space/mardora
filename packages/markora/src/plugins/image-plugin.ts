@@ -2,6 +2,8 @@ import { Decoration, EditorView, KeyBinding, WidgetType } from "@codemirror/view
 import { syntaxTree } from "@codemirror/language";
 import { DecorationContext, DecorationPlugin } from "../editor/plugin";
 import { createTheme } from "../editor";
+import { createMediaPreviewButton } from "../editor/media-lightbox";
+import { mediaLightboxTheme } from "../editor/media-lightbox-theme";
 import { SyntaxNode } from "@lezer/common";
 
 /**
@@ -64,7 +66,7 @@ class ImageWidget extends WidgetType {
   toDOM(view: EditorView) {
     // Create figure element for semantic image container
     const figure = document.createElement("figure");
-    figure.className = "cm-markora-image-figure";
+    figure.className = "cm-markora-image-figure cm-markora-media-preview";
     figure.setAttribute("role", "figure");
     figure.style.cursor = "pointer";
     if (this.title) {
@@ -112,6 +114,18 @@ class ImageWidget extends WidgetType {
       figcaption.textContent = this.title;
       figure.appendChild(figcaption);
     }
+
+    figure.appendChild(
+      createMediaPreviewButton(figure.ownerDocument, {
+        label: "放大查看图片",
+        content: () => ({
+          kind: "image",
+          src: this.url,
+          alt: this.alt,
+          ...(this.title === undefined ? {} : { title: this.title }),
+        }),
+      })
+    );
 
     return figure;
   }
@@ -353,7 +367,7 @@ export class ImagePlugin extends DecorationPlugin {
 /**
  * Theme for image styling
  */
-const theme = createTheme({
+const imageTheme = createTheme({
   default: {
     ".cm-markora-image-block br": {
       display: "none",
@@ -444,4 +458,9 @@ const theme = createTheme({
       color: "#f85149",
     },
   },
+});
+
+const theme = (theme: Parameters<typeof imageTheme>[0]) => ({
+  ...imageTheme(theme),
+  ...mediaLightboxTheme(theme),
 });

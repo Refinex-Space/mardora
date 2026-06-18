@@ -33,6 +33,7 @@ export type MarkoraIconName =
   | "list"
   | "list-ordered"
   | "list-todo"
+  | "maximize-2"
   | "minus"
   | "music-2"
   | "play"
@@ -43,7 +44,8 @@ export type MarkoraIconName =
   | "text-quote"
   | "trash-2"
   | "underline"
-  | "type";
+  | "type"
+  | "x";
 
 const svgNamespace = "http://www.w3.org/2000/svg";
 
@@ -200,6 +202,12 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "m3 17 2 2 4-4" } },
     { name: "rect", attrs: { x: "3", y: "4", width: "6", height: "6", rx: "1" } },
   ],
+  "maximize-2": [
+    { name: "path", attrs: { d: "M15 3h6v6" } },
+    { name: "path", attrs: { d: "m21 3-7 7" } },
+    { name: "path", attrs: { d: "M9 21H3v-6" } },
+    { name: "path", attrs: { d: "m3 21 7-7" } },
+  ],
   minus: [{ name: "path", attrs: { d: "M5 12h14" } }],
   "music-2": [
     { name: "circle", attrs: { cx: "8", cy: "18", r: "4" } },
@@ -258,6 +266,10 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "M12 4v16" } },
     { name: "path", attrs: { d: "M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" } },
     { name: "path", attrs: { d: "M9 20h6" } },
+  ],
+  x: [
+    { name: "path", attrs: { d: "M18 6 6 18" } },
+    { name: "path", attrs: { d: "m6 6 12 12" } },
   ],
 };
 
