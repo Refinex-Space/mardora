@@ -3,7 +3,7 @@ import { syntaxTree } from "@codemirror/language";
 import { BlockWrapper, Decoration, EditorView, KeyBinding, WidgetType, keymap } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { MarkdownConfig, Table } from "@lezer/markdown";
-import { createTheme } from "../editor";
+import { createTheme, deepMerge } from "../editor";
 import { MarkoraConfig } from "../editor/markora";
 import { DecorationContext, DecorationPlugin, PluginContext } from "../editor/plugin";
 import { ThemeEnum } from "../editor/utils";
@@ -14,6 +14,7 @@ import {
   activeTableControlField,
   tableControls,
 } from "./table-controls";
+import { tableControlsTheme } from "./table-controls-theme";
 import {
   copyTableColumn,
   copyTableRow,
@@ -914,7 +915,7 @@ export class TablePlugin extends DecorationPlugin {
 
   /** Exposes the plugin theme used for editor and preview styling. */
   override get theme() {
-    return theme;
+    return (themeEnum: ThemeEnum) => deepMerge(theme(themeEnum), tableControlsTheme(themeEnum));
   }
 
   /** Enables GFM table parsing for the editor and preview renderer. */
@@ -1034,10 +1035,11 @@ export class TablePlugin extends DecorationPlugin {
       return false;
     }
 
-    const target = event.target instanceof Element ? event.target.closest(".cm-markora-table-cell") : null;
     if (event.target instanceof Element && event.target.closest(".cm-markora-table-controls-overlay")) {
       return false;
     }
+
+    const target = event.target instanceof Element ? event.target.closest(".cm-markora-table-cell") : null;
     if (!target || !view.dom.contains(target)) {
       return false;
     }
