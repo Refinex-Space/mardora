@@ -1,6 +1,6 @@
 ---
 owner: refinex
-updated: 2026-06-16
+updated: 2026-06-18
 status: active
 referenced_by: docs/README.md#product-and-integration-guides
 ---
@@ -26,9 +26,10 @@ React playground 使用 `@uiw/react-codemirror` 封装 CodeMirror 生命周期�
 
 ```shell
 npm install @refinex/markora
-npm install @codemirror/commands @codemirror/lang-markdown @codemirror/language @codemirror/language-data @codemirror/state @codemirror/view
-npm install @uiw/react-codemirror @uiw/codemirror-theme-github @codemirror/lang-html @codemirror/lang-css
+npm install @uiw/react-codemirror
 ```
+
+下面的 HTML/CSS 输出面板示例会用到 `@codemirror/lang-html`、`@codemirror/lang-css` 和 `@uiw/codemirror-theme-github`；只有保留该面板时才需要按需安装。
 
 Next.js App Router 中，编辑器组件必须是 client component：
 
@@ -40,11 +41,11 @@ Next.js App Router 中，编辑器组件必须是 client component：
 
 ```tsx
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import CodeMirror, { EditorView, Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import CodeMirror, { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
-import { markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "@refinex/markora/editor";
+import { EditorView, Extension, markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "@refinex/markora/editor";
 import { allPlugins } from "@refinex/markora/plugins";
 import { generateCSS, preview } from "@refinex/markora/preview";
 

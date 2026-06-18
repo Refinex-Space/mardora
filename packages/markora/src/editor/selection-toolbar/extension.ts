@@ -1,10 +1,15 @@
 import { Extension, Prec } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { syntaxTree } from "@codemirror/language";
 import { buildInlineFormatChange, buildLinkChange, buildListChange, parseSelectedLink } from "./commands";
 import { createSelectionToolbarElement } from "./menu";
 import { computeSelectionToolbarLayout } from "./position";
 import { selectionToolbarTheme } from "./theme";
-import { canActivateFromNativeSelection } from "./activation";
+import {
+  canActivateFromNativeSelection,
+  hasSelectionToolbarExcludedAncestor,
+  selectionOverlapsExcludedSyntaxNode,
+} from "./activation";
 import type {
   MarkoraSelectionToolbarConfig,
   SelectionToolbarAnchorRect,
@@ -132,6 +137,8 @@ class SelectionToolbarViewPlugin {
         anchorInEditor: this.view.contentDOM.contains(selection.anchorNode),
         focusInEditor: this.view.contentDOM.contains(selection.focusNode),
         rangeCount: selection.rangeCount,
+        anchorExcluded: hasSelectionToolbarExcludedAncestor(selection.anchorNode, this.view.contentDOM),
+        focusExcluded: hasSelectionToolbarExcludedAncestor(selection.focusNode, this.view.contentDOM),
       })
     ) {
       return;
@@ -148,6 +155,7 @@ class SelectionToolbarViewPlugin {
     const from = Math.min(anchor, head);
     const to = Math.max(anchor, head);
     if (from === to) return;
+    if (this.selectionTouchesExcludedSyntax(from, to)) return;
 
     const rect = selection.getRangeAt(0).getBoundingClientRect();
     this.savedRange = {
@@ -179,6 +187,10 @@ class SelectionToolbarViewPlugin {
       this.close();
       return;
     }
+    if (this.selectionTouchesExcludedSyntax(selection.from, selection.to)) {
+      this.close();
+      return;
+    }
 
     this.savedRange = {
       from: selection.from,
@@ -192,6 +204,30 @@ class SelectionToolbarViewPlugin {
   private isMenuActive(): boolean {
     const activeElement = this.view.dom.ownerDocument.activeElement;
     return !!this.menu && activeElement instanceof Node && this.menu.contains(activeElement);
+  }
+
+  private selectionTouchesExcludedSyntax(from: number, to: number): boolean {
+    let excluded = false;
+    syntaxTree(this.view.state).iterate({
+      from,
+      to,
+      enter: (node) => {
+        if (
+          selectionOverlapsExcludedSyntaxNode({
+            selectionFrom: from,
+            selectionTo: to,
+            nodeFrom: node.from,
+            nodeTo: node.to,
+            nodeName: node.name,
+          })
+        ) {
+          excluded = true;
+          return false;
+        }
+        return undefined;
+      },
+    });
+    return excluded;
   }
 
   private close(): void {

@@ -3,11 +3,28 @@ import { syntaxTree } from "@codemirror/language";
 import { BlockWrapper, Decoration, EditorView, KeyBinding, WidgetType, keymap } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { MarkdownConfig, Table } from "@lezer/markdown";
-import { createTheme } from "../editor";
+import { createTheme, deepMerge } from "../editor";
 import { MarkoraConfig } from "../editor/markora";
 import { DecorationContext, DecorationPlugin, PluginContext } from "../editor/plugin";
 import { ThemeEnum } from "../editor/utils";
 import { PreviewRenderer } from "../preview/renderer";
+import {
+  ActiveTableControl,
+  TableControlAction,
+  activeTableControlField,
+  tableControls,
+} from "./table-controls";
+import { tableControlsTheme } from "./table-controls-theme";
+import {
+  copyTableColumn,
+  copyTableRow,
+  deleteTableColumn,
+  deleteTableRow,
+  insertTableColumn,
+  insertTableRow,
+  moveTableColumn,
+  moveTableRow,
+} from "./table-model";
 
 type Alignment = "left" | "center" | "right";
 type TableRowKind = "header" | "body";
@@ -836,13 +853,21 @@ const lineDecorations = {
   last: Decoration.line({ class: "cm-markora-table-row-last" }),
 };
 
-function getCellClassName(isHeader: boolean, alignment: Alignment, isLastCell: boolean): string {
+function getCellClassName(
+  isHeader: boolean,
+  alignment: Alignment,
+  isLastCell: boolean,
+  isRowSelected = false,
+  isColumnSelected = false
+): string {
   return [
     "cm-markora-table-cell",
     isHeader ? "cm-markora-table-th" : "",
     alignment === "center" ? "cm-markora-table-cell-center" : "",
     alignment === "right" ? "cm-markora-table-cell-right" : "",
     isLastCell ? "cm-markora-table-cell-last" : "",
+    isRowSelected ? "cm-markora-table-cell-row-selected" : "",
+    isColumnSelected ? "cm-markora-table-cell-column-selected" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -852,12 +877,19 @@ function getCellDecoration(
   isHeader: boolean,
   alignment: Alignment,
   isLastCell: boolean,
-  cell: TableCellInfo
+  cell: TableCellInfo,
+  tableFrom: number,
+  isRowSelected = false,
+  isColumnSelected = false
 ): Decoration {
   return Decoration.mark({
-    class: getCellClassName(isHeader, alignment, isLastCell),
+    class: getCellClassName(isHeader, alignment, isLastCell, isRowSelected, isColumnSelected),
     attributes: {
       "data-markora-table-cell": "true",
+      "data-markora-table-from": String(tableFrom),
+      "data-markora-row-index": String(cell.rowIndex),
+      "data-markora-row-kind": cell.rowKind,
+      "data-markora-column-index": String(cell.columnIndex),
       "data-markora-content-from": String(cell.contentFrom),
       "data-markora-content-to": String(cell.contentTo),
     },
@@ -883,7 +915,7 @@ export class TablePlugin extends DecorationPlugin {
 
   /** Exposes the plugin theme used for editor and preview styling. */
   override get theme() {
-    return theme;
+    return (themeEnum: ThemeEnum) => deepMerge(theme(themeEnum), tableControlsTheme(themeEnum));
   }
 
   /** Enables GFM table parsing for the editor and preview renderer. */
@@ -897,6 +929,10 @@ export class TablePlugin extends DecorationPlugin {
       Prec.highest(keymap.of(this.buildTableKeymap())),
       EditorView.blockWrappers.of((view) => this.computeBlockWrappers(view)),
       EditorView.atomicRanges.of((view) => this.computeAtomicRanges(view)),
+      tableControls({
+        getTableInfoByFrom: (view, tableFrom) => getTableInfoAtPosition(view.state, tableFrom),
+        runAction: (view, control, action) => this.runTableControlAction(view, control, action),
+      }),
       EditorView.domEventHandlers({
         mousedown: (event, view) => this.handleTableMouseDown(view, event),
         keydown: (event, view) => this.handleDomKeydown(view, event),
@@ -996,6 +1032,10 @@ export class TablePlugin extends DecorationPlugin {
       event.metaKey ||
       event.shiftKey
     ) {
+      return false;
+    }
+
+    if (event.target instanceof Element && event.target.closest(".cm-markora-table-controls-overlay")) {
       return false;
     }
 
@@ -1184,6 +1224,7 @@ export class TablePlugin extends DecorationPlugin {
 
   /** Applies row, cell, and control decorations for a single table. */
   private decorateTable(view: EditorView, decorations: Range<Decoration>[], tableInfo: TableInfo): void {
+    const activeControl = view.state.field(activeTableControlField, false) ?? null;
     for (let lineNumber = tableInfo.startLineNumber; lineNumber <= tableInfo.endLineNumber; lineNumber++) {
       const line = view.state.doc.line(lineNumber);
       const isHeader = lineNumber === tableInfo.startLineNumber;
@@ -1208,7 +1249,7 @@ export class TablePlugin extends DecorationPlugin {
       }
 
       const rowCells = tableInfo.cellsByRow.find((row) => row[0]?.lineNumber === lineNumber) || [];
-      this.decorateLine(decorations, line.from, line.text, tableInfo.alignments, isHeader, rowCells);
+      this.decorateLine(decorations, line.from, line.text, tableInfo, isHeader, rowCells, activeControl);
     }
 
     this.decorateTableCaret(view, decorations, tableInfo);
@@ -1259,9 +1300,10 @@ export class TablePlugin extends DecorationPlugin {
     decorations: Range<Decoration>[],
     lineFrom: number,
     lineText: string,
-    alignments: Alignment[],
+    tableInfo: TableInfo,
     isHeader: boolean,
-    rowCells: TableCellInfo[]
+    rowCells: TableCellInfo[],
+    activeControl: ActiveTableControl | null
   ): void {
     const pipes = getPipePositions(lineText);
     if (pipes.length < 2) {
@@ -1289,11 +1331,24 @@ export class TablePlugin extends DecorationPlugin {
 
       const cell = rowCells[columnIndex];
       if (cell) {
+        const isRowSelected =
+          activeControl?.kind === "row" &&
+          activeControl.tableFrom === tableInfo.from &&
+          activeControl.rowIndex === cell.rowIndex;
+        const isColumnSelected =
+          activeControl?.kind === "column" &&
+          activeControl.tableFrom === tableInfo.from &&
+          activeControl.columnIndex === cell.columnIndex;
         decorations.push(
-          getCellDecoration(isHeader, alignments[columnIndex] || "left", columnIndex === pipes.length - 2, cell).range(
-            absoluteFrom,
-            absoluteTo
-          )
+          getCellDecoration(
+            isHeader,
+            tableInfo.alignments[columnIndex] || "left",
+            columnIndex === pipes.length - 2,
+            cell,
+            tableInfo.from,
+            isRowSelected,
+            isColumnSelected
+          ).range(absoluteFrom, absoluteTo)
         );
       }
 
@@ -1501,6 +1556,69 @@ export class TablePlugin extends DecorationPlugin {
       changes: { from: change.from, to: change.to, insert: change.insert },
       selection: { anchor: selection },
     });
+  }
+
+  /** Runs a row or column control action by rewriting the active markdown table. */
+  private runTableControlAction(view: EditorView, control: ActiveTableControl, action: TableControlAction): void {
+    const tableInfo = getTableInfoAtPosition(view.state, control.tableFrom);
+    if (!tableInfo) {
+      return;
+    }
+
+    if (action === "delete-table") {
+      view.dispatch({
+        changes: { from: tableInfo.from, to: tableInfo.to, insert: "" },
+        selection: { anchor: tableInfo.from },
+        scrollIntoView: true,
+      });
+      return;
+    }
+
+    const parsed = normalizeParsedTable(buildTableFromInfo(tableInfo));
+    const rowIndex = control.rowIndex ?? 1;
+    const columnIndex = (control.columnIndex ?? 0) + 1;
+
+    const next =
+      action === "insert-row-above"
+        ? insertTableRow(parsed, rowIndex, "above")
+        : action === "insert-row-below"
+          ? insertTableRow(parsed, rowIndex, "below")
+          : action === "move-row-up"
+            ? moveTableRow(parsed, rowIndex, "up")
+            : action === "move-row-down"
+              ? moveTableRow(parsed, rowIndex, "down")
+              : action === "copy-row"
+                ? copyTableRow(parsed, rowIndex)
+                : action === "delete-row"
+                  ? deleteTableRow(parsed, rowIndex)
+                  : action === "insert-column-left"
+                    ? insertTableColumn(parsed, columnIndex, "left")
+                    : action === "insert-column-right"
+                      ? insertTableColumn(parsed, columnIndex, "right")
+                      : action === "move-column-left"
+                        ? moveTableColumn(parsed, columnIndex, "left")
+                        : action === "move-column-right"
+                          ? moveTableColumn(parsed, columnIndex, "right")
+                          : action === "copy-column"
+                            ? copyTableColumn(parsed, columnIndex)
+                            : action === "delete-column"
+                              ? deleteTableColumn(parsed, columnIndex)
+                              : parsed;
+
+    const targetRow =
+      action === "insert-row-above"
+        ? rowIndex
+        : action === "insert-row-below" || action === "copy-row"
+          ? rowIndex + 1
+          : rowIndex;
+    const targetColumn =
+      action === "insert-column-left"
+        ? Math.max(0, columnIndex - 1)
+        : action === "insert-column-right" || action === "copy-column"
+          ? columnIndex
+          : Math.max(0, Math.min(columnIndex - 1, next.headers.length - 1));
+
+    this.replaceTable(view, tableInfo, next, Math.max(0, Math.min(targetRow, next.rows.length)), targetColumn);
   }
 
   /** Inserts an empty body row below the given logical row index. */

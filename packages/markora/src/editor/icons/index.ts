@@ -6,6 +6,14 @@ type IconElementDefinition = {
 };
 
 export type MarkoraIconName =
+  | "arrow-down"
+  | "arrow-down-to-line"
+  | "arrow-left"
+  | "arrow-left-to-line"
+  | "arrow-right"
+  | "arrow-right-to-line"
+  | "arrow-up"
+  | "arrow-up-to-line"
   | "baseline"
   | "bold"
   | "code"
@@ -25,20 +33,59 @@ export type MarkoraIconName =
   | "list"
   | "list-ordered"
   | "list-todo"
+  | "maximize-2"
   | "minus"
   | "music-2"
   | "play"
   | "strikethrough"
   | "table"
+  | "table-delete"
   | "table-of-contents"
   | "text-quote"
   | "trash-2"
   | "underline"
-  | "type";
+  | "type"
+  | "x";
 
 const svgNamespace = "http://www.w3.org/2000/svg";
 
 const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
+  "arrow-down": [
+    { name: "path", attrs: { d: "M12 5v14" } },
+    { name: "path", attrs: { d: "m19 12-7 7-7-7" } },
+  ],
+  "arrow-down-to-line": [
+    { name: "path", attrs: { d: "M19 21H5" } },
+    { name: "path", attrs: { d: "M12 3v14" } },
+    { name: "path", attrs: { d: "m19 10-7 7-7-7" } },
+  ],
+  "arrow-left": [
+    { name: "path", attrs: { d: "M19 12H5" } },
+    { name: "path", attrs: { d: "m12 19-7-7 7-7" } },
+  ],
+  "arrow-left-to-line": [
+    { name: "path", attrs: { d: "M3 5v14" } },
+    { name: "path", attrs: { d: "M21 12H7" } },
+    { name: "path", attrs: { d: "m14 19-7-7 7-7" } },
+  ],
+  "arrow-right": [
+    { name: "path", attrs: { d: "M5 12h14" } },
+    { name: "path", attrs: { d: "m12 5 7 7-7 7" } },
+  ],
+  "arrow-right-to-line": [
+    { name: "path", attrs: { d: "M21 5v14" } },
+    { name: "path", attrs: { d: "M3 12h14" } },
+    { name: "path", attrs: { d: "m10 5 7 7-7 7" } },
+  ],
+  "arrow-up": [
+    { name: "path", attrs: { d: "M12 19V5" } },
+    { name: "path", attrs: { d: "m5 12 7-7 7 7" } },
+  ],
+  "arrow-up-to-line": [
+    { name: "path", attrs: { d: "M5 3h14" } },
+    { name: "path", attrs: { d: "M12 21V7" } },
+    { name: "path", attrs: { d: "m5 14 7-7 7 7" } },
+  ],
   baseline: [
     { name: "path", attrs: { d: "M4 20h16" } },
     { name: "path", attrs: { d: "m6 16 6-12 6 12" } },
@@ -155,6 +202,12 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "m3 17 2 2 4-4" } },
     { name: "rect", attrs: { x: "3", y: "4", width: "6", height: "6", rx: "1" } },
   ],
+  "maximize-2": [
+    { name: "path", attrs: { d: "M15 3h6v6" } },
+    { name: "path", attrs: { d: "m21 3-7 7" } },
+    { name: "path", attrs: { d: "M9 21H3v-6" } },
+    { name: "path", attrs: { d: "m3 21 7-7" } },
+  ],
   minus: [{ name: "path", attrs: { d: "M5 12h14" } }],
   "music-2": [
     { name: "circle", attrs: { cx: "8", cy: "18", r: "4" } },
@@ -176,6 +229,13 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "rect", attrs: { width: "18", height: "18", x: "3", y: "3", rx: "2" } },
     { name: "path", attrs: { d: "M3 9h18" } },
     { name: "path", attrs: { d: "M3 15h18" } },
+  ],
+  "table-delete": [
+    { name: "rect", attrs: { width: "18", height: "18", x: "3", y: "3", rx: "2" } },
+    { name: "path", attrs: { d: "M3 9h18" } },
+    { name: "path", attrs: { d: "M9 3v18" } },
+    { name: "path", attrs: { d: "m14 14 4 4" } },
+    { name: "path", attrs: { d: "m18 14-4 4" } },
   ],
   "table-of-contents": [
     { name: "path", attrs: { d: "M16 5H3" } },
@@ -206,6 +266,10 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "M12 4v16" } },
     { name: "path", attrs: { d: "M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" } },
     { name: "path", attrs: { d: "M9 20h6" } },
+  ],
+  x: [
+    { name: "path", attrs: { d: "M18 6 6 18" } },
+    { name: "path", attrs: { d: "m6 6 12 12" } },
   ],
 };
 
