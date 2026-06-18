@@ -587,3 +587,142 @@ export function collectBreakRanges(tableInfo: TableInfo): Array<{ from: number; 
 
   return ranges;
 }
+
+export type InsertSide = "above" | "below";
+export type HorizontalSide = "left" | "right";
+export type MoveDirection = "up" | "down" | "left" | "right";
+
+function bodyIndexFromRowIndex(rowIndex: number): number {
+  return rowIndex - 1;
+}
+
+function columnArrayIndex(columnIndex: number): number {
+  return columnIndex - 1;
+}
+
+function cloneParsedTable(parsed: ParsedTable): ParsedTable {
+  const normalized = normalizeParsedTable(parsed);
+  return {
+    headers: [...normalized.headers],
+    alignments: [...normalized.alignments],
+    rows: normalized.rows.map((row) => [...row]),
+  };
+}
+
+function swapArrayItems<T>(items: T[], left: number, right: number): void {
+  const current = items[left]!;
+  items[left] = items[right]!;
+  items[right] = current;
+}
+
+export function insertTableRow(parsed: ParsedTable, rowIndex: number, side: InsertSide): ParsedTable {
+  const next = cloneParsedTable(parsed);
+  const bodyIndex = Math.max(0, Math.min(bodyIndexFromRowIndex(rowIndex), next.rows.length));
+  const insertAt = side === "above" ? bodyIndex : bodyIndex + 1;
+  next.rows.splice(Math.max(0, Math.min(insertAt, next.rows.length)), 0, buildEmptyRow(next.headers.length));
+  return next;
+}
+
+export function moveTableRow(
+  parsed: ParsedTable,
+  rowIndex: number,
+  direction: Extract<MoveDirection, "up" | "down">
+): ParsedTable {
+  const next = cloneParsedTable(parsed);
+  const bodyIndex = bodyIndexFromRowIndex(rowIndex);
+  const targetIndex = direction === "up" ? bodyIndex - 1 : bodyIndex + 1;
+  if (bodyIndex < 0 || bodyIndex >= next.rows.length || targetIndex < 0 || targetIndex >= next.rows.length) {
+    return next;
+  }
+  const current = next.rows[bodyIndex]!;
+  next.rows[bodyIndex] = next.rows[targetIndex]!;
+  next.rows[targetIndex] = current;
+  return next;
+}
+
+export function copyTableRow(parsed: ParsedTable, rowIndex: number): ParsedTable {
+  const next = cloneParsedTable(parsed);
+  const bodyIndex = bodyIndexFromRowIndex(rowIndex);
+  if (bodyIndex < 0 || bodyIndex >= next.rows.length) {
+    return next;
+  }
+  next.rows.splice(bodyIndex + 1, 0, [...next.rows[bodyIndex]!]);
+  return next;
+}
+
+export function deleteTableRow(parsed: ParsedTable, rowIndex: number): ParsedTable {
+  const next = cloneParsedTable(parsed);
+  const bodyIndex = bodyIndexFromRowIndex(rowIndex);
+  if (bodyIndex < 0 || bodyIndex >= next.rows.length) {
+    return next;
+  }
+  if (next.rows.length <= 1) {
+    next.rows[0] = buildEmptyRow(next.headers.length);
+    return next;
+  }
+  next.rows.splice(bodyIndex, 1);
+  return next;
+}
+
+export function insertTableColumn(parsed: ParsedTable, columnIndex: number, side: HorizontalSide): ParsedTable {
+  const next = cloneParsedTable(parsed);
+  const currentIndex = Math.max(0, Math.min(columnArrayIndex(columnIndex), next.headers.length));
+  const insertAt = side === "left" ? currentIndex : currentIndex + 1;
+  const safeInsertAt = Math.max(0, Math.min(insertAt, next.headers.length));
+  next.headers.splice(safeInsertAt, 0, "");
+  next.alignments.splice(safeInsertAt, 0, "left");
+  for (const row of next.rows) {
+    row.splice(safeInsertAt, 0, "");
+  }
+  return next;
+}
+
+export function moveTableColumn(
+  parsed: ParsedTable,
+  columnIndex: number,
+  direction: Extract<MoveDirection, "left" | "right">
+): ParsedTable {
+  const next = cloneParsedTable(parsed);
+  const currentIndex = columnArrayIndex(columnIndex);
+  const targetIndex = direction === "left" ? currentIndex - 1 : currentIndex + 1;
+  if (currentIndex < 0 || currentIndex >= next.headers.length || targetIndex < 0 || targetIndex >= next.headers.length) {
+    return next;
+  }
+  swapArrayItems(next.headers, currentIndex, targetIndex);
+  swapArrayItems(next.alignments, currentIndex, targetIndex);
+  for (const row of next.rows) {
+    swapArrayItems(row, currentIndex, targetIndex);
+  }
+  return next;
+}
+
+export function copyTableColumn(parsed: ParsedTable, columnIndex: number): ParsedTable {
+  const next = cloneParsedTable(parsed);
+  const currentIndex = columnArrayIndex(columnIndex);
+  if (currentIndex < 0 || currentIndex >= next.headers.length) {
+    return next;
+  }
+  next.headers.splice(currentIndex + 1, 0, next.headers[currentIndex] || "");
+  next.alignments.splice(currentIndex + 1, 0, next.alignments[currentIndex] || "left");
+  for (const row of next.rows) {
+    row.splice(currentIndex + 1, 0, row[currentIndex] || "");
+  }
+  return next;
+}
+
+export function deleteTableColumn(parsed: ParsedTable, columnIndex: number): ParsedTable {
+  const next = cloneParsedTable(parsed);
+  if (next.headers.length <= 1) {
+    return next;
+  }
+  const currentIndex = columnArrayIndex(columnIndex);
+  if (currentIndex < 0 || currentIndex >= next.headers.length) {
+    return next;
+  }
+  next.headers.splice(currentIndex, 1);
+  next.alignments.splice(currentIndex, 1);
+  for (const row of next.rows) {
+    row.splice(currentIndex, 1);
+  }
+  return next;
+}
