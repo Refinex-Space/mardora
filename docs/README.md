@@ -35,6 +35,7 @@ This directory stores repository details and evidence. Keep root `AGENTS.md` con
 - Playground shell i18n design: `docs/superpowers/specs/2026-06-16-shell-i18n-design.md`
 - Slash menu i18n design: `docs/superpowers/specs/2026-06-16-slash-menu-i18n-design.md`
 - Table of contents design: `docs/superpowers/specs/2026-06-16-table-of-contents-design.md`
+- Table row and column controls design: `docs/superpowers/specs/2026-06-18-table-row-column-controls-design.md`
 
 ## Superpowers Plans
 
