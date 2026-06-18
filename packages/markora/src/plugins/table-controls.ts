@@ -1,5 +1,6 @@
 import { Extension, StateEffect, StateField } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { createMarkoraIcon, type MarkoraIconName } from "../editor/icons";
 import type { TableInfo } from "./table-model";
 
 export type TableControlKind = "row" | "column";
@@ -43,6 +44,13 @@ export interface TableControlMenuState {
   readonly canDeleteColumn: boolean;
 }
 
+export interface TableControlMenuItem {
+  readonly action: TableControlAction;
+  readonly label: string;
+  readonly icon: MarkoraIconName;
+  readonly enabled: boolean;
+}
+
 export function createTableControlMenuState(input: TableMenuStateInput): TableControlMenuState {
   const rowIndex = input.rowIndex ?? 0;
   const columnIndex = input.columnIndex ?? 0;
@@ -56,7 +64,63 @@ export function createTableControlMenuState(input: TableMenuStateInput): TableCo
   };
 }
 
+export function createTableControlMenuItems(input: TableMenuStateInput): TableControlMenuItem[] {
+  const state = createTableControlMenuState(input);
+  return input.kind === "row"
+    ? [
+        { action: "insert-row-above", label: "在上方插入一行", icon: "arrow-up-to-line", enabled: true },
+        { action: "insert-row-below", label: "在下方插入一行", icon: "arrow-down-to-line", enabled: true },
+        { action: "move-row-up", label: "当前行上移", icon: "arrow-up", enabled: state.canMoveRowUp },
+        { action: "move-row-down", label: "当前行下移", icon: "arrow-down", enabled: state.canMoveRowDown },
+        { action: "copy-row", label: "拷贝行", icon: "copy", enabled: true },
+        { action: "delete-row", label: "删除行", icon: "trash-2", enabled: state.canDeleteRow },
+        { action: "delete-table", label: "删除表格", icon: "table-delete", enabled: true },
+      ]
+    : [
+        { action: "insert-column-left", label: "在左侧插入列", icon: "arrow-left-to-line", enabled: true },
+        { action: "insert-column-right", label: "在右侧插入列", icon: "arrow-right-to-line", enabled: true },
+        { action: "move-column-left", label: "左移列", icon: "arrow-left", enabled: state.canMoveColumnLeft },
+        { action: "move-column-right", label: "右移列", icon: "arrow-right", enabled: state.canMoveColumnRight },
+        { action: "copy-column", label: "拷贝列", icon: "copy", enabled: true },
+        { action: "delete-column", label: "删除列", icon: "trash-2", enabled: state.canDeleteColumn },
+        { action: "delete-table", label: "删除表格", icon: "table-delete", enabled: true },
+      ];
+}
+
+function areTableControlsEqual(left: ActiveTableControl | null, right: ActiveTableControl | null): boolean {
+  return (
+    left?.tableFrom === right?.tableFrom &&
+    left?.kind === right?.kind &&
+    left?.rowIndex === right?.rowIndex &&
+    left?.columnIndex === right?.columnIndex &&
+    left?.menuOpen === right?.menuOpen
+  );
+}
+
+function isSameTableControlTarget(left: ActiveTableControl | null, right: ActiveTableControl | null): boolean {
+  return (
+    left?.tableFrom === right?.tableFrom &&
+    left?.kind === right?.kind &&
+    left?.rowIndex === right?.rowIndex &&
+    left?.columnIndex === right?.columnIndex
+  );
+}
+
+export function resolveTableControlHandleClick(
+  current: ActiveTableControl | null,
+  target: ActiveTableControl
+): ActiveTableControl | null {
+  if (current?.menuOpen && isSameTableControlTarget(current, target)) {
+    return null;
+  }
+  return { ...target, menuOpen: true };
+}
+
 export const setActiveTableControlEffect = StateEffect.define<ActiveTableControl | null>();
+
+export function hasTableControlStateChange(effects: readonly StateEffect<unknown>[]): boolean {
+  return effects.some((effect) => effect.is(setActiveTableControlEffect));
+}
 
 export const activeTableControlField = StateField.define<ActiveTableControl | null>({
   create: () => null,
@@ -115,7 +179,14 @@ class TableControlsView {
   }
 
   update(update: ViewUpdate): void {
-    if (update.docChanged || update.selectionSet || update.viewportChanged || update.geometryChanged) {
+    const controlStateChanged = update.transactions.some((transaction) => hasTableControlStateChange(transaction.effects));
+    if (
+      update.docChanged ||
+      update.selectionSet ||
+      update.viewportChanged ||
+      update.geometryChanged ||
+      controlStateChanged
+    ) {
       this.render();
     }
   }
@@ -129,11 +200,14 @@ class TableControlsView {
   }
 
   private readonly handleMouseMove = (event: MouseEvent): void => {
+    if (event.target instanceof Element && event.target.closest(".cm-markora-table-controls-overlay")) {
+      return;
+    }
+
     const cell = event.target instanceof Element ? event.target.closest(".cm-markora-table-cell") : null;
     if (!cell || !this.view.dom.contains(cell)) {
       if (!this.currentControl()?.menuOpen) {
-        this.hoverControl = null;
-        this.render();
+        this.setHoverControl(null);
       }
       return;
     }
@@ -146,26 +220,27 @@ class TableControlsView {
       return;
     }
 
-    this.hoverControl =
+    this.setHoverControl(
       rowKind === "body"
         ? { tableFrom, kind: "row", rowIndex, columnIndex, menuOpen: false }
-        : { tableFrom, kind: "column", columnIndex, menuOpen: false };
-    this.render();
+        : { tableFrom, kind: "column", columnIndex, menuOpen: false }
+    );
   };
 
   private readonly handleMouseLeave = (): void => {
     if (this.currentControl()?.menuOpen) {
       return;
     }
-    this.hoverControl = null;
-    this.render();
+    this.setHoverControl(null);
   };
 
   private readonly handleDocumentMouseDown = (event: MouseEvent): void => {
-    if (event.target instanceof Node && (this.overlay.contains(event.target) || this.view.dom.contains(event.target))) {
+    if (event.target instanceof Node && this.overlay.contains(event.target)) {
       return;
     }
-    this.view.dispatch({ effects: setActiveTableControlEffect.of(null) });
+    if (this.view.state.field(activeTableControlField, false)) {
+      this.view.dispatch({ effects: setActiveTableControlEffect.of(null) });
+    }
   };
 
   private readonly handleOverlayMouseDown = (event: MouseEvent): void => {
@@ -191,8 +266,17 @@ class TableControlsView {
       if (control.rowIndex === undefined || control.rowIndex <= 0) {
         return;
       }
+      const activeControl = this.view.state.field(activeTableControlField, false) ?? null;
       this.view.dispatch({
-        effects: setActiveTableControlEffect.of({ ...control, kind: "row", menuOpen: true }),
+        effects: setActiveTableControlEffect.of(
+          resolveTableControlHandleClick(activeControl, {
+            tableFrom: control.tableFrom,
+            kind: "row",
+            rowIndex: control.rowIndex,
+            ...(control.columnIndex === undefined ? {} : { columnIndex: control.columnIndex }),
+            menuOpen: false,
+          })
+        ),
       });
       return;
     }
@@ -201,13 +285,16 @@ class TableControlsView {
       if (control.columnIndex === undefined) {
         return;
       }
+      const activeControl = this.view.state.field(activeTableControlField, false) ?? null;
       this.view.dispatch({
-        effects: setActiveTableControlEffect.of({
-          tableFrom: control.tableFrom,
-          kind: "column",
-          columnIndex: control.columnIndex,
-          menuOpen: true,
-        }),
+        effects: setActiveTableControlEffect.of(
+          resolveTableControlHandleClick(activeControl, {
+            tableFrom: control.tableFrom,
+            kind: "column",
+            columnIndex: control.columnIndex,
+            menuOpen: false,
+          })
+        ),
       });
       return;
     }
@@ -219,6 +306,14 @@ class TableControlsView {
 
   private currentControl(): ActiveTableControl | null {
     return this.view.state.field(activeTableControlField, false) ?? this.hoverControl ?? null;
+  }
+
+  private setHoverControl(control: ActiveTableControl | null): void {
+    if (areTableControlsEqual(this.hoverControl, control)) {
+      return;
+    }
+    this.hoverControl = control;
+    this.render();
   }
 
   private render(): void {
@@ -259,33 +354,11 @@ class TableControlsView {
       ...(control.rowIndex === undefined ? {} : { rowIndex: control.rowIndex }),
       ...(control.columnIndex === undefined ? {} : { columnIndex: control.columnIndex + 1 }),
     };
-    const state = createTableControlMenuState(input);
     const menu = this.view.dom.ownerDocument.createElement("div");
     menu.className = "cm-markora-table-control-menu";
     menu.setAttribute("role", "menu");
 
-    const items: Array<[TableControlAction, string, boolean]> =
-      control.kind === "row"
-        ? [
-            ["insert-row-above", "在上方插入一行", true],
-            ["insert-row-below", "在下方插入一行", true],
-            ["move-row-up", "当前行上移", state.canMoveRowUp],
-            ["move-row-down", "当前行下移", state.canMoveRowDown],
-            ["copy-row", "拷贝行", true],
-            ["delete-row", "删除行", state.canDeleteRow],
-            ["delete-table", "删除表格", true],
-          ]
-        : [
-            ["insert-column-left", "在左侧插入列", true],
-            ["insert-column-right", "在右侧插入列", true],
-            ["move-column-left", "左移列", state.canMoveColumnLeft],
-            ["move-column-right", "右移列", state.canMoveColumnRight],
-            ["copy-column", "拷贝列", true],
-            ["delete-column", "删除列", state.canDeleteColumn],
-            ["delete-table", "删除表格", true],
-          ];
-
-    for (const [action, label, enabled] of items) {
+    for (const { action, label, icon, enabled } of createTableControlMenuItems(input)) {
       const item = this.view.dom.ownerDocument.createElement("button");
       item.type = "button";
       item.className = "cm-markora-table-control-menu-item";
@@ -293,7 +366,11 @@ class TableControlsView {
       item.setAttribute("role", "menuitem");
       item.setAttribute("aria-disabled", enabled ? "false" : "true");
       if (!enabled) item.disabled = true;
-      item.textContent = label;
+      const svg = createMarkoraIcon(icon);
+      if (svg) item.appendChild(svg);
+      const text = this.view.dom.ownerDocument.createElement("span");
+      text.textContent = label;
+      item.appendChild(text);
       menu.appendChild(item);
     }
     return menu;
@@ -317,17 +394,17 @@ class TableControlsView {
         const rowHandle = this.overlay.querySelector<HTMLElement>(".cm-markora-table-row-handle");
         const columnHandle = this.overlay.querySelector<HTMLElement>(".cm-markora-table-column-handle");
         if (rowHandle && measure.rowRect) {
-          rowHandle.style.left = `${measure.rowRect.left - measure.editorRect.left - 14}px`;
-          rowHandle.style.top = `${measure.rowRect.top - measure.editorRect.top + measure.rowRect.height / 2 - 14}px`;
+          rowHandle.style.left = `${measure.rowRect.left - measure.editorRect.left - 10}px`;
+          rowHandle.style.top = `${measure.rowRect.top - measure.editorRect.top + measure.rowRect.height / 2 - 10}px`;
         }
         if (columnHandle && measure.columnRect) {
-          columnHandle.style.left = `${measure.columnRect.left - measure.editorRect.left + measure.columnRect.width / 2 - 18}px`;
-          columnHandle.style.top = `${measure.columnRect.top - measure.editorRect.top - 18}px`;
+          columnHandle.style.left = `${measure.columnRect.left - measure.editorRect.left + measure.columnRect.width / 2 - 10}px`;
+          columnHandle.style.top = `${measure.columnRect.top - measure.editorRect.top - 10}px`;
         }
         const menu = this.overlay.querySelector<HTMLElement>(".cm-markora-table-control-menu");
         const anchor = control.kind === "row" ? rowHandle : columnHandle;
         if (menu && anchor) {
-          menu.style.left = `${Number.parseFloat(anchor.style.left) + 34}px`;
+          menu.style.left = `${Number.parseFloat(anchor.style.left) + 28}px`;
           menu.style.top = `${Number.parseFloat(anchor.style.top)}px`;
         }
       },
