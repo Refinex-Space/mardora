@@ -89,6 +89,7 @@ declare module "@refinex/markora/plugins" {
     readonly name: string;
     readonly version: string;
   }>;
+  export function bindCodeCopyButtons(root: HTMLElement | Document): () => void;
 }
 
 declare module "@refinex/markora/preview" {

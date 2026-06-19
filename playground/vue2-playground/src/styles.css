@@ -127,6 +127,11 @@ button {
   height: 20px;
 }
 
+.devbar-toggle-icon svg {
+  width: 34px;
+  height: 25px;
+}
+
 .brand-logo {
   display: inline-flex;
   align-items: center;
@@ -354,7 +359,7 @@ button {
 }
 
 .sidebar-panel {
-  border-right: 1px solid var(--border);
+  width: 264px;
 }
 
 .devbar-panel {
@@ -362,15 +367,10 @@ button {
   background: var(--background);
 }
 
-.sidebar-panel.panel-open {
-  width: 264px;
-}
-
 .devbar-panel.panel-open {
   width: 392px;
 }
 
-.sidebar-panel.panel-closed,
 .devbar-panel.panel-closed {
   width: 0;
   padding-right: 0;
@@ -1125,17 +1125,12 @@ button {
     display: none;
   }
 
-  .sidebar-panel,
   .devbar-panel {
     position: absolute;
     top: 0;
     bottom: 0;
     z-index: 20;
     box-shadow: var(--shadow);
-  }
-
-  .sidebar-panel {
-    left: 0;
   }
 
   .devbar-panel {
@@ -1145,10 +1140,6 @@ button {
 
   .devbar-panel.panel-open {
     width: min(392px, 90vw);
-  }
-
-  .sidebar-panel.panel-open {
-    width: min(264px, 84vw);
   }
 
   .backdrop {
