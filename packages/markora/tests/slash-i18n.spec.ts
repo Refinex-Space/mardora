@@ -146,6 +146,7 @@ describe("localized default slash commands", () => {
     const commands = getDefaultSlashCommands("en-US");
 
     expect(commands.find((command) => command.id === "paragraph")?.title).toBe("Text");
+    expect(commands.find((command) => command.id === "code-block")?.title).toBe("Code block");
     expect(commands.find((command) => command.id === "ordered-list")?.title).toBe("Numbered list");
     expect(commands.find((command) => command.id === "callout-warning")?.title).toBe("Warning callout");
     expect(commands.find((command) => command.id === "image")?.title).toBe("Image");
@@ -171,6 +172,10 @@ describe("localized default slash commands", () => {
       "callout-note",
       "callout-tip",
     ]);
+    expect(filterSlashCommands(zhCommands, "代码").map((command) => command.id)).toEqual(["code-block"]);
+    expect(filterSlashCommands(zhCommands, "code").map((command) => command.id)).toEqual(["code-block"]);
+    expect(filterSlashCommands(enCommands, "代码").map((command) => command.id)).toEqual(["code-block"]);
+    expect(filterSlashCommands(enCommands, "fence").map((command) => command.id)).toEqual(["code-block"]);
     expect(filterSlashCommands(zhCommands, "note").map((command) => command.id)).toEqual(["callout-note"]);
     expect(filterSlashCommands(enCommands, "标题").map((command) => command.id)).toEqual([
       "heading-1",

@@ -43,6 +43,7 @@ describe("defaultSlashCommands", () => {
       "callout-important",
       "callout-warning",
       "callout-caution",
+      "code-block",
       "ordered-list",
       "unordered-list",
       "task-list",
@@ -76,6 +77,7 @@ describe("defaultSlashCommands", () => {
       "callout-important": "badge-alert",
       "callout-warning": "triangle-alert",
       "callout-caution": "octagon-alert",
+      "code-block": "code-xml",
       "ordered-list": "list-ordered",
       "unordered-list": "list",
       "task-list": "list-todo",
@@ -128,6 +130,28 @@ describe("defaultSlashCommands", () => {
     expect(calls[0]).toEqual({
       changes: { from: 3, to: 12, insert: "> [!WARNING]\n> " },
       selection: { anchor: 18 },
+      scrollIntoView: true,
+    });
+    expect(calls[1]).toBe("focus");
+  });
+
+  it("inserts fenced code block templates with the cursor inside the block", () => {
+    const calls: unknown[] = [];
+    const view = {
+      dispatch: (spec: unknown) => calls.push(spec),
+      focus: () => calls.push("focus"),
+    };
+    const context = {
+      view,
+      queryRange: { from: 2, to: 7 },
+    } as unknown as MarkoraSlashCommandContext;
+
+    const command = defaultSlashCommands.find((item) => item.id === "code-block");
+    expect(command?.run(context)).toBe(true);
+
+    expect(calls[0]).toEqual({
+      changes: { from: 2, to: 7, insert: "```\n\n```" },
+      selection: { anchor: 6 },
       scrollIntoView: true,
     });
     expect(calls[1]).toBe("focus");

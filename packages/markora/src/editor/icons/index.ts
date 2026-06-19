@@ -18,6 +18,7 @@ export type MarkoraIconName =
   | "baseline"
   | "bold"
   | "code"
+  | "code-xml"
   | "copy"
   | "external-link"
   | "file"
@@ -117,6 +118,11 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
   code: [
     { name: "path", attrs: { d: "m16 18 6-6-6-6" } },
     { name: "path", attrs: { d: "m8 6-6 6 6 6" } },
+  ],
+  "code-xml": [
+    { name: "path", attrs: { d: "m18 16 4-4-4-4" } },
+    { name: "path", attrs: { d: "m6 8-4 4 4 4" } },
+    { name: "path", attrs: { d: "m14.5 4-5 16" } },
   ],
   copy: [
     { name: "rect", attrs: { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2" } },
