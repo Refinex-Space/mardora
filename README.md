@@ -138,19 +138,31 @@ const extensions = markora({
 
 ## 能力范围
 
-| 能力                  | 状态   | 说明                                                                                                 |
-| --------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| CodeMirror 6 扩展组装 | 支持   | `markora()` 返回 `Extension[]`，可直接放入 CodeMirror。                                              |
-| 编辑态富 Markdown     | 支持   | 保留 Markdown 源文本，同时通过 decoration/widget 提供接近 WYSIWYG 的编辑体验。                       |
-| 内置 Markdown 插件    | 支持   | 段落、标题、行内格式、链接、列表、表格、HTML、图片、数学公式、Mermaid、代码块、引用、分割线、Emoji。 |
-| Slash commands        | 支持   | 行首输入 `/` 打开命令菜单，支持基础 Markdown 块和媒体命令。                                          |
-| 附件上传入口          | 支持   | 文件选择、粘贴、拖拽会调用业务侧 `uploader`，成功后替换为 Markdown/HTML。                            |
-| 附件存储服务          | 不提供 | OSS/S3/后端上传、签名 URL、权限、扫描、删除、进度条由业务系统实现。                                  |
-| 选区工具栏            | 支持   | 文本选区后提供加粗、斜体、删除线、下划线、行内代码、链接、颜色、高亮和列表操作。                     |
-| 目录 TOC              | 支持   | 编辑态内置目录面板，也可通过回调或 preview TOC API 自定义侧栏。                                      |
-| 静态预览              | 支持   | `preview()` 输出 HTML，`generateCSS()` 输出同插件和主题匹配的 CSS。                                  |
-| i18n                  | 支持   | 内置 UI 支持 `"zh-CN"` 和 `"en-US"`。                                                                |
-| 框架组件              | 不提供 | React/Vue 接入由业务组件持有生命周期；仓库 playground 提供参考实现。                                 |
+| 能力                  | 状态   | 说明                                                                                                         |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
+| CodeMirror 6 扩展组装 | 支持   | `markora()` 返回 `Extension[]`，可直接放入 CodeMirror。                                                      |
+| 编辑态富 Markdown     | 支持   | 保留 Markdown 源文本，同时通过 decoration/widget 提供接近 WYSIWYG 的编辑体验。                               |
+| 内置 Markdown 插件    | 支持   | 段落、标题、行内格式、链接、列表、表格、HTML、图片、数学公式、Mermaid、代码块、引用/Callout、分割线、Emoji。 |
+| Slash commands        | 支持   | 行首输入 `/` 打开命令菜单，支持基础 Markdown 块、Callout 和媒体命令。                                        |
+| 附件上传入口          | 支持   | 文件选择、粘贴、拖拽会调用业务侧 `uploader`，成功后替换为 Markdown/HTML。                                    |
+| 附件存储服务          | 不提供 | OSS/S3/后端上传、签名 URL、权限、扫描、删除、进度条由业务系统实现。                                          |
+| 选区工具栏            | 支持   | 文本选区后提供加粗、斜体、删除线、下划线、行内代码、链接、颜色、高亮和列表操作。                             |
+| 目录 TOC              | 支持   | 编辑态内置目录面板，也可通过回调或 preview TOC API 自定义侧栏。                                              |
+| 静态预览              | 支持   | `preview()` 输出 HTML，`generateCSS()` 输出同插件和主题匹配的 CSS。                                          |
+| i18n                  | 支持   | 内置 UI 支持 `"zh-CN"` 和 `"en-US"`。                                                                        |
+| 框架组件              | 不提供 | React/Vue 接入由业务组件持有生命周期；仓库 playground 提供参考实现。                                         |
+
+## Callout 告警块
+
+`QuotePlugin` 支持 GitHub Flavored Markdown Callout 语法，支持 `NOTE`、`TIP`、`IMPORTANT`、`WARNING` 和 `CAUTION` 五种类型。
+Slash commands 内置了五种 Callout 快捷插入命令，可直接插入对应模板。
+
+```markdown
+> [!WARNING]
+> 需要读者立即注意的潜在风险，忽视可能导致问题。
+```
+
+编辑态和静态预览会将其渲染为 `cm-markora-callout cm-markora-callout-warning`，普通 `>` 引用仍保持普通引用块。
 
 ## 静态预览
 

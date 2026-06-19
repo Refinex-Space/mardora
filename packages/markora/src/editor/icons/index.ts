@@ -14,9 +14,11 @@ export type MarkoraIconName =
   | "arrow-right-to-line"
   | "arrow-up"
   | "arrow-up-to-line"
+  | "badge-alert"
   | "baseline"
   | "bold"
   | "code"
+  | "code-xml"
   | "copy"
   | "external-link"
   | "file"
@@ -28,14 +30,17 @@ export type MarkoraIconName =
   | "heading-6"
   | "highlighter"
   | "image"
+  | "info"
   | "italic"
   | "link"
+  | "lightbulb"
   | "list"
   | "list-ordered"
   | "list-todo"
   | "maximize-2"
   | "minus"
   | "music-2"
+  | "octagon-alert"
   | "play"
   | "strikethrough"
   | "table"
@@ -43,6 +48,7 @@ export type MarkoraIconName =
   | "table-of-contents"
   | "text-quote"
   | "trash-2"
+  | "triangle-alert"
   | "underline"
   | "type"
   | "x";
@@ -86,6 +92,16 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "M12 21V7" } },
     { name: "path", attrs: { d: "m5 14 7-7 7 7" } },
   ],
+  "badge-alert": [
+    {
+      name: "path",
+      attrs: {
+        d: "M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z",
+      },
+    },
+    { name: "line", attrs: { x1: "12", x2: "12", y1: "8", y2: "12" } },
+    { name: "line", attrs: { x1: "12", x2: "12.01", y1: "16", y2: "16" } },
+  ],
   baseline: [
     { name: "path", attrs: { d: "M4 20h16" } },
     { name: "path", attrs: { d: "m6 16 6-12 6 12" } },
@@ -102,6 +118,11 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
   code: [
     { name: "path", attrs: { d: "m16 18 6-6-6-6" } },
     { name: "path", attrs: { d: "m8 6-6 6 6 6" } },
+  ],
+  "code-xml": [
+    { name: "path", attrs: { d: "m18 16 4-4-4-4" } },
+    { name: "path", attrs: { d: "m6 8-4 4 4 4" } },
+    { name: "path", attrs: { d: "m14.5 4-5 16" } },
   ],
   copy: [
     { name: "rect", attrs: { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2" } },
@@ -170,6 +191,11 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "circle", attrs: { cx: "9", cy: "9", r: "2" } },
     { name: "path", attrs: { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" } },
   ],
+  info: [
+    { name: "circle", attrs: { cx: "12", cy: "12", r: "10" } },
+    { name: "path", attrs: { d: "M12 16v-4" } },
+    { name: "path", attrs: { d: "M12 8h.01" } },
+  ],
   italic: [
     { name: "line", attrs: { x1: "19", x2: "10", y1: "4", y2: "4" } },
     { name: "line", attrs: { x1: "14", x2: "5", y1: "20", y2: "20" } },
@@ -178,6 +204,16 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
   link: [
     { name: "path", attrs: { d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" } },
     { name: "path", attrs: { d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" } },
+  ],
+  lightbulb: [
+    {
+      name: "path",
+      attrs: {
+        d: "M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5",
+      },
+    },
+    { name: "path", attrs: { d: "M9 18h6" } },
+    { name: "path", attrs: { d: "M10 22h4" } },
   ],
   list: [
     { name: "path", attrs: { d: "M3 5h.01" } },
@@ -212,6 +248,16 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
   "music-2": [
     { name: "circle", attrs: { cx: "8", cy: "18", r: "4" } },
     { name: "path", attrs: { d: "M12 18V2l7 4" } },
+  ],
+  "octagon-alert": [
+    { name: "path", attrs: { d: "M12 16h.01" } },
+    { name: "path", attrs: { d: "M12 8v4" } },
+    {
+      name: "path",
+      attrs: {
+        d: "M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z",
+      },
+    },
   ],
   play: [
     {
@@ -257,6 +303,11 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" } },
     { name: "path", attrs: { d: "M3 6h18" } },
     { name: "path", attrs: { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" } },
+  ],
+  "triangle-alert": [
+    { name: "path", attrs: { d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" } },
+    { name: "path", attrs: { d: "M12 9v4" } },
+    { name: "path", attrs: { d: "M12 17h.01" } },
   ],
   underline: [
     { name: "path", attrs: { d: "M6 4v6a6 6 0 0 0 12 0V4" } },
