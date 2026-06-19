@@ -10,8 +10,8 @@ Markora packages the Markdown editor capabilities used by the React, Vue2, and V
 
 - CodeMirror 6 extension composition through `markora()`.
 - Rich Markdown editing decorations while preserving plain Markdown source.
-- Built-in plugins for paragraphs, headings, inline formats, links, lists, tables, HTML, images, math, Mermaid, code blocks, quotes, horizontal rules, and Emoji.
-- Slash commands, browser attachment entry points, selected-text toolbar, editor TOC, UI locale support, and static preview rendering.
+- Built-in plugins for paragraphs, headings, inline formats, links, lists, tables, HTML, images, math, Mermaid, code blocks, quotes, GFM callouts, horizontal rules, and Emoji.
+- Slash commands including Callout templates, browser attachment entry points, selected-text toolbar, editor TOC, UI locale support, and static preview rendering.
 - Framework-neutral APIs for React, Vue, or plain CodeMirror integrations.
 
 Applications remain responsible for layout, state management, persistence, auth, upload storage, file security, and published-content workflows.
@@ -23,6 +23,16 @@ npm install @refinex/markora
 ```
 
 Markora installs the CodeMirror 6 runtime packages it uses as pinned dependencies and re-exports common editor APIs from `@refinex/markora/editor`. Install additional CodeMirror language/theme packages only when your application builds optional output panels like the playground.
+
+## GFM Callouts
+
+`QuotePlugin` recognizes GitHub Flavored Markdown callouts and renders `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, and `CAUTION` as typed callout blocks in both edit-state decoration and static preview output.
+Default slash commands include shortcuts for all five Callout types.
+
+```markdown
+> [!NOTE]
+> Useful context for readers.
+```
 
 ## Quick Start
 

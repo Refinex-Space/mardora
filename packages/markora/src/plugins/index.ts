@@ -10,7 +10,8 @@ export { ImagePlugin } from "./image-plugin";
 export { MathPlugin } from "./math-plugin";
 export { MermaidPlugin } from "./mermaid-plugin";
 export { CodePlugin } from "./code-plugin";
-export { QuotePlugin } from "./quote-plugin";
+export { QuotePlugin, resolveCalloutTitleInputTarget, resolveCalloutTypeChange } from "./quote-plugin";
+export type { CalloutLabel, CalloutTitleInputTarget, CalloutTypeChange } from "./quote-plugin";
 export { HRPlugin } from "./hr-plugin";
 export { EmojiPlugin } from "./emoji-plugin";
 

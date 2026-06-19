@@ -18,6 +18,20 @@ const commandCopy: Record<MarkoraLocale, Record<string, LocalizedSlashCommandCop
     "heading-5": { title: "标题 5", aliases: ["h5", "heading", "heading5", "biaoti", "标题"] },
     "heading-6": { title: "标题 6", aliases: ["h6", "heading", "heading6", "biaoti", "标题"] },
     quote: { title: "引用", aliases: ["quote", "blockquote", "yinyong"] },
+    "callout-note": {
+      title: "说明 Callout",
+      aliases: ["callout", "note", "info", "告警", "说明", "提示", "shuoming", "tishi"],
+    },
+    "callout-tip": {
+      title: "技巧 Callout",
+      aliases: ["callout", "tip", "hint", "告警", "技巧", "提示", "jiqiao", "tishi"],
+    },
+    "callout-important": { title: "重要 Callout", aliases: ["callout", "important", "告警", "重要", "zhongyao"] },
+    "callout-warning": { title: "警告 Callout", aliases: ["callout", "warning", "warn", "告警", "警告", "jinggao"] },
+    "callout-caution": {
+      title: "严重警告 Callout",
+      aliases: ["callout", "caution", "danger", "告警", "严重", "风险", "yanzhong", "fengxian"],
+    },
     "ordered-list": { title: "有序列表", aliases: ["ol", "ordered", "numbered", "youxu", "有序"] },
     "unordered-list": { title: "项目符号列表", aliases: ["ul", "bullet", "unordered", "bulleted", "wuxu", "无序"] },
     "task-list": { title: "待办清单", aliases: ["todo", "task", "check", "daiban", "待办"] },
@@ -38,6 +52,11 @@ const commandCopy: Record<MarkoraLocale, Record<string, LocalizedSlashCommandCop
     "heading-5": { title: "Heading 5", aliases: ["标题", "h5", "heading", "heading5", "biaoti"] },
     "heading-6": { title: "Heading 6", aliases: ["标题", "h6", "heading", "heading6", "biaoti"] },
     quote: { title: "Quote", aliases: ["引用", "quote", "blockquote", "yinyong"] },
+    "callout-note": { title: "Note callout", aliases: ["说明", "提示", "告警", "callout", "note", "info"] },
+    "callout-tip": { title: "Tip callout", aliases: ["技巧", "提示", "告警", "callout", "tip", "hint"] },
+    "callout-important": { title: "Important callout", aliases: ["重要", "告警", "callout", "important"] },
+    "callout-warning": { title: "Warning callout", aliases: ["警告", "告警", "callout", "warning", "warn"] },
+    "callout-caution": { title: "Caution callout", aliases: ["严重", "风险", "告警", "callout", "caution", "danger"] },
     "ordered-list": { title: "Numbered list", aliases: ["有序", "ol", "ordered", "numbered", "youxu"] },
     "unordered-list": { title: "Bulleted list", aliases: ["无序", "ul", "bullet", "unordered", "bulleted", "wuxu"] },
     "task-list": { title: "To-do list", aliases: ["待办", "todo", "task", "check", "daiban"] },
@@ -93,6 +112,15 @@ function markdownCommand(
   };
 }
 
+function calloutCommand(
+  locale: MarkoraLocale,
+  id: string,
+  icon: string,
+  type: "NOTE" | "TIP" | "IMPORTANT" | "WARNING" | "CAUTION"
+): MarkoraSlashCommand {
+  return markdownCommand(commandMeta(locale, id, "basic", icon, `[!${type}]`), `> [!${type}]\n> `);
+}
+
 function mediaCommand(command: Omit<MarkoraSlashCommand, "run">, kind: MarkoraAttachmentKind): MarkoraSlashCommand {
   return {
     ...command,
@@ -134,6 +162,11 @@ export function getDefaultSlashCommands(locale: MarkoraLocale = "zh-CN"): Markor
     markdownCommand(commandMeta(locale, "heading-5", "basic", "heading-5", "#####"), "##### "),
     markdownCommand(commandMeta(locale, "heading-6", "basic", "heading-6", "######"), "###### "),
     markdownCommand(commandMeta(locale, "quote", "basic", "text-quote", ">"), "> "),
+    calloutCommand(locale, "callout-note", "info", "NOTE"),
+    calloutCommand(locale, "callout-tip", "lightbulb", "TIP"),
+    calloutCommand(locale, "callout-important", "badge-alert", "IMPORTANT"),
+    calloutCommand(locale, "callout-warning", "triangle-alert", "WARNING"),
+    calloutCommand(locale, "callout-caution", "octagon-alert", "CAUTION"),
     markdownCommand(commandMeta(locale, "ordered-list", "basic", "list-ordered", "1."), "1. "),
     markdownCommand(commandMeta(locale, "unordered-list", "basic", "list", "-"), "- "),
     markdownCommand(commandMeta(locale, "task-list", "basic", "list-todo", "[]"), "- [ ] "),

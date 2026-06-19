@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { buildSlashReplacement, defaultSlashCommands } from "../src/editor/slash";
 import { markora } from "../src/editor";
 import { hasMarkoraIcon } from "../src/editor/icons";
+import type { MarkoraSlashCommandContext } from "../src/editor/slash";
 
 describe("buildSlashReplacement", () => {
   it("replaces the slash query with heading markdown", () => {
@@ -37,6 +38,11 @@ describe("defaultSlashCommands", () => {
       "heading-5",
       "heading-6",
       "quote",
+      "callout-note",
+      "callout-tip",
+      "callout-important",
+      "callout-warning",
+      "callout-caution",
       "ordered-list",
       "unordered-list",
       "task-list",
@@ -65,6 +71,11 @@ describe("defaultSlashCommands", () => {
       "heading-5": "heading-5",
       "heading-6": "heading-6",
       quote: "text-quote",
+      "callout-note": "info",
+      "callout-tip": "lightbulb",
+      "callout-important": "badge-alert",
+      "callout-warning": "triangle-alert",
+      "callout-caution": "octagon-alert",
       "ordered-list": "list-ordered",
       "unordered-list": "list",
       "task-list": "list-todo",
@@ -98,6 +109,28 @@ describe("defaultSlashCommands", () => {
         "trash-2",
       ].every((icon) => hasMarkoraIcon(icon))
     ).toBe(true);
+  });
+
+  it("inserts callout templates with the cursor on the content line", () => {
+    const calls: unknown[] = [];
+    const view = {
+      dispatch: (spec: unknown) => calls.push(spec),
+      focus: () => calls.push("focus"),
+    };
+    const context = {
+      view,
+      queryRange: { from: 3, to: 12 },
+    } as unknown as MarkoraSlashCommandContext;
+
+    const command = defaultSlashCommands.find((item) => item.id === "callout-warning");
+    expect(command?.run(context)).toBe(true);
+
+    expect(calls[0]).toEqual({
+      changes: { from: 3, to: 12, insert: "> [!WARNING]\n> " },
+      selection: { anchor: 18 },
+      scrollIntoView: true,
+    });
+    expect(calls[1]).toBe("focus");
   });
 });
 
