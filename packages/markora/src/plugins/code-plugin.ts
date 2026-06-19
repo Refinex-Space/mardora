@@ -1,5 +1,5 @@
 import { Decoration, EditorView, KeyBinding, WidgetType } from "@codemirror/view";
-import { Extension } from "@codemirror/state";
+import { EditorState, Extension, Transaction, TransactionSpec } from "@codemirror/state";
 import { LanguageDescription, syntaxTree } from "@codemirror/language";
 import { DecorationContext, DecorationPlugin } from "../editor/plugin";
 import { toggleMarkdownStyle } from "../editor";
@@ -17,7 +17,16 @@ import { codePluginTheme as theme } from "./code-plugin.theme";
 const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
 /** Checkmark icon SVG (success state) */
-const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+export const CODE_COPY_SUCCESS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"></path></svg>`;
+
+/** Chevron icon SVG */
+const CHEVRON_DOWN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>`;
+
+/** Search icon SVG */
+const SEARCH_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>`;
+
+/** Language selected icon SVG */
+const LANGUAGE_SELECTED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>`;
 
 /** Delay before resetting copy button state (ms) */
 const COPY_RESET_DELAY = 2000;
@@ -30,6 +39,352 @@ const QUOTED_INFO_PATTERN = /(\w+)="([^"]*)"/g;
 
 /** Regex for /pattern/ with optional instance selectors (/pattern/1-3,5) */
 const TEXT_HIGHLIGHT_PATTERN = /\/([^/]+)\/(?:(\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*))?/g;
+
+const codeLanguageOptions = [
+  ["Plain text", ""],
+  ["Bash", "bash"],
+  ["C", "c"],
+  ["C++", "cpp"],
+  ["C#", "csharp"],
+  ["CSS", "css"],
+  ["Go", "go"],
+  ["HTML", "html"],
+  ["Java", "java"],
+  ["JavaScript", "javascript"],
+  ["JSON", "json"],
+  ["Markdown", "markdown"],
+  ["Python", "python"],
+  ["Ruby", "ruby"],
+  ["Rust", "rust"],
+  ["Shell", "shell"],
+  ["SQL", "sql"],
+  ["Swift", "swift"],
+  ["TypeScript", "typescript"],
+  ["TSX", "tsx"],
+  ["Vue", "vue"],
+  ["YAML", "yaml"],
+] as const;
+
+const codeLanguageAliases: Record<string, string> = {
+  bash: "Bash",
+  c: "C",
+  cpp: "C++",
+  "c++": "C++",
+  csharp: "C#",
+  "c#": "C#",
+  css: "CSS",
+  go: "Go",
+  html: "HTML",
+  java: "Java",
+  javascript: "JavaScript",
+  js: "JavaScript",
+  json: "JSON",
+  markdown: "Markdown",
+  md: "Markdown",
+  python: "Python",
+  py: "Python",
+  ruby: "Ruby",
+  rust: "Rust",
+  sql: "SQL",
+  swift: "Swift",
+  typescript: "TypeScript",
+  ts: "TypeScript",
+  tsx: "TSX",
+  vue: "Vue",
+  yaml: "YAML",
+  yml: "YAML",
+};
+
+function isCodeInfoDirective(token: string): boolean {
+  const normalizedToken = token.toLowerCase();
+  return (
+    /^(?:line-numbers|linenumbers|showlinenumbers)(?:\{\d+\})?$/.test(normalizedToken) ||
+    normalizedToken === "copy" ||
+    normalizedToken === "diff" ||
+    normalizedToken.startsWith("{") ||
+    normalizedToken.startsWith("/") ||
+    normalizedToken.startsWith("title=") ||
+    normalizedToken.startsWith("caption=")
+  );
+}
+
+export function replaceCodeInfoLanguage(codeInfo: string, nextLanguage: string): string {
+  const trimmedInfo = codeInfo.trim();
+  const normalizedLanguage = nextLanguage.trim();
+  const tokens = trimmedInfo ? trimmedInfo.split(/\s+/) : [];
+
+  if (tokens.length > 0 && tokens[0] && !isCodeInfoDirective(tokens[0])) {
+    tokens.shift();
+  }
+
+  return [normalizedLanguage, ...tokens].filter(Boolean).join(" ");
+}
+
+export function getCodeInfoLanguageTokenLength(codeInfo: string): number {
+  const match = codeInfo.match(/^(\S+)(\s*)/);
+  const token = match?.[1];
+  if (!token || isCodeInfoDirective(token)) return 0;
+  return token.length + (match[2]?.length ?? 0);
+}
+
+export function encodeCodeCopyPayload(code: string): string {
+  if (typeof btoa !== "undefined") {
+    return btoa(encodeURIComponent(code));
+  }
+
+  return Buffer.from(encodeURIComponent(code), "utf8").toString("base64");
+}
+
+export function decodeCodeCopyPayload(payload: string): string {
+  const decoded = typeof atob !== "undefined" ? atob(payload) : Buffer.from(payload, "base64").toString("utf8");
+  return decodeURIComponent(decoded);
+}
+
+function getClipboardApi(documentRef: Document): Clipboard | undefined {
+  return documentRef.defaultView?.navigator.clipboard ?? (typeof navigator !== "undefined" ? navigator.clipboard : undefined);
+}
+
+function copyTextWithTextAreaFallback(text: string, documentRef: Document): boolean {
+  const textArea = documentRef.createElement("textarea");
+  textArea.value = text;
+  textArea.setAttribute("readonly", "true");
+  textArea.style.position = "fixed";
+  textArea.style.left = "-9999px";
+  textArea.style.top = "0";
+  documentRef.body.appendChild(textArea);
+  textArea.select();
+  textArea.setSelectionRange(0, text.length);
+
+  try {
+    return documentRef.execCommand("copy");
+  } finally {
+    textArea.remove();
+  }
+}
+
+export async function copyCodeTextToClipboard(
+  text: string,
+  documentRef: Document | undefined = typeof document !== "undefined" ? document : undefined
+): Promise<void> {
+  if (!documentRef) {
+    throw new Error("A browser document is required to copy code text");
+  }
+
+  const clipboard = getClipboardApi(documentRef);
+  if (clipboard?.writeText) {
+    try {
+      await clipboard.writeText(text);
+      return;
+    } catch {
+      // Fall back to a selected textarea to force a text/plain clipboard payload.
+    }
+  }
+
+  if (copyTextWithTextAreaFallback(text, documentRef)) {
+    return;
+  }
+
+  throw new Error("Unable to copy code text");
+}
+
+function markCodeCopyButtonCopied(copyBtn: HTMLButtonElement): void {
+  copyBtn.classList.add("copied");
+  copyBtn.innerHTML = CODE_COPY_SUCCESS_ICON;
+  setTimeout(() => {
+    copyBtn.classList.remove("copied");
+    copyBtn.innerHTML = COPY_ICON;
+  }, COPY_RESET_DELAY);
+}
+
+export function bindCodeCopyButtons(root: HTMLElement | Document): () => void {
+  const onClick = (event: Event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const copyBtn = target?.closest<HTMLButtonElement>(".cm-markora-code-copy-btn[data-code]");
+    if (!copyBtn || !root.contains(copyBtn)) return;
+
+    const codePayload = copyBtn.dataset.code ?? "";
+    const code = copyBtn.dataset.encoded === "true" ? decodeCodeCopyPayload(codePayload) : codePayload;
+
+    event.preventDefault();
+    event.stopPropagation();
+    void copyCodeTextToClipboard(code, copyBtn.ownerDocument).then(() => {
+      markCodeCopyButtonCopied(copyBtn);
+    });
+  };
+
+  root.addEventListener("click", onClick);
+  return () => root.removeEventListener("click", onClick);
+}
+
+export interface CodeFenceAutoCloseInput {
+  text: string;
+  from: number;
+  to: number;
+  lineFrom: number;
+  lineTo: number;
+  lineText: string;
+  selectionEmpty: boolean;
+}
+
+export interface CodeFenceAutoCloseResult {
+  changes: { from: number; to: number; insert: string };
+  selection: { anchor: number };
+}
+
+export function resolveCodeFenceAutoClose(input: CodeFenceAutoCloseInput): CodeFenceAutoCloseResult | null {
+  if (input.from !== input.to || !input.selectionEmpty) {
+    return null;
+  }
+
+  const cursorOffset = input.from - input.lineFrom;
+  const beforeCursor = input.lineText.slice(0, cursorOffset);
+  const afterCursor = input.lineText.slice(cursorOffset);
+  const openingMatch =
+    input.text === "`" ? beforeCursor.match(/^(\s*)``$/) : input.text === CODE_FENCE ? beforeCursor.match(/^(\s*)$/) : null;
+
+  if (!openingMatch || afterCursor.trim() !== "") {
+    return null;
+  }
+
+  const indent = openingMatch[1] ?? "";
+  const insert = `${indent}${CODE_FENCE}\n${indent}\n${indent}${CODE_FENCE}`;
+  const anchor = input.lineFrom + indent.length + CODE_FENCE.length + 1 + indent.length;
+
+  return {
+    changes: { from: input.lineFrom, to: input.lineTo, insert },
+    selection: { anchor },
+  };
+}
+
+function isInsideFencedCode(state: EditorState, pos: number, lineFrom: number): boolean {
+  const inspectPos = pos > lineFrom ? pos - 1 : pos;
+  let node: SyntaxNode | null = syntaxTree(state).resolveInner(inspectPos, -1);
+
+  while (node) {
+    if (node.name === "FencedCode") return true;
+    node = node.parent;
+  }
+
+  return false;
+}
+
+export function resolveCodeFenceAutoCloseTransaction(transaction: Transaction): TransactionSpec | null {
+  if (!transaction.docChanged || !transaction.startState.selection.main.empty || transaction.startState.selection.ranges.length !== 1) {
+    return null;
+  }
+
+  let autoClose: TransactionSpec | null = null;
+
+  transaction.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+    if (autoClose) return;
+
+    const line = transaction.startState.doc.lineAt(fromA);
+    if (isInsideFencedCode(transaction.startState, fromA, line.from)) return;
+
+    const result = resolveCodeFenceAutoClose({
+      text: inserted.toString(),
+      from: fromA,
+      to: toA,
+      lineFrom: line.from,
+      lineTo: line.to,
+      lineText: line.text,
+      selectionEmpty: true,
+    });
+
+    if (!result) return;
+
+    const userEvent = transaction.annotation(Transaction.userEvent);
+    autoClose = {
+      changes: result.changes,
+      selection: result.selection,
+      scrollIntoView: true,
+      filter: false,
+      ...(userEvent ? { userEvent } : {}),
+    };
+  });
+
+  return autoClose;
+}
+
+function createCodeFenceAutoCloseTransactionFilter(): Extension {
+  return EditorState.transactionFilter.of((transaction) => resolveCodeFenceAutoCloseTransaction(transaction) ?? transaction);
+}
+
+function createCodeFenceAutoCloseInputHandler(): Extension {
+  return EditorView.inputHandler.of((view, from, to, text) => {
+    const selectionEmpty = view.state.selection.ranges.length === 1 && view.state.selection.main.empty;
+    const line = view.state.doc.lineAt(from);
+    const result = resolveCodeFenceAutoClose({
+      text,
+      from,
+      to,
+      lineFrom: line.from,
+      lineTo: line.to,
+      lineText: line.text,
+      selectionEmpty,
+    });
+
+    if (!result) {
+      return false;
+    }
+
+    view.dispatch({
+      changes: result.changes,
+      selection: result.selection,
+      scrollIntoView: true,
+    });
+
+    return true;
+  });
+}
+
+function createCodeFenceAutoCloseBeforeInputHandler(): Extension {
+  return EditorView.domEventHandlers({
+    beforeinput(event, view) {
+      const inputEvent = event as InputEvent;
+      if (inputEvent.inputType !== "insertText") {
+        return false;
+      }
+
+      const text = inputEvent.data ?? "";
+      const { from, to } = view.state.selection.main;
+      const selectionEmpty = view.state.selection.ranges.length === 1 && view.state.selection.main.empty;
+      const line = view.state.doc.lineAt(from);
+      const result = resolveCodeFenceAutoClose({
+        text,
+        from,
+        to,
+        lineFrom: line.from,
+        lineTo: line.to,
+        lineText: line.text,
+        selectionEmpty,
+      });
+
+      if (!result) {
+        return false;
+      }
+
+      event.preventDefault();
+      view.dispatch({
+        changes: result.changes,
+        selection: result.selection,
+        scrollIntoView: true,
+      });
+
+      return true;
+    },
+  });
+}
+
+function formatLanguageLabel(language: string): string {
+  const normalized = language.trim().toLowerCase();
+  if (!normalized) return "Text";
+  return codeLanguageAliases[normalized] ?? language;
+}
+
+interface ToolbarElement extends HTMLElement {
+  __markoraDestroyToolbar?: () => void;
+}
 
 interface PreviewRenderContext {
   sliceDoc(from: number, to: number): string;
@@ -51,6 +406,9 @@ const codeMarkDecorations = {
   "code-block-line": Decoration.line({ class: "cm-markora-code-block-line" }),
   "code-block-line-start": Decoration.line({ class: "cm-markora-code-block-line-start" }),
   "code-block-line-end": Decoration.line({ class: "cm-markora-code-block-line-end" }),
+  "code-block-single-line": Decoration.line({ class: "cm-markora-code-block-single-line" }),
+  "code-block-rendered": Decoration.line({ class: "cm-markora-code-block-rendered" }),
+  "code-fence-line": Decoration.line({ class: "cm-markora-code-fence-line" }),
   "code-fence": Decoration.mark({ class: "cm-markora-code-fence" }),
   "code-hidden": Decoration.replace({}),
 
@@ -123,84 +481,256 @@ interface DiffDisplayLineNumbers {
 // ============================================================================
 
 /**
- * Widget for code block header.
- * Displays title or language on the left, and a copy button on the right.
+ * Widget for the compact code block hover toolbar.
  */
-class CodeBlockHeaderWidget extends WidgetType {
+class CodeBlockToolbarWidget extends WidgetType {
   constructor(
     private props: CodeBlockProperties,
-    private codeContent: string
+    private codeContent: string,
+    private codeInfo: string,
+    private openingLineFrom: number,
+    private openingLineTo: number,
+    private openingFence: string,
+    private forceVisible: boolean
   ) {
     super();
   }
 
-  /** Creates the header DOM element with title/language and optional copy button. */
-  toDOM(): HTMLElement {
-    const header = document.createElement("div");
-    header.className = "cm-markora-code-header";
-
-    // Left side: title or language
-    const leftSide = document.createElement("div");
-    leftSide.className = "cm-markora-code-header-left";
-
-    if (this.props.title) {
-      const title = document.createElement("span");
-      title.className = "cm-markora-code-header-title";
-      title.textContent = this.props.title;
-      leftSide.appendChild(title);
-    } else if (this.props.language) {
-      const lang = document.createElement("span");
-      lang.className = "cm-markora-code-header-lang";
-      lang.textContent = this.props.language;
-      leftSide.appendChild(lang);
+  /** Creates the toolbar DOM element with language switcher and copy button. */
+  toDOM(view: EditorView): HTMLElement {
+    const toolbar = document.createElement("div") as ToolbarElement;
+    toolbar.className = "cm-markora-code-toolbar";
+    if (this.forceVisible) {
+      toolbar.classList.add("is-visible");
     }
+    toolbar.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    toolbar.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
 
-    header.appendChild(leftSide);
+    const languageControl = this.createLanguageControl(view, toolbar);
+    toolbar.appendChild(languageControl);
 
-    // Right side: copy button
     if (this.props.copy !== false) {
-      const rightSide = document.createElement("div");
-      rightSide.className = "cm-markora-code-header-right";
-
       const copyBtn = document.createElement("button");
       copyBtn.className = "cm-markora-code-copy-btn";
       copyBtn.type = "button";
       copyBtn.title = "Copy code";
+      copyBtn.setAttribute("aria-label", "Copy code");
       copyBtn.innerHTML = COPY_ICON;
 
       copyBtn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        navigator.clipboard.writeText(this.codeContent).then(() => {
-          copyBtn.classList.add("copied");
-          copyBtn.innerHTML = CHECK_ICON;
-          setTimeout(() => {
-            copyBtn.classList.remove("copied");
-            copyBtn.innerHTML = COPY_ICON;
-          }, COPY_RESET_DELAY);
+        void copyCodeTextToClipboard(this.codeContent, copyBtn.ownerDocument).then(() => {
+          markCodeCopyButtonCopied(copyBtn);
         });
       });
 
-      rightSide.appendChild(copyBtn);
-      header.appendChild(rightSide);
+      toolbar.appendChild(copyBtn);
     }
 
-    return header;
+    requestAnimationFrame(() => this.bindHoverLines(toolbar));
+    return toolbar;
   }
 
   /** Checks equality for widget reuse optimization. */
-  override eq(other: CodeBlockHeaderWidget): boolean {
+  override eq(other: CodeBlockToolbarWidget): boolean {
     return (
       this.props.title === other.props.title &&
       this.props.language === other.props.language &&
       this.props.copy === other.props.copy &&
-      this.codeContent === other.codeContent
+      this.codeContent === other.codeContent &&
+      this.codeInfo === other.codeInfo &&
+      this.openingLineFrom === other.openingLineFrom &&
+      this.openingLineTo === other.openingLineTo &&
+      this.openingFence === other.openingFence &&
+      this.forceVisible === other.forceVisible
     );
   }
 
-  /** Allow click events to propagate for copy button interaction. */
+  override destroy(dom: HTMLElement): void {
+    const toolbar = dom as ToolbarElement;
+    toolbar.__markoraDestroyToolbar?.();
+  }
+
+  /** Allow click events to propagate for toolbar interaction. */
   override ignoreEvent(): boolean {
     return false;
+  }
+
+  private createLanguageControl(view: EditorView, toolbar: ToolbarElement): HTMLElement {
+    const control = document.createElement("div");
+    control.className = "cm-markora-code-language-control";
+
+    const button = document.createElement("button");
+    button.className = "cm-markora-code-language-button";
+    button.type = "button";
+    button.setAttribute("aria-haspopup", "listbox");
+    button.setAttribute("aria-expanded", "false");
+    button.innerHTML = `<span>${this.escapeHtml(formatLanguageLabel(this.props.language))}</span>${CHEVRON_DOWN_ICON}`;
+
+    const menu = document.createElement("div");
+    menu.className = "cm-markora-code-language-menu";
+    menu.setAttribute("role", "listbox");
+    menu.hidden = true;
+
+    const searchWrap = document.createElement("label");
+    searchWrap.className = "cm-markora-code-language-search";
+    const searchInput = document.createElement("input");
+    searchInput.type = "search";
+    searchInput.placeholder = "Search...";
+    searchInput.autocomplete = "off";
+    searchInput.spellcheck = false;
+    const searchIcon = document.createElement("span");
+    searchIcon.className = "cm-markora-code-language-search-icon";
+    searchIcon.innerHTML = SEARCH_ICON;
+    searchWrap.append(searchInput, searchIcon);
+
+    const list = document.createElement("div");
+    list.className = "cm-markora-code-language-list";
+    menu.append(searchWrap, list);
+    control.append(button, menu);
+
+    const closeMenu = () => {
+      menu.hidden = true;
+      toolbar.classList.remove("is-menu-open");
+      button.setAttribute("aria-expanded", "false");
+      toolbar.ownerDocument.removeEventListener("pointerdown", handleOutsidePointerDown, true);
+    };
+
+    const renderList = () => {
+      const query = searchInput.value.trim().toLowerCase();
+      list.textContent = "";
+
+      for (const [label, value] of codeLanguageOptions) {
+        const searchable = `${label} ${value}`.toLowerCase();
+        if (query && !searchable.includes(query)) continue;
+
+        const item = document.createElement("button");
+        item.className = "cm-markora-code-language-item";
+        item.type = "button";
+        item.setAttribute("role", "option");
+        item.setAttribute("data-language", value);
+        const selected = this.props.language.trim().toLowerCase() === value.toLowerCase();
+        item.setAttribute("aria-selected", String(selected));
+        item.innerHTML = `<span>${this.escapeHtml(label)}</span>${selected ? LANGUAGE_SELECTED_ICON : ""}`;
+        item.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const nextInfo = replaceCodeInfoLanguage(this.codeInfo, value);
+          view.dispatch({
+            changes: {
+              from: this.openingLineFrom,
+              to: this.openingLineTo,
+              insert: `${this.openingFence}${nextInfo ? nextInfo : ""}`,
+            },
+            selection: view.state.selection,
+            scrollIntoView: false,
+          });
+          closeMenu();
+          view.focus();
+        });
+        list.appendChild(item);
+      }
+    };
+
+    const openMenu = () => {
+      renderList();
+      menu.hidden = false;
+      toolbar.classList.add("is-menu-open");
+      button.setAttribute("aria-expanded", "true");
+      toolbar.ownerDocument.addEventListener("pointerdown", handleOutsidePointerDown, true);
+      searchInput.focus();
+    };
+
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      if (toolbar.contains(event.target as Node | null)) return;
+      closeMenu();
+    };
+
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (menu.hidden) {
+        openMenu();
+      } else {
+        closeMenu();
+      }
+    });
+
+    searchInput.addEventListener("input", renderList);
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeMenu();
+        view.focus();
+      }
+    });
+
+    toolbar.__markoraDestroyToolbar = () => closeMenu();
+    return control;
+  }
+
+  private bindHoverLines(toolbar: HTMLElement): void {
+    const firstLine = toolbar.closest(".cm-line");
+    if (!(firstLine instanceof HTMLElement)) return;
+    const editorRoot = firstLine.closest(".cm-editor");
+    if (!(editorRoot instanceof HTMLElement)) return;
+
+    const codeLines: HTMLElement[] = [];
+    let current: Element | null = firstLine;
+
+    while (current instanceof HTMLElement && current.classList.contains("cm-markora-code-block-line")) {
+      codeLines.push(current);
+      if (current.classList.contains("cm-markora-code-block-line-end")) break;
+      current = current.nextElementSibling;
+    }
+
+    const rectContains = (rect: DOMRect, event: MouseEvent) =>
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+
+    const updateVisibility = (event: MouseEvent) => {
+      const overCodeBlock = codeLines.some((line) => rectContains(line.getBoundingClientRect(), event));
+      const overToolbar = rectContains(toolbar.getBoundingClientRect(), event);
+      if (this.forceVisible || overCodeBlock || overToolbar || toolbar.classList.contains("is-menu-open")) {
+        toolbar.classList.add("is-visible");
+      } else {
+        toolbar.classList.remove("is-visible");
+      }
+    };
+    const hide = () => {
+      if (this.forceVisible) {
+        toolbar.classList.add("is-visible");
+        return;
+      }
+      if (!toolbar.classList.contains("is-menu-open")) toolbar.classList.remove("is-visible");
+    };
+
+    editorRoot.addEventListener("mousemove", updateVisibility);
+    editorRoot.addEventListener("mouseleave", hide);
+
+    const existingDestroy = (toolbar as ToolbarElement).__markoraDestroyToolbar;
+    (toolbar as ToolbarElement).__markoraDestroyToolbar = () => {
+      existingDestroy?.();
+      editorRoot.removeEventListener("mousemove", updateVisibility);
+      editorRoot.removeEventListener("mouseleave", hide);
+    };
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 }
 
@@ -290,7 +820,12 @@ export class CodePlugin extends DecorationPlugin {
    * with backticks (selected -> `selected`).
    */
   override getExtensions(): Extension[] {
-    return [createWrapSelectionInputHandler({ "`": "`" })];
+    return [
+      createCodeFenceAutoCloseTransactionFilter(),
+      createCodeFenceAutoCloseBeforeInputHandler(),
+      createCodeFenceAutoCloseInputHandler(),
+      createWrapSelectionInputHandler({ "`": "`" }),
+    ];
   }
 
   /**
@@ -379,16 +914,7 @@ export class CodePlugin extends DecorationPlugin {
     const firstTokenMatch = remaining.match(/^([^\s]+)/);
     if (firstTokenMatch && firstTokenMatch[1]) {
       const firstToken = firstTokenMatch[1];
-      const normalizedToken = firstToken.toLowerCase();
-      const isLineNumberDirective = /^(?:line-numbers|linenumbers|showlinenumbers)(?:\{\d+\})?$/.test(normalizedToken);
-      const isKnownDirective =
-        isLineNumberDirective ||
-        normalizedToken === "copy" ||
-        normalizedToken === "diff" ||
-        normalizedToken.startsWith("{") ||
-        normalizedToken.startsWith("/");
-
-      if (!isKnownDirective) {
+      if (!isCodeInfoDirective(firstToken)) {
         props.language = firstToken;
         remaining = remaining.slice(firstToken.length).trim();
       }
@@ -517,15 +1043,21 @@ export class CodePlugin extends DecorationPlugin {
 
     let infoProps: CodeBlockProperties = { language: "" };
     let codeContent = "";
+    let codeInfo = "";
 
     for (let child = node.node.firstChild; child; child = child.nextSibling) {
       if (child.name === "CodeInfo") {
-        infoProps = this.parseCodeInfo(view.state.sliceDoc(child.from, child.to).trim());
+        codeInfo = view.state.sliceDoc(child.from, child.to).trim();
+        infoProps = this.parseCodeInfo(codeInfo);
       }
       if (child.name === "CodeText") {
         codeContent = view.state.sliceDoc(child.from, child.to);
       }
     }
+
+    const openingLineText = view.state.sliceDoc(nodeLineStart.from, nodeLineStart.to);
+    const openingFenceMatch = openingLineText.match(/^(\s*)(```+|~~~+)/);
+    const openingFence = openingFenceMatch ? `${openingFenceMatch[1] ?? ""}${openingFenceMatch[2] ?? CODE_FENCE}` : CODE_FENCE;
 
     const codeLines: string[] = [];
     for (let i = nodeLineStart.number + 1; i <= nodeLineEnd.number - 1; i++) {
@@ -560,18 +1092,29 @@ export class CodePlugin extends DecorationPlugin {
     const diffOldLineNumWidth = Math.max(String(startLineNum).length, String(maxOldDiffLineNum).length);
     const diffNewLineNumWidth = Math.max(String(startLineNum).length, String(maxNewDiffLineNum).length);
 
-    const shouldShowHeader = !cursorInRange && (infoProps.title || infoProps.copy || infoProps.language);
     const shouldShowCaption = !cursorInRange && !!infoProps.caption;
 
-    if (shouldShowHeader) {
-      decorations.push(
-        Decoration.widget({
-          widget: new CodeBlockHeaderWidget(infoProps, codeContent),
-          block: false,
-          side: -1,
-        }).range(nodeLineStart.from)
-      );
-    }
+    const firstContentLineNumber = nodeLineStart.number + 1;
+    const lastContentLineNumber = nodeLineEnd.number - 1;
+    const toolbarLineNumber =
+      firstContentLineNumber <= lastContentLineNumber ? firstContentLineNumber : nodeLineStart.number;
+    const toolbarLine = view.state.doc.line(toolbarLineNumber);
+
+    decorations.push(
+      Decoration.widget({
+        widget: new CodeBlockToolbarWidget(
+          infoProps,
+          codeContent,
+          codeInfo,
+          nodeLineStart.from,
+          nodeLineStart.to,
+          openingFence,
+          cursorInRange
+        ),
+        block: false,
+        side: -1,
+      }).range(toolbarLine.from)
+    );
 
     let codeLineIndex = 0;
     for (let lineNumber = nodeLineStart.number; lineNumber <= nodeLineEnd.number; lineNumber++) {
@@ -579,20 +1122,29 @@ export class CodePlugin extends DecorationPlugin {
       const isFenceLine = lineNumber === nodeLineStart.number || lineNumber === nodeLineEnd.number;
       const relativeLineNum = displayLineNumbers[codeLineIndex] ?? startLineNum + codeLineIndex;
 
-      decorations.push(codeMarkDecorations["code-block-line"].range(line.from));
-
-      if (lineNumber === nodeLineStart.number) {
-        decorations.push(codeMarkDecorations["code-block-line-start"].range(line.from));
-        if (shouldShowHeader) {
-          decorations.push(Decoration.line({ class: "cm-markora-code-block-has-header" }).range(line.from));
-        }
+      if (isFenceLine) {
+        decorations.push(codeMarkDecorations["code-fence-line"].range(line.from));
+        continue;
       }
 
-      if (lineNumber === nodeLineEnd.number) {
+      decorations.push(codeMarkDecorations["code-block-line"].range(line.from));
+      if (!cursorInRange) {
+        decorations.push(codeMarkDecorations["code-block-rendered"].range(line.from));
+      }
+
+      if (lineNumber === firstContentLineNumber) {
+        decorations.push(codeMarkDecorations["code-block-line-start"].range(line.from));
+      }
+
+      if (lineNumber === lastContentLineNumber) {
         decorations.push(codeMarkDecorations["code-block-line-end"].range(line.from));
         if (shouldShowCaption) {
           decorations.push(Decoration.line({ class: "cm-markora-code-block-has-caption" }).range(line.from));
         }
+      }
+
+      if (firstContentLineNumber === lastContentLineNumber) {
+        decorations.push(codeMarkDecorations["code-block-single-line"].range(line.from));
       }
 
       if (!isFenceLine && infoProps.showLineNumbers && !infoProps.diff) {
@@ -652,7 +1204,7 @@ export class CodePlugin extends DecorationPlugin {
       }
     }
 
-    this.decorateFenceMarkers(node.node, cursorInRange, decorations);
+    this.decorateFenceMarkers(node.node, decorations);
 
     if (!cursorInRange && infoProps.caption) {
       decorations.push(
@@ -667,17 +1219,16 @@ export class CodePlugin extends DecorationPlugin {
 
   private decorateFenceMarkers(
     node: SyntaxNode,
-    cursorInRange: boolean,
     decorations: DecorationContext["decorations"]
   ): void {
     for (let child = node.firstChild; child; child = child.nextSibling) {
-      if (child.name === "CodeMark" || child.name === "CodeInfo") {
-        decorations.push(
-          (cursorInRange ? codeMarkDecorations["code-fence"] : codeMarkDecorations["code-hidden"]).range(
-            child.from,
-            child.to
-          )
-        );
+      if (child.name === "CodeMark") {
+        decorations.push(codeMarkDecorations["code-hidden"].range(child.from, child.to));
+        continue;
+      }
+
+      if (child.name === "CodeInfo") {
+        decorations.push(codeMarkDecorations["code-hidden"].range(child.from, child.to));
       }
     }
   }
@@ -816,29 +1367,18 @@ export class CodePlugin extends DecorationPlugin {
       // Wrapper container
       html += `<div class="cm-markora-code-container">`;
 
-      // Header (if title, copy, or language is set)
-      const showHeader = props.title || props.copy || props.language;
-      if (showHeader) {
-        html += `<div class="cm-markora-code-header">`;
-        html += `<div class="cm-markora-code-header-left">`;
-        if (props.title) {
-          html += `<span class="cm-markora-code-header-title">${this.escapeHtml(props.title)}</span>`;
-        } else if (props.language) {
-          html += `<span class="cm-markora-code-header-lang">${this.escapeHtml(props.language)}</span>`;
-        }
-        html += `</div>`;
-        if (props.copy !== false) {
-          html += `<div class="cm-markora-code-header-right">`;
-          // Encode code as base64 to safely store in data attribute (preserves newlines and special chars)
-          const encodedCode =
-            typeof btoa !== "undefined" ? btoa(encodeURIComponent(code)) : Buffer.from(code).toString("base64");
-          html += `<button class="cm-markora-code-copy-btn" type="button" title="Copy code" data-code="${encodedCode}" data-encoded="true">`;
-          html += `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-          html += `</button>`;
-          html += `</div>`;
-        }
-        html += `</div>`;
+      html += `<div class="cm-markora-code-toolbar">`;
+      html += `<button class="cm-markora-code-language-button" type="button"${props.language ? ` data-lang="${this.escapeAttribute(props.language)}"` : ""}>`;
+      html += `<span>${this.escapeHtml(formatLanguageLabel(props.language))}</span>${CHEVRON_DOWN_ICON}`;
+      html += `</button>`;
+      if (props.copy !== false) {
+        // Encode code as base64 to safely store in data attribute (preserves newlines and special chars)
+        const encodedCode = encodeCodeCopyPayload(code);
+        html += `<button class="cm-markora-code-copy-btn" type="button" title="Copy code" data-code="${encodedCode}" data-encoded="true">`;
+        html += COPY_ICON;
+        html += `</button>`;
       }
+      html += `</div>`;
 
       // Calculate line number info
       const startLineNum = typeof props.showLineNumbers === "number" ? props.showLineNumbers : 1;
@@ -868,9 +1408,8 @@ export class CodePlugin extends DecorationPlugin {
       );
 
       // Code block with line processing
-      const hasHeader = showHeader ? " cm-markora-code-block-has-header" : "";
       const hasCaption = props.caption ? " cm-markora-code-block-has-caption" : "";
-      html += `<pre class="cm-markora-code-block${hasHeader}${hasCaption}"${props.language ? ` data-lang="${this.escapeAttribute(props.language)}"` : ""}>`;
+      html += `<pre class="cm-markora-code-block${hasCaption}"${props.language ? ` data-lang="${this.escapeAttribute(props.language)}"` : ""}>`;
       html += `<code>`;
 
       // Process each line

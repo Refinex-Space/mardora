@@ -9,7 +9,14 @@ export { HTMLPlugin } from "./html-plugin";
 export { ImagePlugin } from "./image-plugin";
 export { MathPlugin } from "./math-plugin";
 export { MermaidPlugin } from "./mermaid-plugin";
-export { CodePlugin } from "./code-plugin";
+export {
+  bindCodeCopyButtons,
+  CodePlugin,
+  CODE_COPY_SUCCESS_ICON,
+  copyCodeTextToClipboard,
+  decodeCodeCopyPayload,
+  encodeCodeCopyPayload,
+} from "./code-plugin";
 export { QuotePlugin, resolveCalloutTitleInputTarget, resolveCalloutTypeChange } from "./quote-plugin";
 export type { CalloutLabel, CalloutTitleInputTarget, CalloutTypeChange } from "./quote-plugin";
 export { HRPlugin } from "./hr-plugin";

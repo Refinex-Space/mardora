@@ -19,11 +19,12 @@ export const codePluginTheme = createTheme({
 
       fontFamily: "var(--font-jetbrains-mono, monospace)",
       fontSize: "0.9rem",
-      backgroundColor: "rgba(0, 0, 0, 0.03)",
+      backgroundColor: "transparent",
       padding: "0 1rem !important",
       lineHeight: "1.5",
-      borderLeft: "1px solid var(--color-border)",
-      borderRight: "1px solid var(--color-border)",
+      minHeight: "1.5em",
+      borderLeft: "1px solid var(--color-border, #d4d4d8)",
+      borderRight: "1px solid var(--color-border, #d4d4d8)",
     },
 
     // First line of code block
@@ -31,69 +32,161 @@ export const codePluginTheme = createTheme({
       borderTopLeftRadius: "var(--radius)",
       borderTopRightRadius: "var(--radius)",
       position: "relative",
-      overflow: "hidden",
-      borderTop: "1px solid var(--color-border)",
-      paddingBottom: "0.5rem !important",
+      overflow: "visible",
+      borderTop: "1px solid var(--color-border, #d4d4d8)",
+      paddingTop: "0.5rem !important",
     },
 
-    // Remove top radius when header is present
-    ".cm-markora-code-block-has-header": {
-      padding: "0 !important",
-      paddingBottom: "0.5rem !important",
+    ".cm-markora-code-block-rendered.cm-markora-code-block-line-start": {
+      paddingTop: "0.5rem !important",
+      paddingBottom: "0 !important",
     },
 
-    // Code block header widget
-    ".cm-markora-code-header": {
+    ".cm-markora-code-fence-line": {
+      height: "0",
+      minHeight: "0",
+      lineHeight: "0",
+      paddingTop: "0 !important",
+      paddingBottom: "0 !important",
+      border: "none !important",
+      overflow: "visible",
+    },
+
+    // Code block hover toolbar
+    ".cm-markora-code-toolbar": {
       display: "flex",
-      justifyContent: "space-between",
       alignItems: "center",
-      padding: "0.25rem 1rem",
-      backgroundColor: "rgba(0, 0, 0, 0.06)",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
-      fontSize: "0.85rem",
+      gap: "0.2rem",
+      position: "absolute",
+      top: "50%",
+      right: "0.45rem",
+      zIndex: "20",
+      opacity: "0",
+      pointerEvents: "none",
+      transform: "translateY(-50%)",
+      transition: "opacity 0.12s ease",
+      color: "var(--color-text, inherit)",
+      fontFamily: "var(--font-sans, system-ui, sans-serif)",
+      fontSize: "0.78rem",
+      lineHeight: "1",
 
-      ".cm-markora-code-header-left": {
-        display: "flex",
-        alignItems: "center",
-        gap: "0.5rem",
+      "&.is-visible, &.is-menu-open": {
+        opacity: "1",
+        pointerEvents: "auto",
+      },
+    },
 
-        ".cm-markora-code-header-title": {
-          color: "var(--color-text, inherit)",
-          fontWeight: "500",
-        },
-
-        ".cm-markora-code-header-lang": {
-          color: "#6a737d",
-          opacity: "0.8",
-        },
+    ".cm-markora-code-container:hover .cm-markora-code-toolbar, .cm-markora-code-container:focus-within .cm-markora-code-toolbar":
+      {
+        opacity: "1",
+        pointerEvents: "auto",
       },
 
-      ".cm-markora-code-header-right": {
-        display: "flex",
-        alignItems: "center",
-        gap: "0.5rem",
+    ".cm-markora-code-language-control": {
+      position: "relative",
+    },
 
-        ".cm-markora-code-copy-btn": {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0.25rem",
-          backgroundColor: "transparent",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-          color: "#6a737d",
-          transition: "color 0.2s, background-color 0.2s",
+    ".cm-markora-code-language-button, .cm-markora-code-copy-btn": {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "1.55rem",
+      minWidth: "1.55rem",
+      gap: "0.25rem",
+      padding: "0 0.35rem",
+      backgroundColor: "rgba(255, 255, 255, 0.86)",
+      border: "1px solid rgba(209, 213, 219, 0.9)",
+      borderRadius: "0.25rem",
+      color: "#3f3f46",
+      cursor: "pointer",
+      boxShadow: "none",
+      transition: "background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease",
 
-          "&:hover": {
-            backgroundColor: "rgba(0, 0, 0, 0.1)",
-            color: "var(--color-text, inherit)",
-          },
+      "&:hover": {
+        backgroundColor: "rgba(244, 244, 245, 0.96)",
+        borderColor: "rgba(161, 161, 170, 0.95)",
+        color: "#18181b",
+      },
 
-          "&.copied": {
-            color: "#22c55e",
-          },
+      "&.copied": {
+        color: "#3f3f46",
+      },
+    },
+
+    ".cm-markora-code-copy-btn": {
+      padding: "0",
+    },
+
+    ".cm-markora-code-language-menu": {
+      position: "absolute",
+      top: "calc(100% + 0.35rem)",
+      right: "0",
+      width: "14rem",
+      maxHeight: "18rem",
+      padding: "0.45rem",
+      backgroundColor: "var(--color-background, #fff)",
+      border: "1px solid var(--color-border)",
+      borderRadius: "0.375rem",
+      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.12)",
+      overflow: "hidden",
+
+      "&[hidden]": {
+        display: "none",
+      },
+    },
+
+    ".cm-markora-code-language-search": {
+      display: "flex",
+      alignItems: "center",
+      position: "relative",
+      marginBottom: "0.35rem",
+
+      "& input": {
+        width: "100%",
+        height: "2rem",
+        padding: "0 2rem 0 0.65rem",
+        border: "1px solid var(--color-border)",
+        borderRadius: "0.25rem",
+        backgroundColor: "transparent",
+        color: "var(--color-text, inherit)",
+        outline: "none",
+        font: "inherit",
+
+        "&:focus": {
+          borderColor: "#94a3b8",
         },
+      },
+    },
+
+    ".cm-markora-code-language-search-icon": {
+      position: "absolute",
+      right: "0.55rem",
+      color: "#52525b",
+      pointerEvents: "none",
+    },
+
+    ".cm-markora-code-language-list": {
+      maxHeight: "14.5rem",
+      overflowY: "auto",
+    },
+
+    ".cm-markora-code-language-item": {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      width: "100%",
+      height: "1.9rem",
+      padding: "0 0.45rem",
+      border: "none",
+      borderRadius: "0.25rem",
+      backgroundColor: "transparent",
+      color: "var(--color-text, inherit)",
+      cursor: "pointer",
+      font: "inherit",
+      textAlign: "left",
+
+      "&:hover": {
+        backgroundColor: "rgba(0, 0, 0, 0.07)",
       },
     },
 
@@ -116,12 +209,23 @@ export const codePluginTheme = createTheme({
     ".cm-markora-code-block-line-end": {
       borderBottomLeftRadius: "var(--radius)",
       borderBottomRightRadius: "var(--radius)",
-      borderBottom: "1px solid var(--color-border)",
-      paddingTop: "0.5rem !important",
+      borderBottom: "1px solid var(--color-border, #d4d4d8)",
+      paddingBottom: "0.5rem !important",
+    },
 
-      "& br": {
-        display: "none",
-      },
+    ".cm-markora-code-block-rendered.cm-markora-code-block-line-end": {
+      paddingTop: "0 !important",
+      paddingBottom: "0.5rem !important",
+    },
+
+    ".cm-markora-code-block-single-line": {
+      paddingTop: "0.5rem !important",
+      paddingBottom: "0.5rem !important",
+    },
+
+    ".cm-markora-code-block-rendered.cm-markora-code-block-single-line": {
+      paddingTop: "0.5rem !important",
+      paddingBottom: "0.5rem !important",
     },
 
     // Fence markers (```)
@@ -272,18 +376,14 @@ export const codePluginTheme = createTheme({
     ".cm-markora-code-container": {
       margin: "1rem 0",
       borderRadius: "var(--radius)",
-      overflow: "hidden",
-      border: "1px solid var(--color-border)",
-
-      ".cm-markora-code-header": {
-        borderRadius: "0",
-        border: "none",
-        borderBottom: "1px solid var(--color-border)",
-      },
+      overflow: "visible",
+      border: "1px solid var(--color-border, #d4d4d8)",
+      position: "relative",
+      backgroundColor: "transparent",
 
       ".cm-markora-code-block": {
         margin: "0",
-        borderRadius: "0",
+        borderRadius: "var(--radius)",
         border: "none",
         whiteSpace: "pre-wrap",
       },
@@ -297,20 +397,12 @@ export const codePluginTheme = createTheme({
     ".cm-markora-code-block": {
       fontFamily: "var(--font-jetbrains-mono, monospace)",
       fontSize: "0.9rem",
-      backgroundColor: "rgba(0, 0, 0, 0.03)",
+      backgroundColor: "transparent",
       padding: "1rem",
       overflow: "auto",
       position: "relative",
       borderRadius: "var(--radius)",
-      border: "1px solid var(--color-border)",
-
-      "&.cm-markora-code-block-has-header": {
-        borderTopLeftRadius: "0",
-        borderTopRightRadius: "0",
-        borderTop: "none",
-        margin: "0",
-        paddingTop: "0.5rem !important",
-      },
+      border: "1px solid var(--color-border, #d4d4d8)",
 
       "&.cm-markora-code-block-has-caption": {
         borderBottomLeftRadius: "0",
@@ -327,31 +419,58 @@ export const codePluginTheme = createTheme({
     },
 
     ".cm-markora-code-block-line": {
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      backgroundColor: "transparent",
+      borderLeftColor: "rgba(148, 163, 184, 0.26)",
+      borderRightColor: "rgba(148, 163, 184, 0.26)",
+    },
+
+    ".cm-markora-code-block-line-start": {
+      borderTopColor: "rgba(148, 163, 184, 0.26)",
+    },
+
+    ".cm-markora-code-block-line-end": {
+      borderBottomColor: "rgba(148, 163, 184, 0.26)",
     },
 
     ".cm-markora-code-fence": {
       color: "#8b949e",
     },
 
-    ".cm-markora-code-block": {
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
+    ".cm-markora-code-container": {
+      borderColor: "rgba(148, 163, 184, 0.26)",
+
+      ".cm-markora-code-caption": {
+        borderTopColor: "rgba(148, 163, 184, 0.26)",
+      },
     },
 
-    ".cm-markora-code-header": {
-      backgroundColor: "rgba(255, 255, 255, 0.08)",
+    ".cm-markora-code-block": {
+      backgroundColor: "transparent",
+      borderColor: "rgba(148, 163, 184, 0.26)",
+    },
 
-      ".cm-markora-code-header-lang": {
-        color: "#8b949e",
+    ".cm-markora-code-language-button, .cm-markora-code-copy-btn": {
+      backgroundColor: "rgba(39, 39, 42, 0.72)",
+      borderColor: "rgba(82, 82, 91, 0.9)",
+      color: "#e4e4e7",
+
+      "&:hover": {
+        backgroundColor: "rgba(63, 63, 70, 0.92)",
+        borderColor: "rgba(113, 113, 122, 0.95)",
       },
 
-      ".cm-markora-code-copy-btn": {
-        color: "#8b949e",
-
-        "&:hover": {
-          backgroundColor: "rgba(255, 255, 255, 0.1)",
-        },
+      "&.copied": {
+        color: "#e4e4e7",
       },
+    },
+
+    ".cm-markora-code-language-menu": {
+      backgroundColor: "#18181b",
+      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.35)",
+    },
+
+    ".cm-markora-code-language-search-icon": {
+      color: "#a1a1aa",
     },
 
     ".cm-markora-code-caption": {
