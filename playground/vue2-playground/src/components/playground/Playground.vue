@@ -3,12 +3,10 @@
     <PlaygroundHeader
       :mode="mode"
       :save-status="saveStatus"
-      :sidebar-open="sidebarOpen"
       :devbar-open="devbarOpen"
       :theme-preference="themePreference"
       :shell-locale="shellLocale"
       :theme="theme"
-      @toggle-sidebar="sidebarOpen = !sidebarOpen"
       @toggle-devbar="devbarOpen = !devbarOpen"
       @change-mode="mode = $event"
       @change-theme="setThemePreference"
@@ -18,7 +16,7 @@
     <main class="playground-main">
       <div v-if="showBackdrop" class="backdrop" @click="closePanels" />
 
-      <div class="sidebar-panel" :class="sidebarOpen ? 'panel-open' : 'panel-closed'">
+      <div class="sidebar-panel">
         <PlaygroundSidebar :contents="contents" :current-content="currentContent" @select-content="selectContent" />
       </div>
 
@@ -104,7 +102,6 @@ export default Vue.extend({
       outputTime: null as number | null,
       showNodes: false,
       saveStatus: "idle" as SaveStatus,
-      sidebarOpen: false,
       devbarOpen: false,
       isDesktop: false,
       theme: "light" as ThemeMode,
@@ -121,7 +118,7 @@ export default Vue.extend({
       return getContentMetrics(this.currentDocument?.content || "");
     },
     showBackdrop(): boolean {
-      return !this.isDesktop && (this.sidebarOpen || this.devbarOpen);
+      return !this.isDesktop && this.devbarOpen;
     },
     // Reads the reactive i18n store so this (and the watcher below) track locale changes.
     shellLocale(): ShellLocale {
@@ -151,7 +148,6 @@ export default Vue.extend({
     handleResize() {
       this.isDesktop = window.matchMedia("(min-width: 1280px)").matches;
       if (this.isDesktop) {
-        this.sidebarOpen = true;
         this.devbarOpen = true;
       }
     },
@@ -169,7 +165,6 @@ export default Vue.extend({
           : preference;
     },
     closePanels() {
-      this.sidebarOpen = false;
       this.devbarOpen = false;
     },
     selectContent(index: number) {
