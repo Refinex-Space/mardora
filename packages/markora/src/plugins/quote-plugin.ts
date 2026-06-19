@@ -35,6 +35,16 @@ const calloutIconMap: Record<CalloutLabel, MarkoraIconName> = {
   WARNING: "triangle-alert",
   CAUTION: "octagon-alert",
 };
+const calloutIconMarkupMap: Record<CalloutLabel, string> = {
+  NOTE: '<circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path>',
+  TIP: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path>',
+  IMPORTANT:
+    '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line>',
+  WARNING:
+    '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path>',
+  CAUTION:
+    '<path d="M12 16h.01"></path><path d="M12 8v4"></path><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"></path>',
+};
 const calloutMarkerPattern = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]$/i;
 const calloutMarkerSearchPattern = /\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/i;
 const quotePrefixPattern = /^ {0,3}>\s?/;
@@ -58,6 +68,10 @@ export function parseCalloutInfo(markdown: string): CalloutInfo | null {
 function removeRenderedCalloutMarker(children: string, label: CalloutLabel): string {
   const markerPattern = new RegExp(`^(\\s*(?:<p\\b[^>]*>)?\\s*)\\[!${label}\\]\\s*(?:\\r?\\n)?\\s*`, "i");
   return children.replace(markerPattern, "$1");
+}
+
+function renderCalloutIconHTML(label: CalloutLabel): string {
+  return `<svg class="cm-markora-callout-title-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${calloutIconMarkupMap[label]}</svg>`;
 }
 
 function getQuotePrefixLength(line: string): number | null {
@@ -525,7 +539,7 @@ export class QuotePlugin extends DecorationPlugin {
     const callout = parseCalloutInfo(ctx.sliceDoc(node.from, node.to));
     if (callout) {
       const content = removeRenderedCalloutMarker(children, callout.label);
-      return `<blockquote class="cm-markora-callout cm-markora-callout-${callout.type}"><div class="cm-markora-callout-title">${callout.label}</div><div class="cm-markora-callout-content">${content}</div></blockquote>\n`;
+      return `<blockquote class="cm-markora-callout cm-markora-callout-${callout.type}"><div class="cm-markora-callout-title">${renderCalloutIconHTML(callout.label)}<span>${callout.label}</span></div><div class="cm-markora-callout-content">${content}</div></blockquote>\n`;
     }
 
     return `<blockquote class="cm-markora-quote-line"><div class="cm-markora-quote-content">${children}</div></blockquote>\n`;
@@ -541,6 +555,8 @@ const theme = createTheme({
       paddingTop: "0.25em !important",
       paddingBottom: "0.25em !important",
       marginLeft: "0.25em",
+      minHeight: "1.6em",
+      boxSizing: "content-box",
       opacity: "0.85",
     },
 
@@ -662,17 +678,22 @@ const theme = createTheme({
 
     ".cm-markora-callout": {
       borderLeft: "4px solid var(--markora-callout-color)",
-      borderRadius: "6px",
-      padding: "0.75em 1em",
+      borderRadius: "0",
+      padding: "0.25em 1em",
       margin: "1em 0",
       backgroundColor: "var(--markora-callout-bg)",
     },
 
     ".cm-markora-callout-title": {
       color: "var(--markora-callout-color)",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "0.35em",
       fontWeight: "700",
       fontStyle: "normal",
-      marginBottom: "0.25em",
+      lineHeight: "1.2",
+      marginBottom: "0.75em",
+      padding: "0.05em 0.2em",
     },
 
     ".cm-markora-callout-content": {

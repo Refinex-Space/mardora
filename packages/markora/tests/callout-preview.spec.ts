@@ -1,8 +1,15 @@
 import { describe, expect, it } from "bun:test";
 import { allPlugins, QuotePlugin } from "../src/plugins";
-import { preview } from "../src/preview";
+import { generateCSS, preview } from "../src/preview";
 
 const plugins = [new QuotePlugin()];
+const calloutIconSnippets: Record<string, string> = {
+  NOTE: '<circle cx="12" cy="12" r="10"></circle>',
+  TIP: "M15 14c.2-1 .7-1.7 1.5-2.5",
+  IMPORTANT: "M3.85 8.62a4 4 0 0 1 4.78-4.77",
+  WARNING: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
+  CAUTION: "M15.312 2a2 2 0 0 1 1.414.586",
+};
 
 describe("callout preview", () => {
   it.each([
@@ -18,7 +25,10 @@ describe("callout preview", () => {
     });
 
     expect(html).toContain(`cm-markora-callout-${type}`);
-    expect(html).toContain(`<div class="cm-markora-callout-title">${label}</div>`);
+    expect(html).toContain(`<div class="cm-markora-callout-title">`);
+    expect(html).toContain(`class="cm-markora-callout-title-icon"`);
+    expect(html).toContain(calloutIconSnippets[label]);
+    expect(html).toContain(`<span>${label}</span>`);
     expect(html).toContain("Callout **content**.");
     expect(html).not.toContain(`[!${label}]`);
   });
@@ -30,7 +40,8 @@ describe("callout preview", () => {
     });
 
     expect(html).toContain("cm-markora-callout-warning");
-    expect(html).toContain(`<div class="cm-markora-callout-title">WARNING</div>`);
+    expect(html).toContain(`<span>WARNING</span>`);
+    expect(html).toContain(`class="cm-markora-callout-title-icon"`);
     expect(html).not.toContain("[!warning]");
   });
 
@@ -43,6 +54,16 @@ describe("callout preview", () => {
     expect(html).toContain("cm-markora-callout-tip");
     expect(html).toContain('<span class="cm-markora-strong">content</span>');
     expect(html).not.toContain("[!TIP]");
+  });
+
+  it("generates preview styles aligned with live callout blocks", () => {
+    const css = generateCSS({ plugins });
+
+    expect(css).toContain(".cm-markora-callout-title-icon");
+    expect(css).toContain("display: inline-flex;");
+    expect(css).toContain("gap: 0.35em;");
+    expect(css).toContain("border-radius: 0;");
+    expect(css).toContain("padding: 0.25em 1em;");
   });
 
   it("keeps ordinary blockquotes unchanged", async () => {

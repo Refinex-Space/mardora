@@ -55,6 +55,13 @@ describe("QuotePlugin decorations", () => {
 });
 
 describe("QuotePlugin callout editing", () => {
+  it("keeps empty ordinary quote lines tall enough for visible cursor placement", () => {
+    const styles = new QuotePlugin().theme(ThemeEnum.LIGHT);
+
+    expect(styles[".cm-markora-quote-line"]?.minHeight).toBe("1.6em");
+    expect(styles[".cm-markora-quote-line"]?.boxSizing).toBe("content-box");
+  });
+
   it("keeps empty callout body lines tall enough for visible cursor placement", () => {
     const styles = new QuotePlugin().theme(ThemeEnum.LIGHT);
 
