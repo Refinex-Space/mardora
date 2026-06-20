@@ -1,5 +1,12 @@
 # react-playground
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [fb8b32e]
+  - mardora@1.2.0
+
 ## 0.0.9
 
 ### Patch Changes
