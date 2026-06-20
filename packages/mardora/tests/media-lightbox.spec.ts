@@ -127,6 +127,9 @@ class FakeDocument {
 }
 
 function matchesSelector(node: FakeElement, selector: string): boolean {
+  if (selector.includes(",")) {
+    return selector.split(",").some((part) => matchesSelector(node, part.trim()));
+  }
   if (selector.startsWith(".")) {
     return node.className.split(/\s+/).includes(selector.slice(1));
   }
@@ -200,6 +203,23 @@ describe("openMediaLightbox", () => {
     });
 
     expect(editor.querySelector(".cm-mardora-media-lightbox")).not.toBeNull();
+    expect(fakeDocument.body.children.some((child) => child.className === "cm-mardora-media-lightbox")).toBe(false);
+  });
+
+  it("mounts inside the preview wrapper so generated preview styles apply", () => {
+    const fakeDocument = installFakeDom();
+    const preview = fakeDocument.createElement("div");
+    preview.className = "mardora-preview";
+    const returnFocus = fakeDocument.createElement("button");
+    preview.appendChild(returnFocus);
+    fakeDocument.body.appendChild(preview);
+
+    openMediaLightbox(fakeDocument as unknown as Document, {
+      content: { kind: "image", src: "https://example.com/a.png", alt: "Diagram" },
+      returnFocus: returnFocus as unknown as HTMLElement,
+    });
+
+    expect(preview.querySelector(".cm-mardora-media-lightbox")).not.toBeNull();
     expect(fakeDocument.body.children.some((child) => child.className === "cm-mardora-media-lightbox")).toBe(false);
   });
 

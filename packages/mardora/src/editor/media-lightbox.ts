@@ -55,7 +55,7 @@ export function createMediaPreviewButton(
 
 export function openMediaLightbox(ownerDocument: Document, options: OpenMediaLightboxOptions): MediaLightboxHandle {
   ownerDocument.querySelector(".cm-mardora-media-lightbox")?.remove();
-  const mountPoint = options.returnFocus?.closest(".cm-editor") ?? ownerDocument.body;
+  const mountPoint = options.returnFocus?.closest(".cm-editor, .mardora-preview") ?? ownerDocument.body;
 
   const root = ownerDocument.createElement("div");
   root.className = "cm-mardora-media-lightbox";

@@ -3,6 +3,7 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorState, type Range } from "@codemirror/state";
 import { Decoration, type EditorView } from "@codemirror/view";
 import {
+  bindImagePreviewButtons,
   ImagePlugin,
   parseImageMarkdown,
   resolveImageDeleteChange,
@@ -78,9 +79,22 @@ describe("image plugin", () => {
       plugins: [new ImagePlugin()],
     });
 
-    expect(html).toContain('style="width: 420px;"');
+    expect(html).toContain('<figure class="cm-mardora-image-figure" role="figure" aria-label="Screenshot" style="width: 420px;">');
+    expect(html).toContain('<img class="cm-mardora-image" src="https://example.com/a.png" alt="Desk" title="Screenshot" style="width: 100%;"');
     expect(html).toContain('src="https://example.com/a.png"');
     expect(html).not.toContain("{width=420}");
+  });
+
+  it("renders a preview lightbox button for images in view mode", async () => {
+    const html = await preview('![Desk](https://example.com/a.png "Screenshot")', {
+      plugins: [new ImagePlugin()],
+    });
+
+    expect(html).toContain("cm-mardora-image-toolbar");
+    expect(html).toContain("cm-mardora-image-preview-button");
+    expect(html).toContain('data-src="https://example.com/a.png"');
+    expect(html).toContain('data-alt="Desk"');
+    expect(html).toContain('data-title="Screenshot"');
   });
 
   it("places the rendered image widget after the width attribute so it is not hidden", () => {
@@ -105,6 +119,8 @@ describe("image plugin", () => {
     expect(css).toContain("background-color: rgba(15, 23, 42, 0.24);");
     expect(css).toContain("width: 1.75rem;");
     expect(css).toContain("height: 2.75rem;");
+    expect(css).toContain("margin: 0;");
+    expect(css).toContain("position: relative;");
   });
 
   it("fills the content width by default so images align with surrounding text", () => {
@@ -116,5 +132,68 @@ describe("image plugin", () => {
     expect(figureRule).toContain("width: 100%");
     // Image fills the figure by default.
     expect(imageRule).toContain("width: 100%");
+  });
+
+  it("binds preview image buttons to the shared media lightbox", () => {
+    const button = {
+      className: "cm-mardora-image-preview-button",
+      dataset: { src: "https://example.com/a.png", alt: "Desk", title: "Screenshot" },
+      closest: (selector: string) => (selector === ".cm-mardora-image-preview-button[data-src]" ? button : null),
+      ownerDocument: {
+        querySelector: () => null,
+        createElement: (tagName: string) => ({
+          tagName,
+          className: "",
+          children: [] as unknown[],
+          setAttribute() {},
+          appendChild(child: unknown) {
+            this.children.push(child);
+            return child;
+          },
+          addEventListener() {},
+          focus() {},
+        }),
+        createElementNS: (_namespace: string, tagName: string) => ({
+          tagName,
+          className: "",
+          setAttribute() {},
+          appendChild() {},
+        }),
+        body: {
+          children: [] as unknown[],
+          appendChild(child: unknown) {
+            this.children.push(child);
+            return child;
+          },
+        },
+        addEventListener() {},
+        removeEventListener() {},
+      },
+    };
+    const root = {
+      listeners: new Map<string, (event: Event) => void>(),
+      addEventListener(type: string, listener: (event: Event) => void) {
+        this.listeners.set(type, listener);
+      },
+      removeEventListener(type: string) {
+        this.listeners.delete(type);
+      },
+      contains: () => true,
+    };
+    const cleanup = bindImagePreviewButtons(root as unknown as HTMLElement);
+    const event = {
+      type: "click",
+      target: button,
+      preventDefault() {},
+      stopPropagation() {},
+    } as unknown as Event;
+
+    globalThis.document = button.ownerDocument as unknown as Document;
+    root.listeners.get("click")?.(event);
+
+    expect(button.ownerDocument.body.children).toHaveLength(1);
+    cleanup();
+    delete (globalThis as typeof globalThis & { document?: Document }).document;
+    expect(root.listeners.has("click")).toBe(false);
   });
 });

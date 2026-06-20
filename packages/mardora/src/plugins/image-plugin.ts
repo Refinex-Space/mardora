@@ -44,6 +44,8 @@ interface ImageMarkdownRange {
 
 const imageWidthAttributePattern = /^(\s*)\{width=(\d+)\}/;
 const minImageWidth = 120;
+const previewImageIcon =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="m21 3-7 7"></path><path d="M9 21H3v-6"></path><path d="m3 21 7-7"></path></svg>';
 
 /**
  * Parse image markdown to extract alt text, URL, optional title, and optional pixel width.
@@ -129,6 +131,29 @@ export function resolveImageDeleteChange(input: {
 }): ImageMarkdownChange {
   const range = readImageMarkdownRange(input.doc, input.from, input.to);
   return { from: input.from, to: range.to, insert: "" };
+}
+
+export function bindImagePreviewButtons(root: HTMLElement | Document): () => void {
+  const onClick = (event: Event) => {
+    const target =
+      event.target && typeof (event.target as Element).closest === "function" ? (event.target as Element) : null;
+    const previewButton = target?.closest<HTMLButtonElement>(".cm-mardora-image-preview-button[data-src]");
+    if (!previewButton || !root.contains(previewButton)) return;
+
+    consumeMediaLightboxTrigger(event);
+    openMediaLightbox(previewButton.ownerDocument, {
+      content: {
+        kind: "image",
+        src: previewButton.dataset.src ?? "",
+        alt: previewButton.dataset.alt ?? "",
+        ...(previewButton.dataset.title ? { title: previewButton.dataset.title } : {}),
+      },
+      returnFocus: previewButton,
+    });
+  };
+
+  root.addEventListener("click", onClick);
+  return () => root.removeEventListener("click", onClick);
 }
 
 /**
@@ -362,9 +387,16 @@ function clampImageWidth(width: number, maxWidth: number): number {
 }
 
 function resolveImageMaxWidth(view: EditorView, figure: HTMLElement): number {
-  const content = figure.closest(".cm-content") ?? view.contentDOM ?? view.dom;
+  const content = figure.closest(".cm-line") ?? figure.closest(".cm-content") ?? view.contentDOM ?? view.dom;
   const width = content.getBoundingClientRect().width;
   return Math.max(minImageWidth, Math.round(width || figure.getBoundingClientRect().width || 800));
+}
+
+function renderPreviewImageButton(parsed: ParsedImageMarkdown, ctx: PreviewContext): string {
+  const titleDataAttr = parsed.title ? ` data-title="${ctx.sanitize(parsed.title)}"` : "";
+  return `<div class="cm-mardora-image-toolbar">
+    <button type="button" class="cm-mardora-image-tool-button cm-mardora-image-preview-button" aria-label="放大查看图片" title="放大查看图片" data-src="${ctx.sanitize(parsed.url)}" data-alt="${ctx.sanitize(parsed.alt)}"${titleDataAttr}>${previewImageIcon}</button>
+  </div>`;
 }
 
 /**
@@ -583,10 +615,12 @@ export class ImagePlugin extends DecorationPlugin {
     const altAttr = ctx.sanitize(parsed.alt);
     const titleAttr = parsed.title ? ` title="${ctx.sanitize(parsed.title)}"` : "";
     const ariaLabel = parsed.title ? ` aria-label="${ctx.sanitize(parsed.title)}"` : "";
-    const widthStyle = parsed.width ? ` style="width: ${parsed.width}px;"` : "";
+    const figureWidthStyle = parsed.width ? ` style="width: ${parsed.width}px;"` : "";
+    const imageWidthStyle = parsed.width ? ` style="width: 100%;"` : "";
 
-    let html = `<figure class="cm-mardora-image-figure" role="figure"${ariaLabel}>`;
-    html += `<img class="cm-mardora-image" src="${ctx.sanitize(parsed.url)}" alt="${altAttr}"${titleAttr}${widthStyle} loading="lazy" decoding="async" />`;
+    let html = `<figure class="cm-mardora-image-figure" role="figure"${ariaLabel}${figureWidthStyle}>`;
+    html += `<img class="cm-mardora-image" src="${ctx.sanitize(parsed.url)}" alt="${altAttr}"${titleAttr}${imageWidthStyle} loading="lazy" decoding="async" />`;
+    html += renderPreviewImageButton(parsed, ctx);
 
     if (parsed.title) {
       html += `<figcaption class="cm-mardora-image-caption">${ctx.sanitize(parsed.title)}</figcaption>`;
@@ -644,7 +678,9 @@ const imageTheme = createTheme({
       alignItems: "start",
       width: "100%",
       maxWidth: "100%",
+      margin: "0",
       padding: "0",
+      position: "relative",
     },
 
     ".cm-mardora-image-toolbar": {
