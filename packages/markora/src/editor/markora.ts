@@ -17,6 +17,8 @@ import type { MarkoraSelectionToolbarConfig } from "./selection-toolbar";
 import { selectionToolbar } from "./selection-toolbar";
 import type { MarkoraTocConfig } from "./table-of-contents";
 import { tableOfContents } from "./table-of-contents";
+import type { MarkoraHeadingFoldConfig } from "./heading-fold";
+import { headingFold } from "./heading-fold";
 import type { MarkoraI18nConfig, MarkoraLocale } from "./i18n";
 import { resolveMarkoraLocale } from "./i18n";
 
@@ -93,6 +95,9 @@ export interface MarkoraConfig {
 
   /** Table of contents configuration */
   toc?: MarkoraTocConfig;
+
+  /** Heading section folding configuration */
+  headingFold?: MarkoraHeadingFoldConfig;
 }
 
 /**
@@ -136,6 +141,7 @@ export function markora(config: MarkoraConfig = {}): Extension[] {
     attachments: configAttachments = { enabled: false },
     selectionToolbar: configSelectionToolbar = { enabled: true },
     toc: configToc = { enabled: true },
+    headingFold: configHeadingFold = { enabled: true },
   } = config;
   const resolvedLocale = resolveMarkoraLocale(configSlashCommands.locale ?? configI18n.locale ?? configLocale);
 
@@ -233,6 +239,7 @@ export function markora(config: MarkoraConfig = {}): Extension[] {
     attachments(configAttachments),
     selectionToolbar(configSelectionToolbar),
     tableOfContents(configToc),
+    ...(!disableViewPlugin ? headingFold(configHeadingFold) : []),
 
     // Plugin extensions & keymaps
     pluginExtensions,
