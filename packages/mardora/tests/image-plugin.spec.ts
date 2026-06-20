@@ -34,6 +34,45 @@ function imageDecorationRanges(doc: string): Array<{ from: number; to: number; c
   }));
 }
 
+function imageWidgetFor(doc: string): { ignoreEvent(event: Event): boolean } {
+  const state = EditorState.create({
+    doc,
+    extensions: [markdown({ base: markdownLanguage })],
+  });
+  const decorations: Range<Decoration>[] = [];
+
+  new ImagePlugin().buildDecorations({
+    view: { state } as unknown as EditorView,
+    decorations,
+    selectionOverlapsRange: () => false,
+    cursorInRange: () => false,
+  });
+
+  const widget = decorations.find((decoration) => "widget" in decoration.value.spec)?.value.spec.widget;
+  if (!widget || typeof widget.ignoreEvent !== "function") {
+    throw new Error("Image widget decoration was not created");
+  }
+
+  return widget;
+}
+
+function fakeTarget(className: string, parent?: ReturnType<typeof fakeTarget>) {
+  return {
+    className,
+    closest(selector: string) {
+      const selectors = selector.split(",").map((part) => part.trim());
+      if (selectors.some((part) => part.startsWith(".") && className.split(/\s+/).includes(part.slice(1)))) {
+        return this;
+      }
+      return parent?.closest(selector) ?? null;
+    },
+  };
+}
+
+function fakeEvent(type: string, target: ReturnType<typeof fakeTarget>): Event {
+  return { type, target } as unknown as Event;
+}
+
 describe("image plugin", () => {
   it("parses optional pixel width attributes after image markdown", () => {
     expect(parseImageMarkdown('![Desk](https://example.com/a.png "Screenshot"){width=420}')).toEqual({
@@ -109,6 +148,21 @@ describe("image plugin", () => {
       from: 0,
       to: doc.length,
     });
+  });
+
+  it("keeps image widget pointer starts out of CodeMirror mouse selection", () => {
+    const widget = imageWidgetFor("![Desk](https://example.com/a.png)");
+    const figure = fakeTarget("cm-mardora-image-figure cm-mardora-media-preview");
+    const resizeHandle = fakeTarget("cm-mardora-image-resize-handle cm-mardora-image-resize-handle-right", figure);
+    const toolButton = fakeTarget("cm-mardora-image-tool-button cm-mardora-image-preview-button", figure);
+
+    expect(widget.ignoreEvent(fakeEvent("mousedown", figure))).toBe(true);
+    expect(widget.ignoreEvent(fakeEvent("pointerdown", figure))).toBe(true);
+    expect(widget.ignoreEvent(fakeEvent("mousedown", resizeHandle))).toBe(true);
+    expect(widget.ignoreEvent(fakeEvent("pointerdown", resizeHandle))).toBe(true);
+    expect(widget.ignoreEvent(fakeEvent("mousedown", toolButton))).toBe(true);
+    expect(widget.ignoreEvent(fakeEvent("pointerdown", toolButton))).toBe(true);
+    expect(widget.ignoreEvent(fakeEvent("click", figure))).toBe(false);
   });
 
   it("generates compact image hover controls, resize handles, and lighter lightbox overlay", () => {

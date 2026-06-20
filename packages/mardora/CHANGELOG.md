@@ -1,5 +1,11 @@
 # mardora
 
+## 1.2.2
+
+### Patch Changes
+
+- Prevent image widget pointer and mouse interactions from leaking into CodeMirror text selection.
+
 ## 1.2.0
 
 ### Minor Changes
