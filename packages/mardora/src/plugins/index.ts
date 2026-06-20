@@ -6,7 +6,7 @@ export { LinkPlugin } from "./link-plugin";
 export { ListPlugin } from "./list-plugin";
 export { TablePlugin } from "./table-plugin";
 export { HTMLPlugin } from "./html-plugin";
-export { ImagePlugin } from "./image-plugin";
+export { bindImagePreviewButtons, ImagePlugin } from "./image-plugin";
 export { MathPlugin } from "./math-plugin";
 export { MermaidPlugin } from "./mermaid-plugin";
 export {

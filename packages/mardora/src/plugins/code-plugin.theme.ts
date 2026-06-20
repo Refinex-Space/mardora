@@ -6,7 +6,7 @@ export const codePluginTheme = createTheme({
     // Inline code
     ".cm-mardora-code-inline": {
       fontFamily: "var(--font-jetbrains-mono, monospace)",
-      fontSize: "0.9rem",
+      fontSize: "0.9em",
       backgroundColor: "rgba(0, 0, 0, 0.05)",
       padding: "0.1rem 0.25rem",
       border: "1px solid var(--color-border)",
@@ -58,12 +58,11 @@ export const codePluginTheme = createTheme({
       alignItems: "center",
       gap: "0.2rem",
       position: "absolute",
-      top: "50%",
+      top: "0.5rem",
       right: "0.45rem",
       zIndex: "20",
       opacity: "0",
       pointerEvents: "none",
-      transform: "translateY(-50%)",
       transition: "opacity 0.12s ease",
       color: "var(--color-text, inherit)",
       fontFamily: "var(--font-sans, system-ui, sans-serif)",

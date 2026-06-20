@@ -47,7 +47,7 @@ import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import type { MardoraNode, MardoraTocItem } from "mardora/editor";
 import { mardora, ThemeEnum } from "mardora/editor";
-import { bindCodeCopyButtons } from "mardora/plugins";
+import { bindCodeCopyButtons, bindImagePreviewButtons } from "mardora/plugins";
 import { extractPreviewTocFromMarkdown, generateCSS, preview } from "mardora/preview";
 import { getActivePlugins } from "@/state/playgroundConfig";
 import type { Content, PlaygroundConfig, PlaygroundMode, PreviewOutput, ThemeMode } from "@/types";
@@ -101,6 +101,7 @@ export default Vue.extend({
       cssView: null as EditorView | null,
       previewStyleElement: null as HTMLStyleElement | null,
       previewCopyCleanup: null as (() => void) | null,
+      previewImageCleanup: null as (() => void) | null,
       previewOutput: { html: "", css: "" } as PreviewOutput,
       internalUpdate: false,
       renderRequest: 0,
@@ -200,6 +201,10 @@ export default Vue.extend({
       if (this.previewCopyCleanup) {
         this.previewCopyCleanup();
         this.previewCopyCleanup = null;
+      }
+      if (this.previewImageCleanup) {
+        this.previewImageCleanup();
+        this.previewImageCleanup = null;
       }
       this.previewToc = [];
     },
@@ -327,6 +332,7 @@ export default Vue.extend({
         if (this.mode === "view") {
           this.updatePreviewStyles();
           this.bindPreviewCodeCopyButtons();
+          this.bindPreviewImageButtons();
           this.syncPreviewTocActive();
         }
         if (this.mode === "output") {
@@ -376,6 +382,16 @@ export default Vue.extend({
       const previewHost = this.$refs.previewHost as HTMLElement | undefined;
       if (!previewHost) return;
       this.previewCopyCleanup = bindCodeCopyButtons(previewHost);
+    },
+    bindPreviewImageButtons() {
+      if (this.previewImageCleanup) {
+        this.previewImageCleanup();
+        this.previewImageCleanup = null;
+      }
+
+      const previewHost = this.$refs.previewHost as HTMLElement | undefined;
+      if (!previewHost) return;
+      this.previewImageCleanup = bindImagePreviewButtons(previewHost);
     },
     createOutputViews() {
       const htmlParent = this.$refs.htmlOutputHost as HTMLElement | undefined;
