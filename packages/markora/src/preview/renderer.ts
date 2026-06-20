@@ -116,6 +116,10 @@ export class PreviewRenderer {
    * Render a single node to HTML
    */
   private async renderNode(node: SyntaxNode): Promise<string> {
+    return (await this.renderNodeWithExtent(node)).html;
+  }
+
+  private async renderNodeWithExtent(node: SyntaxNode): Promise<{ html: string; to: number }> {
     // Get plugins that handle this node type (O(1) lookup)
     const plugins = this.nodeToPlugins.get(node.name);
     if (plugins) {
@@ -123,7 +127,10 @@ export class PreviewRenderer {
         const children = await this.renderChildren(node);
         const result = await plugin.renderToHTML!(node, children, this.ctx);
         if (result !== null) {
-          return result;
+          return {
+            html: result,
+            to: Math.max(node.to, plugin.getPreviewConsumedTo?.(node, this.ctx) ?? node.to),
+          };
         }
       }
     }
@@ -132,16 +139,16 @@ export class PreviewRenderer {
     const renderer = this.renderers[node.name];
     if (renderer) {
       const children = await this.renderChildren(node);
-      return renderer(node, children, this.ctx);
+      return { html: renderer(node, children, this.ctx), to: node.to };
     }
 
     // Unknown node - render children or text
     if (node.firstChild) {
-      return await this.renderChildren(node);
+      return { html: await this.renderChildren(node), to: node.to };
     }
 
     // Leaf node - return text content
-    return this.ctx.sliceDoc(node.from, node.to);
+    return { html: this.ctx.sliceDoc(node.from, node.to), to: node.to };
   }
 
   /**
@@ -159,10 +166,11 @@ export class PreviewRenderer {
       }
 
       // Render the child node
-      result += await this.renderNode(child);
+      const rendered = await this.renderNodeWithExtent(child);
+      result += rendered.html;
 
       // Update position to end of this child
-      pos = child.to;
+      pos = rendered.to;
       child = child.nextSibling;
     }
 

@@ -218,11 +218,25 @@ export abstract class MarkoraPlugin {
     node: SyntaxNode,
     children: string,
     ctx: {
+      doc: string;
       sliceDoc(from: number, to: number): string;
       sanitize(html: string): string;
       syntaxHighlighters?: readonly import("@lezer/highlight").Highlighter[];
     }
   ): string | null | Promise<string | null>;
+
+  /**
+   * Return the document position consumed by preview rendering.
+   * Plugins can use this when a rendered node owns trailing syntax that is
+   * outside the Lezer node range, such as image attributes.
+   */
+  getPreviewConsumedTo?(
+    node: SyntaxNode,
+    ctx: {
+      doc: string;
+      sliceDoc(from: number, to: number): string;
+    }
+  ): number | null;
 
   /**
    * Get CSS styles for preview mode
