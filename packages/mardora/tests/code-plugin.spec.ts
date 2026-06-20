@@ -79,6 +79,17 @@ describe("code plugin", () => {
     expect(html).not.toContain("cm-mardora-code-header");
   });
 
+  it("labels mermaid code fences with the Mermaid language option", async () => {
+    const html = await preview("```mermaid\ngraph TD\n  A --> B\n```", {
+      plugins: [new CodePlugin()],
+      sanitize: true,
+    });
+
+    expect(html).toContain("data-lang=\"mermaid\"");
+    expect(html).toContain("<span>Mermaid</span>");
+    expect(html).not.toContain("<span>mermaid</span>");
+  });
+
   it("stores copy button payload as plain code text and uses the required success icon", async () => {
     const code = 'const el = document.querySelector("img");\nconsole.log(el);';
     const html = await preview(`\`\`\`ts\n${code}\n\`\`\``, {
@@ -115,7 +126,7 @@ describe("code plugin", () => {
     expect(inlineCodeRule).not.toContain("font-size: 0.9rem;");
   });
 
-  it("keeps single-line code blocks vertically balanced with floating tools", () => {
+  it("keeps code block floating tools pinned to the top-right corner", () => {
     const css = generateCSS({ plugins: [new CodePlugin()] });
 
     expect(css).toContain(".cm-mardora-code-block-single-line");
@@ -123,8 +134,9 @@ describe("code plugin", () => {
     expect(css).toContain("min-height: 1.5em;");
     expect(css).toContain("padding-top: 0.5rem !important;");
     expect(css).toContain("padding-bottom: 0.5rem !important;");
-    expect(css).toContain("top: 50%;");
-    expect(css).toContain("transform: translateY(-50%);");
+    expect(css).toContain("top: 0.5rem;");
+    expect(css).toContain("right: 0.45rem;");
+    expect(css).not.toContain("transform: translateY(-50%);");
   });
 
   it("keeps empty fenced code blocks tall enough for direct input", () => {
