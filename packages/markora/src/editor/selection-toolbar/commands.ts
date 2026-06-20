@@ -3,6 +3,7 @@ import type {
   LinkChangeInput,
   ParsedSelectionLink,
   SelectionToolbarListKind,
+  SelectionToolbarBlockType,
   TextChange,
   TextCommandResult,
 } from "./types";
@@ -10,6 +11,7 @@ import type {
 const markdownLinkPattern = /^\[([^\]]*)\]\(([^)]*)\)$/;
 const urlPattern = /^(https?:\/\/|www\.)[^\s]+$/i;
 const listMarkerPattern = /^(\s*)([-*+]|\d+\.)\s(\[[ xX]\]\s)?/;
+const headingMarkerPattern = /^(\s*)(#{1,6})(?:[ \t]+|$)/;
 
 function selectedText(input: Pick<InlineFormatInput, "doc" | "from" | "to">): string {
   return input.doc.slice(input.from, input.to);
@@ -160,4 +162,118 @@ export function buildListChange(input: { doc: string; from: number; to: number; 
   }
 
   return { changes };
+}
+
+function headingLevelForLine(text: string): number {
+  return text.match(headingMarkerPattern)?.[2]?.length ?? 0;
+}
+
+function escapePlainTextBlockStart(text: string): string {
+  if (/^\d+[.)]\s/.test(text)) {
+    return text.replace(/^(\d+)([.)])/, "$1\\$2");
+  }
+  if (/^[-*+]\s/.test(text) || /^#{1,6}(\s|$)/.test(text) || /^>\s?/.test(text)) {
+    return `\\${text}`;
+  }
+  return text;
+}
+
+function unescapePlainTextBlockStart(text: string): string {
+  if (/^\d+\\[.)]\s/.test(text)) {
+    return text.replace(/^(\d+)\\([.)])/, "$1$2");
+  }
+  if (/^\\([-*+#>])/.test(text)) {
+    return text.slice(1);
+  }
+  return text;
+}
+
+export function detectSelectionBlockType(input: { doc: string; from: number; to: number }): SelectionToolbarBlockType {
+  const line = lineRanges(input.doc, input.from, input.to)[0];
+  const level = line ? headingLevelForLine(line.text) : 0;
+  return level > 0 ? (`heading-${level}` as SelectionToolbarBlockType) : "text";
+}
+
+export function buildBlockTypeChange(input: {
+  doc: string;
+  from: number;
+  to: number;
+  level: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+}): TextCommandResult {
+  const changes: TextChange[] = [];
+  const lines = lineRanges(input.doc, input.from, input.to);
+  let accumulatedDelta = 0;
+  let selectionAnchor: number | null = null;
+  let selectionHead: number | null = null;
+
+  for (const line of lines) {
+    const lineTo = line.from + line.text.length;
+    const headingMatch = line.text.match(headingMarkerPattern);
+    const indent = headingMatch?.[1] ?? line.text.match(/^(\s*)/)?.[1] ?? "";
+    const oldPrefixLength = headingMatch ? headingMatch[0].length : indent.length;
+    const content = line.text.slice(oldPrefixLength);
+
+    if (input.level === 0 && headingMatch) {
+      const escapedContent = escapePlainTextBlockStart(content);
+      if (escapedContent !== content) {
+        const insert = `${indent}${escapedContent}`;
+        const delta = insert.length - line.text.length;
+        changes.push({
+          from: line.from,
+          to: lineTo,
+          insert,
+        });
+
+        const newContentFrom = line.from + accumulatedDelta + indent.length;
+        const newContentTo = lineTo + accumulatedDelta + delta;
+        selectionAnchor ??= newContentFrom;
+        selectionHead = newContentTo;
+        accumulatedDelta += delta;
+        continue;
+      }
+    }
+
+    const newPrefix = input.level === 0 ? indent : `${indent}${"#".repeat(input.level)} `;
+    const delta = newPrefix.length - oldPrefixLength;
+    const headingContent = input.level > 0 ? unescapePlainTextBlockStart(content) : content;
+
+    if (input.level > 0 && headingContent !== content) {
+      const insert = `${newPrefix}${headingContent}`;
+      const lineDelta = insert.length - line.text.length;
+      changes.push({
+        from: line.from,
+        to: lineTo,
+        insert,
+      });
+
+      const newContentFrom = line.from + accumulatedDelta + newPrefix.length;
+      const newContentTo = lineTo + accumulatedDelta + lineDelta;
+      selectionAnchor ??= newContentFrom;
+      selectionHead = newContentTo;
+      accumulatedDelta += lineDelta;
+      continue;
+    }
+
+    if (newPrefix !== line.text.slice(0, oldPrefixLength)) {
+      changes.push({
+        from: line.from,
+        to: line.from + oldPrefixLength,
+        insert: newPrefix,
+      });
+    }
+
+    const newContentFrom = line.from + accumulatedDelta + newPrefix.length;
+    const newContentTo = lineTo + accumulatedDelta + delta;
+    selectionAnchor ??= newContentFrom;
+    selectionHead = newContentTo;
+    accumulatedDelta += delta;
+  }
+
+  return {
+    changes,
+    selection: {
+      anchor: selectionAnchor ?? input.from,
+      head: selectionHead ?? input.to,
+    },
+  };
 }

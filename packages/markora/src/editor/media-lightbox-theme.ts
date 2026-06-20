@@ -46,7 +46,7 @@ export const mediaLightboxTheme = createTheme({
       alignItems: "center",
       justifyContent: "center",
       padding: "2rem",
-      backgroundColor: "rgba(15, 23, 42, 0.42)",
+      backgroundColor: "rgba(15, 23, 42, 0.24)",
     },
     ".cm-markora-media-lightbox-panel": {
       position: "relative",

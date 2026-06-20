@@ -109,6 +109,7 @@ export class InlinePlugin extends DecorationPlugin {
     "SubscriptMark",
     "SuperscriptMark",
     "HighlightMark",
+    "Escape",
   ] as const;
   marks: string[] = [];
 
@@ -200,6 +201,11 @@ export class InlinePlugin extends DecorationPlugin {
     tree.iterate({
       enter: (node) => {
         const { from, to, name } = node;
+
+        if (name === "Escape") {
+          decorations.push(inlineMarkDecorations["inline-mark"].range(from, Math.min(from + 1, to)));
+          return;
+        }
 
         // Check if this is an inline type we handle
         const inlineType = INLINE_TYPES[name as keyof typeof INLINE_TYPES];

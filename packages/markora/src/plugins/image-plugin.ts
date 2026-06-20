@@ -2,8 +2,10 @@ import { Decoration, EditorView, KeyBinding, WidgetType } from "@codemirror/view
 import { syntaxTree } from "@codemirror/language";
 import { DecorationContext, DecorationPlugin } from "../editor/plugin";
 import { createTheme } from "../editor";
-import { createMediaPreviewButton } from "../editor/media-lightbox";
+import { consumeMediaLightboxTrigger, openMediaLightbox } from "../editor/media-lightbox";
 import { mediaLightboxTheme } from "../editor/media-lightbox-theme";
+import { createMarkoraIcon } from "../editor/icons";
+import type { PreviewContext } from "../preview/types";
 import { SyntaxNode } from "@lezer/common";
 
 /**
@@ -17,25 +19,116 @@ const imageMarkDecorations = {
   "image-hidden": Decoration.mark({ class: "cm-markora-image-hidden" }),
 };
 
+export interface ParsedImageMarkdown {
+  readonly alt: string;
+  readonly url: string;
+  readonly title?: string;
+  readonly width?: number;
+}
+
+export interface ImageMarkdownChange {
+  readonly from: number;
+  readonly to: number;
+  readonly insert: string;
+}
+
+interface ImageMarkdownRange {
+  readonly from: number;
+  readonly imageTo: number;
+  readonly to: number;
+  readonly markdown: string;
+  readonly width?: number;
+  readonly widthAttrFrom?: number;
+  readonly widthAttrTo?: number;
+}
+
+const imageWidthAttributePattern = /^(\s*)\{width=(\d+)\}/;
+const minImageWidth = 120;
+
 /**
- * Parse image markdown to extract alt text, URL, and optional title
- * Format: ![alt text](url "optional title")
+ * Parse image markdown to extract alt text, URL, optional title, and optional pixel width.
+ * Format: ![alt text](url "optional title"){width=420}
  */
-function parseImageMarkdown(content: string): { alt: string; url: string; title?: string } | null {
+export function parseImageMarkdown(content: string): ParsedImageMarkdown | null {
+  const trimmed = content.trim();
+  const widthMatch = trimmed.match(/\{width=(\d+)\}$/);
+  const markdown = widthMatch ? trimmed.slice(0, widthMatch.index).trimEnd() : trimmed;
+
   // Regex to match: ![alt](url) or ![alt](url "title")
-  const match = content.match(/^!\[([^\]]*)\]\(([^"\s)]+)(?:\s+"([^"]*)")?\s*\)$/);
+  const match = markdown.match(/^!\[([^\]]*)\]\(([^"\s)]+)(?:\s+"([^"]*)")?\s*\)$/);
   if (!match) return null;
 
-  const result: { alt: string; url: string; title?: string } = {
+  const result: ParsedImageMarkdown = {
     alt: match[1] || "",
     url: match[2]!,
+    ...(widthMatch ? { width: Number(widthMatch[1]) } : {}),
   };
 
   if (match[3] !== undefined) {
-    result.title = match[3];
+    return { ...result, title: match[3] };
   }
 
   return result;
+}
+
+function readImageMarkdownRange(doc: string, from: number, imageTo: number): ImageMarkdownRange {
+  const lineEnd = doc.indexOf("\n", imageTo);
+  const scanTo = lineEnd === -1 ? doc.length : lineEnd;
+  const afterImage = doc.slice(imageTo, scanTo);
+  const widthMatch = afterImage.match(imageWidthAttributePattern);
+  if (widthMatch) {
+    const widthAttrTo = imageTo + widthMatch[0].length;
+    return {
+      from,
+      imageTo,
+      to: widthAttrTo,
+      markdown: doc.slice(from, widthAttrTo),
+      width: Number(widthMatch[2]),
+      widthAttrFrom: imageTo,
+      widthAttrTo,
+    };
+  }
+
+  return {
+    from,
+    imageTo,
+    to: imageTo,
+    markdown: doc.slice(from, imageTo),
+  };
+}
+
+export function resolveImageWidthChange(input: {
+  readonly doc: string;
+  readonly from: number;
+  readonly to: number;
+  readonly width: number;
+}): ImageMarkdownChange {
+  const range = readImageMarkdownRange(input.doc, input.from, input.to);
+  const width = Math.max(1, Math.round(input.width));
+  return {
+    from: range.widthAttrFrom ?? input.to,
+    to: range.widthAttrTo ?? input.to,
+    insert: `{width=${width}}`,
+  };
+}
+
+export function resolveImageResetWidthChange(input: {
+  readonly doc: string;
+  readonly from: number;
+  readonly to: number;
+}): ImageMarkdownChange | null {
+  const range = readImageMarkdownRange(input.doc, input.from, input.to);
+  if (range.widthAttrFrom === undefined || range.widthAttrTo === undefined) return null;
+  return { from: range.widthAttrFrom, to: range.widthAttrTo, insert: "" };
+}
+
+export function resolveImageDeleteChange(input: {
+  readonly doc: string;
+  readonly from: number;
+  readonly to: number;
+}): ImageMarkdownChange {
+  const range = readImageMarkdownRange(input.doc, input.from, input.to);
+  return { from: input.from, to: range.to, insert: "" };
 }
 
 /**
@@ -47,7 +140,9 @@ class ImageWidget extends WidgetType {
     readonly url: string,
     readonly alt: string,
     readonly from: number,
+    readonly imageTo: number,
     readonly to: number,
+    readonly width?: number,
     readonly title?: string
   ) {
     super();
@@ -58,7 +153,9 @@ class ImageWidget extends WidgetType {
       other.url === this.url &&
       other.alt === this.alt &&
       other.from === this.from &&
+      other.imageTo === this.imageTo &&
       other.to === this.to &&
+      other.width === this.width &&
       other.title === this.title
     );
   }
@@ -69,9 +166,23 @@ class ImageWidget extends WidgetType {
     figure.className = "cm-markora-image-figure cm-markora-media-preview";
     figure.setAttribute("role", "figure");
     figure.style.cursor = "pointer";
+    if (this.width) {
+      figure.style.width = `${this.width}px`;
+    }
     if (this.title) {
       figure.setAttribute("aria-label", this.title);
     }
+
+    const activateFigure = () => figure.classList.add("cm-markora-image-figure-active");
+    const deactivateFigure = () => {
+      if (!figure.matches(":focus-within")) figure.classList.remove("cm-markora-image-figure-active");
+    };
+    figure.addEventListener("pointerenter", activateFigure);
+    figure.addEventListener("mouseenter", activateFigure);
+    figure.addEventListener("focusin", activateFigure);
+    figure.addEventListener("pointerleave", deactivateFigure);
+    figure.addEventListener("mouseleave", deactivateFigure);
+    figure.addEventListener("focusout", deactivateFigure);
 
     // Click handler to select the raw markdown text
     figure.addEventListener("click", (e) => {
@@ -94,6 +205,9 @@ class ImageWidget extends WidgetType {
     if (this.title) {
       img.title = this.title;
     }
+    if (this.width) {
+      img.style.width = "100%";
+    }
 
     // Handle image loading error
     img.onerror = () => {
@@ -106,6 +220,9 @@ class ImageWidget extends WidgetType {
     };
 
     figure.appendChild(img);
+    figure.appendChild(this.createToolbar(view, figure));
+    figure.appendChild(this.createResizeHandle(view, figure, "left"));
+    figure.appendChild(this.createResizeHandle(view, figure, "right"));
 
     // Add figcaption if title exists
     if (this.title) {
@@ -115,25 +232,139 @@ class ImageWidget extends WidgetType {
       figure.appendChild(figcaption);
     }
 
-    figure.appendChild(
-      createMediaPreviewButton(figure.ownerDocument, {
-        label: "放大查看图片",
-        content: () => ({
-          kind: "image",
-          src: this.url,
-          alt: this.alt,
-          ...(this.title === undefined ? {} : { title: this.title }),
-        }),
-      })
-    );
-
     return figure;
   }
 
   override ignoreEvent(event: Event) {
-    // Allow click events to be handled by our click handler
-    return event.type !== "click";
+    return !["click", "mousedown", "mouseup", "mousemove", "pointerdown", "pointermove", "pointerup"].includes(
+      event.type
+    );
   }
+
+  private createToolbar(view: EditorView, figure: HTMLElement): HTMLElement {
+    const toolbar = figure.ownerDocument.createElement("div");
+    toolbar.className = "cm-markora-image-toolbar";
+    toolbar.appendChild(
+      this.createToolButton(figure.ownerDocument, "还原默认大小", "rotate-ccw", () => {
+        const change = resolveImageResetWidthChange({
+          doc: view.state.doc.toString(),
+          from: this.from,
+          to: this.imageTo,
+        });
+        if (!change) return;
+        view.dispatch({ changes: change });
+        view.focus();
+      })
+    );
+    toolbar.appendChild(
+      this.createToolButton(figure.ownerDocument, "放大查看图片", "maximize-2", () => {
+        openMediaLightbox(figure.ownerDocument, {
+          content: {
+            kind: "image",
+            src: this.url,
+            alt: this.alt,
+            ...(this.title === undefined ? {} : { title: this.title }),
+          },
+          returnFocus: toolbar.querySelector(".cm-markora-image-preview-button") as HTMLElement | null,
+        });
+      }, "cm-markora-image-preview-button")
+    );
+    toolbar.appendChild(
+      this.createToolButton(figure.ownerDocument, "删除图片", "trash-2", () => {
+        view.dispatch({
+          changes: resolveImageDeleteChange({
+            doc: view.state.doc.toString(),
+            from: this.from,
+            to: this.imageTo,
+          }),
+        });
+        view.focus();
+      })
+    );
+    return toolbar;
+  }
+
+  private createToolButton(
+    ownerDocument: Document,
+    label: string,
+    iconName: string,
+    onActivate: () => void,
+    extraClass = ""
+  ): HTMLButtonElement {
+    const button = ownerDocument.createElement("button");
+    button.type = "button";
+    button.className = `cm-markora-image-tool-button${extraClass ? ` ${extraClass}` : ""}`;
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    const icon = createMarkoraIcon(iconName);
+    if (icon) button.appendChild(icon);
+    button.addEventListener("click", (event) => {
+      consumeMediaLightboxTrigger(event);
+      onActivate();
+    });
+    return button;
+  }
+
+  private createResizeHandle(view: EditorView, figure: HTMLElement, side: "left" | "right"): HTMLElement {
+    const handle = figure.ownerDocument.createElement("span");
+    handle.className = `cm-markora-image-resize-handle cm-markora-image-resize-handle-${side}`;
+    handle.setAttribute("role", "separator");
+    handle.setAttribute("aria-label", side === "left" ? "向左拖拽调整图片宽度" : "向右拖拽调整图片宽度");
+    if (figure.ownerDocument.defaultView?.PointerEvent) {
+      handle.addEventListener("pointerdown", (event) => this.startResize(event, view, figure, side));
+    } else {
+      handle.addEventListener("mousedown", (event) => this.startResize(event, view, figure, side));
+    }
+    return handle;
+  }
+
+  private startResize(event: PointerEvent | MouseEvent, view: EditorView, figure: HTMLElement, side: "left" | "right") {
+    consumeMediaLightboxTrigger(event);
+    const ownerDocument = figure.ownerDocument;
+    const startX = event.clientX;
+    const startWidth = Math.max(minImageWidth, figure.getBoundingClientRect().width || this.width || minImageWidth);
+    const maxWidth = resolveImageMaxWidth(view, figure);
+    const direction = side === "right" ? 1 : -1;
+    const image = figure.querySelector("img");
+    if (image) image.style.width = "100%";
+    let nextWidth = startWidth;
+
+    const moveEvent = event.type.startsWith("pointer") ? "pointermove" : "mousemove";
+    const upEvent = event.type.startsWith("pointer") ? "pointerup" : "mouseup";
+    const onMove = (move: Event) => {
+      const pointer = move as PointerEvent | MouseEvent;
+      consumeMediaLightboxTrigger(pointer);
+      nextWidth = clampImageWidth(startWidth + (pointer.clientX - startX) * direction, maxWidth);
+      figure.style.width = `${nextWidth}px`;
+    };
+    const onUp = (up: Event) => {
+      consumeMediaLightboxTrigger(up);
+      ownerDocument.removeEventListener(moveEvent, onMove);
+      ownerDocument.removeEventListener(upEvent, onUp);
+      view.dispatch({
+        changes: resolveImageWidthChange({
+          doc: view.state.doc.toString(),
+          from: this.from,
+          to: this.imageTo,
+          width: nextWidth,
+        }),
+      });
+      view.focus();
+    };
+
+    ownerDocument.addEventListener(moveEvent, onMove);
+    ownerDocument.addEventListener(upEvent, onUp);
+  }
+}
+
+function clampImageWidth(width: number, maxWidth: number): number {
+  return Math.max(minImageWidth, Math.min(Math.round(width), maxWidth));
+}
+
+function resolveImageMaxWidth(view: EditorView, figure: HTMLElement): number {
+  const content = figure.closest(".cm-content") ?? view.contentDOM ?? view.dom;
+  const width = content.getBoundingClientRect().width;
+  return Math.max(minImageWidth, Math.round(width || figure.getBoundingClientRect().width || 800));
 }
 
 /**
@@ -266,12 +497,12 @@ export class ImagePlugin extends DecorationPlugin {
 
         // Handle Image nodes
         if (name === "Image") {
-          const content = view.state.sliceDoc(from, to);
-          const parsed = parseImageMarkdown(content);
+          const imageRange = readImageMarkdownRange(view.state.doc.toString(), from, to);
+          const parsed = parseImageMarkdown(imageRange.markdown);
 
           if (!parsed) return;
 
-          const cursorInRange = ctx.selectionOverlapsRange(from, to);
+          const cursorInRange = ctx.selectionOverlapsRange(from, imageRange.to);
 
           // Add line decoration for image
           decorations.push(imageMarkDecorations["image-block"].range(from));
@@ -279,10 +510,10 @@ export class ImagePlugin extends DecorationPlugin {
           // Always add the image widget below the node
           decorations.push(
             Decoration.widget({
-              widget: new ImageWidget(parsed.url, parsed.alt, from, to, parsed.title),
+              widget: new ImageWidget(parsed.url, parsed.alt, from, to, imageRange.to, parsed.width, parsed.title),
               side: 1, // Place after the position
               block: false, // Don't create a new line
-            }).range(to)
+            }).range(imageRange.to)
           );
 
           if (cursorInRange) {
@@ -290,7 +521,7 @@ export class ImagePlugin extends DecorationPlugin {
             this.decorateRawImage(node.node, decorations, view);
           } else {
             // Cursor out of range: hide the raw markdown text
-            decorations.push(imageMarkDecorations["image-hidden"].range(from, to));
+            decorations.push(imageMarkDecorations["image-hidden"].range(from, imageRange.to));
           }
         }
       },
@@ -340,20 +571,22 @@ export class ImagePlugin extends DecorationPlugin {
   override renderToHTML(
     node: SyntaxNode,
     _children: string,
-    ctx: { sliceDoc(from: number, to: number): string; sanitize(html: string): string }
+    ctx: PreviewContext
   ): string | null {
     if (node.name !== "Image") return null;
 
-    const content = ctx.sliceDoc(node.from, node.to);
+    const range = readImageMarkdownRange(ctx.doc, node.from, node.to);
+    const content = ctx.sliceDoc(node.from, range.to);
     const parsed = parseImageMarkdown(content);
     if (!parsed) return null;
 
     const altAttr = ctx.sanitize(parsed.alt);
     const titleAttr = parsed.title ? ` title="${ctx.sanitize(parsed.title)}"` : "";
     const ariaLabel = parsed.title ? ` aria-label="${ctx.sanitize(parsed.title)}"` : "";
+    const widthStyle = parsed.width ? ` style="width: ${parsed.width}px;"` : "";
 
     let html = `<figure class="cm-markora-image-figure" role="figure"${ariaLabel}>`;
-    html += `<img class="cm-markora-image" src="${ctx.sanitize(parsed.url)}" alt="${altAttr}"${titleAttr} loading="lazy" decoding="async" />`;
+    html += `<img class="cm-markora-image" src="${ctx.sanitize(parsed.url)}" alt="${altAttr}"${titleAttr}${widthStyle} loading="lazy" decoding="async" />`;
 
     if (parsed.title) {
       html += `<figcaption class="cm-markora-image-caption">${ctx.sanitize(parsed.title)}</figcaption>`;
@@ -361,6 +594,11 @@ export class ImagePlugin extends DecorationPlugin {
 
     html += `</figure>`;
     return html;
+  }
+
+  override getPreviewConsumedTo(node: SyntaxNode, ctx: { doc: string }): number | null {
+    if (node.name !== "Image") return null;
+    return readImageMarkdownRange(ctx.doc, node.from, node.to).to;
   }
 }
 
@@ -396,17 +634,104 @@ const imageTheme = createTheme({
       display: "none",
     },
 
-    // Figure container
+    // Figure container — fill the content width so the image aligns with
+    // surrounding text lines instead of shrinking to its intrinsic size and
+    // leaving a gap on the right. Inline width (from {width=} / drag-resize)
+    // overrides this via the style attribute.
     ".cm-markora-image-figure": {
       display: "flex",
       flexDirection: "column",
       alignItems: "start",
+      width: "100%",
       maxWidth: "100%",
       padding: "0",
     },
 
-    // Image element
+    ".cm-markora-image-toolbar": {
+      position: "absolute",
+      top: "0.5rem",
+      right: "0.5rem",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "0.125rem",
+      padding: "0.1875rem",
+      border: "1px solid rgba(148, 163, 184, 0.4)",
+      borderRadius: "0.375rem",
+      backgroundColor: "rgba(255, 255, 255, 0.9)",
+      boxShadow: "0 8px 24px rgba(15, 23, 42, 0.14)",
+      opacity: "0",
+      pointerEvents: "auto",
+      transition: "opacity 120ms ease, background-color 120ms ease, border-color 120ms ease",
+      zIndex: "3",
+    },
+
+    ".cm-markora-image-figure:hover .cm-markora-image-toolbar, .cm-markora-image-figure-active .cm-markora-image-toolbar, .cm-markora-image-toolbar:focus-within": {
+      opacity: "1",
+    },
+
+    ".cm-markora-image-tool-button": {
+      width: "1.75rem",
+      height: "1.75rem",
+      border: "0",
+      borderRadius: "0.25rem",
+      backgroundColor: "transparent",
+      color: "#334155",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "0",
+      cursor: "pointer",
+      transition: "background-color 120ms ease, color 120ms ease",
+    },
+
+    ".cm-markora-image-tool-button:hover, .cm-markora-image-tool-button:focus-visible": {
+      backgroundColor: "rgba(37, 99, 235, 0.1)",
+      color: "#2563eb",
+      outline: "none",
+    },
+
+    ".cm-markora-image-tool-button svg": {
+      width: "1rem",
+      height: "1rem",
+    },
+
+    ".cm-markora-image-resize-handle": {
+      position: "absolute",
+      top: "50%",
+      width: "0.375rem",
+      height: "2.75rem",
+      borderRadius: "999px",
+      backgroundColor: "#3b82f6",
+      boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.9), 0 8px 20px rgba(37, 99, 235, 0.24)",
+      cursor: "ew-resize",
+      opacity: "0",
+      transform: "translateY(-50%)",
+      transition: "opacity 120ms ease, background-color 120ms ease",
+      zIndex: "2",
+    },
+
+    ".cm-markora-image-figure:hover .cm-markora-image-resize-handle, .cm-markora-image-figure-active .cm-markora-image-resize-handle, .cm-markora-image-resize-handle:focus-visible": {
+      opacity: "1",
+    },
+
+    ".cm-markora-image-resize-handle:hover, .cm-markora-image-resize-handle:focus-visible": {
+      backgroundColor: "#2563eb",
+      outline: "none",
+    },
+
+    ".cm-markora-image-resize-handle-left": {
+      left: "-0.1875rem",
+    },
+
+    ".cm-markora-image-resize-handle-right": {
+      right: "-0.1875rem",
+    },
+
+    // Image element — fill the figure by default so the image stretches to
+    // the content width. When an explicit width is set, img gets an inline
+    // width:100% too (figure carries the pixel width), so this stays consistent.
     ".cm-markora-image": {
+      width: "100%",
       maxWidth: "100%",
       maxHeight: "800px",
       height: "auto",
@@ -451,6 +776,21 @@ const imageTheme = createTheme({
 
     ".cm-markora-image-caption": {
       color: "#8b949e",
+    },
+
+    ".cm-markora-image-toolbar": {
+      borderColor: "rgba(71, 85, 105, 0.72)",
+      backgroundColor: "rgba(15, 23, 42, 0.88)",
+      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.32)",
+    },
+
+    ".cm-markora-image-tool-button": {
+      color: "#cbd5e1",
+    },
+
+    ".cm-markora-image-tool-button:hover, .cm-markora-image-tool-button:focus-visible": {
+      backgroundColor: "rgba(96, 165, 250, 0.18)",
+      color: "#93c5fd",
     },
 
     ".cm-markora-image-error": {

@@ -1,19 +1,31 @@
 import { Extension, Prec } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
-import { buildInlineFormatChange, buildLinkChange, buildListChange, parseSelectedLink } from "./commands";
+import {
+  buildBlockTypeChange,
+  buildInlineFormatChange,
+  buildLinkChange,
+  buildListChange,
+  detectSelectionBlockType,
+  parseSelectedLink,
+} from "./commands";
 import { createSelectionToolbarElement } from "./menu";
 import { computeSelectionToolbarLayout } from "./position";
 import { selectionToolbarTheme } from "./theme";
+import { resolveMarkoraLocale } from "../i18n";
+import { getSelectionToolbarMessages } from "./i18n";
 import {
   canActivateFromNativeSelection,
   hasSelectionToolbarExcludedAncestor,
   selectionOverlapsExcludedSyntaxNode,
 } from "./activation";
+import type { MarkoraLocale } from "../i18n";
 import type {
   MarkoraSelectionToolbarConfig,
   SelectionToolbarAnchorRect,
+  SelectionToolbarBoundary,
   SelectionToolbarActionId,
+  SelectionToolbarBlockType,
   SelectionToolbarButton,
   SelectionToolbarLinkState,
   SelectionToolbarMenuState,
@@ -22,45 +34,82 @@ import type {
   TextCommandResult,
 } from "./types";
 
-const toolbarWidth = 392;
+type MarkoraSelectionToolbarRuntimeConfig = MarkoraSelectionToolbarConfig & {
+  inheritedLocale?: MarkoraLocale;
+};
+
+const toolbarWidth = 448;
 const toolbarHeight = 40;
 const panelWidth = 336;
+const blockTypePanelHeight = 300;
 const linkPanelHeight = 138;
 const palettePanelHeight = 72;
+const popoverGap = 6;
 
-const textColors: SelectionToolbarPaletteItem[] = [
-  { id: "default", label: "默认文字颜色", value: null },
-  { id: "gray", label: "灰色", value: "#71717a" },
-  { id: "red", label: "红色", value: "#dc2626" },
-  { id: "orange", label: "橙色", value: "#ea580c" },
-  { id: "yellow", label: "黄色", value: "#ca8a04" },
-  { id: "green", label: "绿色", value: "#16a34a" },
-  { id: "blue", label: "蓝色", value: "#2563eb" },
-  { id: "purple", label: "紫色", value: "#7c3aed" },
-];
-
-const highlightColors: SelectionToolbarPaletteItem[] = [
-  { id: "default", label: "默认高亮", value: null },
-  { id: "yellow", label: "黄色高亮", value: "#fef08a" },
-  { id: "green", label: "绿色高亮", value: "#bbf7d0" },
-  { id: "blue", label: "蓝色高亮", value: "#bfdbfe" },
-  { id: "pink", label: "粉色高亮", value: "#fbcfe8" },
-  { id: "purple", label: "紫色高亮", value: "#ddd6fe" },
-];
-
-function defaultButtons(): SelectionToolbarButton[] {
+function textColors(messages: ReturnType<typeof getSelectionToolbarMessages>): SelectionToolbarPaletteItem[] {
   return [
-    { id: "bold", label: "加粗", icon: "bold" },
-    { id: "italic", label: "斜体", icon: "italic" },
-    { id: "strike", label: "删除线", icon: "strikethrough" },
-    { id: "underline", label: "下划线", icon: "underline" },
-    { id: "code", label: "行内代码", icon: "code" },
-    { id: "highlight", label: "高亮", icon: "highlighter" },
-    { id: "color", label: "文字颜色", icon: "baseline" },
-    { id: "link", label: "链接", icon: "link" },
-    { id: "ordered-list", label: "有序列表", icon: "list-ordered" },
-    { id: "unordered-list", label: "无序列表", icon: "list" },
-    { id: "task-list", label: "任务列表", icon: "list-todo" },
+    { id: "default", label: messages.colors.defaultText, value: null },
+    { id: "gray", label: messages.colors.gray, value: "#71717a" },
+    { id: "red", label: messages.colors.red, value: "#dc2626" },
+    { id: "orange", label: messages.colors.orange, value: "#ea580c" },
+    { id: "yellow", label: messages.colors.yellow, value: "#ca8a04" },
+    { id: "green", label: messages.colors.green, value: "#16a34a" },
+    { id: "blue", label: messages.colors.blue, value: "#2563eb" },
+    { id: "purple", label: messages.colors.purple, value: "#7c3aed" },
+  ];
+}
+
+function highlightColors(messages: ReturnType<typeof getSelectionToolbarMessages>): SelectionToolbarPaletteItem[] {
+  return [
+    { id: "default", label: messages.colors.defaultHighlight, value: null },
+    { id: "yellow", label: messages.colors.yellowHighlight, value: "#fef08a" },
+    { id: "green", label: messages.colors.greenHighlight, value: "#bbf7d0" },
+    { id: "blue", label: messages.colors.blueHighlight, value: "#bfdbfe" },
+    { id: "pink", label: messages.colors.pinkHighlight, value: "#fbcfe8" },
+    { id: "purple", label: messages.colors.purpleHighlight, value: "#ddd6fe" },
+  ];
+}
+
+function blockTypeOptions(messages: ReturnType<typeof getSelectionToolbarMessages>): SelectionToolbarMenuState["blockTypes"] {
+  return [
+    { type: "text", label: messages.blockTypes.text, icon: "text-align-start" },
+    { type: "heading-1", label: messages.blockTypes["heading-1"], icon: "heading-1" },
+    { type: "heading-2", label: messages.blockTypes["heading-2"], icon: "heading-2" },
+    { type: "heading-3", label: messages.blockTypes["heading-3"], icon: "heading-3" },
+    { type: "heading-4", label: messages.blockTypes["heading-4"], icon: "heading-4" },
+    { type: "heading-5", label: messages.blockTypes["heading-5"], icon: "heading-5" },
+    { type: "heading-6", label: messages.blockTypes["heading-6"], icon: "heading-6" },
+  ];
+}
+
+function blockButton(blockType: SelectionToolbarBlockType, messages: ReturnType<typeof getSelectionToolbarMessages>): SelectionToolbarButton {
+  return blockType === "text"
+    ? { id: "block-type", label: messages.buttons.blockType, icon: "text-align-start" }
+    : {
+        id: "block-type",
+        label: messages.buttons.blockType,
+        icon: blockType,
+        text: `H${blockType.slice("heading-".length)}`,
+      };
+}
+
+function defaultButtons(
+  messages: ReturnType<typeof getSelectionToolbarMessages>,
+  blockType: SelectionToolbarBlockType
+): SelectionToolbarButton[] {
+  return [
+    blockButton(blockType, messages),
+    { id: "bold", label: messages.buttons.bold, icon: "bold" },
+    { id: "italic", label: messages.buttons.italic, icon: "italic" },
+    { id: "strike", label: messages.buttons.strike, icon: "strikethrough" },
+    { id: "underline", label: messages.buttons.underline, icon: "underline" },
+    { id: "code", label: messages.buttons.code, icon: "code" },
+    { id: "highlight", label: messages.buttons.highlight, icon: "highlighter" },
+    { id: "color", label: messages.buttons.color, icon: "baseline" },
+    { id: "link", label: messages.buttons.link, icon: "link" },
+    { id: "ordered-list", label: messages.buttons.orderedList, icon: "list-ordered" },
+    { id: "unordered-list", label: messages.buttons.unorderedList, icon: "list" },
+    { id: "task-list", label: messages.buttons.taskList, icon: "list-todo" },
   ];
 }
 
@@ -73,9 +122,18 @@ function normalizedUrl(value: string): string {
 }
 
 function floatingSizeForPanel(panel: SelectionToolbarPanel): { width: number; height: number } {
-  if (panel === "toolbar") return { width: toolbarWidth, height: toolbarHeight };
+  if (panel === "toolbar" || panel === "block-type") return { width: toolbarWidth, height: toolbarHeight };
   if (panel === "link") return { width: panelWidth, height: linkPanelHeight };
   return { width: panelWidth, height: palettePanelHeight };
+}
+
+function boundaryFromRect(rect: DOMRect): SelectionToolbarBoundary {
+  return {
+    left: rect.left,
+    right: rect.right,
+    top: rect.top,
+    bottom: rect.bottom,
+  };
 }
 
 class SelectionToolbarViewPlugin {
@@ -86,7 +144,14 @@ class SelectionToolbarViewPlugin {
   private link: SelectionToolbarLinkState = { title: "", url: "", canRemove: false };
   private renderVersion = 0;
 
-  constructor(private readonly view: EditorView) {
+  private readonly messages;
+
+  constructor(
+    private readonly view: EditorView,
+    private readonly config: MarkoraSelectionToolbarRuntimeConfig
+  ) {
+    const locale = resolveMarkoraLocale(config.locale ?? config.inheritedLocale);
+    this.messages = getSelectionToolbarMessages(locale);
     this.view.dom.ownerDocument.addEventListener("mousedown", this.handleDocumentMouseDown, true);
     this.view.dom.ownerDocument.addEventListener("selectionchange", this.handleDocumentSelectionChange);
     this.updateState();
@@ -248,12 +313,19 @@ class SelectionToolbarViewPlugin {
   }
 
   private menuState(): SelectionToolbarMenuState {
+    const range = this.savedRange;
+    const blockType = range
+      ? detectSelectionBlockType({ doc: this.view.state.doc.toString(), from: range.from, to: range.to })
+      : "text";
     return {
       panel: this.panel,
-      buttons: defaultButtons(),
-      textColors,
-      highlightColors,
+      buttons: defaultButtons(this.messages, blockType),
+      blockType,
+      blockTypes: blockTypeOptions(this.messages),
+      textColors: textColors(this.messages),
+      highlightColors: highlightColors(this.messages),
       link: this.link,
+      messages: this.messages,
     };
   }
 
@@ -267,27 +339,31 @@ class SelectionToolbarViewPlugin {
 
     this.view.requestMeasure({
       read: (view) => {
-        if (anchorFromSelection) return anchorFromSelection;
+        const boundary = boundaryFromRect(view.dom.getBoundingClientRect());
+        if (anchorFromSelection) return { anchor: anchorFromSelection, boundary };
         const from = view.coordsAtPos(range.from);
         const to = view.coordsAtPos(range.to);
         if (!from || !to) return null;
-        return {
+        const anchor = {
           left: Math.min(from.left, to.left),
           right: Math.max(from.right, to.right),
           top: Math.min(from.top, to.top),
           bottom: Math.max(from.bottom, to.bottom),
         };
+        return { anchor, boundary };
       },
-      write: (anchor) => {
-        if (renderVersion !== this.renderVersion || !anchor) return;
+      write: (measure) => {
+        if (renderVersion !== this.renderVersion || !measure) return;
         const win = this.view.dom.ownerDocument.defaultView ?? window;
         const layout = computeSelectionToolbarLayout({
-          anchor,
+          anchor: measure.anchor,
           viewport: { width: win.innerWidth, height: win.innerHeight },
+          boundary: measure.boundary,
           floating,
         });
         this.menu = createSelectionToolbarElement(this.menuState(), {
           onAction: (id) => this.handleAction(id),
+          onBlockType: (type) => this.applyBlockType(type),
           onColor: (value) => this.applyColor(value),
           onHighlight: (value) => this.applyHighlight(value),
           onLinkInput: (field, value) => {
@@ -308,6 +384,16 @@ class SelectionToolbarViewPlugin {
         this.menu.style.top = `${layout.top}px`;
         this.menu.style.maxHeight = `${layout.maxHeight}px`;
         this.menu.dataset.markoraSelectionPlacement = layout.placement;
+        if (this.panel === "block-type") {
+          const opensDown = layout.placement === "bottom";
+          const available = opensDown
+            ? measure.boundary.bottom - (layout.top + toolbarHeight) - popoverGap
+            : layout.top - measure.boundary.top - popoverGap;
+          this.menu.style.setProperty(
+            "--markora-selection-toolbar-popover-max-height",
+            `${Math.max(96, Math.min(blockTypePanelHeight, Math.floor(available)))}px`
+          );
+        }
         this.view.dom.appendChild(this.menu);
       },
     });
@@ -346,6 +432,12 @@ class SelectionToolbarViewPlugin {
       return;
     }
 
+    if (id === "block-type") {
+      this.panel = "block-type";
+      this.renderMenu();
+      return;
+    }
+
     if (id === "color") {
       this.panel = "color";
       this.renderMenu();
@@ -373,6 +465,21 @@ class SelectionToolbarViewPlugin {
     if (!marker) return;
     const result = buildInlineFormatChange({ doc, from: range.from, to: range.to, marker });
     this.dispatchResult(result);
+  }
+
+  private applyBlockType(type: SelectionToolbarBlockType): void {
+    const range = this.savedRange;
+    if (!range) return;
+    const level = type === "text" ? 0 : Number(type.slice("heading-".length));
+    if (level < 0 || level > 6) return;
+    this.dispatchResult(
+      buildBlockTypeChange({
+        doc: this.view.state.doc.toString(),
+        from: range.from,
+        to: range.to,
+        level: level as 0 | 1 | 2 | 3 | 4 | 5 | 6,
+      })
+    );
   }
 
   private applyColor(value: string | null): void {
@@ -407,7 +514,7 @@ class SelectionToolbarViewPlugin {
     const range = this.savedRange;
     if (!range) return;
     if (!this.link.url || !isValidUrl(this.link.url)) {
-      this.link = { ...this.link, error: "请输入有效链接" };
+      this.link = { ...this.link, error: this.messages.link.invalid };
       this.renderMenu();
       return;
     }
@@ -436,9 +543,9 @@ class SelectionToolbarViewPlugin {
   }
 }
 
-export function selectionToolbar(config: MarkoraSelectionToolbarConfig = {}): Extension[] {
+export function selectionToolbar(config: MarkoraSelectionToolbarRuntimeConfig = {}): Extension[] {
   if (config.enabled === false) return [];
-  const plugin = ViewPlugin.define((view) => new SelectionToolbarViewPlugin(view));
+  const plugin = ViewPlugin.define((view) => new SelectionToolbarViewPlugin(view, config));
   return [
     selectionToolbarTheme,
     plugin,

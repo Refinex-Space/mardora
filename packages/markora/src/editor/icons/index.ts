@@ -42,10 +42,12 @@ export type MarkoraIconName =
   | "music-2"
   | "octagon-alert"
   | "play"
+  | "rotate-ccw"
   | "strikethrough"
   | "table"
   | "table-delete"
   | "table-of-contents"
+  | "text-align-start"
   | "text-quote"
   | "trash-2"
   | "triangle-alert"
@@ -265,6 +267,10 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
       attrs: { d: "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" },
     },
   ],
+  "rotate-ccw": [
+    { name: "path", attrs: { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" } },
+    { name: "path", attrs: { d: "M3 3v5h5" } },
+  ],
   strikethrough: [
     { name: "path", attrs: { d: "M16 4H9a3 3 0 0 0-2.83 4" } },
     { name: "path", attrs: { d: "M14 12a4 4 0 0 1 0 8H6" } },
@@ -290,6 +296,11 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "M21 5h.01" } },
     { name: "path", attrs: { d: "M21 12h.01" } },
     { name: "path", attrs: { d: "M21 19h.01" } },
+  ],
+  "text-align-start": [
+    { name: "path", attrs: { d: "M21 5H3" } },
+    { name: "path", attrs: { d: "M15 12H3" } },
+    { name: "path", attrs: { d: "M17 19H3" } },
   ],
   "text-quote": [
     { name: "path", attrs: { d: "M17 5H3" } },

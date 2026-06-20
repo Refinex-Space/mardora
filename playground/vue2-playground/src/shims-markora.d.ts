@@ -60,6 +60,7 @@ declare module "@refinex/markora/editor" {
     };
     selectionToolbar?: {
       enabled?: boolean;
+      locale?: "zh-CN" | "en-US";
     };
     toc?: MarkoraTocConfig;
     attachments?: {

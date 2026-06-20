@@ -13,3 +13,4 @@ export * from "./slash";
 export * from "./attachments";
 export * from "./selection-toolbar";
 export * from "./table-of-contents";
+export * from "./heading-fold";
