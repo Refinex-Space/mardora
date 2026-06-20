@@ -1,14 +1,14 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@workspace/ui/components/accordion";
 import { Switch } from "@workspace/ui/components/switch";
 import { Label } from "@workspace/ui/components/label";
-import { allPlugins, MarkoraNode } from "@refinex/markora/src";
+import { allPlugins, MardoraNode } from "mardora/src";
 import React from "react";
 import { useLocale } from "../i18n/LocaleContext";
 import { PlaygroundConfig } from "./page";
 
 type Props = {
   setShowNodes: (show: boolean) => void;
-  nodes: MarkoraNode[];
+  nodes: MardoraNode[];
   config: PlaygroundConfig;
   setConfig: React.Dispatch<React.SetStateAction<PlaygroundConfig>>;
   outputTime?: number | null;
@@ -32,7 +32,7 @@ export default function Devbar({ setShowNodes, nodes, config, setConfig, outputT
     }));
   };
 
-  // Helper to toggle Markora feature config
+  // Helper to toggle Mardora feature config
   const toggleFeatureOption = (key: keyof PlaygroundConfig["features"]) => {
     setConfig((prev) => ({
       ...prev,
@@ -263,7 +263,7 @@ function ConfigSwitch({
   );
 }
 
-function NodeViewer({ nodes, depth = 0 }: { nodes: MarkoraNode[]; depth?: number }) {
+function NodeViewer({ nodes, depth = 0 }: { nodes: MardoraNode[]; depth?: number }) {
   return (
     <div className="font-mono text-xs">
       {nodes.map((node, idx) => (

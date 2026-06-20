@@ -14,7 +14,7 @@ referenced_by: docs/README.md#superpowers-specs
 ## Goal
 
 Refactor the Header action bar so every control is **icon-only** with a hover
-tooltip, and replace the "Markora" wordmark with a **theme-aware inline logo**.
+tooltip, and replace the "Mardora" wordmark with a **theme-aware inline logo**.
 Click behavior (dropdowns) stays unchanged.
 
 ## Decisions (from AskUserQuestion)
@@ -79,14 +79,14 @@ className="size-8">`. The `<img>`/icon inside is `size-4`-ish. No label text,
     theme resolves to dark.
   - `LOGO_LIGHT_SVG` = the light-mode logo (dark paths on light bg) — shown when
     light.
-    Source: the existing `public/markora-logo-dark.svg` / `markora-logo-light.svg`
+    Source: the existing `public/mardora-logo-dark.svg` / `mardora-logo-light.svg`
     path data (already in the repo for React).
 - **React (`Header`):** render `<span dangerouslySetInnerHTML={{__html: logo}} />`
   (or inline JSX paths) where `logo` picks the variant from `useTheme().resolvedTheme`.
-  Size ~`size-7`. Replace the `<h2 className="text-xl font-mono">markora</h2>`.
+  Size ~`size-7`. Replace the `<h2 className="text-xl font-mono">mardora</h2>`.
 - **Vue 3 / Vue 2:** the logo variant is selected from the existing `theme`
   prop (`"light" | "dark"`), rendered via `v-html` on an inline span, replacing
-  `<span class="brand">markora</span>`.
+  `<span class="brand">mardora</span>`.
 - The logo + sidebar-toggle remain grouped on the left; the 4 action buttons on
   the right.
 

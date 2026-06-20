@@ -1,6 +1,6 @@
-// Markora brand logo as inline SVG markup for the Vue 2 playground.
+// Mardora brand logo as inline SVG markup for the Vue 2 playground.
 const base = (fill: string, title: string) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Markora" width="100%" height="100%">` +
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Mardora" width="100%" height="100%">` +
   `<title>${title}</title>` +
   `<g fill="${fill}">` +
   `<path d="M138 182H333C308 188 299 221 312 255L486 674L414 828L172 267C161 241 151 212 138 182Z"/>` +
@@ -9,7 +9,7 @@ const base = (fill: string, title: string) =>
   `</g></svg>`;
 
 // Dark-mode variant: white logo (for dark backgrounds).
-export const LOGO_DARK_SVG = base("#FFFFFF", "Markora");
+export const LOGO_DARK_SVG = base("#FFFFFF", "Mardora");
 
 // Light-mode variant: near-black logo (for light backgrounds).
-export const LOGO_LIGHT_SVG = base("#111111", "Markora");
+export const LOGO_LIGHT_SVG = base("#111111", "Mardora");

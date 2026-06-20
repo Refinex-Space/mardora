@@ -1,5 +1,5 @@
 // Shell UI locale model + message dictionary for the React playground.
-// NOTE: this is independent of the Markora editor's own i18n (config.locale).
+// NOTE: this is independent of the Mardora editor's own i18n (config.locale).
 // It only covers the playground shell: Header, Sidebar, Devbar, Footer, dialogs.
 
 export type ShellLocale = "zh" | "en";
@@ -11,7 +11,7 @@ export const SHELL_LOCALE_OPTIONS: { value: ShellLocale; label: string }[] = [
 
 export const DEFAULT_SHELL_LOCALE: ShellLocale = "zh";
 
-export const SHELL_LOCALE_STORAGE_KEY = "markora-playground-locale";
+export const SHELL_LOCALE_STORAGE_KEY = "mardora-playground-locale";
 
 export type MessageKey =
   // header

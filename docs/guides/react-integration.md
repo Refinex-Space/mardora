@@ -7,7 +7,7 @@ referenced_by: docs/README.md#product-and-integration-guides
 
 # React 接入指南
 
-本文面向 React 项目，目标是接入一个与 Markora React playground 同等质量的编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、选区工具栏、主题切换、本地持久化和节点调试。
+本文面向 React 项目，目标是接入一个与 Mardora React playground 同等质量的编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、选区工具栏、主题切换、本地持久化和节点调试。
 
 React playground 使用 `@uiw/react-codemirror` 封装 CodeMirror 生命周期。你也可以手动创建 `EditorView`，但大多数 React 项目使用 `@uiw/react-codemirror` 会更直接。
 
@@ -17,7 +17,7 @@ React playground 使用 `@uiw/react-codemirror` 封装 CodeMirror 生命周期�
 | -------- | ------------------------------------------------------------------------- |
 | 接入方式 | 使用 `@uiw/react-codemirror` 渲染编辑器。                                 |
 | 状态同步 | React state 保存 Markdown 原文，`onChange` 更新当前文档。                 |
-| 扩展管理 | 用 `useMemo` 生成 Markora extensions，避免每次输入重建。                 |
+| 扩展管理 | 用 `useMemo` 生成 Mardora extensions，避免每次输入重建。                 |
 | 预览     | 用 `useEffect` 在 view/output 模式下调用 `preview()` 和 `generateCSS()`。 |
 | 附件上传 | 用 `useCallback` 提供稳定 uploader。                                      |
 | 资源清理 | 在 `useEffect` cleanup 中释放 `blob:` URL。                               |
@@ -25,7 +25,7 @@ React playground 使用 `@uiw/react-codemirror` 封装 CodeMirror 生命周期�
 ## 2. 安装依赖
 
 ```shell
-npm install @refinex/markora
+npm install mardora
 npm install @uiw/react-codemirror
 ```
 
@@ -45,9 +45,9 @@ import CodeMirror, { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
-import { EditorView, Extension, markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "@refinex/markora/editor";
-import { allPlugins } from "@refinex/markora/plugins";
-import { generateCSS, preview } from "@refinex/markora/preview";
+import { EditorView, Extension, mardora, MardoraNode, MardoraPlugin, ThemeEnum } from "mardora/editor";
+import { allPlugins } from "mardora/plugins";
+import { generateCSS, preview } from "mardora/preview";
 
 type Content = {
   id: string;
@@ -114,9 +114,9 @@ const defaultConfig: PlaygroundConfig = {
 ## 4. 默认文档和持久化
 
 ```tsx
-const STORAGE_KEY = "markora-playground-contents";
-const STORAGE_CURRENT_KEY = "markora-playground-current";
-const STORAGE_VERSION_KEY = "markora-playground-version";
+const STORAGE_KEY = "mardora-playground-contents";
+const STORAGE_CURRENT_KEY = "mardora-playground-current";
+const STORAGE_VERSION_KEY = "mardora-playground-version";
 const STORAGE_VERSION = 2;
 
 const DEFAULT_CONTENTS: Content[] = [
@@ -138,12 +138,12 @@ const DEFAULT_CONTENT_IDS = new Set(DEFAULT_CONTENTS.map((content) => content.id
 ## 5. 主组件状态
 
 ```tsx
-export function MarkoraReactEditor() {
+export function MardoraReactEditor() {
   const [contents, setContents] = useState<Content[]>(DEFAULT_CONTENTS);
   const [currentContent, setCurrentContent] = useState(0);
   const [mode, setMode] = useState<Mode>("live");
   const [config, setConfig] = useState<PlaygroundConfig>(defaultConfig);
-  const [nodes, setNodes] = useState<MarkoraNode[]>([]);
+  const [nodes, setNodes] = useState<MardoraNode[]>([]);
   const [output, setOutput] = useState<{ html: string; css: string } | null>(null);
 
   const editor = useRef<ReactCodeMirrorRef>(null);
@@ -151,9 +151,9 @@ export function MarkoraReactEditor() {
 
   const theme = "light";
   const cmTheme = theme === "dark" ? githubDark : githubLight;
-  const markoraTheme = theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT;
+  const mardoraTheme = theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT;
 
-  const activePlugins = useMemo<MarkoraPlugin[]>(() => {
+  const activePlugins = useMemo<MardoraPlugin[]>(() => {
     return allPlugins.filter((plugin) => {
       const name = plugin.name.toLowerCase();
       return config.plugins[name] ?? true;
@@ -198,25 +198,25 @@ useEffect(() => {
 | `attachments.enableDrop`  | `true`           | 是否处理拖拽文件。                                                              |
 | `attachments.accept`      | 类型侧默认 `*/*` | 按 `image/video/audio/file` 限制 MIME 或后缀。                                  |
 
-### 6.2 Markora 提供了什么
+### 6.2 Mardora 提供了什么
 
-| 阶段     | Markora 行为                                               |
+| 阶段     | Mardora 行为                                               |
 | -------- | ----------------------------------------------------------- |
 | 文件来源 | 支持 slash 文件选择、粘贴、拖拽。                           |
-| 上传前   | 插入 `markora-upload://task-id` 临时标记。                 |
+| 上传前   | 插入 `mardora-upload://task-id` 临时标记。                 |
 | 上传中   | 调用 `uploader(file, context)`。                            |
 | 上传成功 | 按附件类型替换为 Markdown 图片、音视频 HTML 或文件链接。    |
-| 上传失败 | 替换为 `[Upload failed: name](markora-upload://task-id)`。 |
+| 上传失败 | 替换为 `[Upload failed: name](mardora-upload://task-id)`。 |
 
-Markora 不提供对象存储、鉴权、文件扫描、断点续传、进度条或删除接口。需要这些能力时，业务侧应在 uploader 和自己的 UI 中实现。
+Mardora 不提供对象存储、鉴权、文件扫描、断点续传、进度条或删除接口。需要这些能力时，业务侧应在 uploader 和自己的 UI 中实现。
 
-## 7. 生成 Markora extensions
+## 7. 生成 Mardora extensions
 
 ```tsx
 const extensions = useMemo<Extension[]>(
   () =>
-    markora({
-      theme: markoraTheme,
+    mardora({
+      theme: mardoraTheme,
       locale: config.locale,
       baseStyles: config.editor.baseStyles,
       plugins: activePlugins,
@@ -234,7 +234,7 @@ const extensions = useMemo<Extension[]>(
       },
       toc: {
         enabled: mode === "live" && config.features.tableOfContents,
-        storageKey: "markora-react:toc",
+        storageKey: "mardora-react:toc",
       },
       attachments: {
         enabled: config.features.attachments,
@@ -252,7 +252,7 @@ const extensions = useMemo<Extension[]>(
         setNodes(nextNodes);
       },
     }),
-  [activePlugins, config.editor, config.features, config.locale, markoraTheme, mode, uploader]
+  [activePlugins, config.editor, config.features, config.locale, mardoraTheme, mode, uploader]
 );
 ```
 
@@ -264,14 +264,14 @@ const extensions = useMemo<Extension[]>(
 const current = contents[currentContent];
 
 return (
-  <main className="markora-react-shell">
+  <main className="mardora-react-shell">
     {mode === "view" && output ? (
-      <article className="markora-preview-host">
+      <article className="mardora-preview-host">
         <style>{output.css}</style>
         <div dangerouslySetInnerHTML={{ __html: output.html }} />
       </article>
     ) : mode === "output" && output ? (
-      <div className="markora-output-grid">
+      <div className="mardora-output-grid">
         <CodeMirror
           value={output.html}
           theme={cmTheme}
@@ -303,7 +303,7 @@ return (
 );
 ```
 
-`basicSetup={false}` 用于避免 `@uiw/react-codemirror` 默认扩展与 Markora 组装的扩展重复。
+`basicSetup={false}` 用于避免 `@uiw/react-codemirror` 默认扩展与 Mardora 组装的扩展重复。
 
 ## 9. 生成预览输出
 
@@ -317,19 +317,19 @@ useEffect(() => {
     const markdown = contents[currentContent]?.content || "";
 
     const htmlOutput = await preview(markdown, {
-      theme: markoraTheme,
+      theme: mardoraTheme,
       plugins: activePlugins,
       markdown: [],
       syntaxTheme: cmTheme,
       sanitize: config.preview.sanitize,
       wrapperTag: "div",
-      wrapperClass: "markora-preview",
+      wrapperClass: "mardora-preview",
     });
 
     const cssOutput = generateCSS({
-      theme: markoraTheme,
+      theme: mardoraTheme,
       plugins: activePlugins,
-      wrapperClass: "markora-preview",
+      wrapperClass: "mardora-preview",
       includeBase: config.preview.includeBase,
       syntaxTheme: cmTheme,
     });
@@ -342,18 +342,18 @@ useEffect(() => {
   return () => {
     cancelled = true;
   };
-}, [activePlugins, cmTheme, config.preview, contents, currentContent, markoraTheme, mode]);
+}, [activePlugins, cmTheme, config.preview, contents, currentContent, mardoraTheme, mode]);
 ```
 
 | API                       | 默认值               | React 建议                        |
 | ------------------------- | -------------------- | --------------------------------- |
 | `preview.plugins`         | `[]`                 | 使用 `activePlugins`。            |
 | `preview.sanitize`        | `true`               | 用户内容保持开启。                |
-| `preview.wrapperClass`    | `"markora-preview"` | 和 CSS 生成保持一致。             |
+| `preview.wrapperClass`    | `"mardora-preview"` | 和 CSS 生成保持一致。             |
 | `generateCSS.includeBase` | `true`               | 需要完全自定义 spacing 时再关闭。 |
 | `generateCSS.syntaxTheme` | `undefined`          | 使用当前 CodeMirror theme。       |
 
-## 10. Markora 配置速查
+## 10. Mardora 配置速查
 
 | 配置                       | 默认值           | React 建议                                |
 | -------------------------- | ---------------- | ----------------------------------------- |
@@ -374,13 +374,13 @@ useEffect(() => {
 
 ## 11. 插件体系
 
-React 接入不改变插件模型。自定义插件继承 `MarkoraPlugin`：
+React 接入不改变插件模型。自定义插件继承 `MardoraPlugin`：
 
 ```tsx
-import type { DecorationContext } from "@refinex/markora/editor";
-import { MarkoraPlugin } from "@refinex/markora/editor";
+import type { DecorationContext } from "mardora/editor";
+import { MardoraPlugin } from "mardora/editor";
 
-class MentionPlugin extends MarkoraPlugin {
+class MentionPlugin extends MardoraPlugin {
   readonly name = "mention";
   readonly version = "1.0.0";
 

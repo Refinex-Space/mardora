@@ -5,11 +5,11 @@ status: active
 referenced_by: docs/README.md#superpowers-specs
 ---
 
-# Markora 表格行列控件设计
+# Mardora 表格行列控件设计
 
 ## Goal
 
-为 Markora Live 编辑模式中的 Markdown 表格增加行列级操作控件。用户 hover 或将光标定位到表格单元格时，可以在当前行左侧和当前列顶部看到小句柄；点击句柄后进入行或列操作态，显示对应菜单，并支持插入、移动、复制、删除行列以及删除整张表格。
+为 Mardora Live 编辑模式中的 Markdown 表格增加行列级操作控件。用户 hover 或将光标定位到表格单元格时，可以在当前行左侧和当前列顶部看到小句柄；点击句柄后进入行或列操作态，显示对应菜单，并支持插入、移动、复制、删除行列以及删除整张表格。
 
 该能力应保持核心包框架无关，React、Vue2、Vue3 接入方默认获得一致体验。
 
@@ -32,20 +32,20 @@ referenced_by: docs/README.md#superpowers-specs
 - 没有移动、复制、删除行列的可视菜单。
 - 没有整行/整列可视选中态。
 
-Draftly 上游没有现成的行列句柄菜单实现，不能直接搬移；本能力需要基于 Markora 当前更完整的表格坐标映射继续扩展。
+Draftly 上游没有现成的行列句柄菜单实现，不能直接搬移；本能力需要基于 Mardora 当前更完整的表格坐标映射继续扩展。
 
 ## Non-Goals
 
 - 不支持合并单元格、拆分单元格、列宽拖拽。
 - 不支持多行、多列批量选择。
 - 不把行/列选中写入浏览器原生文本选区。
-- 不新增 React、Vue、Radix 或其他 UI 依赖到 `packages/markora`。
+- 不新增 React、Vue、Radix 或其他 UI 依赖到 `packages/mardora`。
 - 不改变静态 preview 表格行为；行列控件只属于 Live 编辑模式。
 - 不新增公开配置项，第一版默认随 `TablePlugin` 开启。
 
 ## Design Principles
 
-- 行列选中是 Markora 自己的 UI 状态，不是 CodeMirror 文本选区，也不是浏览器 native selection。
+- 行列选中是 Mardora 自己的 UI 状态，不是 CodeMirror 文本选区，也不是浏览器 native selection。
 - 普通点击单元格仍只定位光标。
 - 拖选表格文字仍产生真实文本选区，并继续触发选中文本工具条。
 - 点击行/列句柄必须 `preventDefault()` 和 `stopPropagation()`，避免清空或污染正文选区。
@@ -121,24 +121,24 @@ Draftly 上游没有现成的行列句柄菜单实现，不能直接搬移；本
 
 ## Architecture
 
-继续以 `packages/markora/src/plugins/table-plugin.ts` 为入口，但将复杂度拆成内部小模块，避免单文件继续膨胀。
+继续以 `packages/mardora/src/plugins/table-plugin.ts` 为入口，但将复杂度拆成内部小模块，避免单文件继续膨胀。
 
 建议文件结构：
 
-- `packages/markora/src/plugins/table-plugin.ts`
+- `packages/mardora/src/plugins/table-plugin.ts`
   - 保留插件注册、Markdown config、preview 渲染、既有 keymap 和能力整合。
   - 调用新的 overlay extension 与纯表格操作 helper。
 
-- `packages/markora/src/plugins/table-model.ts`
+- `packages/mardora/src/plugins/table-model.ts`
   - 承载 `Alignment`、`ParsedTable`、`TableInfo`、`TableCellInfo` 类型。
   - 承载表格解析、标准化、格式化、行列变换纯函数。
 
-- `packages/markora/src/plugins/table-controls.ts`
+- `packages/mardora/src/plugins/table-controls.ts`
   - CodeMirror `ViewPlugin` 或内部 extension。
   - 维护 hover cell、active handle、active menu。
   - 负责 overlay DOM 创建、定位、事件监听和销毁。
 
-- `packages/markora/src/plugins/table-controls-theme.ts`
+- `packages/mardora/src/plugins/table-controls-theme.ts`
   - 行列句柄、菜单、选中态样式。
   - 继承现有 `createTheme()` 体系，覆盖 light/dark。
 
@@ -163,13 +163,13 @@ interface ActiveTableControl {
 扩展单元格 decoration 的 DOM attributes：
 
 ```html
-data-markora-table-cell="true"
-data-markora-table-from="..."
-data-markora-row-index="..."
-data-markora-row-kind="header|body"
-data-markora-column-index="..."
-data-markora-content-from="..."
-data-markora-content-to="..."
+data-mardora-table-cell="true"
+data-mardora-table-from="..."
+data-mardora-row-index="..."
+data-mardora-row-kind="header|body"
+data-mardora-column-index="..."
+data-mardora-content-from="..."
+data-mardora-content-to="..."
 ```
 
 这些 attribute 只用于核心内部命中和 overlay 定位，不作为公开 API 承诺。
@@ -214,21 +214,21 @@ data-markora-content-to="..."
 
 选中态使用 decoration class：
 
-- 行选中：给目标 body 行所有单元格追加 `cm-markora-table-cell-row-selected`。
-- 列选中：给目标列所有单元格追加 `cm-markora-table-cell-column-selected`。
+- 行选中：给目标 body 行所有单元格追加 `cm-mardora-table-cell-row-selected`。
+- 列选中：给目标列所有单元格追加 `cm-mardora-table-cell-column-selected`。
 - 不修改 editor selection。
 
 ## Event Handling
 
 新增 DOM 事件规则：
 
-- `mousemove`：当目标是 `.cm-markora-table-cell` 时更新 hover cell。
+- `mousemove`：当目标是 `.cm-mardora-table-cell` 时更新 hover cell。
 - `mouseleave`：离开表格且菜单未打开时清空 hover。
 - `mousedown` on handle：阻止默认行为，打开对应菜单。
 - `mousedown` outside menu/handle/table：关闭菜单。
 - `keydown Escape`：关闭菜单。
 
-现有 `handleTableMouseDown()` 仍只处理 `.cm-markora-table-cell` 内普通单元格点击。句柄和菜单事件必须先被控件层消费，不能落入普通单元格点击逻辑。
+现有 `handleTableMouseDown()` 仍只处理 `.cm-mardora-table-cell` 内普通单元格点击。句柄和菜单事件必须先被控件层消费，不能落入普通单元格点击逻辑。
 
 ## Accessibility
 
@@ -244,7 +244,7 @@ data-markora-content-to="..."
 
 ### Unit Tests
 
-新增 `packages/markora/tests/table-commands.spec.ts`：
+新增 `packages/mardora/tests/table-commands.spec.ts`：
 
 - 在上方/下方插入 body 行。
 - 第一行 body 上移禁用，最后一行 body 下移禁用。
@@ -283,8 +283,8 @@ data-markora-content-to="..."
 最小检查：
 
 ```bash
-bun run --cwd packages/markora test
-bun run --cwd packages/markora typecheck
+bun run --cwd packages/mardora test
+bun run --cwd packages/mardora typecheck
 ```
 
 共享核心变更后全量检查：

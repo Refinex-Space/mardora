@@ -23,16 +23,16 @@ referenced_by: AGENTS.md#knowledge-map
 - Format TypeScript, TSX, and Markdown: `bun run format`
 - Create a Changeset: `bun run changeset`
 - Version packages from Changesets: `bun run version-packages`
-- Release `@refinex/markora`: `bun run release`
+- Release `mardora`: `bun run release`
 - Run Harness governance checks: `bun run harness:check`
 
 ## Package Commands
 
-- Core package build: `bun run --cwd packages/markora build`
-- Core package watch: `bun run --cwd packages/markora dev`
-- Core package lint: `bun run --cwd packages/markora lint`
-- Core package typecheck: `bun run --cwd packages/markora typecheck`
-- Core package tests: `bun run --cwd packages/markora test`
+- Core package build: `bun run --cwd packages/mardora build`
+- Core package watch: `bun run --cwd packages/mardora dev`
+- Core package lint: `bun run --cwd packages/mardora lint`
+- Core package typecheck: `bun run --cwd packages/mardora typecheck`
+- Core package tests: `bun run --cwd packages/mardora test`
 - React playground dev server: `bun run --cwd playground/react-playground dev`
 - React playground build: `bun run --cwd playground/react-playground build`
 - React playground typecheck: `bun run --cwd playground/react-playground typecheck`

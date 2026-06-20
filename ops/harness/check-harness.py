@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the Markora Harness control plane."""
+"""Validate the Mardora Harness control plane."""
 
 from __future__ import annotations
 

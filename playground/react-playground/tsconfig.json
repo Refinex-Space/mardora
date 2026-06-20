@@ -5,8 +5,8 @@
     "types": ["node"],
     "paths": {
       "@/*": ["./*"],
-      "@refinex/markora/src": ["../../packages/markora/src/index.ts"],
-      "@refinex/markora/src/*": ["../../packages/markora/src/*"],
+      "mardora/src": ["../../packages/mardora/src/index.ts"],
+      "mardora/src/*": ["../../packages/mardora/src/*"],
       "@workspace/ui/*": ["../../packages/ui/src/*"]
     },
     "plugins": [

@@ -2,7 +2,7 @@
 
 ## Project
 
-Markora is a Bun workspace and Turborepo monorepo for a framework-agnostic CodeMirror 6 Markdown editor, static preview renderer, shared UI package, and React/Vue playgrounds.
+Mardora is a Bun workspace and Turborepo monorepo for a framework-agnostic CodeMirror 6 Markdown editor, static preview renderer, shared UI package, and React/Vue playgrounds.
 
 ## Environment And Commands
 
@@ -14,8 +14,8 @@ Markora is a Bun workspace and Turborepo monorepo for a framework-agnostic CodeM
 - Build all workspaces: `bun run build`
 - Lint all workspaces: `bun run lint`
 - Format source/docs: `bun run format`
-- Core package tests: `bun run --cwd packages/markora test`
-- Core package typecheck: `bun run --cwd packages/markora typecheck`
+- Core package tests: `bun run --cwd packages/mardora test`
+- Core package typecheck: `bun run --cwd packages/mardora typecheck`
 - React playground typecheck: `bun run --cwd playground/react-playground typecheck`
 - Vue2 unit tests: `bun run --cwd playground/vue2-playground test:unit`
 - Vue3 unit tests: `bun run --cwd playground/vue3-playground test:unit`
@@ -23,15 +23,15 @@ Markora is a Bun workspace and Turborepo monorepo for a framework-agnostic CodeM
 
 ## Repository Boundaries
 
-- Keep `packages/markora` framework-agnostic; do not add React, Vue, Radix, playground UI, backend upload, OSS, S3, or asset-manager dependencies to the core package unless the task explicitly requires it.
-- Treat `packages/markora` public exports and `MarkoraConfig` as package API; API changes need tests and docs updates, and published behavior changes usually need a Changeset.
-- Vue2 and Vue3 playgrounds consume package exports such as `@refinex/markora/editor`; React playground may use `@refinex/markora/src` for local iteration, so do not assume all playground imports are equivalent.
+- Keep `packages/mardora` framework-agnostic; do not add React, Vue, Radix, playground UI, backend upload, OSS, S3, or asset-manager dependencies to the core package unless the task explicitly requires it.
+- Treat `packages/mardora` public exports and `MardoraConfig` as package API; API changes need tests and docs updates, and published behavior changes usually need a Changeset.
+- Vue2 and Vue3 playgrounds consume package exports such as `mardora/editor`; React playground may use `mardora/src` for local iteration, so do not assume all playground imports are equivalent.
 - Do not edit generated output such as `dist`, `.next`, `.turbo`, or `node_modules` as source.
 - Do not write secrets, tokens, production credentials, or real uploaded file URLs into docs, tests, logs, screenshots, or fixtures.
 
 ## Definition Of Done
 
-- The smallest relevant checks pass: core changes normally run `bun run --cwd packages/markora test` plus `typecheck`; workspace-wide or shared changes normally run `bun run lint` and `bun run build`.
+- The smallest relevant checks pass: core changes normally run `bun run --cwd packages/mardora test` plus `typecheck`; workspace-wide or shared changes normally run `bun run lint` and `bun run build`.
 - UI/playground changes cover loading, empty, error, responsive, and theme states where the touched surface exposes them; use browser validation when a local page behavior changed.
 - Public API, config, architecture, security, or integration changes update the matching docs through the knowledge map.
 - Delivery includes changed files/modules, commands run with result summaries, skipped checks and reasons, risks, and rollback.

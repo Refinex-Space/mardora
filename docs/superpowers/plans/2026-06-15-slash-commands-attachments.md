@@ -9,9 +9,9 @@ referenced_by: docs/README.md#superpowers-plans
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a compact Notion-like slash command menu and a framework-agnostic browser attachment upload protocol to Markora, then verify it in both React and Vue2 playgrounds.
+**Goal:** Add a compact Notion-like slash command menu and a framework-agnostic browser attachment upload protocol to Mardora, then verify it in both React and Vue2 playgrounds.
 
-**Architecture:** Implement two focused core modules under `packages/markora/src/editor`: `slash` owns command matching, menu state, menu DOM, and command execution; `attachments` owns file kind detection, upload markers, upload result formatting, paste/drop/file selection, and async replacement. The existing `markora()` entry point composes both modules through optional config, while React and Vue2 playgrounds provide mock uploaders that return local `blob:` URLs.
+**Architecture:** Implement two focused core modules under `packages/mardora/src/editor`: `slash` owns command matching, menu state, menu DOM, and command execution; `attachments` owns file kind detection, upload markers, upload result formatting, paste/drop/file selection, and async replacement. The existing `mardora()` entry point composes both modules through optional config, while React and Vue2 playgrounds provide mock uploaders that return local `blob:` URLs.
 
 **Tech Stack:** TypeScript, CodeMirror 6 `ViewPlugin`, `EditorView.domEventHandlers`, Bun test for core helper coverage, Next.js React playground, Vue 2.6 + Vue CLI 4 playground.
 
@@ -19,25 +19,25 @@ referenced_by: docs/README.md#superpowers-plans
 
 ## File Structure
 
-- Create `packages/markora/src/editor/slash/types.ts`: public slash command types and menu config.
-- Create `packages/markora/src/editor/slash/default-commands.ts`: default basic block and media command definitions.
-- Create `packages/markora/src/editor/slash/query.ts`: line-start trigger detection and command filtering.
-- Create `packages/markora/src/editor/slash/insertions.ts`: reusable Markdown insertion helpers.
-- Create `packages/markora/src/editor/slash/menu.ts`: framework-free compact menu DOM renderer.
-- Create `packages/markora/src/editor/slash/theme.ts`: compact Notion-like slash menu theme.
-- Create `packages/markora/src/editor/slash/extension.ts`: CodeMirror extension and view plugin for slash command lifecycle.
-- Create `packages/markora/src/editor/slash/index.ts`: slash module exports.
-- Create `packages/markora/src/editor/attachments/types.ts`: public attachment types and config.
-- Create `packages/markora/src/editor/attachments/format.ts`: file kind detection, accept matching, output formatting, and upload marker formatting.
-- Create `packages/markora/src/editor/attachments/extension.ts`: CodeMirror extension for file picking, paste, drop, and async upload replacement.
-- Create `packages/markora/src/editor/attachments/index.ts`: attachment module exports.
-- Modify `packages/markora/src/editor/markora.ts`: add `slashCommands` and `attachments` config and compose extensions.
-- Modify `packages/markora/src/editor/index.ts`: export slash and attachment APIs.
-- Modify `packages/markora/package.json`: add a `test` script for Bun unit tests.
-- Create `packages/markora/tests/slash-query.spec.ts`: slash trigger and filtering tests.
-- Create `packages/markora/tests/slash-insertions.spec.ts`: basic command insertion tests.
-- Create `packages/markora/tests/attachments-format.spec.ts`: attachment kind, accept, marker, and output formatting tests.
-- Create `packages/markora/tests/attachments-upload.spec.ts`: async marker replacement behavior tests.
+- Create `packages/mardora/src/editor/slash/types.ts`: public slash command types and menu config.
+- Create `packages/mardora/src/editor/slash/default-commands.ts`: default basic block and media command definitions.
+- Create `packages/mardora/src/editor/slash/query.ts`: line-start trigger detection and command filtering.
+- Create `packages/mardora/src/editor/slash/insertions.ts`: reusable Markdown insertion helpers.
+- Create `packages/mardora/src/editor/slash/menu.ts`: framework-free compact menu DOM renderer.
+- Create `packages/mardora/src/editor/slash/theme.ts`: compact Notion-like slash menu theme.
+- Create `packages/mardora/src/editor/slash/extension.ts`: CodeMirror extension and view plugin for slash command lifecycle.
+- Create `packages/mardora/src/editor/slash/index.ts`: slash module exports.
+- Create `packages/mardora/src/editor/attachments/types.ts`: public attachment types and config.
+- Create `packages/mardora/src/editor/attachments/format.ts`: file kind detection, accept matching, output formatting, and upload marker formatting.
+- Create `packages/mardora/src/editor/attachments/extension.ts`: CodeMirror extension for file picking, paste, drop, and async upload replacement.
+- Create `packages/mardora/src/editor/attachments/index.ts`: attachment module exports.
+- Modify `packages/mardora/src/editor/mardora.ts`: add `slashCommands` and `attachments` config and compose extensions.
+- Modify `packages/mardora/src/editor/index.ts`: export slash and attachment APIs.
+- Modify `packages/mardora/package.json`: add a `test` script for Bun unit tests.
+- Create `packages/mardora/tests/slash-query.spec.ts`: slash trigger and filtering tests.
+- Create `packages/mardora/tests/slash-insertions.spec.ts`: basic command insertion tests.
+- Create `packages/mardora/tests/attachments-format.spec.ts`: attachment kind, accept, marker, and output formatting tests.
+- Create `packages/mardora/tests/attachments-upload.spec.ts`: async marker replacement behavior tests.
 - Modify `playground/react-playground/app/playground/page.tsx`: pass slash and attachment config with mock uploader.
 - Modify `playground/react-playground/app/playground/devbar.tsx`: add slash/attachment/paste-drop toggles.
 - Modify `playground/react-playground/app/data/md/walkthrough.ts`: add usage documentation for the React playground.
@@ -45,24 +45,24 @@ referenced_by: docs/README.md#superpowers-plans
 - Modify `playground/vue2-playground/src/state/playgroundConfig.ts`: add default feature toggles.
 - Modify `playground/vue2-playground/src/components/playground/Devbar.vue`: add Vue2 devbar switches.
 - Modify `playground/vue2-playground/src/components/playground/EditorPane.vue`: pass slash and attachment config with mock uploader.
-- Modify `playground/vue2-playground/src/shims-markora.d.ts`: update temporary type declarations only if package exports are still unavailable to Vue CLI 4 during local development.
+- Modify `playground/vue2-playground/src/shims-mardora.d.ts`: update temporary type declarations only if package exports are still unavailable to Vue CLI 4 during local development.
 - Modify `playground/vue2-playground/src/data/md/walkthrough.ts`: add usage documentation for the Vue2 playground.
-- Modify `packages/markora/README.md`: document slash commands and attachment uploader integration.
-- Modify `packages/markora/CHANGELOG.md`: add the unreleased feature summary.
+- Modify `packages/mardora/README.md`: document slash commands and attachment uploader integration.
+- Modify `packages/mardora/CHANGELOG.md`: add the unreleased feature summary.
 
 ## Task 1: Add Core Test Entry and Slash Query Helpers
 
 **Files:**
 
-- Modify: `packages/markora/package.json`
-- Create: `packages/markora/src/editor/slash/types.ts`
-- Create: `packages/markora/src/editor/slash/query.ts`
-- Create: `packages/markora/src/editor/slash/index.ts`
-- Create: `packages/markora/tests/slash-query.spec.ts`
+- Modify: `packages/mardora/package.json`
+- Create: `packages/mardora/src/editor/slash/types.ts`
+- Create: `packages/mardora/src/editor/slash/query.ts`
+- Create: `packages/mardora/src/editor/slash/index.ts`
+- Create: `packages/mardora/tests/slash-query.spec.ts`
 
-- [ ] **Step 1: Add the markora core test script**
+- [ ] **Step 1: Add the mardora core test script**
 
-Modify `packages/markora/package.json` scripts to include `test`:
+Modify `packages/mardora/package.json` scripts to include `test`:
 
 ```json
 {
@@ -78,14 +78,14 @@ Modify `packages/markora/package.json` scripts to include `test`:
 
 - [ ] **Step 2: Write failing slash query tests**
 
-Create `packages/markora/tests/slash-query.spec.ts`:
+Create `packages/mardora/tests/slash-query.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
 import { detectSlashQuery, filterSlashCommands } from "../src/editor/slash";
-import type { MarkoraSlashCommand } from "../src/editor/slash";
+import type { MardoraSlashCommand } from "../src/editor/slash";
 
-const commands: MarkoraSlashCommand[] = [
+const commands: MardoraSlashCommand[] = [
   {
     id: "paragraph",
     group: "basic",
@@ -158,55 +158,55 @@ describe("filterSlashCommands", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- slash-query.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- slash-query.spec.ts
 ```
 
-Expected: FAIL because `packages/markora/src/editor/slash` does not exist.
+Expected: FAIL because `packages/mardora/src/editor/slash` does not exist.
 
 - [ ] **Step 4: Add slash types and query helpers**
 
-Create `packages/markora/src/editor/slash/types.ts`:
+Create `packages/mardora/src/editor/slash/types.ts`:
 
 ```ts
 import type { EditorView } from "@codemirror/view";
 
-export type MarkoraSlashCommandGroup = "basic" | "media";
+export type MardoraSlashCommandGroup = "basic" | "media";
 
-export type MarkoraSlashCommandContext = {
+export type MardoraSlashCommandContext = {
   view: EditorView;
   queryRange: { from: number; to: number };
 };
 
-export type MarkoraSlashCommand = {
+export type MardoraSlashCommand = {
   id: string;
-  group: MarkoraSlashCommandGroup;
+  group: MardoraSlashCommandGroup;
   title: string;
   aliases: string[];
   icon: string;
   hint: string;
-  run: (context: MarkoraSlashCommandContext) => boolean;
+  run: (context: MardoraSlashCommandContext) => boolean;
 };
 
-export type MarkoraSlashQuery = {
+export type MardoraSlashQuery = {
   from: number;
   to: number;
   query: string;
 };
 
-export type MarkoraSlashCommandsConfig = {
+export type MardoraSlashCommandsConfig = {
   enabled?: boolean;
-  commands?: MarkoraSlashCommand[];
+  commands?: MardoraSlashCommand[];
 };
 ```
 
-Create `packages/markora/src/editor/slash/query.ts`:
+Create `packages/mardora/src/editor/slash/query.ts`:
 
 ```ts
-import type { MarkoraSlashCommand, MarkoraSlashQuery } from "./types";
+import type { MardoraSlashCommand, MardoraSlashQuery } from "./types";
 
 const slashLinePattern = /^\/([^\s]*)$/;
 
-export function detectSlashQuery(documentText: string, cursorPosition: number): MarkoraSlashQuery | null {
+export function detectSlashQuery(documentText: string, cursorPosition: number): MardoraSlashQuery | null {
   const safeCursor = Math.max(0, Math.min(cursorPosition, documentText.length));
   const lineStart = documentText.lastIndexOf("\n", safeCursor - 1) + 1;
   const lineTextBeforeCursor = documentText.slice(lineStart, safeCursor);
@@ -223,7 +223,7 @@ export function detectSlashQuery(documentText: string, cursorPosition: number): 
   };
 }
 
-export function filterSlashCommands(commands: readonly MarkoraSlashCommand[], query: string): MarkoraSlashCommand[] {
+export function filterSlashCommands(commands: readonly MardoraSlashCommand[], query: string): MardoraSlashCommand[] {
   const normalizedQuery = query.trim().toLocaleLowerCase();
 
   if (!normalizedQuery) {
@@ -237,7 +237,7 @@ export function filterSlashCommands(commands: readonly MarkoraSlashCommand[], qu
 }
 ```
 
-Create `packages/markora/src/editor/slash/index.ts`:
+Create `packages/mardora/src/editor/slash/index.ts`:
 
 ```ts
 export * from "./types";
@@ -249,7 +249,7 @@ export * from "./query";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- slash-query.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- slash-query.spec.ts
 ```
 
 Expected: PASS for all slash query tests.
@@ -257,7 +257,7 @@ Expected: PASS for all slash query tests.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add packages/markora/package.json packages/markora/src/editor/slash packages/markora/tests/slash-query.spec.ts
+git add packages/mardora/package.json packages/mardora/src/editor/slash packages/mardora/tests/slash-query.spec.ts
 git commit -m "test(editor): 添加斜杆命令查询测试"
 ```
 
@@ -265,14 +265,14 @@ git commit -m "test(editor): 添加斜杆命令查询测试"
 
 **Files:**
 
-- Create: `packages/markora/src/editor/slash/insertions.ts`
-- Create: `packages/markora/src/editor/slash/default-commands.ts`
-- Modify: `packages/markora/src/editor/slash/index.ts`
-- Create: `packages/markora/tests/slash-insertions.spec.ts`
+- Create: `packages/mardora/src/editor/slash/insertions.ts`
+- Create: `packages/mardora/src/editor/slash/default-commands.ts`
+- Modify: `packages/mardora/src/editor/slash/index.ts`
+- Create: `packages/mardora/tests/slash-insertions.spec.ts`
 
 - [ ] **Step 1: Write failing insertion tests**
 
-Create `packages/markora/tests/slash-insertions.spec.ts`:
+Create `packages/mardora/tests/slash-insertions.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -337,33 +337,33 @@ describe("defaultSlashCommands", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- slash-insertions.spec.ts
 ```
 
 Expected: FAIL because `buildSlashReplacement` and `defaultSlashCommands` are not exported.
 
 - [ ] **Step 3: Add insertion helpers**
 
-Create `packages/markora/src/editor/slash/insertions.ts`:
+Create `packages/mardora/src/editor/slash/insertions.ts`:
 
 ```ts
 import type { ChangeSpec } from "@codemirror/state";
-import type { MarkoraSlashQuery } from "./types";
+import type { MardoraSlashQuery } from "./types";
 
-export type MarkoraSlashReplacementTemplate = {
+export type MardoraSlashReplacementTemplate = {
   marker: string;
   cursorOffset: number;
 };
 
-export type MarkoraSlashReplacement = {
+export type MardoraSlashReplacement = {
   changes: ChangeSpec;
   selectionAnchor: number;
 };
 
 export function buildSlashReplacement(
-  template: MarkoraSlashReplacementTemplate,
-  query: MarkoraSlashQuery
-): MarkoraSlashReplacement {
+  template: MardoraSlashReplacementTemplate,
+  query: MardoraSlashQuery
+): MardoraSlashReplacement {
   return {
     changes: {
       from: query.from,
@@ -377,17 +377,17 @@ export function buildSlashReplacement(
 
 - [ ] **Step 4: Add default command definitions**
 
-Create `packages/markora/src/editor/slash/default-commands.ts`:
+Create `packages/mardora/src/editor/slash/default-commands.ts`:
 
 ```ts
-import type { MarkoraSlashCommand } from "./types";
+import type { MardoraSlashCommand } from "./types";
 import { buildSlashReplacement } from "./insertions";
 
 function markdownCommand(
-  command: Omit<MarkoraSlashCommand, "run">,
+  command: Omit<MardoraSlashCommand, "run">,
   marker: string,
   cursorOffset: number = marker.length
-): MarkoraSlashCommand {
+): MardoraSlashCommand {
   return {
     ...command,
     run: ({ view, queryRange }) => {
@@ -403,7 +403,7 @@ function markdownCommand(
   };
 }
 
-export const defaultSlashCommands: MarkoraSlashCommand[] = [
+export const defaultSlashCommands: MardoraSlashCommand[] = [
   markdownCommand(
     { id: "paragraph", group: "basic", title: "文本", aliases: ["text", "plain"], icon: "T", hint: "" },
     "",
@@ -495,7 +495,7 @@ export const defaultSlashCommands: MarkoraSlashCommand[] = [
 
 - [ ] **Step 5: Export insertion helpers and defaults**
 
-Modify `packages/markora/src/editor/slash/index.ts`:
+Modify `packages/mardora/src/editor/slash/index.ts`:
 
 ```ts
 export * from "./types";
@@ -509,7 +509,7 @@ export * from "./default-commands";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- slash-insertions.spec.ts
 ```
 
 Expected: PASS.
@@ -517,7 +517,7 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/markora/src/editor/slash packages/markora/tests/slash-insertions.spec.ts
+git add packages/mardora/src/editor/slash packages/mardora/tests/slash-insertions.spec.ts
 git commit -m "feat(editor): 添加默认斜杆命令"
 ```
 
@@ -525,14 +525,14 @@ git commit -m "feat(editor): 添加默认斜杆命令"
 
 **Files:**
 
-- Create: `packages/markora/src/editor/attachments/types.ts`
-- Create: `packages/markora/src/editor/attachments/format.ts`
-- Create: `packages/markora/src/editor/attachments/index.ts`
-- Create: `packages/markora/tests/attachments-format.spec.ts`
+- Create: `packages/mardora/src/editor/attachments/types.ts`
+- Create: `packages/mardora/src/editor/attachments/format.ts`
+- Create: `packages/mardora/src/editor/attachments/index.ts`
+- Create: `packages/mardora/tests/attachments-format.spec.ts`
 
 - [ ] **Step 1: Write failing attachment formatting tests**
 
-Create `packages/markora/tests/attachments-format.spec.ts`:
+Create `packages/mardora/tests/attachments-format.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -578,10 +578,10 @@ describe("formatAttachmentMarkdown", () => {
 describe("createUploadMarker", () => {
   it("creates stable visible upload markers", () => {
     expect(createUploadMarker({ taskId: "task-1", kind: "image", name: "a.png", state: "uploading" })).toBe(
-      "![a.png](markora-upload://task-1)"
+      "![a.png](mardora-upload://task-1)"
     );
     expect(createUploadMarker({ taskId: "task-1", kind: "file", name: "a.pdf", state: "failed" })).toBe(
-      "[Upload failed: a.pdf](markora-upload://task-1)"
+      "[Upload failed: a.pdf](mardora-upload://task-1)"
     );
   });
 });
@@ -600,50 +600,50 @@ describe("isAcceptedAttachment", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- attachments-format.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- attachments-format.spec.ts
 ```
 
-Expected: FAIL because `packages/markora/src/editor/attachments` does not exist.
+Expected: FAIL because `packages/mardora/src/editor/attachments` does not exist.
 
 - [ ] **Step 3: Add attachment types**
 
-Create `packages/markora/src/editor/attachments/types.ts`:
+Create `packages/mardora/src/editor/attachments/types.ts`:
 
 ```ts
-export type MarkoraAttachmentKind = "image" | "video" | "audio" | "file";
+export type MardoraAttachmentKind = "image" | "video" | "audio" | "file";
 
-export type MarkoraAttachmentUploadSource = "slash" | "paste" | "drop" | "api";
+export type MardoraAttachmentUploadSource = "slash" | "paste" | "drop" | "api";
 
-export type MarkoraAttachmentUploadContext = {
-  kind: MarkoraAttachmentKind;
-  source: MarkoraAttachmentUploadSource;
+export type MardoraAttachmentUploadContext = {
+  kind: MardoraAttachmentKind;
+  source: MardoraAttachmentUploadSource;
   documentText: string;
   selection: { from: number; to: number };
 };
 
-export type MarkoraAttachmentUploadResult = {
+export type MardoraAttachmentUploadResult = {
   url: string;
   name?: string;
   title?: string;
   mimeType?: string;
 };
 
-export type MarkoraAttachmentUploader = (
+export type MardoraAttachmentUploader = (
   file: File,
-  context: MarkoraAttachmentUploadContext
-) => Promise<MarkoraAttachmentUploadResult>;
+  context: MardoraAttachmentUploadContext
+) => Promise<MardoraAttachmentUploadResult>;
 
-export type MarkoraAttachmentAccept = Partial<Record<MarkoraAttachmentKind, string[]>>;
+export type MardoraAttachmentAccept = Partial<Record<MardoraAttachmentKind, string[]>>;
 
-export type MarkoraAttachmentsConfig = {
+export type MardoraAttachmentsConfig = {
   enabled?: boolean;
-  uploader?: MarkoraAttachmentUploader;
-  accept?: MarkoraAttachmentAccept;
+  uploader?: MardoraAttachmentUploader;
+  accept?: MardoraAttachmentAccept;
   enablePaste?: boolean;
   enableDrop?: boolean;
 };
 
-export type MarkoraFileLike = {
+export type MardoraFileLike = {
   name: string;
   type: string;
 };
@@ -651,28 +651,28 @@ export type MarkoraFileLike = {
 
 - [ ] **Step 4: Add attachment formatting helpers**
 
-Create `packages/markora/src/editor/attachments/format.ts`:
+Create `packages/mardora/src/editor/attachments/format.ts`:
 
 ```ts
-import type { MarkoraAttachmentKind, MarkoraAttachmentUploadResult, MarkoraFileLike } from "./types";
+import type { MardoraAttachmentKind, MardoraAttachmentUploadResult, MardoraFileLike } from "./types";
 
-export type MarkoraUploadMarkerState = "uploading" | "failed";
+export type MardoraUploadMarkerState = "uploading" | "failed";
 
-export type MarkoraUploadMarkerInput = {
+export type MardoraUploadMarkerInput = {
   taskId: string;
-  kind: MarkoraAttachmentKind;
+  kind: MardoraAttachmentKind;
   name: string;
-  state: MarkoraUploadMarkerState;
+  state: MardoraUploadMarkerState;
 };
 
-export function detectAttachmentKind(file: MarkoraFileLike): MarkoraAttachmentKind {
+export function detectAttachmentKind(file: MardoraFileLike): MardoraAttachmentKind {
   if (file.type.startsWith("image/")) return "image";
   if (file.type.startsWith("video/")) return "video";
   if (file.type.startsWith("audio/")) return "audio";
   return "file";
 }
 
-export function isAcceptedAttachment(file: MarkoraFileLike, acceptRules: readonly string[]): boolean {
+export function isAcceptedAttachment(file: MardoraFileLike, acceptRules: readonly string[]): boolean {
   if (acceptRules.includes("*/*")) return true;
 
   return acceptRules.some((rule) => {
@@ -688,19 +688,19 @@ export function isAcceptedAttachment(file: MarkoraFileLike, acceptRules: readonl
   });
 }
 
-export function createUploadMarker(input: MarkoraUploadMarkerInput): string {
+export function createUploadMarker(input: MardoraUploadMarkerInput): string {
   if (input.state === "failed") {
-    return `[Upload failed: ${input.name}](markora-upload://${input.taskId})`;
+    return `[Upload failed: ${input.name}](mardora-upload://${input.taskId})`;
   }
 
   if (input.kind === "image") {
-    return `![${input.name}](markora-upload://${input.taskId})`;
+    return `![${input.name}](mardora-upload://${input.taskId})`;
   }
 
-  return `[Uploading ${input.name}](markora-upload://${input.taskId})`;
+  return `[Uploading ${input.name}](mardora-upload://${input.taskId})`;
 }
 
-export function formatAttachmentMarkdown(kind: MarkoraAttachmentKind, result: MarkoraAttachmentUploadResult): string {
+export function formatAttachmentMarkdown(kind: MardoraAttachmentKind, result: MardoraAttachmentUploadResult): string {
   const name = result.name || "attachment";
 
   if (kind === "image") {
@@ -721,7 +721,7 @@ export function formatAttachmentMarkdown(kind: MarkoraAttachmentKind, result: Ma
 
 - [ ] **Step 5: Export attachment helpers**
 
-Create `packages/markora/src/editor/attachments/index.ts`:
+Create `packages/mardora/src/editor/attachments/index.ts`:
 
 ```ts
 export * from "./types";
@@ -733,7 +733,7 @@ export * from "./format";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- attachments-format.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- attachments-format.spec.ts
 ```
 
 Expected: PASS.
@@ -741,7 +741,7 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/markora/src/editor/attachments packages/markora/tests/attachments-format.spec.ts
+git add packages/mardora/src/editor/attachments packages/mardora/tests/attachments-format.spec.ts
 git commit -m "feat(editor): 添加附件格式化协议"
 ```
 
@@ -749,13 +749,13 @@ git commit -m "feat(editor): 添加附件格式化协议"
 
 **Files:**
 
-- Create: `packages/markora/src/editor/attachments/extension.ts`
-- Modify: `packages/markora/src/editor/attachments/index.ts`
-- Create: `packages/markora/tests/attachments-upload.spec.ts`
+- Create: `packages/mardora/src/editor/attachments/extension.ts`
+- Modify: `packages/mardora/src/editor/attachments/index.ts`
+- Create: `packages/mardora/tests/attachments-upload.spec.ts`
 
 - [ ] **Step 1: Write failing async upload tests**
 
-Create `packages/markora/tests/attachments-upload.spec.ts`:
+Create `packages/mardora/tests/attachments-upload.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -805,7 +805,7 @@ describe("uploadAttachmentFile", () => {
       },
     });
 
-    expect(view.state.doc.toString()).toContain("[Upload failed: a.pdf](markora-upload://");
+    expect(view.state.doc.toString()).toContain("[Upload failed: a.pdf](mardora-upload://");
     view.destroy();
   });
 
@@ -839,33 +839,33 @@ describe("uploadAttachmentFile", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- attachments-upload.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- attachments-upload.spec.ts
 ```
 
 Expected: FAIL because `uploadAttachmentFile` is not exported.
 
 - [ ] **Step 3: Add upload extension utilities**
 
-Create `packages/markora/src/editor/attachments/extension.ts`:
+Create `packages/mardora/src/editor/attachments/extension.ts`:
 
 ```ts
 import { EditorSelection, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { createUploadMarker, detectAttachmentKind, formatAttachmentMarkdown, isAcceptedAttachment } from "./format";
 import type {
-  MarkoraAttachmentKind,
-  MarkoraAttachmentsConfig,
-  MarkoraAttachmentUploadSource,
-  MarkoraAttachmentUploader,
+  MardoraAttachmentKind,
+  MardoraAttachmentsConfig,
+  MardoraAttachmentUploadSource,
+  MardoraAttachmentUploader,
 } from "./types";
 
 let uploadSequence = 0;
 
-export type MarkoraUploadAttachmentOptions = {
-  kind?: MarkoraAttachmentKind;
-  source: MarkoraAttachmentUploadSource;
+export type MardoraUploadAttachmentOptions = {
+  kind?: MardoraAttachmentKind;
+  source: MardoraAttachmentUploadSource;
   range?: { from: number; to: number };
-  uploader: MarkoraAttachmentUploader;
+  uploader: MardoraAttachmentUploader;
 };
 
 function nextUploadTaskId(): string {
@@ -875,7 +875,7 @@ function nextUploadTaskId(): string {
 
 function findMarkerRange(view: EditorView, taskId: string): { from: number; to: number } | null {
   const doc = view.state.doc.toString();
-  const marker = `markora-upload://${taskId}`;
+  const marker = `mardora-upload://${taskId}`;
   const markerIndex = doc.indexOf(marker);
 
   if (markerIndex === -1) {
@@ -889,7 +889,7 @@ function findMarkerRange(view: EditorView, taskId: string): { from: number; to: 
 export async function uploadAttachmentFile(
   view: EditorView,
   file: File,
-  options: MarkoraUploadAttachmentOptions
+  options: MardoraUploadAttachmentOptions
 ): Promise<void> {
   const kind = options.kind ?? detectAttachmentKind(file);
   const range = options.range ?? {
@@ -953,8 +953,8 @@ function getFilesFromEvent(event: ClipboardEvent | DragEvent): File[] {
 function uploadFilesFromEvent(
   view: EditorView,
   event: ClipboardEvent | DragEvent,
-  source: MarkoraAttachmentUploadSource,
-  config: Required<Pick<MarkoraAttachmentsConfig, "uploader">> & MarkoraAttachmentsConfig
+  source: MardoraAttachmentUploadSource,
+  config: Required<Pick<MardoraAttachmentsConfig, "uploader">> & MardoraAttachmentsConfig
 ): boolean {
   const files = getFilesFromEvent(event);
   if (files.length === 0) {
@@ -981,7 +981,7 @@ function uploadFilesFromEvent(
   return true;
 }
 
-export function attachments(config: MarkoraAttachmentsConfig = {}): Extension[] {
+export function attachments(config: MardoraAttachmentsConfig = {}): Extension[] {
   if (config.enabled === false || !config.uploader) {
     return [];
   }
@@ -1014,7 +1014,7 @@ export function attachments(config: MarkoraAttachmentsConfig = {}): Extension[] 
 
 - [ ] **Step 4: Export upload utilities**
 
-Modify `packages/markora/src/editor/attachments/index.ts`:
+Modify `packages/mardora/src/editor/attachments/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1027,7 +1027,7 @@ export * from "./extension";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- attachments-upload.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- attachments-upload.spec.ts
 ```
 
 Expected: PASS.
@@ -1035,7 +1035,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add packages/markora/src/editor/attachments packages/markora/tests/attachments-upload.spec.ts
+git add packages/mardora/src/editor/attachments packages/mardora/tests/attachments-upload.spec.ts
 git commit -m "feat(editor): 添加附件上传扩展"
 ```
 
@@ -1043,57 +1043,57 @@ git commit -m "feat(editor): 添加附件上传扩展"
 
 **Files:**
 
-- Create: `packages/markora/src/editor/slash/menu.ts`
-- Create: `packages/markora/src/editor/slash/theme.ts`
-- Create: `packages/markora/src/editor/slash/extension.ts`
-- Modify: `packages/markora/src/editor/slash/index.ts`
-- Modify: `packages/markora/src/editor/slash/default-commands.ts`
+- Create: `packages/mardora/src/editor/slash/menu.ts`
+- Create: `packages/mardora/src/editor/slash/theme.ts`
+- Create: `packages/mardora/src/editor/slash/extension.ts`
+- Modify: `packages/mardora/src/editor/slash/index.ts`
+- Modify: `packages/mardora/src/editor/slash/default-commands.ts`
 
 - [ ] **Step 1: Add media command dispatch support**
 
-Modify `packages/markora/src/editor/slash/types.ts` so `MarkoraSlashCommandsConfig` can connect media commands to attachments:
+Modify `packages/mardora/src/editor/slash/types.ts` so `MardoraSlashCommandsConfig` can connect media commands to attachments:
 
 ```ts
 import type { EditorView } from "@codemirror/view";
-import type { MarkoraAttachmentKind } from "../attachments";
+import type { MardoraAttachmentKind } from "../attachments";
 
-export type MarkoraSlashCommandGroup = "basic" | "media";
+export type MardoraSlashCommandGroup = "basic" | "media";
 
-export type MarkoraSlashCommandContext = {
+export type MardoraSlashCommandContext = {
   view: EditorView;
   queryRange: { from: number; to: number };
-  requestAttachment?: (kind: MarkoraAttachmentKind, context: MarkoraSlashCommandContext) => boolean;
+  requestAttachment?: (kind: MardoraAttachmentKind, context: MardoraSlashCommandContext) => boolean;
 };
 
-export type MarkoraSlashCommand = {
+export type MardoraSlashCommand = {
   id: string;
-  group: MarkoraSlashCommandGroup;
+  group: MardoraSlashCommandGroup;
   title: string;
   aliases: string[];
   icon: string;
   hint: string;
-  run: (context: MarkoraSlashCommandContext) => boolean;
+  run: (context: MardoraSlashCommandContext) => boolean;
 };
 
-export type MarkoraSlashQuery = {
+export type MardoraSlashQuery = {
   from: number;
   to: number;
   query: string;
 };
 
-export type MarkoraSlashCommandsConfig = {
+export type MardoraSlashCommandsConfig = {
   enabled?: boolean;
-  commands?: MarkoraSlashCommand[];
+  commands?: MardoraSlashCommand[];
 };
 ```
 
-Modify the four media commands in `packages/markora/src/editor/slash/default-commands.ts`:
+Modify the four media commands in `packages/mardora/src/editor/slash/default-commands.ts`:
 
 ```ts
 function mediaCommand(
-  command: Omit<MarkoraSlashCommand, "run">,
+  command: Omit<MardoraSlashCommand, "run">,
   kind: "image" | "video" | "audio" | "file"
-): MarkoraSlashCommand {
+): MardoraSlashCommand {
   return {
     ...command,
     run: (context) => {
@@ -1134,49 +1134,49 @@ mediaCommand({ id: "audio", group: "media", title: "音频", aliases: ["audio"],
 
 - [ ] **Step 2: Add the compact menu renderer**
 
-Create `packages/markora/src/editor/slash/menu.ts`:
+Create `packages/mardora/src/editor/slash/menu.ts`:
 
 ```ts
-import type { MarkoraSlashCommand } from "./types";
+import type { MardoraSlashCommand } from "./types";
 
-export type MarkoraSlashMenuState = {
-  commands: MarkoraSlashCommand[];
+export type MardoraSlashMenuState = {
+  commands: MardoraSlashCommand[];
   activeIndex: number;
 };
 
-export type MarkoraSlashMenuCallbacks = {
+export type MardoraSlashMenuCallbacks = {
   onHover: (index: number) => void;
   onSelect: (index: number) => void;
 };
 
-const groupLabels: Record<MarkoraSlashCommand["group"], string> = {
+const groupLabels: Record<MardoraSlashCommand["group"], string> = {
   basic: "基本区块",
   media: "媒体",
 };
 
 export function createSlashMenuElement(
-  state: MarkoraSlashMenuState,
-  callbacks: MarkoraSlashMenuCallbacks
+  state: MardoraSlashMenuState,
+  callbacks: MardoraSlashMenuCallbacks
 ): HTMLElement {
   const root = document.createElement("div");
-  root.className = "cm-markora-slash-menu";
+  root.className = "cm-mardora-slash-menu";
   root.setAttribute("role", "listbox");
 
   if (state.commands.length === 0) {
     const empty = document.createElement("div");
-    empty.className = "cm-markora-slash-empty";
+    empty.className = "cm-mardora-slash-empty";
     empty.textContent = "没有匹配的命令";
     root.appendChild(empty);
     return root;
   }
 
-  let currentGroup: MarkoraSlashCommand["group"] | null = null;
+  let currentGroup: MardoraSlashCommand["group"] | null = null;
 
   for (const [index, command] of state.commands.entries()) {
     if (command.group !== currentGroup) {
       currentGroup = command.group;
       const label = document.createElement("div");
-      label.className = "cm-markora-slash-group";
+      label.className = "cm-mardora-slash-group";
       label.textContent = groupLabels[currentGroup];
       root.appendChild(label);
     }
@@ -1184,7 +1184,7 @@ export function createSlashMenuElement(
     const item = document.createElement("button");
     item.type = "button";
     item.className =
-      index === state.activeIndex ? "cm-markora-slash-item cm-markora-slash-item-active" : "cm-markora-slash-item";
+      index === state.activeIndex ? "cm-mardora-slash-item cm-mardora-slash-item-active" : "cm-mardora-slash-item";
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(index === state.activeIndex));
     item.addEventListener("mouseenter", () => callbacks.onHover(index));
@@ -1194,15 +1194,15 @@ export function createSlashMenuElement(
     });
 
     const icon = document.createElement("span");
-    icon.className = "cm-markora-slash-icon";
+    icon.className = "cm-mardora-slash-icon";
     icon.textContent = command.icon;
 
     const title = document.createElement("span");
-    title.className = "cm-markora-slash-title";
+    title.className = "cm-mardora-slash-title";
     title.textContent = command.title;
 
     const hint = document.createElement("span");
-    hint.className = "cm-markora-slash-hint";
+    hint.className = "cm-mardora-slash-hint";
     hint.textContent = command.hint;
 
     item.append(icon, title, hint);
@@ -1210,7 +1210,7 @@ export function createSlashMenuElement(
   }
 
   const footer = document.createElement("div");
-  footer.className = "cm-markora-slash-footer";
+  footer.className = "cm-mardora-slash-footer";
   footer.innerHTML = "<span>关闭菜单</span><span>esc</span>";
   root.appendChild(footer);
 
@@ -1220,25 +1220,25 @@ export function createSlashMenuElement(
 
 - [ ] **Step 3: Add the slash extension**
 
-Create `packages/markora/src/editor/slash/extension.ts`:
+Create `packages/mardora/src/editor/slash/extension.ts`:
 
 ```ts
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Extension } from "@codemirror/state";
 import { EditorView as CodeMirrorEditorView } from "@codemirror/view";
-import type { MarkoraAttachmentKind, MarkoraAttachmentUploader } from "../attachments";
+import type { MardoraAttachmentKind, MardoraAttachmentUploader } from "../attachments";
 import { uploadAttachmentFile } from "../attachments";
 import { defaultSlashCommands } from "./default-commands";
 import { detectSlashQuery, filterSlashCommands } from "./query";
 import { createSlashMenuElement } from "./menu";
 import { slashMenuTheme } from "./theme";
-import type { MarkoraSlashCommand, MarkoraSlashCommandsConfig, MarkoraSlashQuery } from "./types";
+import type { MardoraSlashCommand, MardoraSlashCommandsConfig, MardoraSlashQuery } from "./types";
 
-export type MarkoraSlashRuntimeConfig = MarkoraSlashCommandsConfig & {
-  attachmentUploader?: MarkoraAttachmentUploader;
+export type MardoraSlashRuntimeConfig = MardoraSlashCommandsConfig & {
+  attachmentUploader?: MardoraAttachmentUploader;
 };
 
-function requestFile(kind: MarkoraAttachmentKind): Promise<File | null> {
+function requestFile(kind: MardoraAttachmentKind): Promise<File | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
@@ -1249,14 +1249,14 @@ function requestFile(kind: MarkoraAttachmentKind): Promise<File | null> {
 }
 
 class SlashCommandViewPlugin {
-  private query: MarkoraSlashQuery | null = null;
-  private commands: MarkoraSlashCommand[] = [];
+  private query: MardoraSlashQuery | null = null;
+  private commands: MardoraSlashCommand[] = [];
   private activeIndex = 0;
   private menu: HTMLElement | null = null;
 
   constructor(
     private readonly view: EditorView,
-    private readonly config: Required<Pick<MarkoraSlashRuntimeConfig, "commands">> & MarkoraSlashRuntimeConfig
+    private readonly config: Required<Pick<MardoraSlashRuntimeConfig, "commands">> & MardoraSlashRuntimeConfig
   ) {
     this.updateState();
   }
@@ -1305,7 +1305,7 @@ class SlashCommandViewPlugin {
     });
   }
 
-  private requestAttachment(kind: MarkoraAttachmentKind, queryRange: { from: number; to: number }): boolean {
+  private requestAttachment(kind: MardoraAttachmentKind, queryRange: { from: number; to: number }): boolean {
     if (!this.config.attachmentUploader) {
       return false;
     }
@@ -1371,7 +1371,7 @@ class SlashCommandViewPlugin {
   }
 }
 
-export function slashCommands(config: MarkoraSlashRuntimeConfig = {}): Extension[] {
+export function slashCommands(config: MardoraSlashRuntimeConfig = {}): Extension[] {
   if (config.enabled === false) {
     return [];
   }
@@ -1424,13 +1424,13 @@ export function slashCommands(config: MarkoraSlashRuntimeConfig = {}): Extension
 
 - [ ] **Step 4: Add compact slash menu theme**
 
-Create `packages/markora/src/editor/slash/theme.ts`:
+Create `packages/mardora/src/editor/slash/theme.ts`:
 
 ```ts
 import { EditorView } from "@codemirror/view";
 
 export const slashMenuTheme = EditorView.baseTheme({
-  ".cm-markora-slash-menu": {
+  ".cm-mardora-slash-menu": {
     position: "fixed",
     zIndex: "1000",
     width: "328px",
@@ -1438,18 +1438,18 @@ export const slashMenuTheme = EditorView.baseTheme({
     overflowY: "auto",
     border: "1px solid rgba(120, 113, 108, 0.22)",
     borderRadius: "12px",
-    background: "var(--markora-slash-bg, #ffffff)",
+    background: "var(--mardora-slash-bg, #ffffff)",
     boxShadow: "0 18px 48px rgba(15, 23, 42, 0.16)",
     padding: "8px 0 0",
     fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
   },
-  ".cm-markora-slash-group": {
+  ".cm-mardora-slash-group": {
     padding: "8px 14px 6px",
-    color: "var(--markora-slash-muted, #a8a29e)",
+    color: "var(--mardora-slash-muted, #a8a29e)",
     fontSize: "12px",
     fontWeight: "700",
   },
-  ".cm-markora-slash-item": {
+  ".cm-mardora-slash-item": {
     display: "grid",
     gridTemplateColumns: "34px 1fr auto",
     alignItems: "center",
@@ -1458,20 +1458,20 @@ export const slashMenuTheme = EditorView.baseTheme({
     border: "0",
     padding: "0 14px",
     background: "transparent",
-    color: "var(--markora-slash-fg, #27272a)",
+    color: "var(--mardora-slash-fg, #27272a)",
     textAlign: "left",
     cursor: "default",
   },
-  ".cm-markora-slash-item-active": {
-    background: "var(--markora-slash-active, #f4f4f5)",
+  ".cm-mardora-slash-item-active": {
+    background: "var(--mardora-slash-active, #f4f4f5)",
   },
-  ".cm-markora-slash-icon": {
-    color: "var(--markora-slash-icon, #3f3f46)",
+  ".cm-mardora-slash-icon": {
+    color: "var(--mardora-slash-icon, #3f3f46)",
     fontSize: "14px",
     fontWeight: "650",
     textAlign: "center",
   },
-  ".cm-markora-slash-title": {
+  ".cm-mardora-slash-title": {
     overflow: "hidden",
     color: "inherit",
     fontSize: "14px",
@@ -1479,13 +1479,13 @@ export const slashMenuTheme = EditorView.baseTheme({
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
-  ".cm-markora-slash-hint": {
+  ".cm-mardora-slash-hint": {
     marginLeft: "12px",
-    color: "var(--markora-slash-muted, #a8a29e)",
+    color: "var(--mardora-slash-muted, #a8a29e)",
     fontSize: "12px",
     fontWeight: "600",
   },
-  ".cm-markora-slash-footer": {
+  ".cm-mardora-slash-footer": {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1493,32 +1493,32 @@ export const slashMenuTheme = EditorView.baseTheme({
     marginTop: "6px",
     borderTop: "1px solid rgba(120, 113, 108, 0.18)",
     padding: "0 14px",
-    color: "var(--markora-slash-fg, #27272a)",
+    color: "var(--mardora-slash-fg, #27272a)",
     fontSize: "14px",
   },
-  ".cm-markora-slash-footer span:last-child": {
-    color: "var(--markora-slash-muted, #a8a29e)",
+  ".cm-mardora-slash-footer span:last-child": {
+    color: "var(--mardora-slash-muted, #a8a29e)",
     fontSize: "12px",
     fontWeight: "650",
   },
-  ".cm-markora-slash-empty": {
+  ".cm-mardora-slash-empty": {
     padding: "14px",
-    color: "var(--markora-slash-muted, #a8a29e)",
+    color: "var(--mardora-slash-muted, #a8a29e)",
     fontSize: "13px",
   },
-  "&dark .cm-markora-slash-menu": {
-    "--markora-slash-bg": "#18181b",
-    "--markora-slash-fg": "#f4f4f5",
-    "--markora-slash-muted": "#a1a1aa",
-    "--markora-slash-active": "#27272a",
-    "--markora-slash-icon": "#e4e4e7",
+  "&dark .cm-mardora-slash-menu": {
+    "--mardora-slash-bg": "#18181b",
+    "--mardora-slash-fg": "#f4f4f5",
+    "--mardora-slash-muted": "#a1a1aa",
+    "--mardora-slash-active": "#27272a",
+    "--mardora-slash-icon": "#e4e4e7",
   },
 });
 ```
 
 - [ ] **Step 5: Export slash extension and theme**
 
-Modify `packages/markora/src/editor/slash/index.ts`:
+Modify `packages/mardora/src/editor/slash/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1535,8 +1535,8 @@ export * from "./extension";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test
-pnpm --config.package-manager-strict=false --filter markora typecheck
+pnpm --config.package-manager-strict=false --filter mardora test
+pnpm --config.package-manager-strict=false --filter mardora typecheck
 ```
 
 Expected: tests PASS and typecheck PASS.
@@ -1544,28 +1544,28 @@ Expected: tests PASS and typecheck PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/markora/src/editor/slash
+git add packages/mardora/src/editor/slash
 git commit -m "feat(editor): 添加斜杆菜单扩展"
 ```
 
-## Task 6: Compose Slash and Attachments in `markora()`
+## Task 6: Compose Slash and Attachments in `mardora()`
 
 **Files:**
 
-- Modify: `packages/markora/src/editor/markora.ts`
-- Modify: `packages/markora/src/editor/index.ts`
-- Modify: `packages/markora/tests/slash-insertions.spec.ts`
+- Modify: `packages/mardora/src/editor/mardora.ts`
+- Modify: `packages/mardora/src/editor/index.ts`
+- Modify: `packages/mardora/tests/slash-insertions.spec.ts`
 
 - [ ] **Step 1: Add config coverage test**
 
-Append to `packages/markora/tests/slash-insertions.spec.ts`:
+Append to `packages/mardora/tests/slash-insertions.spec.ts`:
 
 ```ts
-import { markora } from "../src/editor";
+import { mardora } from "../src/editor";
 
-describe("markora extension composition", () => {
+describe("mardora extension composition", () => {
   it("returns extensions when slash commands and attachments are enabled", () => {
-    const extensions = markora({
+    const extensions = mardora({
       slashCommands: { enabled: true },
       attachments: {
         enabled: true,
@@ -1578,7 +1578,7 @@ describe("markora extension composition", () => {
   });
 
   it("allows slash commands and attachments to be disabled", () => {
-    const extensions = markora({
+    const extensions = mardora({
       slashCommands: { enabled: false },
       attachments: { enabled: false },
     });
@@ -1593,33 +1593,33 @@ describe("markora extension composition", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test -- slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --filter mardora test -- slash-insertions.spec.ts
 ```
 
-Expected: FAIL because `MarkoraConfig` does not include `slashCommands` and `attachments`.
+Expected: FAIL because `MardoraConfig` does not include `slashCommands` and `attachments`.
 
 - [ ] **Step 3: Add config fields and compose extensions**
 
-Modify imports at the top of `packages/markora/src/editor/markora.ts`:
+Modify imports at the top of `packages/mardora/src/editor/mardora.ts`:
 
 ```ts
-import type { MarkoraSlashCommandsConfig } from "./slash";
+import type { MardoraSlashCommandsConfig } from "./slash";
 import { slashCommands } from "./slash";
-import type { MarkoraAttachmentsConfig } from "./attachments";
+import type { MardoraAttachmentsConfig } from "./attachments";
 import { attachments } from "./attachments";
 ```
 
-Add fields to `MarkoraConfig`:
+Add fields to `MardoraConfig`:
 
 ```ts
   /** Slash command menu configuration */
-  slashCommands?: MarkoraSlashCommandsConfig;
+  slashCommands?: MardoraSlashCommandsConfig;
 
   /** Browser attachment upload configuration */
-  attachments?: MarkoraAttachmentsConfig;
+  attachments?: MardoraAttachmentsConfig;
 ```
 
-Destructure the fields inside `markora()`:
+Destructure the fields inside `mardora()`:
 
 ```ts
     slashCommands: configSlashCommands = { enabled: true },
@@ -1642,7 +1642,7 @@ The `composedExtensions` section should include the new entries:
 const composedExtensions: Extension[] = [
   Prec.high(markdownSupport),
   Prec.high(keymap.of(markdownKeymap)),
-  markoraExtensions,
+  mardoraExtensions,
   baseExtensions,
   slashCommands({
     ...configSlashCommands,
@@ -1658,10 +1658,10 @@ const composedExtensions: Extension[] = [
 
 - [ ] **Step 4: Export new modules from editor index**
 
-Modify `packages/markora/src/editor/index.ts`:
+Modify `packages/mardora/src/editor/index.ts`:
 
 ```ts
-export * from "./markora";
+export * from "./mardora";
 export * from "./plugin";
 export * from "./utils";
 export * from "./theme";
@@ -1669,17 +1669,17 @@ export * from "./slash";
 export * from "./attachments";
 ```
 
-Keep `packages/markora/src/index.ts` unchanged if it already exports `./editor`.
+Keep `packages/mardora/src/index.ts` unchanged if it already exports `./editor`.
 
 - [ ] **Step 5: Run core checks**
 
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test
-pnpm --config.package-manager-strict=false --filter markora lint
-pnpm --config.package-manager-strict=false --filter markora typecheck
-pnpm --config.package-manager-strict=false --filter markora build
+pnpm --config.package-manager-strict=false --filter mardora test
+pnpm --config.package-manager-strict=false --filter mardora lint
+pnpm --config.package-manager-strict=false --filter mardora typecheck
+pnpm --config.package-manager-strict=false --filter mardora build
 ```
 
 Expected: PASS for tests, lint, typecheck, and build.
@@ -1687,7 +1687,7 @@ Expected: PASS for tests, lint, typecheck, and build.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add packages/markora/src/editor packages/markora/tests/slash-insertions.spec.ts
+git add packages/mardora/src/editor packages/mardora/tests/slash-insertions.spec.ts
 git commit -m "feat(editor): 集成斜杆菜单与附件配置"
 ```
 
@@ -1778,9 +1778,9 @@ useEffect(() => {
 }, []);
 ```
 
-- [ ] **Step 3: Pass slash and attachment config to `markora()`**
+- [ ] **Step 3: Pass slash and attachment config to `mardora()`**
 
-Modify the `markora({ ... })` call in `playground/react-playground/app/playground/page.tsx`:
+Modify the `mardora({ ... })` call in `playground/react-playground/app/playground/page.tsx`:
 
 ```ts
 slashCommands: {
@@ -1854,11 +1854,11 @@ Append this section to `playground/react-playground/app/data/md/walkthrough.ts` 
 ```md
 ## Slash Commands and Attachments
 
-Type \`/\` at the start of an empty line to open Markora's compact command menu. Use arrow keys to move through commands, Enter to insert, and Esc to close the menu.
+Type \`/\` at the start of an empty line to open Mardora's compact command menu. Use arrow keys to move through commands, Enter to insert, and Esc to close the menu.
 
 Media commands use the browser attachment protocol. In this playground, uploads are mocked with local \`blob:\` URLs so the result previews immediately. Production apps should provide an uploader that stores the file in a backend, OSS, or MinIO-compatible service and returns a public URL.
 
-You can also paste or drag files into the editor. Markora inserts an upload marker, calls the configured uploader, and replaces the marker with Markdown or HTML when the upload succeeds.
+You can also paste or drag files into the editor. Mardora inserts an upload marker, calls the configured uploader, and replaces the marker with Markdown or HTML when the upload succeeds.
 ```
 
 - [ ] **Step 6: Run React checks**
@@ -1887,7 +1887,7 @@ git commit -m "feat(playground): 接入斜杆菜单与附件上传"
 - Modify: `playground/vue2-playground/src/state/playgroundConfig.ts`
 - Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
 - Modify: `playground/vue2-playground/src/components/playground/EditorPane.vue`
-- Modify: `playground/vue2-playground/src/shims-markora.d.ts`
+- Modify: `playground/vue2-playground/src/shims-mardora.d.ts`
 - Modify: `playground/vue2-playground/src/data/md/walkthrough.ts`
 
 - [ ] **Step 1: Add Vue2 feature config types**
@@ -1959,7 +1959,7 @@ async mockUploader(file: File) {
 
 - [ ] **Step 4: Pass slash and attachment config in Vue2**
 
-Modify the `markora({ ... })` call in `EditorPane.vue`:
+Modify the `mardora({ ... })` call in `EditorPane.vue`:
 
 ```ts
 slashCommands: {
@@ -1979,34 +1979,34 @@ attachments: {
 },
 ```
 
-- [ ] **Step 5: Update Vue2 markora shim if needed**
+- [ ] **Step 5: Update Vue2 mardora shim if needed**
 
-If Vue2 lint or build cannot see the new package exports, update `playground/vue2-playground/src/shims-markora.d.ts` inside `declare module "@refinex/markora/editor"`:
+If Vue2 lint or build cannot see the new package exports, update `playground/vue2-playground/src/shims-mardora.d.ts` inside `declare module "mardora/editor"`:
 
 ```ts
-export type MarkoraAttachmentKind = "image" | "video" | "audio" | "file";
+export type MardoraAttachmentKind = "image" | "video" | "audio" | "file";
 
-export type MarkoraAttachmentUploadContext = {
-  kind: MarkoraAttachmentKind;
+export type MardoraAttachmentUploadContext = {
+  kind: MardoraAttachmentKind;
   source: "slash" | "paste" | "drop" | "api";
   documentText: string;
   selection: { from: number; to: number };
 };
 
-export type MarkoraAttachmentUploadResult = {
+export type MardoraAttachmentUploadResult = {
   url: string;
   name?: string;
   title?: string;
   mimeType?: string;
 };
 
-export type MarkoraAttachmentUploader = (
+export type MardoraAttachmentUploader = (
   file: File,
-  context: MarkoraAttachmentUploadContext
-) => Promise<MarkoraAttachmentUploadResult>;
+  context: MardoraAttachmentUploadContext
+) => Promise<MardoraAttachmentUploadResult>;
 ```
 
-And extend the `markora(config?: { ... })` shape:
+And extend the `mardora(config?: { ... })` shape:
 
 ```ts
     slashCommands?: {
@@ -2014,10 +2014,10 @@ And extend the `markora(config?: { ... })` shape:
     };
     attachments?: {
       enabled?: boolean;
-      uploader?: MarkoraAttachmentUploader;
+      uploader?: MardoraAttachmentUploader;
       enablePaste?: boolean;
       enableDrop?: boolean;
-      accept?: Partial<Record<MarkoraAttachmentKind, string[]>>;
+      accept?: Partial<Record<MardoraAttachmentKind, string[]>>;
     };
 ```
 
@@ -2090,9 +2090,9 @@ Append this section to `playground/vue2-playground/src/data/md/walkthrough.ts`:
 ```md
 ## Slash Commands and Attachments
 
-Type \`/\` at the start of an empty line to open Markora's compact command menu. Use arrow keys to move through commands, Enter to insert, and Esc to close the menu.
+Type \`/\` at the start of an empty line to open Mardora's compact command menu. Use arrow keys to move through commands, Enter to insert, and Esc to close the menu.
 
-This Vue2 playground uses the same core Markora attachment protocol as the React playground. Uploads are mocked with local \`blob:\` URLs, so they are useful for local preview but are not persistent. Production Vue2 integrations should provide an uploader that stores the file in a backend, OSS, or MinIO-compatible service and returns a URL.
+This Vue2 playground uses the same core Mardora attachment protocol as the React playground. Uploads are mocked with local \`blob:\` URLs, so they are useful for local preview but are not persistent. Production Vue2 integrations should provide an uploader that stores the file in a backend, OSS, or MinIO-compatible service and returns a URL.
 
 Pasted and dropped files also use this uploader when Paste/Drop Uploads is enabled.
 ```
@@ -2120,23 +2120,23 @@ git commit -m "feat(playground): 在 Vue2 演示站点接入斜杆菜单"
 
 **Files:**
 
-- Modify: `packages/markora/README.md`
-- Modify: `packages/markora/CHANGELOG.md`
+- Modify: `packages/mardora/README.md`
+- Modify: `packages/mardora/CHANGELOG.md`
 
 - [ ] **Step 1: Add README integration docs**
 
-Add this section to `packages/markora/README.md` after the basic editor setup:
+Add this section to `packages/mardora/README.md` after the basic editor setup:
 
 ````md
 ## Slash Commands
 
-Markora includes a compact slash command menu for common Markdown blocks. Type `/` at the start of an empty line or line-start query to open the menu.
+Mardora includes a compact slash command menu for common Markdown blocks. Type `/` at the start of an empty line or line-start query to open the menu.
 
 ```ts
-import { markora } from "@refinex/markora/editor";
-import { allPlugins } from "@refinex/markora/plugins";
+import { mardora } from "mardora/editor";
+import { allPlugins } from "mardora/plugins";
 
-const extensions = markora({
+const extensions = mardora({
   plugins: allPlugins,
   slashCommands: {
     enabled: true,
@@ -2148,10 +2148,10 @@ The default menu includes text, headings 1-6, quote, ordered list, unordered lis
 
 ## Attachments
 
-Attachment uploads are provided by the host application. Markora receives a browser `File`, calls your uploader, and inserts Markdown or HTML when the upload succeeds.
+Attachment uploads are provided by the host application. Mardora receives a browser `File`, calls your uploader, and inserts Markdown or HTML when the upload succeeds.
 
 ```ts
-const extensions = markora({
+const extensions = mardora({
   attachments: {
     enabled: true,
     uploader: async (file, context) => {
@@ -2186,7 +2186,7 @@ Images are inserted as `![name](url)`, videos as `<video src="url" controls></vi
 
 - [ ] **Step 2: Add changelog entry**
 
-Add this entry near the top of `packages/markora/CHANGELOG.md`:
+Add this entry near the top of `packages/mardora/CHANGELOG.md`:
 
 ```md
 ## Unreleased
@@ -2200,8 +2200,8 @@ Add this entry near the top of `packages/markora/CHANGELOG.md`:
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora typecheck
-pnpm --config.package-manager-strict=false --filter markora build
+pnpm --config.package-manager-strict=false --filter mardora typecheck
+pnpm --config.package-manager-strict=false --filter mardora build
 ```
 
 Expected: typecheck PASS and build PASS.
@@ -2209,7 +2209,7 @@ Expected: typecheck PASS and build PASS.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add packages/markora/README.md packages/markora/CHANGELOG.md
+git add packages/mardora/README.md packages/mardora/CHANGELOG.md
 git commit -m "docs(editor): 说明斜杆菜单与附件上传协议"
 ```
 
@@ -2225,10 +2225,10 @@ git commit -m "docs(editor): 说明斜杆菜单与附件上传协议"
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --filter markora test
-pnpm --config.package-manager-strict=false --filter markora lint
-pnpm --config.package-manager-strict=false --filter markora typecheck
-pnpm --config.package-manager-strict=false --filter markora build
+pnpm --config.package-manager-strict=false --filter mardora test
+pnpm --config.package-manager-strict=false --filter mardora lint
+pnpm --config.package-manager-strict=false --filter mardora typecheck
+pnpm --config.package-manager-strict=false --filter mardora build
 pnpm --config.package-manager-strict=false --filter web typecheck
 pnpm --config.package-manager-strict=false --filter web build
 pnpm --config.package-manager-strict=false --filter vue2-playground test:unit
@@ -2287,7 +2287,7 @@ Run:
 ```bash
 git status --short
 git diff --stat HEAD
-git diff -- packages/markora/src/editor/markora.ts packages/markora/src/editor/slash packages/markora/src/editor/attachments
+git diff -- packages/mardora/src/editor/mardora.ts packages/mardora/src/editor/slash packages/mardora/src/editor/attachments
 ```
 
 Expected:

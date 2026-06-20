@@ -1,4 +1,4 @@
-import type { MarkoraNode } from "@refinex/markora/editor";
+import type { MardoraNode } from "mardora/editor";
 
 export type PlaygroundMode = "live" | "view" | "code" | "output";
 export type SaveStatus = "idle" | "saving" | "saved";
@@ -56,4 +56,4 @@ export interface ContentMetrics {
   chars: number;
 }
 
-export type NodesChangeHandler = (nodes: MarkoraNode[]) => void;
+export type NodesChangeHandler = (nodes: MardoraNode[]) => void;

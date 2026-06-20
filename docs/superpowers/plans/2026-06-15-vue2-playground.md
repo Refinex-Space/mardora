@@ -9,11 +9,11 @@ referenced_by: docs/README.md#superpowers-plans
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a Vue 2.6 + Vue CLI 4 + Webpack 4 playground app that matches the current Markora `/playground` capabilities.
+**Goal:** Build a Vue 2.6 + Vue CLI 4 + Webpack 4 playground app that matches the current Mardora `/playground` capabilities.
 
-**Architecture:** Add `playground/vue2-playground` as an isolated workspace app. It consumes built `@refinex/markora` package exports, manages CodeMirror 6 directly from Vue2 lifecycle hooks, and copies playground data/config locally so the React playground remains untouched.
+**Architecture:** Add `playground/vue2-playground` as an isolated workspace app. It consumes built `mardora` package exports, manages CodeMirror 6 directly from Vue2 lifecycle hooks, and copies playground data/config locally so the React playground remains untouched.
 
-**Tech Stack:** Vue 2.6.14, Vue CLI 4.5.19, Webpack 4, TypeScript, CodeMirror 6, Markora package exports, localStorage, Jest through Vue CLI unit test plugin.
+**Tech Stack:** Vue 2.6.14, Vue CLI 4.5.19, Webpack 4, TypeScript, CodeMirror 6, Mardora package exports, localStorage, Jest through Vue CLI unit test plugin.
 
 ---
 
@@ -28,7 +28,7 @@ referenced_by: docs/README.md#superpowers-plans
 - Create `playground/vue2-playground/src/App.vue`: App root that renders the playground.
 - Create `playground/vue2-playground/src/shims-vue.d.ts`: Vue SFC typing.
 - Create `playground/vue2-playground/src/types.ts`: Shared playground types.
-- Create `playground/vue2-playground/src/data/md/what-is-markora.ts`: Copied first default Markdown document.
+- Create `playground/vue2-playground/src/data/md/what-is-mardora.ts`: Copied first default Markdown document.
 - Create `playground/vue2-playground/src/data/md/walkthrough.ts`: Copied walkthrough Markdown document.
 - Create `playground/vue2-playground/src/data/defaultContents.ts`: Copied default documents and storage version.
 - Create `playground/vue2-playground/src/state/storage.ts`: localStorage load/save helpers.
@@ -86,7 +86,7 @@ Create `playground/vue2-playground/package.json` with this content:
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.39.11",
     "@uiw/codemirror-theme-github": "^4.25.4",
-    "@refinex/markora": "workspace:*",
+    "mardora": "workspace:*",
     "uuid": "^13.0.0",
     "vue": "2.6.14"
   },
@@ -152,7 +152,7 @@ Create `playground/vue2-playground/vue.config.js`:
 const path = require("path");
 
 module.exports = {
-  transpileDependencies: ["@refinex/markora", "@codemirror", "@lezer", "style-mod", "uuid"],
+  transpileDependencies: ["mardora", "@codemirror", "@lezer", "style-mod", "uuid"],
   configureWebpack: {
     resolve: {
       symlinks: true,
@@ -175,10 +175,10 @@ Create `playground/vue2-playground/public/index.html`:
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Markora Vue2 Playground</title>
+    <title>Mardora Vue2 Playground</title>
   </head>
   <body>
-    <noscript>JavaScript is required to run Markora Vue2 Playground.</noscript>
+    <noscript>JavaScript is required to run Mardora Vue2 Playground.</noscript>
     <div id="app"></div>
   </body>
 </html>
@@ -264,7 +264,7 @@ Expected: commit succeeds and does not include existing unrelated `README.md` ch
 **Files:**
 
 - Create: `playground/vue2-playground/src/types.ts`
-- Create: `playground/vue2-playground/src/data/md/what-is-markora.ts`
+- Create: `playground/vue2-playground/src/data/md/what-is-mardora.ts`
 - Create: `playground/vue2-playground/src/data/md/walkthrough.ts`
 - Create: `playground/vue2-playground/src/data/defaultContents.ts`
 - Create: `playground/vue2-playground/src/state/storage.ts`
@@ -279,7 +279,7 @@ Expected: commit succeeds and does not include existing unrelated `README.md` ch
 Create `playground/vue2-playground/src/types.ts`:
 
 ```ts
-import type { MarkoraNode } from "@refinex/markora/editor";
+import type { MardoraNode } from "mardora/editor";
 
 export type PlaygroundMode = "live" | "view" | "code" | "output";
 export type SaveStatus = "idle" | "saving" | "saved";
@@ -318,7 +318,7 @@ export interface PlaygroundStateSnapshot {
   version: number;
 }
 
-export type NodesChangeHandler = (nodes: MarkoraNode[]) => void;
+export type NodesChangeHandler = (nodes: MardoraNode[]) => void;
 ```
 
 - [ ] **Step 2: Copy default Markdown modules into the Vue2 app**
@@ -327,7 +327,7 @@ Run:
 
 ```bash
 mkdir -p playground/vue2-playground/src/data/md
-cp playground/react-playground/app/data/md/what-id-markora.ts playground/vue2-playground/src/data/md/what-is-markora.ts
+cp playground/react-playground/app/data/md/what-id-mardora.ts playground/vue2-playground/src/data/md/what-is-mardora.ts
 cp playground/react-playground/app/data/md/walkthrough.ts playground/vue2-playground/src/data/md/walkthrough.ts
 ```
 
@@ -339,7 +339,7 @@ Create `playground/vue2-playground/src/data/defaultContents.ts`:
 
 ```ts
 import type { Content } from "@/types";
-import whatIsMarkora from "./md/what-is-markora";
+import whatIsMardora from "./md/what-is-mardora";
 import walkthrough from "./md/walkthrough";
 
 export const STORAGE_VERSION = 1;
@@ -347,8 +347,8 @@ export const STORAGE_VERSION = 1;
 export const defaultContents: Content[] = [
   {
     id: "0",
-    title: "What is Markora?",
-    content: whatIsMarkora,
+    title: "What is Mardora?",
+    content: whatIsMardora,
   },
   {
     id: "1",
@@ -365,11 +365,11 @@ export const defaultContentIds = new Set(defaultContents.map((content) => conten
 Create `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`:
 
 ```ts
-import { allPlugins } from "@refinex/markora/plugins";
+import { allPlugins } from "mardora/plugins";
 import { createDefaultConfig, getActivePlugins } from "@/state/playgroundConfig";
 
 describe("playgroundConfig", () => {
-  it("enables every Markora plugin by default", () => {
+  it("enables every Mardora plugin by default", () => {
     const config = createDefaultConfig();
 
     for (const plugin of allPlugins) {
@@ -394,8 +394,8 @@ describe("playgroundConfig", () => {
 Create `playground/vue2-playground/src/state/playgroundConfig.ts`:
 
 ```ts
-import { allPlugins } from "@refinex/markora/plugins";
-import type { MarkoraPlugin } from "@refinex/markora/editor";
+import { allPlugins } from "mardora/plugins";
+import type { MardoraPlugin } from "mardora/editor";
 import type { PlaygroundConfig, PluginConfig } from "@/types";
 
 export function createDefaultPluginConfig(): PluginConfig {
@@ -420,7 +420,7 @@ export function createDefaultConfig(): PlaygroundConfig {
   };
 }
 
-export function getActivePlugins(pluginConfig: PluginConfig): MarkoraPlugin[] {
+export function getActivePlugins(pluginConfig: PluginConfig): MardoraPlugin[] {
   return allPlugins.filter((plugin) => pluginConfig[plugin.name.toLowerCase()] !== false);
 }
 ```
@@ -490,9 +490,9 @@ Create `playground/vue2-playground/src/state/storage.ts`:
 import { defaultContentIds, defaultContents, STORAGE_VERSION } from "@/data/defaultContents";
 import type { Content, PlaygroundStateSnapshot } from "@/types";
 
-export const STORAGE_CONTENTS_KEY = "markora-vue2-playground-contents";
-export const STORAGE_CURRENT_KEY = "markora-vue2-playground-current";
-export const STORAGE_VERSION_KEY = "markora-vue2-playground-version";
+export const STORAGE_CONTENTS_KEY = "mardora-vue2-playground-contents";
+export const STORAGE_CURRENT_KEY = "mardora-vue2-playground-current";
+export const STORAGE_VERSION_KEY = "mardora-vue2-playground-version";
 
 function persistSnapshot(contents: Content[], currentContent: number): void {
   localStorage.setItem(STORAGE_CONTENTS_KEY, JSON.stringify(contents));
@@ -608,7 +608,7 @@ Expected: all three unit test files pass.
 Run:
 
 ```bash
-git add playground/vue2-playground/src/types.ts playground/vue2-playground/src/data/md/what-is-markora.ts playground/vue2-playground/src/data/md/walkthrough.ts playground/vue2-playground/src/data/defaultContents.ts playground/vue2-playground/src/state/storage.ts playground/vue2-playground/src/state/playgroundConfig.ts playground/vue2-playground/src/utils/contentMetrics.ts playground/vue2-playground/tests/unit/storage.spec.ts playground/vue2-playground/tests/unit/playgroundConfig.spec.ts playground/vue2-playground/tests/unit/contentMetrics.spec.ts
+git add playground/vue2-playground/src/types.ts playground/vue2-playground/src/data/md/what-is-mardora.ts playground/vue2-playground/src/data/md/walkthrough.ts playground/vue2-playground/src/data/defaultContents.ts playground/vue2-playground/src/state/storage.ts playground/vue2-playground/src/state/playgroundConfig.ts playground/vue2-playground/src/utils/contentMetrics.ts playground/vue2-playground/tests/unit/storage.spec.ts playground/vue2-playground/tests/unit/playgroundConfig.spec.ts playground/vue2-playground/tests/unit/contentMetrics.spec.ts
 git commit -m "feat(playground): add vue2 playground state helpers"
 ```
 
@@ -688,7 +688,7 @@ Create `Devbar.vue` with props:
 ```ts
 config: PlaygroundConfig;
 showNodes: boolean;
-nodes: MarkoraNode[];
+nodes: MardoraNode[];
 outputTime: number | null;
 ```
 
@@ -769,7 +769,7 @@ Emit events:
 
 ```ts
 "change-content" with string
-"nodes-change" with MarkoraNode[]
+"nodes-change" with MardoraNode[]
 "output-change" with { output: PreviewOutput; outputTime: number | null }
 ```
 
@@ -778,7 +778,7 @@ Emit events:
 In `EditorPane.vue`, create an `EditorView` in `mounted`. Use `EditorState.create()` with these extensions:
 
 ```ts
-markora({
+mardora({
   theme: this.theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT,
   baseStyles: this.config.editor.baseStyles,
   plugins: getActivePlugins(this.config.plugins),
@@ -822,13 +822,13 @@ const html = await preview(markdown, {
   syntaxTheme: this.theme === "dark" ? githubDark : githubLight,
   sanitize: this.config.preview.sanitize,
   wrapperTag: "div",
-  wrapperClass: "markora-preview",
+  wrapperClass: "mardora-preview",
 });
 
 const css = generateCSS({
   theme: this.theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT,
   plugins: getActivePlugins(this.config.plugins),
-  wrapperClass: "markora-preview",
+  wrapperClass: "mardora-preview",
   includeBase: this.config.preview.includeBase,
   syntaxTheme: this.theme === "dark" ? githubDark : githubLight,
 });
@@ -855,15 +855,15 @@ Replace the temporary placeholder in `Playground.vue` with `EditorPane`. Wire:
 - nodes update event to `nodes`;
 - output update event to `output` and `outputTime`.
 
-- [ ] **Step 7: Build Markora before testing the app**
+- [ ] **Step 7: Build Mardora before testing the app**
 
 Run:
 
 ```bash
-bun run --cwd packages/markora build
+bun run --cwd packages/mardora build
 ```
 
-Expected: `packages/markora/dist` is regenerated successfully.
+Expected: `packages/mardora/dist` is regenerated successfully.
 
 - [ ] **Step 8: Run app build**
 
@@ -880,11 +880,11 @@ Expected: Vue CLI production build succeeds and writes `playground/vue2-playgrou
 Run:
 
 ```bash
-git add playground/vue2-playground/src/components/playground/EditorPane.vue playground/vue2-playground/src/components/playground/Playground.vue playground/vue2-playground/src/styles.css packages/markora/dist
-git commit -m "feat(playground): integrate markora in vue2 playground"
+git add playground/vue2-playground/src/components/playground/EditorPane.vue playground/vue2-playground/src/components/playground/Playground.vue playground/vue2-playground/src/styles.css packages/mardora/dist
+git commit -m "feat(playground): integrate mardora in vue2 playground"
 ```
 
-Expected: commit succeeds. If `packages/markora/dist` is ignored or unchanged, leave it out of the commit.
+Expected: commit succeeds. If `packages/mardora/dist` is ignored or unchanged, leave it out of the commit.
 
 ## Task 5: Complete UX Parity and Responsive Behavior
 
@@ -924,14 +924,14 @@ Manual checks:
 - create a document named `Scratch`;
 - rename it to `Scratch Renamed`;
 - delete it;
-- select `What is Markora?`;
+- select `What is Mardora?`;
 - reload the page and confirm the selected document persists.
 
 - [ ] **Step 5: Verify mode parity**
 
 At `http://localhost:3001`, check:
 
-- `live` mode renders Markora rich editing;
+- `live` mode renders Mardora rich editing;
 - `code` mode shows raw Markdown editing;
 - `view` mode renders generated preview HTML;
 - `output` mode shows generated HTML and CSS.
@@ -981,10 +981,10 @@ In `README.md`, add a subsection under local development explaining:
 
 The repository also includes `playground/vue2-playground`, a Vue 2.6 + Vue CLI 4 + Webpack 4 compatibility playground. It mirrors the main `/playground` capabilities but is implemented independently from the Next.js app.
 
-Build Markora first:
+Build Mardora first:
 
 ```bash
-bun run --cwd packages/markora build
+bun run --cwd packages/mardora build
 ```
 
 Then start the Vue2 playground:
@@ -1033,10 +1033,10 @@ Expected: lint passes.
 Run:
 
 ```bash
-bun run --cwd packages/markora build
+bun run --cwd packages/mardora build
 ```
 
-Expected: Markora package build succeeds.
+Expected: Mardora package build succeeds.
 
 - [ ] **Step 5: Run Vue2 production build**
 

@@ -1,5 +1,5 @@
-import { allPlugins } from "@refinex/markora/plugins";
-import type { MarkoraPlugin } from "@refinex/markora/editor";
+import { allPlugins } from "mardora/plugins";
+import type { MardoraPlugin } from "mardora/editor";
 import type { PlaygroundConfig, PluginConfig } from "@/types";
 
 export function createDefaultPluginConfig(): PluginConfig {
@@ -33,6 +33,6 @@ export function createDefaultConfig(): PlaygroundConfig {
   };
 }
 
-export function getActivePlugins(pluginConfig: PluginConfig): MarkoraPlugin[] {
+export function getActivePlugins(pluginConfig: PluginConfig): MardoraPlugin[] {
   return allPlugins.filter((plugin) => pluginConfig[plugin.name.toLowerCase()] !== false);
 }

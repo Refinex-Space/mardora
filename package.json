@@ -1,5 +1,5 @@
 {
-  "name": "markora",
+  "name": "mardora",
   "version": "1.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build --filter=@refinex/markora && changeset publish"
+    "release": "turbo run build --filter=mardora && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
