@@ -107,6 +107,14 @@ describe("code plugin", () => {
     expect(css).toContain("position: absolute;");
   });
 
+  it("uses relative sizing for inline code so it scales inside headings", () => {
+    const css = generateCSS({ plugins: [new CodePlugin()] });
+    const inlineCodeRule = css.match(/\.cm-mardora-code-inline \{[^}]+\}/)?.[0] ?? "";
+
+    expect(inlineCodeRule).toContain("font-size: 0.9em;");
+    expect(inlineCodeRule).not.toContain("font-size: 0.9rem;");
+  });
+
   it("keeps single-line code blocks vertically balanced with floating tools", () => {
     const css = generateCSS({ plugins: [new CodePlugin()] });
 
