@@ -42,6 +42,46 @@ describe("computeSelectionToolbarLayout", () => {
     ).toBe(592);
   });
 
+  it("clamps the toolbar horizontally inside the editor boundary", () => {
+    expect(
+      computeSelectionToolbarLayout({
+        anchor: { left: 120, right: 180, top: 300, bottom: 324 },
+        viewport: { width: 1000, height: 800 },
+        boundary: { left: 220, right: 780, top: 80, bottom: 720 },
+        floating: { width: 448, height: 40 },
+      }).left
+    ).toBe(220);
+
+    expect(
+      computeSelectionToolbarLayout({
+        anchor: { left: 820, right: 880, top: 300, bottom: 324 },
+        viewport: { width: 1000, height: 800 },
+        boundary: { left: 220, right: 780, top: 80, bottom: 720 },
+        floating: { width: 448, height: 40 },
+      }).left
+    ).toBe(332);
+  });
+
+  it("chooses popover direction from the editor boundary", () => {
+    expect(
+      computeSelectionToolbarLayout({
+        anchor: { left: 360, right: 480, top: 96, bottom: 124 },
+        viewport: { width: 1000, height: 800 },
+        boundary: { left: 220, right: 780, top: 80, bottom: 720 },
+        floating: { width: 448, height: 40 },
+      }).placement
+    ).toBe("bottom");
+
+    expect(
+      computeSelectionToolbarLayout({
+        anchor: { left: 360, right: 480, top: 680, bottom: 708 },
+        viewport: { width: 1000, height: 800 },
+        boundary: { left: 220, right: 780, top: 80, bottom: 720 },
+        floating: { width: 448, height: 40 },
+      }).placement
+    ).toBe("top");
+  });
+
   it("uses child panel width when it is wider than the toolbar", () => {
     expect(
       computeSelectionToolbarLayout({

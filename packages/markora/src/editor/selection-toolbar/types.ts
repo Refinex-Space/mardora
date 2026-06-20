@@ -1,7 +1,10 @@
 import type { MarkoraIconName } from "../icons";
+import type { MarkoraLocale } from "../i18n";
+import type { SelectionToolbarMessages } from "./i18n";
 
 export type MarkoraSelectionToolbarConfig = {
   enabled?: boolean;
+  locale?: MarkoraLocale;
 };
 
 export type SelectionToolbarPlacement = "top" | "bottom";
@@ -23,9 +26,17 @@ export type SelectionToolbarFloatingSize = {
   height: number;
 };
 
+export type SelectionToolbarBoundary = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+};
+
 export type SelectionToolbarLayoutInput = {
   anchor: SelectionToolbarAnchorRect;
   viewport: SelectionToolbarViewport;
+  boundary?: SelectionToolbarBoundary;
   floating: SelectionToolbarFloatingSize;
 };
 
@@ -37,6 +48,7 @@ export type SelectionToolbarLayout = {
 };
 
 export type SelectionToolbarActionId =
+  | "block-type"
   | "bold"
   | "italic"
   | "strike"
@@ -53,6 +65,7 @@ export type SelectionToolbarButton = {
   id: SelectionToolbarActionId;
   label: string;
   icon: MarkoraIconName;
+  text?: string;
   active?: boolean;
 };
 
@@ -99,8 +112,9 @@ export type LinkChangeInput = {
 };
 
 export type SelectionToolbarListKind = "ordered" | "unordered" | "task";
+export type SelectionToolbarBlockType = "text" | "heading-1" | "heading-2" | "heading-3" | "heading-4" | "heading-5" | "heading-6";
 
-export type SelectionToolbarPanel = "toolbar" | "link" | "color" | "highlight";
+export type SelectionToolbarPanel = "toolbar" | "link" | "color" | "highlight" | "block-type";
 
 export type SelectionToolbarPaletteItem = {
   id: string;
@@ -119,13 +133,17 @@ export type SelectionToolbarLinkState = {
 export type SelectionToolbarMenuState = {
   panel: SelectionToolbarPanel;
   buttons: SelectionToolbarButton[];
+  blockType: SelectionToolbarBlockType;
+  blockTypes: Array<{ type: SelectionToolbarBlockType; label: string; icon: MarkoraIconName }>;
   textColors: SelectionToolbarPaletteItem[];
   highlightColors: SelectionToolbarPaletteItem[];
   link: SelectionToolbarLinkState;
+  messages: SelectionToolbarMessages;
 };
 
 export type SelectionToolbarMenuCallbacks = {
   onAction: (id: SelectionToolbarActionId) => void;
+  onBlockType: (type: SelectionToolbarBlockType) => void;
   onColor: (value: string | null) => void;
   onHighlight: (value: string | null) => void;
   onLinkInput: (field: "title" | "url", value: string) => void;

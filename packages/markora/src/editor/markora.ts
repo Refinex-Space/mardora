@@ -237,7 +237,10 @@ export function markora(config: MarkoraConfig = {}): Extension[] {
       attachmentUploader: configAttachments.uploader,
     }),
     attachments(configAttachments),
-    selectionToolbar(configSelectionToolbar),
+    selectionToolbar({
+      ...configSelectionToolbar,
+      inheritedLocale: resolvedLocale,
+    }),
     tableOfContents(configToc),
     ...(!disableViewPlugin ? headingFold(configHeadingFold) : []),
 

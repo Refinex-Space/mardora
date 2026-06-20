@@ -1,5 +1,6 @@
 import { createMarkoraIcon } from "../icons";
 import type {
+  SelectionToolbarBlockType,
   SelectionToolbarButton,
   SelectionToolbarMenuCallbacks,
   SelectionToolbarMenuState,
@@ -20,13 +21,73 @@ function iconButton(button: SelectionToolbarButton, callbacks: SelectionToolbarM
     callbacks.onAction(button.id);
   });
 
-  const icon = createMarkoraIcon(button.icon);
-  if (icon) {
-    element.appendChild(icon);
+  if (button.text) {
+    element.classList.add("cm-markora-selection-toolbar-block-button");
+    const label = document.createElement("span");
+    label.className = "cm-markora-selection-toolbar-button-text";
+    label.textContent = button.text;
+    element.appendChild(label);
+  } else if (button.id === "block-type") {
+    element.classList.add("cm-markora-selection-toolbar-block-button");
+    const icon = createMarkoraIcon(button.icon);
+    if (icon) element.appendChild(icon);
   } else {
-    element.textContent = button.label;
+    const icon = createMarkoraIcon(button.icon);
+    if (icon) {
+      element.appendChild(icon);
+    } else {
+      element.textContent = button.label;
+    }
   }
   return element;
+}
+
+function blockTypeIcon(type: SelectionToolbarBlockType): HTMLElement {
+  const icon = document.createElement("span");
+  icon.className = "cm-markora-selection-toolbar-block-menu-icon";
+  if (type === "text") {
+    const svg = createMarkoraIcon("text-align-start");
+    if (svg) icon.appendChild(svg);
+  } else {
+    icon.textContent = `H${type.slice("heading-".length)}`;
+  }
+  return icon;
+}
+
+function appendBlockTypePanel(
+  root: HTMLElement,
+  state: SelectionToolbarMenuState,
+  callbacks: SelectionToolbarMenuCallbacks
+): void {
+  const list = document.createElement("div");
+  list.className = "cm-markora-selection-toolbar-block-menu";
+  list.setAttribute("role", "menu");
+
+  for (const item of state.blockTypes) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className =
+      item.type === state.blockType
+        ? "cm-markora-selection-toolbar-block-item cm-markora-selection-toolbar-block-item-active"
+        : "cm-markora-selection-toolbar-block-item";
+    button.setAttribute("aria-label", item.label);
+    button.setAttribute("aria-pressed", String(item.type === state.blockType));
+    button.setAttribute("role", "menuitemradio");
+    button.dataset.markoraBlockType = item.type;
+    button.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      callbacks.onBlockType(item.type);
+    });
+
+    const label = document.createElement("span");
+    label.className = "cm-markora-selection-toolbar-block-menu-label";
+    label.textContent = item.label;
+
+    button.append(blockTypeIcon(item.type), label);
+    list.appendChild(button);
+  }
+
+  root.appendChild(list);
 }
 
 function divider(): HTMLSpanElement {
@@ -41,7 +102,7 @@ function appendToolbarButtons(
   buttons: SelectionToolbarButton[],
   callbacks: SelectionToolbarMenuCallbacks
 ): void {
-  const groups: SelectionToolbarButton[][] = [buttons.slice(0, 7), buttons.slice(7, 8), buttons.slice(8)];
+  const groups: SelectionToolbarButton[][] = [buttons.slice(0, 1), buttons.slice(1, 8), buttons.slice(8, 9), buttons.slice(9)];
 
   groups.forEach((group, index) => {
     if (group.length === 0) return;
@@ -121,7 +182,7 @@ function appendLinkPanel(
 ): void {
   const title = document.createElement("input");
   title.className = "cm-markora-selection-toolbar-link-input";
-  title.setAttribute("aria-label", "Link title");
+  title.setAttribute("aria-label", state.messages.link.title);
   title.value = state.link.title;
   title.addEventListener("input", () => callbacks.onLinkInput("title", title.value));
   title.addEventListener("keydown", (event) => {
@@ -131,7 +192,7 @@ function appendLinkPanel(
 
   const url = document.createElement("input");
   url.className = "cm-markora-selection-toolbar-link-input";
-  url.setAttribute("aria-label", "Link URL");
+  url.setAttribute("aria-label", state.messages.link.url);
   url.value = state.link.url;
   url.addEventListener("input", () => callbacks.onLinkInput("url", url.value));
   url.addEventListener("keydown", (event) => {
@@ -142,9 +203,9 @@ function appendLinkPanel(
   const actions = document.createElement("div");
   actions.className = "cm-markora-selection-toolbar-link-actions";
 
-  appendLinkAction(actions, state.link.copied ? "Copied" : "Copy link", "copy", callbacks.onLinkCopy);
-  appendLinkAction(actions, "Open link", "external-link", callbacks.onLinkOpen);
-  if (state.link.canRemove) appendLinkAction(actions, "Remove link", "trash-2", callbacks.onLinkRemove, true);
+  appendLinkAction(actions, state.link.copied ? state.messages.link.copied : state.messages.link.copy, "copy", callbacks.onLinkCopy);
+  appendLinkAction(actions, state.messages.link.open, "external-link", callbacks.onLinkOpen);
+  if (state.link.canRemove) appendLinkAction(actions, state.messages.link.remove, "trash-2", callbacks.onLinkRemove, true);
 
   root.append(title, url);
   if (state.link.error) {
@@ -166,7 +227,7 @@ export function createSelectionToolbarElement(
 ): HTMLElement {
   const root = document.createElement("div");
   root.className =
-    state.panel === "toolbar"
+    state.panel === "toolbar" || state.panel === "block-type"
       ? "cm-markora-selection-toolbar"
       : "cm-markora-selection-toolbar cm-markora-selection-toolbar-panel";
   root.setAttribute("role", "toolbar");
@@ -176,14 +237,15 @@ export function createSelectionToolbarElement(
     event.preventDefault();
   });
 
-  if (state.panel === "toolbar") {
+  if (state.panel === "toolbar" || state.panel === "block-type") {
     appendToolbarButtons(root, state.buttons, callbacks);
+    if (state.panel === "block-type") appendBlockTypePanel(root, state, callbacks);
   } else if (state.panel === "link") {
     appendLinkPanel(root, state, callbacks);
   } else if (state.panel === "color") {
-    appendPalette(root, "文字颜色", state.textColors, callbacks.onColor);
+    appendPalette(root, state.messages.panels.textColor, state.textColors, callbacks.onColor);
   } else {
-    appendPalette(root, "高亮颜色", state.highlightColors, callbacks.onHighlight);
+    appendPalette(root, state.messages.panels.highlightColor, state.highlightColors, callbacks.onHighlight);
   }
 
   return root;

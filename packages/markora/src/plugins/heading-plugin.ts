@@ -98,18 +98,12 @@ export class HeadingPlugin extends DecorationPlugin {
         // Add mark decoration for the heading content
         decorations.push(headingMarkDecorations[headingClass].range(from, to));
 
-        // Find and style the heading marker (#)
-        // Only hide when cursor is not in the heading
+        // Find and hide the heading marker (#). Heading level changes are handled by the selection toolbar.
         const headingMark = node.node.getChild("HeaderMark");
         if (headingMark) {
           const markEnd = Math.min(headingMark.to + 1, line.to);
-          const cursorInNode = ctx.selectionOverlapsRange(from, to);
-          if (!cursorInNode) {
-            // Clamp to line end so replace decoration never spans a newline
-            decorations.push(headingMarkDecorations["heading-mark"].range(headingMark.from, markEnd));
-          } else {
-            decorations.push(headingMarkDecorations["header-mark-class"].range(headingMark.from, markEnd));
-          }
+          // Clamp to line end so replace decoration never spans a newline.
+          decorations.push(headingMarkDecorations["heading-mark"].range(headingMark.from, markEnd));
         }
       },
     });

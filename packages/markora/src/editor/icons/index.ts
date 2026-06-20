@@ -46,6 +46,7 @@ export type MarkoraIconName =
   | "table"
   | "table-delete"
   | "table-of-contents"
+  | "text-align-start"
   | "text-quote"
   | "trash-2"
   | "triangle-alert"
@@ -290,6 +291,11 @@ const iconDefinitions: Record<MarkoraIconName, IconElementDefinition[]> = {
     { name: "path", attrs: { d: "M21 5h.01" } },
     { name: "path", attrs: { d: "M21 12h.01" } },
     { name: "path", attrs: { d: "M21 19h.01" } },
+  ],
+  "text-align-start": [
+    { name: "path", attrs: { d: "M21 5H3" } },
+    { name: "path", attrs: { d: "M15 12H3" } },
+    { name: "path", attrs: { d: "M17 19H3" } },
   ],
   "text-quote": [
     { name: "path", attrs: { d: "M17 5H3" } },

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
+  buildBlockTypeChange,
   buildInlineFormatChange,
   buildLinkChange,
   buildListChange,
+  detectSelectionBlockType,
   parseSelectedLink,
 } from "../src/editor/selection-toolbar";
 
@@ -125,5 +127,57 @@ describe("selection toolbar list commands", () => {
         { from: 12, to: 18, insert: "" },
       ],
     });
+  });
+});
+
+describe("selection toolbar block type commands", () => {
+  it("converts plain text to a heading", () => {
+    expect(buildBlockTypeChange({ doc: "Title", from: 0, to: 5, level: 2 })).toEqual({
+      changes: [{ from: 0, to: 0, insert: "## " }],
+      selection: { anchor: 3, head: 8 },
+    });
+  });
+
+  it("converts a heading back to text", () => {
+    expect(buildBlockTypeChange({ doc: "## Title", from: 3, to: 8, level: 0 })).toEqual({
+      changes: [{ from: 0, to: 3, insert: "" }],
+      selection: { anchor: 0, head: 5 },
+    });
+  });
+
+  it("escapes text-like heading content that would otherwise become another markdown block", () => {
+    expect(buildBlockTypeChange({ doc: "## 1. Title", from: 3, to: 11, level: 0 })).toEqual({
+      changes: [{ from: 0, to: 11, insert: "1\\. Title" }],
+      selection: { anchor: 0, head: 9 },
+    });
+  });
+
+  it("changes an existing heading level", () => {
+    expect(buildBlockTypeChange({ doc: "## Title", from: 3, to: 8, level: 3 })).toEqual({
+      changes: [{ from: 0, to: 3, insert: "### " }],
+      selection: { anchor: 4, head: 9 },
+    });
+  });
+
+  it("removes plain-text block escapes when converting text back to a heading", () => {
+    expect(buildBlockTypeChange({ doc: "1\\. Title", from: 0, to: 9, level: 2 })).toEqual({
+      changes: [{ from: 0, to: 9, insert: "## 1. Title" }],
+      selection: { anchor: 3, head: 11 },
+    });
+  });
+
+  it("converts every touched line while preserving indentation", () => {
+    expect(buildBlockTypeChange({ doc: "  A\n## B", from: 2, to: 8, level: 1 })).toEqual({
+      changes: [
+        { from: 0, to: 2, insert: "  # " },
+        { from: 4, to: 7, insert: "# " },
+      ],
+      selection: { anchor: 4, head: 9 },
+    });
+  });
+
+  it("detects the block type for heading and plain selections", () => {
+    expect(detectSelectionBlockType({ doc: "## Title", from: 3, to: 8 })).toBe("heading-2");
+    expect(detectSelectionBlockType({ doc: "Title", from: 0, to: 5 })).toBe("text");
   });
 });
