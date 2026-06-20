@@ -58,7 +58,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import type { MarkoraNode } from "@refinex/markora/editor";
+import type { MardoraNode } from "mardora/editor";
 import CreateContentDialog from "./CreateContentDialog.vue";
 import PlaygroundDevbar from "./Devbar.vue";
 import EditorPane from "./EditorPane.vue";
@@ -97,7 +97,7 @@ export default Vue.extend({
       currentContent: snapshot.currentContent,
       mode: "live" as PlaygroundMode,
       config: createDefaultConfig() as PlaygroundConfig,
-      nodes: [] as MarkoraNode[],
+      nodes: [] as MardoraNode[],
       output: null as PreviewOutput | null,
       outputTime: null as number | null,
       showNodes: false,

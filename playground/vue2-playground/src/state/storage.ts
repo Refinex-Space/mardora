@@ -2,9 +2,9 @@ import { buildDefaultContents, defaultContentIds, STORAGE_VERSION } from "@/data
 import { DEFAULT_SHELL_LOCALE, SHELL_LOCALE_STORAGE_KEY, type ShellLocale } from "@/i18n";
 import type { Content, PlaygroundStateSnapshot } from "@/types";
 
-export const STORAGE_CONTENTS_KEY = "markora-vue2-playground-contents";
-export const STORAGE_CURRENT_KEY = "markora-vue2-playground-current";
-export const STORAGE_VERSION_KEY = "markora-vue2-playground-version";
+export const STORAGE_CONTENTS_KEY = "mardora-vue2-playground-contents";
+export const STORAGE_CURRENT_KEY = "mardora-vue2-playground-current";
+export const STORAGE_VERSION_KEY = "mardora-vue2-playground-version";
 
 function readStoredLocale(): ShellLocale {
   try {

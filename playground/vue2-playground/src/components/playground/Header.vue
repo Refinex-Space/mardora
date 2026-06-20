@@ -2,7 +2,7 @@
   <header class="playground-header">
     <div class="header-left">
       <span class="brand-logo" aria-hidden="true" v-html="logo" />
-      <span class="brand-title">Markora</span>
+      <span class="brand-title">Mardora</span>
     </div>
 
     <div class="header-actions">

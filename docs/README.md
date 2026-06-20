@@ -5,7 +5,7 @@ status: active
 referenced_by: AGENTS.md#knowledge-map
 ---
 
-# Markora Knowledge Map
+# Mardora Knowledge Map
 
 This directory stores repository details and evidence. Keep root `AGENTS.md` concise and route task-specific details here.
 

@@ -29,9 +29,9 @@ import CodeMirror, { EditorView, Extension, ReactCodeMirrorRef } from "@uiw/reac
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
-import { allPlugins } from "@refinex/markora/src";
-import { generateCSS, preview } from "@refinex/markora/src";
-import { markora, MarkoraNode, MarkoraPlugin, ThemeEnum } from "@refinex/markora/src";
+import { allPlugins } from "mardora/src";
+import { generateCSS, preview } from "mardora/src";
+import { mardora, MardoraNode, MardoraPlugin, ThemeEnum } from "mardora/src";
 
 // Plugin configuration - dynamic based on allPlugins
 export type PluginConfig = Record<string, boolean>;
@@ -57,7 +57,7 @@ export type PlaygroundConfig = {
     includeBase: boolean;
     sanitize: boolean;
   };
-  // Markora feature toggles
+  // Mardora feature toggles
   features: {
     slashCommands: boolean;
     selectionToolbar: boolean;
@@ -90,9 +90,9 @@ const defaultConfig: PlaygroundConfig = {
   plugins: defaultPluginConfig,
 };
 
-const STORAGE_KEY = "markora-playground-contents";
-const STORAGE_CURRENT_KEY = "markora-playground-current";
-const STORAGE_VERSION_KEY = "markora-playground-version";
+const STORAGE_KEY = "mardora-playground-contents";
+const STORAGE_CURRENT_KEY = "mardora-playground-current";
+const STORAGE_VERSION_KEY = "mardora-playground-version";
 const DEBOUNCE_MS = 500;
 
 // Bump this version whenever default guide content changes.
@@ -135,7 +135,7 @@ export default function Page() {
 
   const [mode, setMode] = useState<"live" | "view" | "code" | "output">("live");
   const [showNodes, setShowNodes] = useState(false);
-  const [nodes, setNodes] = useState<MarkoraNode[]>([]);
+  const [nodes, setNodes] = useState<MardoraNode[]>([]);
   const [config, setConfig] = useState<PlaygroundConfig>(defaultConfig);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -322,7 +322,7 @@ export default function Page() {
   }
 
   // Build active plugins list based on config
-  const activePlugins = useMemo<MarkoraPlugin[]>(() => {
+  const activePlugins = useMemo<MardoraPlugin[]>(() => {
     return allPlugins.filter((plugin) => {
       const name = plugin.name.toLowerCase() as keyof PluginConfig;
       return config.plugins[name] ?? true;
@@ -331,7 +331,7 @@ export default function Page() {
 
   const defaultExtensions = useMemo<Extension[]>(
     () =>
-      markora({
+      mardora({
         theme:
           theme && theme !== "system" ? (theme.includes("dark") ? ThemeEnum.DARK : ThemeEnum.LIGHT) : ThemeEnum.AUTO,
         baseStyles: config.editor.baseStyles,
@@ -383,14 +383,14 @@ export default function Page() {
         syntaxTheme: cmTheme,
         sanitize: config.preview.sanitize,
         wrapperTag: "div",
-        wrapperClass: "markora-preview h-full w-full max-w-[48rem] mx-auto overflow-auto",
+        wrapperClass: "mardora-preview h-full w-full max-w-[48rem] mx-auto overflow-auto",
       });
 
       const css = generateCSS({
         theme:
           theme && theme !== "system" ? (theme.includes("dark") ? ThemeEnum.DARK : ThemeEnum.LIGHT) : ThemeEnum.AUTO,
         plugins: activePlugins,
-        wrapperClass: "markora-preview",
+        wrapperClass: "mardora-preview",
         includeBase: config.preview.includeBase,
         syntaxTheme: cmTheme,
       });
@@ -469,8 +469,8 @@ export default function Page() {
                 <div className="h-full w-full grid grid-rows-2">
                   <div className="h-full w-full flex flex-col border-b-2">
                     <CodeMirror
-                      key={`markora-output-${mode}`}
-                      id={"markora-output"}
+                      key={`mardora-output-${mode}`}
+                      id={"mardora-output"}
                       autoFocus={false}
                       className={"h-full w-full"}
                       height="100%"
@@ -486,8 +486,8 @@ export default function Page() {
                   </div>
                   <div className="h-full w-full flex flex-col border-t-2">
                     <CodeMirror
-                      key={`markora-output-${mode}`}
-                      id={"markora-output"}
+                      key={`mardora-output-${mode}`}
+                      id={"mardora-output"}
                       autoFocus={false}
                       className={"h-full w-full"}
                       height="100%"
@@ -505,8 +505,8 @@ export default function Page() {
               </div>
             ) : (
               <CodeMirror
-                key={`markora-editor-${mode}`}
-                id={"markora-editor"}
+                key={`mardora-editor-${mode}`}
+                id={"mardora-editor"}
                 ref={editor}
                 autoFocus={false}
                 className={"h-full w-full"}

@@ -24,12 +24,12 @@ referenced_by: AGENTS.md#knowledge-map
 3. For Vue playground work, build or watch the core package first if package exports are stale:
 
    ```bash
-   bun run --cwd packages/markora build
+   bun run --cwd packages/mardora build
    ```
 
 ## Focused Verification
 
-- Core editor or preview code: `bun run --cwd packages/markora test` and `bun run --cwd packages/markora typecheck`
+- Core editor or preview code: `bun run --cwd packages/mardora test` and `bun run --cwd packages/mardora typecheck`
 - React playground: `bun run --cwd playground/react-playground typecheck` and, for UI behavior, local browser validation at `http://localhost:3000/playground`
 - Vue2 playground: `bun run --cwd playground/vue2-playground test:unit`
 - Vue3 playground: `bun run --cwd playground/vue3-playground test:unit`

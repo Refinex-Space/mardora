@@ -80,7 +80,7 @@ export default function Header({
         </Tooltip>
         {/* Theme-aware inline logo */}
         <span className="size-7 inline-block" dangerouslySetInnerHTML={{ __html: logo }} aria-hidden="true" />
-        <span className="text-xl font-mono">Markora</span>
+        <span className="text-xl font-mono">Mardora</span>
       </div>
       <div className="flex items-center gap-1">
         {saveStatus !== "idle" && (

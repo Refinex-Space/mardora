@@ -16,7 +16,7 @@ referenced_by: docs/README.md#superpowers-specs
 Add a **language switcher** (中文 / English, default 中文) to each playground's
 Header, placed **left of the theme switcher**. It switches the language of the
 **shell** (Header, Sidebar, Devbar, Footer, dialogs) AND swaps the 4 built-in
-sample documents between Chinese and English. It does **not** affect the Markora
+sample documents between Chinese and English. It does **not** affect the Mardora
 editor's own UI text (that is already driven by `config.locale` in Vue via the
 existing Devbar segmented control; React has no such control today).
 
@@ -31,7 +31,7 @@ existing Devbar segmented control; React has no such control today).
 ### Locale model
 
 A shared locale type per playground. To avoid confusion with the existing
-Markora-internal `config.locale` ("zh-CN" | "en-US"), the **shell locale** uses
+Mardora-internal `config.locale` ("zh-CN" | "en-US"), the **shell locale** uses
 short codes:
 
 ```ts
@@ -45,7 +45,7 @@ New files under `app/i18n/`:
 - `locales.ts` — `type Messages = {...}` + `const messages: Record<ShellLocale, Messages>`.
   Keys cover every shell string (header, sidebar, devbar, footer, dialogs, mode/theme labels).
 - `LocaleContext.tsx` — `LocaleProvider` (React Context) holding `locale` state,
-  persisted to `localStorage["markora-playground-locale"]`, default `"zh"`.
+  persisted to `localStorage["mardora-playground-locale"]`, default `"zh"`.
   Exposes `{ locale, setLocale, t }` via `useLocale()` hook. `t` is typed as
   `(key) => string`.
 - `LanguageSwitcher.tsx` — dropdown button (lucide `Languages` icon + current
@@ -65,7 +65,7 @@ New files under `src/i18n/`:
 
 - `locales.ts` — same Messages type + `messages` map.
 - `index.ts` — `reactive({ locale })` store + `setLocale()` (persists to
-  `localStorage["markora-vue3-playground-locale"]`, default `"zh"`) + `t(key)`
+  `localStorage["mardora-vue3-playground-locale"]`, default `"zh"`) + `t(key)`
   helper that reads from the reactive store. Exported as `i18n` and `useI18n()`
   (returns `{ t, locale, setLocale }`).
 
@@ -75,7 +75,7 @@ Wiring:
   - `closeMenus` outside-click handler) before the theme dropdown. Labels via `t()`.
 - Replace strings in `Header.vue`, `Sidebar.vue`, `Devbar.vue` (only the shell
   strings; the existing Language segmented control stays — it sets
-  `config.locale` for the Markora editor, independent of shell locale),
+  `config.locale` for the Mardora editor, independent of shell locale),
   `Footer.vue`, `CreateContentDialog.vue` via a global mixin or `useI18n()` in
   each component. **Choice:** use a global mixin installed in `main.ts` that
   adds `this.$t` + `this.$locale` + `this.$setLocale` (simplest for Options API
@@ -87,7 +87,7 @@ New files under `src/i18n/`:
 
 - `locales.ts` — same Messages type + `messages` map.
 - `index.ts` — `Vue.observable({ locale })` store + `setLocale()` (persists to
-  `localStorage["markora-vue2-playground-locale"]`, default `"zh"`) + a global
+  `localStorage["mardora-vue2-playground-locale"]`, default `"zh"`) + a global
   mixin adding `$t`, `$locale` (computed), `$setLocale`.
 
 Wiring mirrors Vue 3 (global mixin installed in `main.ts`; Header dropdown
@@ -160,7 +160,7 @@ entries refresh to the new locale-aware shape.
 
 ## Out of scope
 
-- The Markora editor package's own i18n (separate; already exists).
+- The Mardora editor package's own i18n (separate; already exists).
 - React Devbar has no Language control; we do NOT add one (matches the request:
   the switcher drives the shell + docs, not the editor internals).
 - Persisting per-doc edits across language swaps (see "On locale change" above).

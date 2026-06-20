@@ -88,7 +88,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       attribute="class"
       defaultTheme="system"
       enableSystem
-      storageKey="markora-theme"
+      storageKey="mardora-theme"
       disableTransitionOnChange
       enableColorScheme
       themes={themeValues}

@@ -7,10 +7,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "@refinex/markora/editor": fileURLToPath(new URL("../../packages/markora/dist/editor/index.js", import.meta.url)),
-      "@refinex/markora/preview": fileURLToPath(new URL("../../packages/markora/dist/preview/index.js", import.meta.url)),
-      "@refinex/markora/plugins": fileURLToPath(new URL("../../packages/markora/dist/plugins/index.js", import.meta.url)),
-      markora: fileURLToPath(new URL("../../packages/markora/dist/index.js", import.meta.url)),
+      "mardora/editor": fileURLToPath(new URL("../../packages/mardora/dist/editor/index.js", import.meta.url)),
+      "mardora/preview": fileURLToPath(new URL("../../packages/mardora/dist/preview/index.js", import.meta.url)),
+      "mardora/plugins": fileURLToPath(new URL("../../packages/mardora/dist/plugins/index.js", import.meta.url)),
+      mardora: fileURLToPath(new URL("../../packages/mardora/dist/index.js", import.meta.url)),
     },
   },
   server: {

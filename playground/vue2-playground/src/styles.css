@@ -824,7 +824,7 @@ button {
   scrollbar-gutter: stable;
 }
 
-.preview-with-toc .editor-host-with-toc .cm-markora .cm-content {
+.preview-with-toc .editor-host-with-toc .cm-mardora .cm-content {
   max-width: var(--vue2-content-max-width, 48rem);
 }
 
@@ -885,44 +885,44 @@ button {
   margin: 0;
 }
 
-.vue2-preview .cm-markora-paragraph {
+.vue2-preview .cm-mardora-paragraph {
   padding-top: 0.25em !important;
   padding-bottom: 0.25em !important;
 }
 
-.vue2-preview .cm-markora-line-h1 {
+.vue2-preview .cm-mardora-line-h1 {
   padding-top: 1.25em !important;
   padding-bottom: 0.4em !important;
 }
 
-.vue2-preview .cm-markora-line-h2 {
+.vue2-preview .cm-mardora-line-h2 {
   padding-top: 1em !important;
   padding-bottom: 0.35em !important;
 }
 
-.vue2-preview .cm-markora-line-h3,
-.vue2-preview .cm-markora-line-h4,
-.vue2-preview .cm-markora-line-h5,
-.vue2-preview .cm-markora-line-h6 {
+.vue2-preview .cm-mardora-line-h3,
+.vue2-preview .cm-mardora-line-h4,
+.vue2-preview .cm-mardora-line-h5,
+.vue2-preview .cm-mardora-line-h6 {
   padding-top: 0.85em !important;
   padding-bottom: 0.3em !important;
 }
 
-.vue2-preview .cm-markora-code-container {
+.vue2-preview .cm-mardora-code-container {
   margin: 0.75rem 0 !important;
   border-radius: var(--radius) !important;
 }
 
-.vue2-preview .cm-markora-code-block {
+.vue2-preview .cm-mardora-code-block {
   border-radius: var(--radius) !important;
 }
 
-.vue2-preview .cm-markora-code-container .cm-markora-code-block {
+.vue2-preview .cm-mardora-code-container .cm-mardora-code-block {
   margin: 0 !important;
   border-radius: 0 !important;
 }
 
-.vue2-preview .cm-markora-quote-line {
+.vue2-preview .cm-mardora-quote-line {
   margin: 0.5rem 0 !important;
 }
 

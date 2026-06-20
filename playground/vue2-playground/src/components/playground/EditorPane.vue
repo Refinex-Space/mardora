@@ -45,14 +45,14 @@ import { css } from "@codemirror/lang-css";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import type { MarkoraNode, MarkoraTocItem } from "@refinex/markora/editor";
-import { markora, ThemeEnum } from "@refinex/markora/editor";
-import { bindCodeCopyButtons } from "@refinex/markora/plugins";
-import { extractPreviewTocFromMarkdown, generateCSS, preview } from "@refinex/markora/preview";
+import type { MardoraNode, MardoraTocItem } from "mardora/editor";
+import { mardora, ThemeEnum } from "mardora/editor";
+import { bindCodeCopyButtons } from "mardora/plugins";
+import { extractPreviewTocFromMarkdown, generateCSS, preview } from "mardora/preview";
 import { getActivePlugins } from "@/state/playgroundConfig";
 import type { Content, PlaygroundConfig, PlaygroundMode, PreviewOutput, ThemeMode } from "@/types";
 
-const previewTocStorageKey = "markora-vue2-playground:preview-toc-width";
+const previewTocStorageKey = "mardora-vue2-playground:preview-toc-width";
 const previewTocMinWidth = 180;
 const previewTocMaxWidth = 360;
 const previewTocDefaultWidth = 240;
@@ -106,7 +106,7 @@ export default Vue.extend({
       renderRequest: 0,
       objectUrls: [] as string[],
       previewTocWidth: readPreviewTocWidth(),
-      previewToc: [] as MarkoraTocItem[],
+      previewToc: [] as MardoraTocItem[],
       previewTocManualActiveUntil: 0,
     };
   },
@@ -177,7 +177,7 @@ export default Vue.extend({
     cmTheme() {
       return this.theme === "dark" ? githubDark : githubLight;
     },
-    markoraTheme() {
+    mardoraTheme() {
       return this.theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT;
     },
     destroyViews() {
@@ -246,8 +246,8 @@ export default Vue.extend({
           doc: this.content.content,
           extensions: [
             this.cmTheme(),
-            markora({
-              theme: this.markoraTheme(),
+            mardora({
+              theme: this.mardoraTheme(),
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
               plugins: getActivePlugins(this.config.plugins),
@@ -279,7 +279,7 @@ export default Vue.extend({
                   file: ["*/*"],
                 },
               },
-              onNodesChange: (nodes: MarkoraNode[]) => {
+              onNodesChange: (nodes: MardoraNode[]) => {
                 if (this.showNodes) {
                   this.$emit("nodes-change", nodes);
                 }
@@ -298,19 +298,19 @@ export default Vue.extend({
       const plugins = getActivePlugins(this.config.plugins);
 
       const htmlOutput = await preview(this.content.content, {
-        theme: this.markoraTheme(),
+        theme: this.mardoraTheme(),
         plugins,
         markdown: [],
         syntaxTheme,
         sanitize: this.config.preview.sanitize,
         wrapperTag: "div",
-        wrapperClass: "markora-preview vue2-preview",
+        wrapperClass: "mardora-preview vue2-preview",
       });
 
       const cssOutput = generateCSS({
-        theme: this.markoraTheme(),
+        theme: this.mardoraTheme(),
         plugins,
-        wrapperClass: "markora-preview",
+        wrapperClass: "mardora-preview",
         includeBase: this.config.preview.includeBase,
         syntaxTheme,
       });
@@ -344,7 +344,7 @@ export default Vue.extend({
         onTocChange: this.handleEditorTocChange,
       };
     },
-    handleEditorTocChange(items: MarkoraTocItem[]) {
+    handleEditorTocChange(items: MardoraTocItem[]) {
       if (Date.now() >= this.previewTocManualActiveUntil) {
         this.previewToc = items;
         return;
@@ -401,7 +401,7 @@ export default Vue.extend({
         }),
       });
     },
-    jumpToc(item: MarkoraTocItem) {
+    jumpToc(item: MardoraTocItem) {
       if (this.mode === "live") {
         this.jumpEditorToc(item);
         return;
@@ -409,7 +409,7 @@ export default Vue.extend({
 
       this.jumpPreviewToc(item.id);
     },
-    jumpEditorToc(item: MarkoraTocItem) {
+    jumpEditorToc(item: MardoraTocItem) {
       if (!this.editorView || typeof item.from !== "number") return;
 
       this.previewTocManualActiveUntil = Date.now() + 650;

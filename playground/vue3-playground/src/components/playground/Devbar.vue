@@ -158,7 +158,7 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
-import type { MarkoraNode } from "@refinex/markora/editor";
+import type { MardoraNode } from "mardora/editor";
 import type { PlaygroundConfig, PlaygroundLocale, PreviewContentWidth } from "@/types";
 
 type EditorOptionKey = keyof PlaygroundConfig["editor"];
@@ -181,7 +181,7 @@ export default defineComponent({
       required: true,
     },
     nodes: {
-      type: Array as PropType<MarkoraNode[]>,
+      type: Array as PropType<MardoraNode[]>,
       required: true,
     },
     outputTime: {

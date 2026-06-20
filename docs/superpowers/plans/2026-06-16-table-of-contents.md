@@ -5,61 +5,61 @@ status: active
 referenced_by: docs/README.md#superpowers-plans
 ---
 
-# Markora Table of Contents Implementation Plan
+# Mardora Table of Contents Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build Markora's default built-in table-of-contents panel for Live and View modes, while allowing consumers to disable the default UI and use `onTocChange` data for custom rendering.
+**Goal:** Build Mardora's default built-in table-of-contents panel for Live and View modes, while allowing consumers to disable the default UI and use `onTocChange` data for custom rendering.
 
-**Architecture:** Add a focused `packages/markora/src/editor/table-of-contents` module for shared types, slugging, storage, Live extraction, panel DOM, theme, and the CodeMirror extension. Add preview-side TOC helpers and heading-id support so View mode uses the same heading id rules. Wire the feature into `markora()` by default and into the Vue2 playground feature switches.
+**Architecture:** Add a focused `packages/mardora/src/editor/table-of-contents` module for shared types, slugging, storage, Live extraction, panel DOM, theme, and the CodeMirror extension. Add preview-side TOC helpers and heading-id support so View mode uses the same heading id rules. Wire the feature into `mardora()` by default and into the Vue2 playground feature switches.
 
-**Tech Stack:** TypeScript, CodeMirror 6 ViewPlugin, Lezer Markdown syntax tree, Markora preview renderer, Vue 2.6 playground, Bun tests, tsup.
+**Tech Stack:** TypeScript, CodeMirror 6 ViewPlugin, Lezer Markdown syntax tree, Mardora preview renderer, Vue 2.6 playground, Bun tests, tsup.
 
 ---
 
 ## File Structure
 
-- Create `packages/markora/src/editor/table-of-contents/types.ts`
-  Public `MarkoraTocConfig`, `MarkoraTocItem`, resolved config, and internal panel state types.
-- Create `packages/markora/src/editor/table-of-contents/slug.ts`
+- Create `packages/mardora/src/editor/table-of-contents/types.ts`
+  Public `MardoraTocConfig`, `MardoraTocItem`, resolved config, and internal panel state types.
+- Create `packages/mardora/src/editor/table-of-contents/slug.ts`
   Shared heading id generation for Live and View modes.
-- Create `packages/markora/src/editor/table-of-contents/storage.ts`
+- Create `packages/mardora/src/editor/table-of-contents/storage.ts`
   Optional localStorage persistence for panel `expanded` and `width`.
-- Create `packages/markora/src/editor/table-of-contents/extract.ts`
+- Create `packages/mardora/src/editor/table-of-contents/extract.ts`
   Extract `h2-h6` headings from CodeMirror/Lezer state.
-- Create `packages/markora/src/editor/table-of-contents/panel.ts`
+- Create `packages/mardora/src/editor/table-of-contents/panel.ts`
   Build the built-in DOM panel and wire click, toggle, and resize callbacks.
-- Create `packages/markora/src/editor/table-of-contents/theme.ts`
+- Create `packages/mardora/src/editor/table-of-contents/theme.ts`
   Built-in panel CSS.
-- Create `packages/markora/src/editor/table-of-contents/extension.ts`
+- Create `packages/mardora/src/editor/table-of-contents/extension.ts`
   Live-mode ViewPlugin for TOC data, active item, panel render, click jump, and resize state.
-- Create `packages/markora/src/editor/table-of-contents/index.ts`
+- Create `packages/mardora/src/editor/table-of-contents/index.ts`
   Public exports for editor consumers.
-- Modify `packages/markora/src/editor/markora.ts`
+- Modify `packages/mardora/src/editor/mardora.ts`
   Add `toc` config, default it on, and include the TOC extension.
-- Modify `packages/markora/src/editor/index.ts`
+- Modify `packages/mardora/src/editor/index.ts`
   Export the TOC module.
-- Create `packages/markora/src/preview/toc.ts`
+- Create `packages/mardora/src/preview/toc.ts`
   Generate preview TOC items from Markdown and attach heading ids to rendered preview DOM.
-- Modify `packages/markora/src/preview/types.ts`
+- Modify `packages/mardora/src/preview/types.ts`
   Add optional TOC context fields.
-- Modify `packages/markora/src/preview/context.ts`
+- Modify `packages/mardora/src/preview/context.ts`
   Pass heading id lookup through `PreviewContext`.
-- Modify `packages/markora/src/preview/renderer.ts`
+- Modify `packages/mardora/src/preview/renderer.ts`
   Compute heading ids before rendering and expose them through preview context.
-- Modify `packages/markora/src/plugins/heading-plugin.ts`
+- Modify `packages/mardora/src/plugins/heading-plugin.ts`
   Add `id` attributes for `h2-h6` when preview context provides one.
-- Modify `packages/markora/src/preview/index.ts`
+- Modify `packages/mardora/src/preview/index.ts`
   Export preview TOC helpers.
-- Create `packages/markora/tests/toc-slug-storage.spec.ts`
+- Create `packages/mardora/tests/toc-slug-storage.spec.ts`
   Cover slugging, duplicate ids, config defaults, and storage.
-- Create `packages/markora/tests/toc-extract.spec.ts`
+- Create `packages/mardora/tests/toc-extract.spec.ts`
   Cover Live extraction from Markdown syntax tree.
-- Create `packages/markora/tests/toc-preview.spec.ts`
+- Create `packages/mardora/tests/toc-preview.spec.ts`
   Cover preview TOC extraction and heading ids.
-- Create `packages/markora/tests/toc-panel.spec.ts`
+- Create `packages/mardora/tests/toc-panel.spec.ts`
   Cover panel DOM states and interaction callbacks.
-- Modify `packages/markora/src/editor/icons/index.ts`
+- Modify `packages/mardora/src/editor/icons/index.ts`
   Add `table-of-contents` and a collapse/expand icon if missing.
 - Modify `playground/vue2-playground/src/types.ts`
   Add `features.tableOfContents`.
@@ -78,15 +78,15 @@ referenced_by: docs/README.md#superpowers-plans
 
 **Files:**
 
-- Create: `packages/markora/src/editor/table-of-contents/types.ts`
-- Create: `packages/markora/src/editor/table-of-contents/slug.ts`
-- Create: `packages/markora/src/editor/table-of-contents/storage.ts`
-- Create: `packages/markora/src/editor/table-of-contents/index.ts`
-- Create: `packages/markora/tests/toc-slug-storage.spec.ts`
+- Create: `packages/mardora/src/editor/table-of-contents/types.ts`
+- Create: `packages/mardora/src/editor/table-of-contents/slug.ts`
+- Create: `packages/mardora/src/editor/table-of-contents/storage.ts`
+- Create: `packages/mardora/src/editor/table-of-contents/index.ts`
+- Create: `packages/mardora/tests/toc-slug-storage.spec.ts`
 
 - [ ] **Step 1: Write failing tests for slugging, config defaults, and storage**
 
-Create `packages/markora/tests/toc-slug-storage.spec.ts`:
+Create `packages/mardora/tests/toc-slug-storage.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -153,9 +153,9 @@ describe("toc panel storage", () => {
       setItem: (key: string, value: string) => storage.set(key, value),
     };
 
-    writeTocPanelState("markora:toc", { expanded: false, width: 320 }, adapter);
+    writeTocPanelState("mardora:toc", { expanded: false, width: 320 }, adapter);
 
-    expect(readTocPanelState("markora:toc", adapter)).toEqual({ expanded: false, width: 320 });
+    expect(readTocPanelState("mardora:toc", adapter)).toEqual({ expanded: false, width: 320 });
   });
 });
 ```
@@ -165,32 +165,32 @@ describe("toc panel storage", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-slug-storage.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-slug-storage.spec.ts
 ```
 
 Expected: FAIL because `../src/editor/table-of-contents` does not exist.
 
 - [ ] **Step 3: Implement shared types**
 
-Create `packages/markora/src/editor/table-of-contents/types.ts`:
+Create `packages/mardora/src/editor/table-of-contents/types.ts`:
 
 ```ts
-export type MarkoraTocLevel = 2 | 3 | 4 | 5 | 6;
+export type MardoraTocLevel = 2 | 3 | 4 | 5 | 6;
 
-export interface MarkoraTocItem {
+export interface MardoraTocItem {
   id: string;
-  level: MarkoraTocLevel;
+  level: MardoraTocLevel;
   text: string;
   from?: number;
   to?: number;
   active: boolean;
 }
 
-export interface MarkoraTocConfig {
+export interface MardoraTocConfig {
   enabled?: boolean;
-  onTocChange?: (items: MarkoraTocItem[]) => void;
-  minLevel?: MarkoraTocLevel;
-  maxLevel?: MarkoraTocLevel;
+  onTocChange?: (items: MardoraTocItem[]) => void;
+  minLevel?: MardoraTocLevel;
+  maxLevel?: MardoraTocLevel;
   defaultExpanded?: boolean;
   defaultWidth?: number;
   minWidth?: number;
@@ -198,11 +198,11 @@ export interface MarkoraTocConfig {
   storageKey?: string;
 }
 
-export interface ResolvedMarkoraTocConfig {
+export interface ResolvedMardoraTocConfig {
   enabled: boolean;
-  onTocChange?: (items: MarkoraTocItem[]) => void;
-  minLevel: MarkoraTocLevel;
-  maxLevel: MarkoraTocLevel;
+  onTocChange?: (items: MardoraTocItem[]) => void;
+  minLevel: MardoraTocLevel;
+  maxLevel: MardoraTocLevel;
   defaultExpanded: boolean;
   defaultWidth: number;
   minWidth: number;
@@ -223,25 +223,25 @@ export interface TocStorageAdapter {
 
 - [ ] **Step 4: Implement config and slug utilities**
 
-Create `packages/markora/src/editor/table-of-contents/slug.ts`:
+Create `packages/mardora/src/editor/table-of-contents/slug.ts`:
 
 ```ts
-import type { MarkoraTocConfig, ResolvedMarkoraTocConfig } from "./types";
+import type { MardoraTocConfig, ResolvedMardoraTocConfig } from "./types";
 
 const defaultMinWidth = 180;
 const defaultMaxWidth = 360;
 const defaultWidth = 240;
 
-export function clampTocWidth(width: number, config: Pick<ResolvedMarkoraTocConfig, "minWidth" | "maxWidth">): number {
+export function clampTocWidth(width: number, config: Pick<ResolvedMardoraTocConfig, "minWidth" | "maxWidth">): number {
   return Math.min(Math.max(width, config.minWidth), config.maxWidth);
 }
 
-export function resolveTocConfig(config: MarkoraTocConfig = {}): ResolvedMarkoraTocConfig {
+export function resolveTocConfig(config: MardoraTocConfig = {}): ResolvedMardoraTocConfig {
   const minWidth = Math.max(120, config.minWidth ?? defaultMinWidth);
   const maxWidth = Math.max(minWidth, config.maxWidth ?? defaultMaxWidth);
   const minLevel = config.minLevel ?? 2;
   const maxLevel = config.maxLevel ?? 6;
-  const resolved: ResolvedMarkoraTocConfig = {
+  const resolved: ResolvedMardoraTocConfig = {
     enabled: config.enabled !== false,
     onTocChange: config.onTocChange,
     minLevel: minLevel <= maxLevel ? minLevel : maxLevel,
@@ -277,7 +277,7 @@ export function createTocSlugger(): (text: string) => string {
 
 - [ ] **Step 5: Implement storage helpers**
 
-Create `packages/markora/src/editor/table-of-contents/storage.ts`:
+Create `packages/mardora/src/editor/table-of-contents/storage.ts`:
 
 ```ts
 import type { TocPanelState, TocStorageAdapter } from "./types";
@@ -319,7 +319,7 @@ export function writeTocPanelState(
 
 - [ ] **Step 6: Add module exports**
 
-Create `packages/markora/src/editor/table-of-contents/index.ts`:
+Create `packages/mardora/src/editor/table-of-contents/index.ts`:
 
 ```ts
 export * from "./types";
@@ -332,7 +332,7 @@ export * from "./storage";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-slug-storage.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-slug-storage.spec.ts
 ```
 
 Expected: PASS for `toc-slug-storage.spec.ts`.
@@ -340,7 +340,7 @@ Expected: PASS for `toc-slug-storage.spec.ts`.
 - [ ] **Step 8: Commit Task 1**
 
 ```bash
-git add packages/markora/src/editor/table-of-contents packages/markora/tests/toc-slug-storage.spec.ts
+git add packages/mardora/src/editor/table-of-contents packages/mardora/tests/toc-slug-storage.spec.ts
 git commit -m "feat(editor): 添加目录配置与基础工具"
 ```
 
@@ -350,13 +350,13 @@ git commit -m "feat(editor): 添加目录配置与基础工具"
 
 **Files:**
 
-- Create: `packages/markora/src/editor/table-of-contents/extract.ts`
-- Modify: `packages/markora/src/editor/table-of-contents/index.ts`
-- Create: `packages/markora/tests/toc-extract.spec.ts`
+- Create: `packages/mardora/src/editor/table-of-contents/extract.ts`
+- Modify: `packages/mardora/src/editor/table-of-contents/index.ts`
+- Create: `packages/mardora/tests/toc-extract.spec.ts`
 
 - [ ] **Step 1: Write failing extraction tests**
 
-Create `packages/markora/tests/toc-extract.spec.ts`:
+Create `packages/mardora/tests/toc-extract.spec.ts`:
 
 ```ts
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
@@ -421,29 +421,29 @@ describe("extractTocItemsFromState", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-extract.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-extract.spec.ts
 ```
 
 Expected: FAIL because `extractTocItemsFromState` is not exported.
 
 - [ ] **Step 3: Implement Live extraction**
 
-Create `packages/markora/src/editor/table-of-contents/extract.ts`:
+Create `packages/mardora/src/editor/table-of-contents/extract.ts`:
 
 ```ts
 import type { EditorState } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import type { SyntaxNodeRef } from "@lezer/common";
-import type { MarkoraTocConfig, MarkoraTocItem, MarkoraTocLevel } from "./types";
+import type { MardoraTocConfig, MardoraTocItem, MardoraTocLevel } from "./types";
 import { createTocSlugger, resolveTocConfig } from "./slug";
 
 const headingPattern = /^ATXHeading([1-6])$/;
 
-function headingLevel(node: SyntaxNodeRef): MarkoraTocLevel | null {
+function headingLevel(node: SyntaxNodeRef): MardoraTocLevel | null {
   const match = headingPattern.exec(node.name);
   if (!match) return null;
   const level = Number(match[1]);
-  return level >= 2 && level <= 6 ? (level as MarkoraTocLevel) : null;
+  return level >= 2 && level <= 6 ? (level as MardoraTocLevel) : null;
 }
 
 function stripMarkdownInline(text: string): string {
@@ -458,10 +458,10 @@ function stripMarkdownInline(text: string): string {
     .trim();
 }
 
-export function extractTocItemsFromState(state: EditorState, config: MarkoraTocConfig = {}): MarkoraTocItem[] {
+export function extractTocItemsFromState(state: EditorState, config: MardoraTocConfig = {}): MardoraTocItem[] {
   const resolved = resolveTocConfig(config);
   const slug = createTocSlugger();
-  const items: MarkoraTocItem[] = [];
+  const items: MardoraTocItem[] = [];
 
   syntaxTree(state).iterate({
     enter: (node) => {
@@ -486,7 +486,7 @@ export function extractTocItemsFromState(state: EditorState, config: MarkoraTocC
 
 - [ ] **Step 4: Export extraction**
 
-Modify `packages/markora/src/editor/table-of-contents/index.ts`:
+Modify `packages/mardora/src/editor/table-of-contents/index.ts`:
 
 ```ts
 export * from "./types";
@@ -500,7 +500,7 @@ export * from "./extract";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-extract.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-extract.spec.ts
 ```
 
 Expected: PASS for extraction tests.
@@ -508,7 +508,7 @@ Expected: PASS for extraction tests.
 - [ ] **Step 6: Commit Task 2**
 
 ```bash
-git add packages/markora/src/editor/table-of-contents packages/markora/tests/toc-extract.spec.ts
+git add packages/mardora/src/editor/table-of-contents packages/mardora/tests/toc-extract.spec.ts
 git commit -m "feat(editor): 提取文档目录标题数据"
 ```
 
@@ -518,15 +518,15 @@ git commit -m "feat(editor): 提取文档目录标题数据"
 
 **Files:**
 
-- Create: `packages/markora/src/editor/table-of-contents/panel.ts`
-- Create: `packages/markora/src/editor/table-of-contents/theme.ts`
-- Modify: `packages/markora/src/editor/table-of-contents/index.ts`
-- Modify: `packages/markora/src/editor/icons/index.ts`
-- Create: `packages/markora/tests/toc-panel.spec.ts`
+- Create: `packages/mardora/src/editor/table-of-contents/panel.ts`
+- Create: `packages/mardora/src/editor/table-of-contents/theme.ts`
+- Modify: `packages/mardora/src/editor/table-of-contents/index.ts`
+- Modify: `packages/mardora/src/editor/icons/index.ts`
+- Create: `packages/mardora/tests/toc-panel.spec.ts`
 
 - [ ] **Step 1: Write failing panel tests**
 
-Create `packages/markora/tests/toc-panel.spec.ts`:
+Create `packages/mardora/tests/toc-panel.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -551,14 +551,14 @@ describe("createTocPanelElement", () => {
       }
     );
 
-    expect(panel.className).toContain("cm-markora-toc");
-    expect(panel.getAttribute("data-markora-toc-expanded")).toBe("true");
-    expect(panel.querySelectorAll(".cm-markora-toc-item").length).toBe(2);
-    expect(panel.querySelector(".cm-markora-toc-item-active")?.textContent).toContain("Intro");
-    expect(panel.querySelector('[data-markora-toc-level="3"]')?.textContent).toContain("Details");
+    expect(panel.className).toContain("cm-mardora-toc");
+    expect(panel.getAttribute("data-mardora-toc-expanded")).toBe("true");
+    expect(panel.querySelectorAll(".cm-mardora-toc-item").length).toBe(2);
+    expect(panel.querySelector(".cm-mardora-toc-item-active")?.textContent).toContain("Intro");
+    expect(panel.querySelector('[data-mardora-toc-level="3"]')?.textContent).toContain("Details");
 
     panel
-      .querySelector<HTMLButtonElement>(".cm-markora-toc-item")
+      .querySelector<HTMLButtonElement>(".cm-mardora-toc-item")
       ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
     expect(calls).toEqual(["intro"]);
@@ -570,7 +570,7 @@ describe("createTocPanelElement", () => {
       { onSelect: () => undefined, onToggle: () => undefined, onResizeStart: () => undefined }
     );
 
-    expect(panel.getAttribute("data-markora-toc-expanded")).toBe("false");
+    expect(panel.getAttribute("data-mardora-toc-expanded")).toBe("false");
     expect(panel.textContent).toContain("目录");
   });
 });
@@ -581,14 +581,14 @@ describe("createTocPanelElement", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-panel.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-panel.spec.ts
 ```
 
 Expected: FAIL because `createTocPanelElement` does not exist.
 
 - [ ] **Step 3: Add the table-of-contents icon**
 
-Modify `packages/markora/src/editor/icons/index.ts` by adding this icon entry to the built-in icon map:
+Modify `packages/mardora/src/editor/icons/index.ts` by adding this icon entry to the built-in icon map:
 
 ```ts
 "table-of-contents": [
@@ -603,35 +603,35 @@ Modify `packages/markora/src/editor/icons/index.ts` by adding this icon entry to
 
 - [ ] **Step 4: Implement panel DOM builder**
 
-Create `packages/markora/src/editor/table-of-contents/panel.ts`:
+Create `packages/mardora/src/editor/table-of-contents/panel.ts`:
 
 ```ts
-import { createMarkoraIcon } from "../icons";
-import type { MarkoraTocItem } from "./types";
+import { createMardoraIcon } from "../icons";
+import type { MardoraTocItem } from "./types";
 
 export interface TocPanelRenderState {
   expanded: boolean;
   width: number;
-  items: MarkoraTocItem[];
+  items: MardoraTocItem[];
 }
 
 export interface TocPanelCallbacks {
-  onSelect(item: MarkoraTocItem): void;
+  onSelect(item: MardoraTocItem): void;
   onToggle(): void;
   onResizeStart(event: MouseEvent): void;
 }
 
 function appendIcon(parent: HTMLElement, name: string): void {
-  const icon = createMarkoraIcon(name);
+  const icon = createMardoraIcon(name);
   if (icon) parent.appendChild(icon);
 }
 
 function createHeader(callbacks: TocPanelCallbacks): HTMLElement {
   const header = document.createElement("div");
-  header.className = "cm-markora-toc-header";
+  header.className = "cm-mardora-toc-header";
 
   const title = document.createElement("div");
-  title.className = "cm-markora-toc-title";
+  title.className = "cm-mardora-toc-title";
   appendIcon(title, "table-of-contents");
   const text = document.createElement("span");
   text.textContent = "目录";
@@ -639,7 +639,7 @@ function createHeader(callbacks: TocPanelCallbacks): HTMLElement {
 
   const toggle = document.createElement("button");
   toggle.type = "button";
-  toggle.className = "cm-markora-toc-toggle";
+  toggle.className = "cm-mardora-toc-toggle";
   toggle.setAttribute("aria-label", "Toggle table of contents");
   toggle.textContent = "‹";
   toggle.addEventListener("click", callbacks.onToggle);
@@ -651,7 +651,7 @@ function createHeader(callbacks: TocPanelCallbacks): HTMLElement {
 function createCollapsed(callbacks: TocPanelCallbacks): HTMLElement {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "cm-markora-toc-collapsed";
+  button.className = "cm-mardora-toc-collapsed";
   button.setAttribute("aria-label", "Open table of contents");
   appendIcon(button, "table-of-contents");
   const label = document.createElement("span");
@@ -661,12 +661,12 @@ function createCollapsed(callbacks: TocPanelCallbacks): HTMLElement {
   return button;
 }
 
-function createItem(item: MarkoraTocItem, callbacks: TocPanelCallbacks): HTMLButtonElement {
+function createItem(item: MardoraTocItem, callbacks: TocPanelCallbacks): HTMLButtonElement {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = item.active ? "cm-markora-toc-item cm-markora-toc-item-active" : "cm-markora-toc-item";
-  button.dataset.markoraTocId = item.id;
-  button.dataset.markoraTocLevel = String(item.level);
+  button.className = item.active ? "cm-mardora-toc-item cm-mardora-toc-item-active" : "cm-mardora-toc-item";
+  button.dataset.mardoraTocId = item.id;
+  button.dataset.mardoraTocLevel = String(item.level);
   button.title = item.text;
   button.textContent = item.text;
   button.addEventListener("click", () => callbacks.onSelect(item));
@@ -675,12 +675,12 @@ function createItem(item: MarkoraTocItem, callbacks: TocPanelCallbacks): HTMLBut
 
 export function createTocPanelElement(state: TocPanelRenderState, callbacks: TocPanelCallbacks): HTMLElement {
   const root = document.createElement("aside");
-  root.className = "cm-markora-toc";
-  root.dataset.markoraTocExpanded = String(state.expanded);
-  root.style.setProperty("--markora-toc-width", `${state.width}px`);
+  root.className = "cm-mardora-toc";
+  root.dataset.mardoraTocExpanded = String(state.expanded);
+  root.style.setProperty("--mardora-toc-width", `${state.width}px`);
 
   const resize = document.createElement("div");
-  resize.className = "cm-markora-toc-resize";
+  resize.className = "cm-mardora-toc-resize";
   resize.addEventListener("mousedown", callbacks.onResizeStart);
   root.appendChild(resize);
 
@@ -692,10 +692,10 @@ export function createTocPanelElement(state: TocPanelRenderState, callbacks: Toc
   root.appendChild(createHeader(callbacks));
 
   const list = document.createElement("nav");
-  list.className = "cm-markora-toc-list";
+  list.className = "cm-mardora-toc-list";
   if (state.items.length === 0) {
     const empty = document.createElement("div");
-    empty.className = "cm-markora-toc-empty";
+    empty.className = "cm-mardora-toc-empty";
     empty.textContent = "暂无目录";
     list.appendChild(empty);
   } else {
@@ -708,28 +708,28 @@ export function createTocPanelElement(state: TocPanelRenderState, callbacks: Toc
 
 - [ ] **Step 5: Implement panel theme**
 
-Create `packages/markora/src/editor/table-of-contents/theme.ts`:
+Create `packages/mardora/src/editor/table-of-contents/theme.ts`:
 
 ```ts
 import { EditorView } from "@codemirror/view";
 
 export const tocTheme = EditorView.baseTheme({
-  ".cm-markora-toc": {
+  ".cm-mardora-toc": {
     position: "relative",
-    flex: "0 0 var(--markora-toc-width, 240px)",
-    width: "var(--markora-toc-width, 240px)",
+    flex: "0 0 var(--mardora-toc-width, 240px)",
+    width: "var(--mardora-toc-width, 240px)",
     minWidth: "0",
     height: "100%",
-    borderLeft: "1px solid var(--markora-toc-border, #e4e4e7)",
-    background: "var(--markora-toc-bg, #ffffff)",
-    color: "var(--markora-toc-fg, #27272a)",
+    borderLeft: "1px solid var(--mardora-toc-border, #e4e4e7)",
+    background: "var(--mardora-toc-bg, #ffffff)",
+    color: "var(--mardora-toc-fg, #27272a)",
     userSelect: "none",
   },
-  ".cm-markora-toc[data-markora-toc-expanded='false']": {
+  ".cm-mardora-toc[data-mardora-toc-expanded='false']": {
     flexBasis: "42px",
     width: "42px",
   },
-  ".cm-markora-toc-resize": {
+  ".cm-mardora-toc-resize": {
     position: "absolute",
     top: "0",
     bottom: "0",
@@ -737,50 +737,50 @@ export const tocTheme = EditorView.baseTheme({
     width: "6px",
     cursor: "col-resize",
   },
-  ".cm-markora-toc-resize::after": {
+  ".cm-mardora-toc-resize::after": {
     position: "absolute",
     top: "40%",
     left: "2px",
     width: "2px",
     height: "58px",
     borderRadius: "999px",
-    background: "var(--markora-toc-handle, #d4d4d8)",
+    background: "var(--mardora-toc-handle, #d4d4d8)",
     content: "''",
   },
-  ".cm-markora-toc-header": {
+  ".cm-mardora-toc-header": {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     height: "44px",
     padding: "0 10px 0 14px",
   },
-  ".cm-markora-toc-title": {
+  ".cm-mardora-toc-title": {
     display: "inline-flex",
     alignItems: "center",
     gap: "8px",
     fontSize: "13px",
     fontWeight: "600",
   },
-  ".cm-markora-toc-title svg, .cm-markora-toc-collapsed svg": {
+  ".cm-mardora-toc-title svg, .cm-mardora-toc-collapsed svg": {
     width: "16px",
     height: "16px",
   },
-  ".cm-markora-toc-toggle, .cm-markora-toc-collapsed, .cm-markora-toc-item": {
+  ".cm-mardora-toc-toggle, .cm-mardora-toc-collapsed, .cm-mardora-toc-item": {
     border: "0",
     background: "transparent",
     color: "inherit",
     cursor: "default",
     font: "inherit",
   },
-  ".cm-markora-toc-toggle": {
+  ".cm-mardora-toc-toggle": {
     width: "28px",
     height: "28px",
     borderRadius: "6px",
   },
-  ".cm-markora-toc-toggle:hover, .cm-markora-toc-collapsed:hover, .cm-markora-toc-item:hover": {
-    background: "var(--markora-toc-hover, #f4f4f5)",
+  ".cm-mardora-toc-toggle:hover, .cm-mardora-toc-collapsed:hover, .cm-mardora-toc-item:hover": {
+    background: "var(--mardora-toc-hover, #f4f4f5)",
   },
-  ".cm-markora-toc-collapsed": {
+  ".cm-mardora-toc-collapsed": {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -788,15 +788,15 @@ export const tocTheme = EditorView.baseTheme({
     gap: "6px",
     width: "100%",
     height: "100%",
-    color: "var(--markora-toc-muted, #71717a)",
+    color: "var(--mardora-toc-muted, #71717a)",
     fontSize: "12px",
   },
-  ".cm-markora-toc-list": {
+  ".cm-mardora-toc-list": {
     overflow: "auto",
     height: "calc(100% - 44px)",
     padding: "4px 10px 16px 12px",
   },
-  ".cm-markora-toc-item": {
+  ".cm-mardora-toc-item": {
     display: "block",
     width: "100%",
     overflow: "hidden",
@@ -804,42 +804,42 @@ export const tocTheme = EditorView.baseTheme({
     padding: "0 8px",
     borderLeft: "2px solid transparent",
     borderRadius: "6px",
-    color: "var(--markora-toc-muted, #71717a)",
+    color: "var(--mardora-toc-muted, #71717a)",
     lineHeight: "30px",
     textAlign: "left",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
-  ".cm-markora-toc-item[data-markora-toc-level='3']": { paddingLeft: "18px" },
-  ".cm-markora-toc-item[data-markora-toc-level='4']": { paddingLeft: "28px" },
-  ".cm-markora-toc-item[data-markora-toc-level='5']": { paddingLeft: "38px" },
-  ".cm-markora-toc-item[data-markora-toc-level='6']": { paddingLeft: "48px" },
-  ".cm-markora-toc-item-active": {
-    borderLeftColor: "var(--markora-toc-active, #18181b)",
-    background: "var(--markora-toc-hover, #f4f4f5)",
-    color: "var(--markora-toc-active, #18181b)",
+  ".cm-mardora-toc-item[data-mardora-toc-level='3']": { paddingLeft: "18px" },
+  ".cm-mardora-toc-item[data-mardora-toc-level='4']": { paddingLeft: "28px" },
+  ".cm-mardora-toc-item[data-mardora-toc-level='5']": { paddingLeft: "38px" },
+  ".cm-mardora-toc-item[data-mardora-toc-level='6']": { paddingLeft: "48px" },
+  ".cm-mardora-toc-item-active": {
+    borderLeftColor: "var(--mardora-toc-active, #18181b)",
+    background: "var(--mardora-toc-hover, #f4f4f5)",
+    color: "var(--mardora-toc-active, #18181b)",
     fontWeight: "600",
   },
-  ".cm-markora-toc-empty": {
+  ".cm-mardora-toc-empty": {
     padding: "12px 8px",
-    color: "var(--markora-toc-muted, #71717a)",
+    color: "var(--mardora-toc-muted, #71717a)",
     fontSize: "13px",
   },
-  "&dark .cm-markora-toc": {
-    "--markora-toc-bg": "#18181b",
-    "--markora-toc-fg": "#f4f4f5",
-    "--markora-toc-border": "#3f3f46",
-    "--markora-toc-handle": "#52525b",
-    "--markora-toc-hover": "#27272a",
-    "--markora-toc-muted": "#a1a1aa",
-    "--markora-toc-active": "#f4f4f5",
+  "&dark .cm-mardora-toc": {
+    "--mardora-toc-bg": "#18181b",
+    "--mardora-toc-fg": "#f4f4f5",
+    "--mardora-toc-border": "#3f3f46",
+    "--mardora-toc-handle": "#52525b",
+    "--mardora-toc-hover": "#27272a",
+    "--mardora-toc-muted": "#a1a1aa",
+    "--mardora-toc-active": "#f4f4f5",
   },
 });
 ```
 
 - [ ] **Step 6: Export panel and theme**
 
-Modify `packages/markora/src/editor/table-of-contents/index.ts`:
+Modify `packages/mardora/src/editor/table-of-contents/index.ts`:
 
 ```ts
 export * from "./types";
@@ -855,7 +855,7 @@ export * from "./theme";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-panel.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-panel.spec.ts
 ```
 
 Expected: PASS for panel tests.
@@ -863,29 +863,29 @@ Expected: PASS for panel tests.
 - [ ] **Step 8: Commit Task 3**
 
 ```bash
-git add packages/markora/src/editor/icons/index.ts packages/markora/src/editor/table-of-contents packages/markora/tests/toc-panel.spec.ts
+git add packages/mardora/src/editor/icons/index.ts packages/mardora/src/editor/table-of-contents packages/mardora/tests/toc-panel.spec.ts
 git commit -m "feat(editor): 添加内置目录面板"
 ```
 
 ---
 
-## Task 4: Live Mode TOC Extension And Core Markora Config
+## Task 4: Live Mode TOC Extension And Core Mardora Config
 
 **Files:**
 
-- Create: `packages/markora/src/editor/table-of-contents/extension.ts`
-- Modify: `packages/markora/src/editor/table-of-contents/index.ts`
-- Modify: `packages/markora/src/editor/markora.ts`
-- Modify: `packages/markora/src/editor/index.ts`
-- Create: `packages/markora/tests/toc-extension.spec.ts`
+- Create: `packages/mardora/src/editor/table-of-contents/extension.ts`
+- Modify: `packages/mardora/src/editor/table-of-contents/index.ts`
+- Modify: `packages/mardora/src/editor/mardora.ts`
+- Modify: `packages/mardora/src/editor/index.ts`
+- Create: `packages/mardora/tests/toc-extension.spec.ts`
 
 - [ ] **Step 1: Write failing composition tests**
 
-Create `packages/markora/tests/toc-extension.spec.ts`:
+Create `packages/mardora/tests/toc-extension.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
-import { markora } from "../src/editor";
+import { mardora } from "../src/editor";
 import { tableOfContents } from "../src/editor/table-of-contents";
 
 describe("tableOfContents extension composition", () => {
@@ -899,8 +899,8 @@ describe("tableOfContents extension composition", () => {
     expect(tableOfContents({ enabled: false, onTocChange: (items) => calls.push(items) }).length).toBeGreaterThan(0);
   });
 
-  it("is included by markora by default", () => {
-    expect(markora().flat(Infinity).length).toBeGreaterThan(0);
+  it("is included by mardora by default", () => {
+    expect(mardora().flat(Infinity).length).toBeGreaterThan(0);
   });
 });
 ```
@@ -910,14 +910,14 @@ describe("tableOfContents extension composition", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-extension.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-extension.spec.ts
 ```
 
 Expected: FAIL because `tableOfContents` is not exported.
 
 - [ ] **Step 3: Implement Live extension**
 
-Create `packages/markora/src/editor/table-of-contents/extension.ts`:
+Create `packages/mardora/src/editor/table-of-contents/extension.ts`:
 
 ```ts
 import { EditorSelection, Extension, Prec } from "@codemirror/state";
@@ -927,21 +927,21 @@ import { createTocPanelElement } from "./panel";
 import { clampTocWidth, resolveTocConfig } from "./slug";
 import { readTocPanelState, writeTocPanelState } from "./storage";
 import { tocTheme } from "./theme";
-import type { MarkoraTocConfig, MarkoraTocItem, ResolvedMarkoraTocConfig, TocPanelState } from "./types";
+import type { MardoraTocConfig, MardoraTocItem, ResolvedMardoraTocConfig, TocPanelState } from "./types";
 
-function sameItems(a: MarkoraTocItem[], b: MarkoraTocItem[]): boolean {
+function sameItems(a: MardoraTocItem[], b: MardoraTocItem[]): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
 class TocViewPlugin {
   private panel: HTMLElement | null = null;
-  private config: ResolvedMarkoraTocConfig;
+  private config: ResolvedMardoraTocConfig;
   private panelState: TocPanelState;
-  private items: MarkoraTocItem[] = [];
+  private items: MardoraTocItem[] = [];
 
   constructor(
     private readonly view: EditorView,
-    rawConfig: MarkoraTocConfig
+    rawConfig: MardoraTocConfig
   ) {
     this.config = resolveTocConfig(rawConfig);
     const stored = readTocPanelState(this.config.storageKey);
@@ -974,7 +974,7 @@ class TocViewPlugin {
     this.render();
   }
 
-  private withActive(items: MarkoraTocItem[]): MarkoraTocItem[] {
+  private withActive(items: MardoraTocItem[]): MardoraTocItem[] {
     if (items.length === 0) return [];
     const viewportTop = this.view.scrollDOM.getBoundingClientRect().top + 24;
     let activeIndex = 0;
@@ -1009,7 +1009,7 @@ class TocViewPlugin {
     this.panel = nextPanel;
   }
 
-  private selectItem(item: MarkoraTocItem): void {
+  private selectItem(item: MardoraTocItem): void {
     if (typeof item.from !== "number") return;
     this.view.dispatch({
       selection: EditorSelection.cursor(item.from),
@@ -1034,7 +1034,7 @@ class TocViewPlugin {
     const startX = event.clientX;
     const startWidth = this.panelState.width;
     const doc = this.view.dom.ownerDocument;
-    doc.body.classList.add("cm-markora-toc-resizing");
+    doc.body.classList.add("cm-mardora-toc-resizing");
 
     const move = (moveEvent: MouseEvent) => {
       const nextWidth = clampTocWidth(startWidth - (moveEvent.clientX - startX), this.config);
@@ -1042,7 +1042,7 @@ class TocViewPlugin {
       this.render();
     };
     const up = () => {
-      doc.body.classList.remove("cm-markora-toc-resizing");
+      doc.body.classList.remove("cm-mardora-toc-resizing");
       doc.removeEventListener("mousemove", move);
       doc.removeEventListener("mouseup", up);
       this.persistPanelState();
@@ -1053,14 +1053,14 @@ class TocViewPlugin {
   }
 }
 
-export function tableOfContents(config: MarkoraTocConfig = {}): Extension[] {
+export function tableOfContents(config: MardoraTocConfig = {}): Extension[] {
   return [tocTheme, Prec.low(ViewPlugin.define((view) => new TocViewPlugin(view, config)))];
 }
 ```
 
 - [ ] **Step 4: Export the extension**
 
-Modify `packages/markora/src/editor/table-of-contents/index.ts`:
+Modify `packages/mardora/src/editor/table-of-contents/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1072,10 +1072,10 @@ export * from "./theme";
 export * from "./extension";
 ```
 
-Modify `packages/markora/src/editor/index.ts`:
+Modify `packages/mardora/src/editor/index.ts`:
 
 ```ts
-export * from "./markora";
+export * from "./mardora";
 export * from "./plugin";
 export * from "./utils";
 export * from "./theme";
@@ -1086,23 +1086,23 @@ export * from "./selection-toolbar";
 export * from "./table-of-contents";
 ```
 
-- [ ] **Step 5: Wire into markora config**
+- [ ] **Step 5: Wire into mardora config**
 
-Modify `packages/markora/src/editor/markora.ts`:
+Modify `packages/mardora/src/editor/mardora.ts`:
 
 ```ts
-import type { MarkoraTocConfig } from "./table-of-contents";
+import type { MardoraTocConfig } from "./table-of-contents";
 import { tableOfContents } from "./table-of-contents";
 ```
 
-Add this to `MarkoraConfig`:
+Add this to `MardoraConfig`:
 
 ```ts
 /** Table of contents configuration */
-toc?: MarkoraTocConfig;
+toc?: MardoraTocConfig;
 ```
 
-Add this default in `markora()` destructuring:
+Add this default in `mardora()` destructuring:
 
 ```ts
 toc: configToc = { enabled: true },
@@ -1119,8 +1119,8 @@ tableOfContents(configToc),
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-extension.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-extension.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
 ```
 
 Expected: tests PASS and typecheck exits 0.
@@ -1128,7 +1128,7 @@ Expected: tests PASS and typecheck exits 0.
 - [ ] **Step 7: Commit Task 4**
 
 ```bash
-git add packages/markora/src/editor packages/markora/tests/toc-extension.spec.ts
+git add packages/mardora/src/editor packages/mardora/tests/toc-extension.spec.ts
 git commit -m "feat(editor): 默认启用内置目录扩展"
 ```
 
@@ -1138,17 +1138,17 @@ git commit -m "feat(editor): 默认启用内置目录扩展"
 
 **Files:**
 
-- Create: `packages/markora/src/preview/toc.ts`
-- Modify: `packages/markora/src/preview/types.ts`
-- Modify: `packages/markora/src/preview/context.ts`
-- Modify: `packages/markora/src/preview/renderer.ts`
-- Modify: `packages/markora/src/plugins/heading-plugin.ts`
-- Modify: `packages/markora/src/preview/index.ts`
-- Create: `packages/markora/tests/toc-preview.spec.ts`
+- Create: `packages/mardora/src/preview/toc.ts`
+- Modify: `packages/mardora/src/preview/types.ts`
+- Modify: `packages/mardora/src/preview/context.ts`
+- Modify: `packages/mardora/src/preview/renderer.ts`
+- Modify: `packages/mardora/src/plugins/heading-plugin.ts`
+- Modify: `packages/mardora/src/preview/index.ts`
+- Create: `packages/mardora/tests/toc-preview.spec.ts`
 
 - [ ] **Step 1: Write failing preview tests**
 
-Create `packages/markora/tests/toc-preview.spec.ts`:
+Create `packages/mardora/tests/toc-preview.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -1183,27 +1183,27 @@ describe("preview table of contents", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-preview.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-preview.spec.ts
 ```
 
 Expected: FAIL because `extractPreviewTocFromMarkdown` and heading ids do not exist.
 
 - [ ] **Step 3: Implement preview TOC extraction**
 
-Create `packages/markora/src/preview/toc.ts`:
+Create `packages/mardora/src/preview/toc.ts`:
 
 ```ts
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorState } from "@codemirror/state";
 import type { MarkdownConfig } from "@lezer/markdown";
-import type { MarkoraTocConfig, MarkoraTocItem } from "../editor/table-of-contents";
+import type { MardoraTocConfig, MardoraTocItem } from "../editor/table-of-contents";
 import { extractTocItemsFromState } from "../editor/table-of-contents";
 
 export function extractPreviewTocFromMarkdown(
   doc: string,
-  config: MarkoraTocConfig = {},
+  config: MardoraTocConfig = {},
   markdownConfig: MarkdownConfig[] = []
-): MarkoraTocItem[] {
+): MardoraTocItem[] {
   const state = EditorState.create({
     doc,
     extensions: [markdown({ base: markdownLanguage, extensions: markdownConfig })],
@@ -1214,14 +1214,14 @@ export function extractPreviewTocFromMarkdown(
 
 - [ ] **Step 4: Extend preview context types**
 
-Modify `packages/markora/src/preview/types.ts` to add `headingIdForNode` to `PreviewContext`:
+Modify `packages/mardora/src/preview/types.ts` to add `headingIdForNode` to `PreviewContext`:
 
 ```ts
 /** Return a stable heading id for TOC-aware heading renderers */
 headingIdForNode?(node: import("@lezer/common").SyntaxNode): string | null;
 ```
 
-Modify `packages/markora/src/preview/context.ts` so `createPreviewContext` accepts and returns this optional function:
+Modify `packages/mardora/src/preview/context.ts` so `createPreviewContext` accepts and returns this optional function:
 
 ```ts
 export function createPreviewContext(
@@ -1245,7 +1245,7 @@ export function createPreviewContext(
 
 - [ ] **Step 5: Compute heading ids in PreviewRenderer**
 
-Modify `packages/markora/src/preview/renderer.ts`:
+Modify `packages/mardora/src/preview/renderer.ts`:
 
 ```ts
 import { EditorState } from "@codemirror/state";
@@ -1279,7 +1279,7 @@ return await this.renderNode(tree.topNode);
 
 - [ ] **Step 6: Add heading ids in HeadingPlugin preview HTML**
 
-Modify `packages/markora/src/plugins/heading-plugin.ts` imports:
+Modify `packages/mardora/src/plugins/heading-plugin.ts` imports:
 
 ```ts
 import type { PreviewContext } from "../preview/types";
@@ -1311,7 +1311,7 @@ override renderToHTML(node: SyntaxNode, children: string, ctx: PreviewContext): 
 
 - [ ] **Step 7: Export preview helper**
 
-Modify `packages/markora/src/preview/index.ts`:
+Modify `packages/mardora/src/preview/index.ts`:
 
 ```ts
 export { extractPreviewTocFromMarkdown } from "./toc";
@@ -1322,8 +1322,8 @@ export { extractPreviewTocFromMarkdown } from "./toc";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/toc-preview.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/toc-preview.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
 ```
 
 Expected: tests PASS and typecheck exits 0.
@@ -1331,7 +1331,7 @@ Expected: tests PASS and typecheck exits 0.
 - [ ] **Step 9: Commit Task 5**
 
 ```bash
-git add packages/markora/src/preview packages/markora/src/plugins/heading-plugin.ts packages/markora/tests/toc-preview.spec.ts
+git add packages/mardora/src/preview packages/mardora/src/plugins/heading-plugin.ts packages/mardora/tests/toc-preview.spec.ts
 git commit -m "feat(preview): 支持预览目录数据与标题锚点"
 ```
 
@@ -1386,12 +1386,12 @@ featureOptions: [
 
 - [ ] **Step 3: Pass Live TOC config**
 
-Modify the `markora({ ... })` call in `playground/vue2-playground/src/components/playground/EditorPane.vue`:
+Modify the `mardora({ ... })` call in `playground/vue2-playground/src/components/playground/EditorPane.vue`:
 
 ```ts
 toc: {
   enabled: this.config.features.tableOfContents && this.mode === "live",
-  storageKey: "markora-vue2-playground:toc",
+  storageKey: "mardora-vue2-playground:toc",
 },
 ```
 
@@ -1436,14 +1436,14 @@ to:
 Modify `EditorPane.vue` imports:
 
 ```ts
-import type { MarkoraNode, MarkoraTocItem } from "@refinex/markora/editor";
-import { extractPreviewTocFromMarkdown } from "@refinex/markora/preview";
+import type { MardoraNode, MardoraTocItem } from "mardora/editor";
+import { extractPreviewTocFromMarkdown } from "mardora/preview";
 ```
 
 Add data:
 
 ```ts
-previewToc: [] as MarkoraTocItem[],
+previewToc: [] as MardoraTocItem[],
 ```
 
 At the end of `renderPreview()`, after `this.previewOutput = ...`, add:
@@ -1582,10 +1582,10 @@ git commit -m "feat(playground): 演示内置目录能力"
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
-pnpm --config.package-manager-strict=false --dir packages/markora test
-pnpm --config.package-manager-strict=false --dir packages/markora build
-pnpm --config.package-manager-strict=false --dir packages/markora lint
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora test
+pnpm --config.package-manager-strict=false --dir packages/mardora build
+pnpm --config.package-manager-strict=false --dir packages/mardora lint
 pnpm --config.package-manager-strict=false --filter vue2-playground build
 git diff --check
 ```
@@ -1644,7 +1644,7 @@ In Developer Panel > Feature Options, turn off Table of Contents and verify:
 If browser QA required code changes, commit them:
 
 ```bash
-git add packages/markora playground/vue2-playground
+git add packages/mardora playground/vue2-playground
 git commit -m "fix(editor): 完善目录交互验证问题"
 ```
 

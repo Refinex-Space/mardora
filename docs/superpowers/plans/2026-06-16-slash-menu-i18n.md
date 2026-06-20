@@ -9,9 +9,9 @@ referenced_by: docs/README.md#superpowers-plans
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add Chinese and English localization for the Markora slash command menu, defaulting to Chinese and allowing integrators to opt into English.
+**Goal:** Add Chinese and English localization for the Mardora slash command menu, defaulting to Chinese and allowing integrators to opt into English.
 
-**Architecture:** Add a tiny core i18n layer in `packages/markora/src/editor/i18n.ts`, then route the resolved locale into slash menu commands and menu chrome. Keep default command behavior source-compatible by preserving `defaultSlashCommands` as the Chinese command list while adding `getDefaultSlashCommands(locale)`.
+**Architecture:** Add a tiny core i18n layer in `packages/mardora/src/editor/i18n.ts`, then route the resolved locale into slash menu commands and menu chrome. Keep default command behavior source-compatible by preserving `defaultSlashCommands` as the Chinese command list while adding `getDefaultSlashCommands(locale)`.
 
 **Tech Stack:** TypeScript, CodeMirror 6 extensions, Bun test, Vue 2.6 + Vue CLI 4 playground.
 
@@ -19,19 +19,19 @@ referenced_by: docs/README.md#superpowers-plans
 
 ## File Structure
 
-- Create `packages/markora/src/editor/i18n.ts`: shared `MarkoraLocale`, default locale, and locale resolver.
-- Modify `packages/markora/src/editor/slash/types.ts`: add `locale` to slash config and export `MarkoraSlashMessages`.
-- Modify `packages/markora/src/editor/slash/default-commands.ts`: replace the fixed command array with localized command definitions and `getDefaultSlashCommands(locale)`.
-- Modify `packages/markora/src/editor/slash/menu.ts`: accept localized menu messages instead of hard-coded group/footer/empty strings.
-- Modify `packages/markora/src/editor/slash/extension.ts`: resolve locale and pass localized commands/messages into the view plugin.
-- Modify `packages/markora/src/editor/markora.ts`: add top-level `locale` and `i18n.locale`, then pass the resolved locale to slash commands.
-- Modify `packages/markora/src/editor/index.ts`: export the i18n types.
-- Create `packages/markora/tests/slash-i18n.spec.ts`: cover command localization, search aliases, menu chrome, slash config resolution, and custom command preservation.
+- Create `packages/mardora/src/editor/i18n.ts`: shared `MardoraLocale`, default locale, and locale resolver.
+- Modify `packages/mardora/src/editor/slash/types.ts`: add `locale` to slash config and export `MardoraSlashMessages`.
+- Modify `packages/mardora/src/editor/slash/default-commands.ts`: replace the fixed command array with localized command definitions and `getDefaultSlashCommands(locale)`.
+- Modify `packages/mardora/src/editor/slash/menu.ts`: accept localized menu messages instead of hard-coded group/footer/empty strings.
+- Modify `packages/mardora/src/editor/slash/extension.ts`: resolve locale and pass localized commands/messages into the view plugin.
+- Modify `packages/mardora/src/editor/mardora.ts`: add top-level `locale` and `i18n.locale`, then pass the resolved locale to slash commands.
+- Modify `packages/mardora/src/editor/index.ts`: export the i18n types.
+- Create `packages/mardora/tests/slash-i18n.spec.ts`: cover command localization, search aliases, menu chrome, slash config resolution, and custom command preservation.
 - Modify `playground/vue2-playground/src/types.ts`: add `PlaygroundLocale` and `config.locale`.
 - Modify `playground/vue2-playground/src/state/playgroundConfig.ts`: default to `zh-CN`.
 - Modify `playground/vue2-playground/src/components/playground/Devbar.vue`: add a Language segmented control.
-- Modify `playground/vue2-playground/src/components/playground/EditorPane.vue`: pass `locale: this.config.locale` to `markora()`.
-- Modify `playground/vue2-playground/src/shims-markora.d.ts`: add the legacy app type declarations for `locale`.
+- Modify `playground/vue2-playground/src/components/playground/EditorPane.vue`: pass `locale: this.config.locale` to `mardora()`.
+- Modify `playground/vue2-playground/src/shims-mardora.d.ts`: add the legacy app type declarations for `locale`.
 - Modify `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`: assert the new locale default and current feature defaults.
 
 ---
@@ -40,21 +40,21 @@ referenced_by: docs/README.md#superpowers-plans
 
 **Files:**
 
-- Create: `packages/markora/src/editor/i18n.ts`
-- Modify: `packages/markora/src/editor/index.ts`
-- Modify: `packages/markora/src/editor/slash/types.ts`
-- Modify: `packages/markora/src/editor/slash/menu.ts`
-- Test: `packages/markora/tests/slash-i18n.spec.ts`
+- Create: `packages/mardora/src/editor/i18n.ts`
+- Modify: `packages/mardora/src/editor/index.ts`
+- Modify: `packages/mardora/src/editor/slash/types.ts`
+- Modify: `packages/mardora/src/editor/slash/menu.ts`
+- Test: `packages/mardora/tests/slash-i18n.spec.ts`
 
 - [ ] **Step 1: Add failing tests for menu messages and locale fallback**
 
-Create `packages/markora/tests/slash-i18n.spec.ts` with this initial content:
+Create `packages/mardora/tests/slash-i18n.spec.ts` with this initial content:
 
 ```ts
 import { afterEach, describe, expect, it } from "bun:test";
-import { defaultMarkoraLocale, resolveMarkoraLocale } from "../src/editor";
+import { defaultMardoraLocale, resolveMardoraLocale } from "../src/editor";
 import { createSlashMenuElement, getSlashMessages } from "../src/editor/slash";
-import type { MarkoraSlashCommand } from "../src/editor/slash";
+import type { MardoraSlashCommand } from "../src/editor/slash";
 
 class FakeElement {
   className = "";
@@ -130,7 +130,7 @@ afterEach(() => {
   delete (globalThis as typeof globalThis & { document?: Document }).document;
 });
 
-const commands: MarkoraSlashCommand[] = [
+const commands: MardoraSlashCommand[] = [
   {
     id: "paragraph",
     group: "basic",
@@ -153,10 +153,10 @@ const commands: MarkoraSlashCommand[] = [
 
 describe("slash i18n", () => {
   it("defaults to Chinese locale", () => {
-    expect(defaultMarkoraLocale).toBe("zh-CN");
-    expect(resolveMarkoraLocale()).toBe("zh-CN");
-    expect(resolveMarkoraLocale("en-US")).toBe("en-US");
-    expect(resolveMarkoraLocale("fr-FR" as never)).toBe("zh-CN");
+    expect(defaultMardoraLocale).toBe("zh-CN");
+    expect(resolveMardoraLocale()).toBe("zh-CN");
+    expect(resolveMardoraLocale("en-US")).toBe("en-US");
+    expect(resolveMardoraLocale("fr-FR" as never)).toBe("zh-CN");
   });
 
   it("renders Chinese slash menu chrome by default", () => {
@@ -188,35 +188,35 @@ describe("slash i18n", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test slash-i18n.spec.ts
 ```
 
-Expected: FAIL because `defaultMarkoraLocale`, `resolveMarkoraLocale`, `getSlashMessages`, and the `messages` state property do not exist.
+Expected: FAIL because `defaultMardoraLocale`, `resolveMardoraLocale`, `getSlashMessages`, and the `messages` state property do not exist.
 
 - [ ] **Step 3: Add core i18n helpers**
 
-Create `packages/markora/src/editor/i18n.ts`:
+Create `packages/mardora/src/editor/i18n.ts`:
 
 ```ts
-export type MarkoraLocale = "zh-CN" | "en-US";
+export type MardoraLocale = "zh-CN" | "en-US";
 
-export type MarkoraI18nConfig = {
-  locale?: MarkoraLocale;
+export type MardoraI18nConfig = {
+  locale?: MardoraLocale;
 };
 
-export const defaultMarkoraLocale: MarkoraLocale = "zh-CN";
+export const defaultMardoraLocale: MardoraLocale = "zh-CN";
 
-const supportedMarkoraLocales = new Set<MarkoraLocale>(["zh-CN", "en-US"]);
+const supportedMardoraLocales = new Set<MardoraLocale>(["zh-CN", "en-US"]);
 
-export function resolveMarkoraLocale(locale?: MarkoraLocale): MarkoraLocale {
-  return locale && supportedMarkoraLocales.has(locale) ? locale : defaultMarkoraLocale;
+export function resolveMardoraLocale(locale?: MardoraLocale): MardoraLocale {
+  return locale && supportedMardoraLocales.has(locale) ? locale : defaultMardoraLocale;
 }
 ```
 
-Modify `packages/markora/src/editor/index.ts` to export the new module:
+Modify `packages/mardora/src/editor/index.ts` to export the new module:
 
 ```ts
-export * from "./markora";
+export * from "./mardora";
 export * from "./icons";
 export * from "./i18n";
 export * from "./selection-toolbar";
@@ -226,62 +226,62 @@ export * from "./table-of-contents";
 
 - [ ] **Step 4: Add slash message types and dictionary**
 
-Modify `packages/markora/src/editor/slash/types.ts`:
+Modify `packages/mardora/src/editor/slash/types.ts`:
 
 ```ts
 import type { EditorView } from "@codemirror/view";
-import type { MarkoraAttachmentKind } from "../attachments";
-import type { MarkoraLocale } from "../i18n";
+import type { MardoraAttachmentKind } from "../attachments";
+import type { MardoraLocale } from "../i18n";
 
-export type MarkoraSlashCommandGroup = "basic" | "media";
+export type MardoraSlashCommandGroup = "basic" | "media";
 
-export type MarkoraSlashMessages = {
-  groups: Record<MarkoraSlashCommandGroup, string>;
+export type MardoraSlashMessages = {
+  groups: Record<MardoraSlashCommandGroup, string>;
   empty: string;
   close: string;
   closeHint: string;
 };
 
-export type MarkoraSlashCommandContext = {
+export type MardoraSlashCommandContext = {
   view: EditorView;
   queryRange: { from: number; to: number };
-  requestAttachment?: (kind: MarkoraAttachmentKind, context: MarkoraSlashCommandContext) => boolean;
+  requestAttachment?: (kind: MardoraAttachmentKind, context: MardoraSlashCommandContext) => boolean;
 };
 
-export type MarkoraSlashCommand = {
+export type MardoraSlashCommand = {
   id: string;
-  group: MarkoraSlashCommandGroup;
+  group: MardoraSlashCommandGroup;
   title: string;
   aliases: string[];
   icon: string;
   hint: string;
-  run: (context: MarkoraSlashCommandContext) => boolean;
+  run: (context: MardoraSlashCommandContext) => boolean;
 };
 
-export type MarkoraSlashQuery = {
+export type MardoraSlashQuery = {
   from: number;
   to: number;
   query: string;
 };
 
-export type MarkoraSlashCommandsConfig = {
+export type MardoraSlashCommandsConfig = {
   enabled?: boolean;
-  locale?: MarkoraLocale;
-  commands?: MarkoraSlashCommand[];
+  locale?: MardoraLocale;
+  commands?: MardoraSlashCommand[];
 };
 ```
 
-Add to `packages/markora/src/editor/slash/menu.ts`:
+Add to `packages/mardora/src/editor/slash/menu.ts`:
 
 ```ts
-import type { MarkoraLocale } from "../i18n";
-import type { MarkoraSlashCommand, MarkoraSlashMessages } from "./types";
+import type { MardoraLocale } from "../i18n";
+import type { MardoraSlashCommand, MardoraSlashMessages } from "./types";
 ```
 
 Replace the hard-coded `groupLabels` with:
 
 ```ts
-const slashMessages: Record<MarkoraLocale, MarkoraSlashMessages> = {
+const slashMessages: Record<MardoraLocale, MardoraSlashMessages> = {
   "zh-CN": {
     groups: {
       basic: "基本区块",
@@ -302,18 +302,18 @@ const slashMessages: Record<MarkoraLocale, MarkoraSlashMessages> = {
   },
 };
 
-export function getSlashMessages(locale: MarkoraLocale): MarkoraSlashMessages {
+export function getSlashMessages(locale: MardoraLocale): MardoraSlashMessages {
   return slashMessages[locale];
 }
 ```
 
-Update `MarkoraSlashMenuState`:
+Update `MardoraSlashMenuState`:
 
 ```ts
-export type MarkoraSlashMenuState = {
-  commands: MarkoraSlashCommand[];
+export type MardoraSlashMenuState = {
+  commands: MardoraSlashCommand[];
   activeIndex: number;
-  messages: MarkoraSlashMessages;
+  messages: MardoraSlashMessages;
 };
 ```
 
@@ -330,7 +330,7 @@ footer.innerHTML = `<span>${state.messages.close}</span><span>${state.messages.c
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test slash-i18n.spec.ts
 ```
 
 Expected: PASS.
@@ -340,7 +340,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/i18n.ts packages/markora/src/editor/index.ts packages/markora/src/editor/slash/types.ts packages/markora/src/editor/slash/menu.ts packages/markora/tests/slash-i18n.spec.ts
+git add packages/mardora/src/editor/i18n.ts packages/mardora/src/editor/index.ts packages/mardora/src/editor/slash/types.ts packages/mardora/src/editor/slash/menu.ts packages/mardora/tests/slash-i18n.spec.ts
 git commit -m "feat(i18n): 添加 slash 菜单基础文案字典"
 ```
 
@@ -350,13 +350,13 @@ git commit -m "feat(i18n): 添加 slash 菜单基础文案字典"
 
 **Files:**
 
-- Modify: `packages/markora/src/editor/slash/default-commands.ts`
-- Test: `packages/markora/tests/slash-i18n.spec.ts`
-- Test: `packages/markora/tests/slash-query.spec.ts`
+- Modify: `packages/mardora/src/editor/slash/default-commands.ts`
+- Test: `packages/mardora/tests/slash-i18n.spec.ts`
+- Test: `packages/mardora/tests/slash-query.spec.ts`
 
 - [ ] **Step 1: Add failing tests for localized commands and bilingual search**
 
-Append to `packages/markora/tests/slash-i18n.spec.ts`:
+Append to `packages/mardora/tests/slash-i18n.spec.ts`:
 
 ```ts
 import { filterSlashCommands } from "../src/editor/slash";
@@ -401,17 +401,17 @@ describe("localized default slash commands", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test slash-i18n.spec.ts
 ```
 
 Expected: FAIL because `getDefaultSlashCommands` does not exist.
 
 - [ ] **Step 3: Implement localized command metadata**
 
-In `packages/markora/src/editor/slash/default-commands.ts`, import locale type:
+In `packages/mardora/src/editor/slash/default-commands.ts`, import locale type:
 
 ```ts
-import type { MarkoraLocale } from "../i18n";
+import type { MardoraLocale } from "../i18n";
 ```
 
 Add localized titles and aliases:
@@ -422,7 +422,7 @@ type LocalizedSlashCommandCopy = {
   aliases: string[];
 };
 
-const commandCopy: Record<MarkoraLocale, Record<string, LocalizedSlashCommandCopy>> = {
+const commandCopy: Record<MardoraLocale, Record<string, LocalizedSlashCommandCopy>> = {
   "zh-CN": {
     paragraph: { title: "文本", aliases: ["text", "plain", "wenben"] },
     "heading-1": { title: "标题 1", aliases: ["h1", "heading", "heading1", "biaoti", "标题"] },
@@ -470,12 +470,12 @@ Use a helper to build command metadata:
 
 ```ts
 function commandMeta(
-  locale: MarkoraLocale,
+  locale: MardoraLocale,
   id: string,
-  group: MarkoraSlashCommand["group"],
+  group: MardoraSlashCommand["group"],
   icon: string,
   hint: string
-): Omit<MarkoraSlashCommand, "run"> {
+): Omit<MardoraSlashCommand, "run"> {
   const copy = commandCopy[locale][id];
   if (!copy) {
     throw new Error(`Missing slash command copy: ${locale}:${id}`);
@@ -495,7 +495,7 @@ function commandMeta(
 Replace the exported array with:
 
 ```ts
-export function getDefaultSlashCommands(locale: MarkoraLocale = "zh-CN"): MarkoraSlashCommand[] {
+export function getDefaultSlashCommands(locale: MardoraLocale = "zh-CN"): MardoraSlashCommand[] {
   return [
     markdownCommand(commandMeta(locale, "paragraph", "basic", "type", ""), "", 0),
     markdownCommand(commandMeta(locale, "heading-1", "basic", "heading-1", "#"), "# "),
@@ -522,7 +522,7 @@ export function getDefaultSlashCommands(locale: MarkoraLocale = "zh-CN"): Markor
   ];
 }
 
-export const defaultSlashCommands: MarkoraSlashCommand[] = getDefaultSlashCommands("zh-CN");
+export const defaultSlashCommands: MardoraSlashCommand[] = getDefaultSlashCommands("zh-CN");
 ```
 
 - [ ] **Step 4: Run focused tests**
@@ -530,7 +530,7 @@ export const defaultSlashCommands: MarkoraSlashCommand[] = getDefaultSlashComman
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
 ```
 
 Expected: PASS.
@@ -540,23 +540,23 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/slash/default-commands.ts packages/markora/tests/slash-i18n.spec.ts
+git add packages/mardora/src/editor/slash/default-commands.ts packages/mardora/tests/slash-i18n.spec.ts
 git commit -m "feat(i18n): 支持 slash 默认命令中英文文案"
 ```
 
 ---
 
-## Task 3: Wire Locale Through Slash Extension and Markora Config
+## Task 3: Wire Locale Through Slash Extension and Mardora Config
 
 **Files:**
 
-- Modify: `packages/markora/src/editor/slash/extension.ts`
-- Modify: `packages/markora/src/editor/markora.ts`
-- Test: `packages/markora/tests/slash-i18n.spec.ts`
+- Modify: `packages/mardora/src/editor/slash/extension.ts`
+- Modify: `packages/mardora/src/editor/mardora.ts`
+- Test: `packages/mardora/tests/slash-i18n.spec.ts`
 
 - [ ] **Step 1: Add failing tests for runtime locale resolution and custom commands**
 
-Append to `packages/markora/tests/slash-i18n.spec.ts`:
+Append to `packages/mardora/tests/slash-i18n.spec.ts`:
 
 ```ts
 import { createSlashRuntimeConfig } from "../src/editor/slash";
@@ -570,7 +570,7 @@ describe("slash runtime i18n config", () => {
   });
 
   it("preserves custom command titles while localizing menu chrome", () => {
-    const custom: MarkoraSlashCommand[] = [
+    const custom: MardoraSlashCommand[] = [
       {
         id: "custom",
         group: "basic",
@@ -595,44 +595,44 @@ describe("slash runtime i18n config", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test slash-i18n.spec.ts
 ```
 
 Expected: FAIL because `createSlashRuntimeConfig` does not exist and `slashCommands()` still uses the fixed Chinese defaults.
 
 - [ ] **Step 3: Implement slash runtime normalization**
 
-Modify imports in `packages/markora/src/editor/slash/extension.ts`:
+Modify imports in `packages/mardora/src/editor/slash/extension.ts`:
 
 ```ts
-import type { MarkoraLocale } from "../i18n";
-import { resolveMarkoraLocale } from "../i18n";
+import type { MardoraLocale } from "../i18n";
+import { resolveMardoraLocale } from "../i18n";
 import { getDefaultSlashCommands } from "./default-commands";
 import { createSlashMenuElement, getSlashMessages } from "./menu";
 import type {
-  MarkoraSlashCommand,
-  MarkoraSlashCommandsConfig,
-  MarkoraSlashMessages,
-  MarkoraSlashQuery,
+  MardoraSlashCommand,
+  MardoraSlashCommandsConfig,
+  MardoraSlashMessages,
+  MardoraSlashQuery,
 } from "./types";
 ```
 
 Update runtime config:
 
 ```ts
-export type MarkoraSlashRuntimeConfig = MarkoraSlashCommandsConfig & {
-  attachmentUploader?: MarkoraAttachmentUploader | undefined;
-  inheritedLocale?: MarkoraLocale | undefined;
+export type MardoraSlashRuntimeConfig = MardoraSlashCommandsConfig & {
+  attachmentUploader?: MardoraAttachmentUploader | undefined;
+  inheritedLocale?: MardoraLocale | undefined;
 };
 
-export type ResolvedMarkoraSlashRuntimeConfig = Required<Pick<MarkoraSlashRuntimeConfig, "commands">> &
-  MarkoraSlashRuntimeConfig & {
-    locale: MarkoraLocale;
-    messages: MarkoraSlashMessages;
+export type ResolvedMardoraSlashRuntimeConfig = Required<Pick<MardoraSlashRuntimeConfig, "commands">> &
+  MardoraSlashRuntimeConfig & {
+    locale: MardoraLocale;
+    messages: MardoraSlashMessages;
   };
 
-export function createSlashRuntimeConfig(config: MarkoraSlashRuntimeConfig = {}): ResolvedMarkoraSlashRuntimeConfig {
-  const locale = resolveMarkoraLocale(config.locale ?? config.inheritedLocale);
+export function createSlashRuntimeConfig(config: MardoraSlashRuntimeConfig = {}): ResolvedMardoraSlashRuntimeConfig {
+  const locale = resolveMardoraLocale(config.locale ?? config.inheritedLocale);
   return {
     ...config,
     locale,
@@ -647,7 +647,7 @@ Change the plugin constructor type:
 ```ts
 constructor(
   private readonly view: EditorView,
-  private readonly config: ResolvedMarkoraSlashRuntimeConfig
+  private readonly config: ResolvedMardoraSlashRuntimeConfig
 ) {
   this.view.dom.ownerDocument.addEventListener("keydown", this.handleDocumentKeydown, true);
   this.updateState();
@@ -677,26 +677,26 @@ Replace normalization in `slashCommands()`:
 const normalizedConfig = createSlashRuntimeConfig(config);
 ```
 
-- [ ] **Step 4: Add top-level Markora locale config**
+- [ ] **Step 4: Add top-level Mardora locale config**
 
-Modify `packages/markora/src/editor/markora.ts` imports:
+Modify `packages/mardora/src/editor/mardora.ts` imports:
 
 ```ts
-import type { MarkoraI18nConfig, MarkoraLocale } from "./i18n";
-import { resolveMarkoraLocale } from "./i18n";
+import type { MardoraI18nConfig, MardoraLocale } from "./i18n";
+import { resolveMardoraLocale } from "./i18n";
 ```
 
-Add to `MarkoraConfig`:
+Add to `MardoraConfig`:
 
 ```ts
 /** Editor UI locale. Defaults to Simplified Chinese. */
-locale?: MarkoraLocale;
+locale?: MardoraLocale;
 
 /** Internationalization configuration for editor-owned UI text */
-i18n?: MarkoraI18nConfig;
+i18n?: MardoraI18nConfig;
 ```
 
-In `markora(config: MarkoraConfig = {})`, destructure:
+In `mardora(config: MardoraConfig = {})`, destructure:
 
 ```ts
 const {
@@ -710,7 +710,7 @@ const {
 Before composing extensions, resolve:
 
 ```ts
-const resolvedLocale = resolveMarkoraLocale(configSlashCommands.locale ?? configI18n.locale ?? configLocale);
+const resolvedLocale = resolveMardoraLocale(configSlashCommands.locale ?? configI18n.locale ?? configLocale);
 ```
 
 Pass inherited locale to slash:
@@ -728,8 +728,8 @@ slashCommands({
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
 ```
 
 Expected: both commands PASS.
@@ -739,8 +739,8 @@ Expected: both commands PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/slash/extension.ts packages/markora/src/editor/markora.ts packages/markora/tests/slash-i18n.spec.ts
-git commit -m "feat(i18n): 串联 Markora locale 到 slash 菜单"
+git add packages/mardora/src/editor/slash/extension.ts packages/mardora/src/editor/mardora.ts packages/mardora/tests/slash-i18n.spec.ts
+git commit -m "feat(i18n): 串联 Mardora locale 到 slash 菜单"
 ```
 
 ---
@@ -753,7 +753,7 @@ git commit -m "feat(i18n): 串联 Markora locale 到 slash 菜单"
 - Modify: `playground/vue2-playground/src/state/playgroundConfig.ts`
 - Modify: `playground/vue2-playground/src/components/playground/Devbar.vue`
 - Modify: `playground/vue2-playground/src/components/playground/EditorPane.vue`
-- Modify: `playground/vue2-playground/src/shims-markora.d.ts`
+- Modify: `playground/vue2-playground/src/shims-mardora.d.ts`
 - Test: `playground/vue2-playground/tests/unit/playgroundConfig.spec.ts`
 
 - [ ] **Step 1: Add failing playground config assertions**
@@ -849,7 +849,7 @@ Add this UI block in the Preview Options section after Content Width:
           <div class="option-row">
             <span class="switch-copy">
               <span class="switch-label">Language</span>
-              <span class="switch-description">Adjust Markora-owned editor UI text</span>
+              <span class="switch-description">Adjust Mardora-owned editor UI text</span>
             </span>
             <div class="segmented-control" role="group" aria-label="Language">
               <button
@@ -885,9 +885,9 @@ Add method:
     },
 ```
 
-- [ ] **Step 5: Pass locale into Markora and shims**
+- [ ] **Step 5: Pass locale into Mardora and shims**
 
-Modify `playground/vue2-playground/src/components/playground/EditorPane.vue` inside `markora({ ... })`:
+Modify `playground/vue2-playground/src/components/playground/EditorPane.vue` inside `mardora({ ... })`:
 
 ```ts
               locale: this.config.locale,
@@ -896,18 +896,18 @@ Modify `playground/vue2-playground/src/components/playground/EditorPane.vue` ins
 Place it near `theme`:
 
 ```ts
-              theme: this.markoraTheme(),
+              theme: this.mardoraTheme(),
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
 ```
 
-Modify `playground/vue2-playground/src/shims-markora.d.ts`:
+Modify `playground/vue2-playground/src/shims-mardora.d.ts`:
 
 ```ts
     locale?: "zh-CN" | "en-US";
 ```
 
-Add that property inside the declared `markora(config?: { ... })` object.
+Add that property inside the declared `mardora(config?: { ... })` object.
 
 - [ ] **Step 6: Run Vue2 checks**
 
@@ -925,7 +925,7 @@ Expected: both commands PASS. Build may print existing bundle size warnings.
 Run:
 
 ```bash
-git add playground/vue2-playground/src/types.ts playground/vue2-playground/src/state/playgroundConfig.ts playground/vue2-playground/src/components/playground/Devbar.vue playground/vue2-playground/src/components/playground/EditorPane.vue playground/vue2-playground/src/shims-markora.d.ts playground/vue2-playground/tests/unit/playgroundConfig.spec.ts
+git add playground/vue2-playground/src/types.ts playground/vue2-playground/src/state/playgroundConfig.ts playground/vue2-playground/src/components/playground/Devbar.vue playground/vue2-playground/src/components/playground/EditorPane.vue playground/vue2-playground/src/shims-mardora.d.ts playground/vue2-playground/tests/unit/playgroundConfig.spec.ts
 git commit -m "feat(playground): 增加 slash 菜单语言调试项"
 ```
 
@@ -936,15 +936,15 @@ git commit -m "feat(playground): 增加 slash 菜单语言调试项"
 **Files:**
 
 - No new source files expected.
-- Validate: `packages/markora`, `playground/vue2-playground`, browser at `http://localhost:3001/`.
+- Validate: `packages/mardora`, `playground/vue2-playground`, browser at `http://localhost:3001/`.
 
 - [ ] **Step 1: Run package and app checks**
 
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora test slash-i18n.spec.ts slash-query.spec.ts slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
 pnpm --config.package-manager-strict=false --filter vue2-playground test:unit playgroundConfig.spec.ts
 pnpm --config.package-manager-strict=false --filter vue2-playground build
 git diff --check
@@ -952,8 +952,8 @@ git diff --check
 
 Expected:
 
-- Markora focused tests PASS.
-- Markora typecheck PASS.
+- Mardora focused tests PASS.
+- Mardora typecheck PASS.
 - Vue2 playground focused unit test PASS.
 - Vue2 playground build PASS with only existing bundle size warnings.
 - `git diff --check` produces no output.

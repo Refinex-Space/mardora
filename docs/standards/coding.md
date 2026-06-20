@@ -16,14 +16,14 @@ referenced_by: AGENTS.md#knowledge-map
 
 ## Core Editor Code
 
-- Keep `packages/markora` independent from React, Vue, Next.js, Radix, and playground UI packages.
+- Keep `packages/mardora` independent from React, Vue, Next.js, Radix, and playground UI packages.
 - Prefer CodeMirror extension boundaries for editor behavior: state/query helpers, DOM menu rendering, theme, and extension wiring should stay in separate files when the feature is non-trivial.
 - Put browser-only or DOM-only behavior behind integration points that can be tested with lightweight fakes.
-- Keep upload and persistence as application responsibilities unless a task explicitly changes the Markora API boundary.
+- Keep upload and persistence as application responsibilities unless a task explicitly changes the Mardora API boundary.
 
 ## Tests
 
-- Use `bun:test` for core package unit tests under `packages/markora/tests`.
+- Use `bun:test` for core package unit tests under `packages/mardora/tests`.
 - Add pure helper coverage before wiring complex CodeMirror or DOM behavior.
 - For playground logic, prefer focused tests for state, persistence, and config defaults.
 

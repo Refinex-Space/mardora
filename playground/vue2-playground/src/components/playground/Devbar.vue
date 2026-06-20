@@ -158,7 +158,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import type { MarkoraNode } from "@refinex/markora/editor";
+import type { MardoraNode } from "mardora/editor";
 import type { PlaygroundConfig, PlaygroundLocale, PreviewContentWidth } from "@/types";
 
 type EditorOptionKey = keyof PlaygroundConfig["editor"];
@@ -181,7 +181,7 @@ export default Vue.extend({
       required: true,
     },
     nodes: {
-      type: Array as () => MarkoraNode[],
+      type: Array as () => MardoraNode[],
       required: true,
     },
     outputTime: {

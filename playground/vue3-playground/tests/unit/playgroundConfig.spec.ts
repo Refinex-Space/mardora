@@ -1,12 +1,12 @@
 import { describe, expect, it, mock } from "bun:test";
-import { allPlugins } from "../../../../packages/markora/src/plugins";
+import { allPlugins } from "../../../../packages/mardora/src/plugins";
 
-mock.module("@refinex/markora/plugins", () => ({ allPlugins }));
+mock.module("mardora/plugins", () => ({ allPlugins }));
 
 const { createDefaultConfig, getActivePlugins } = await import("../../src/state/playgroundConfig");
 
 describe("playgroundConfig", () => {
-  it("enables Markora plugins by default", () => {
+  it("enables Mardora plugins by default", () => {
     const config = createDefaultConfig();
     const activePlugins = getActivePlugins(config.plugins);
 

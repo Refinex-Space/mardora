@@ -9,7 +9,7 @@ referenced_by: docs/README.md#superpowers-specs
 
 ## Goal
 
-Add a Notion-like slash command menu to Markora so users can type `/` at the start of an empty block or line-start query to insert common Markdown structures without memorizing syntax.
+Add a Notion-like slash command menu to Mardora so users can type `/` at the start of an empty block or line-start query to insert common Markdown structures without memorizing syntax.
 
 The feature also establishes a browser attachment protocol for images, files, video, and audio. The same protocol must power slash media commands, local file selection, clipboard paste, drag-and-drop, and future external insertion APIs.
 
@@ -17,15 +17,15 @@ The feature also establishes a browser attachment protocol for images, files, vi
 
 The repository contains:
 
-- `packages/markora`: the framework-agnostic core package built on CodeMirror 6 extensions and Markora plugins.
+- `packages/mardora`: the framework-agnostic core package built on CodeMirror 6 extensions and Mardora plugins.
 - `playground/react-playground`: the React/Next.js playground.
 - `playground/vue2-playground`: the Vue 2.6 + Vue CLI 4 + Webpack 4 playground.
 
-Markora currently renders images, links, tables, lists, quotes, horizontal rules, and other Markdown blocks through plugins. It does not currently provide a slash command layer, a file upload protocol, paste/drop upload handling, or a framework-independent attachment API.
+Mardora currently renders images, links, tables, lists, quotes, horizontal rules, and other Markdown blocks through plugins. It does not currently provide a slash command layer, a file upload protocol, paste/drop upload handling, or a framework-independent attachment API.
 
 ## Constraints
 
-- Implement the editor capability in `packages/markora`, not inside a specific playground.
+- Implement the editor capability in `packages/mardora`, not inside a specific playground.
 - Keep the core package framework-agnostic. Do not depend on React, Vue, Radix, or any playground UI library.
 - Do not add OSS, MinIO, or backend SDK dependencies to the core package.
 - The core upload protocol calls an integration-provided uploader and never stores or transmits files on its own.
@@ -41,16 +41,16 @@ Use two separate framework-agnostic CodeMirror extensions:
 - `slashCommands(config)`: handles trigger detection, search filtering, menu state, keyboard navigation, mouse selection, and command execution.
 - `attachments(config)`: handles file selection, paste, drop, upload state, placeholder insertion, success replacement, and failure replacement.
 
-The existing `markora(config)` entry point composes both extensions through optional configuration.
+The existing `mardora(config)` entry point composes both extensions through optional configuration.
 
 This keeps command UI and attachment processing reusable across React, Vue2, Vue3, and vanilla CodeMirror integrations while leaving upload transport to the application.
 
 ## Public API
 
-`MarkoraConfig` gains optional slash command and attachment sections:
+`MardoraConfig` gains optional slash command and attachment sections:
 
 ```ts
-markora({
+mardora({
   slashCommands: {
     enabled: true,
     commands: defaultSlashCommands,
@@ -121,28 +121,28 @@ The first version includes two command groups.
 The core attachment protocol uses the browser `File` object and an integration-provided uploader.
 
 ```ts
-type MarkoraAttachmentKind = "image" | "video" | "audio" | "file";
+type MardoraAttachmentKind = "image" | "video" | "audio" | "file";
 
-type MarkoraAttachmentUploadSource = "slash" | "paste" | "drop" | "api";
+type MardoraAttachmentUploadSource = "slash" | "paste" | "drop" | "api";
 
-type MarkoraAttachmentUploadContext = {
-  kind: MarkoraAttachmentKind;
-  source: MarkoraAttachmentUploadSource;
+type MardoraAttachmentUploadContext = {
+  kind: MardoraAttachmentKind;
+  source: MardoraAttachmentUploadSource;
   documentText: string;
   selection: { from: number; to: number };
 };
 
-type MarkoraAttachmentUploadResult = {
+type MardoraAttachmentUploadResult = {
   url: string;
   name?: string;
   title?: string;
   mimeType?: string;
 };
 
-type MarkoraAttachmentUploader = (
+type MardoraAttachmentUploader = (
   file: File,
-  context: MarkoraAttachmentUploadContext
-) => Promise<MarkoraAttachmentUploadResult>;
+  context: MardoraAttachmentUploadContext
+) => Promise<MardoraAttachmentUploadResult>;
 ```
 
 The core extension determines the default attachment kind from command intent, MIME type, or extension. The uploader remains responsible for real validation, storage, authorization, and URL generation.
@@ -206,7 +206,7 @@ Icons should be meaningful for block type. If the core implementation does not i
 
 ## React Playground Integration
 
-The React playground enables the feature through the `markora()` config in `playground/react-playground/app/playground/page.tsx`.
+The React playground enables the feature through the `mardora()` config in `playground/react-playground/app/playground/page.tsx`.
 
 It provides a mock uploader that returns `URL.createObjectURL(file)`.
 
@@ -219,7 +219,7 @@ The playground should:
 
 ## Vue2 Playground Integration
 
-The Vue2 playground enables the same feature through `markora()` config in `playground/vue2-playground/src/components/playground/EditorPane.vue`.
+The Vue2 playground enables the same feature through `mardora()` config in `playground/vue2-playground/src/components/playground/EditorPane.vue`.
 
 It provides a Vue2-compatible mock uploader that returns `URL.createObjectURL(file)`.
 
@@ -227,7 +227,7 @@ The Vue2 integration must not fork command behavior. If TypeScript 4 or Vue CLI 
 
 ## Documentation
 
-Update Markora documentation and walkthrough content to explain:
+Update Mardora documentation and walkthrough content to explain:
 
 - slash command trigger behavior;
 - default command list;
@@ -256,7 +256,7 @@ Core checks:
 
 Repository checks:
 
-- `packages/markora` lint/typecheck/build as applicable;
+- `packages/mardora` lint/typecheck/build as applicable;
 - React playground lint/build;
 - Vue2 playground lint/unit/build;
 - browser verification for React playground;
@@ -275,6 +275,6 @@ Repository checks:
 Rollback consists of:
 
 - removing the new slash command and attachment core modules;
-- removing their exports and `MarkoraConfig` fields;
+- removing their exports and `MardoraConfig` fields;
 - removing React and Vue2 playground configuration for these features;
 - removing documentation and walkthrough sections added for slash commands and attachments.

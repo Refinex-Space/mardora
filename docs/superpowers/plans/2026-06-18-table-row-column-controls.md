@@ -9,27 +9,27 @@ referenced_by: docs/README.md#superpowers-plans
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add framework-agnostic table row and column handles to Markora Live tables, with row/column selection styling and menus for insertion, movement, copy, deletion, and deleting the whole table.
+**Goal:** Add framework-agnostic table row and column handles to Mardora Live tables, with row/column selection styling and menus for insertion, movement, copy, deletion, and deleting the whole table.
 
-**Architecture:** Move reusable Markdown table parsing/formatting and row/column transforms into pure helpers first, then add a DOM overlay `ViewPlugin` for handles and menus. Keep visual row/column selection as Markora decoration state, not browser native selection or CodeMirror text selection, so normal table caret placement and text dragging remain stable.
+**Architecture:** Move reusable Markdown table parsing/formatting and row/column transforms into pure helpers first, then add a DOM overlay `ViewPlugin` for handles and menus. Keep visual row/column selection as Mardora decoration state, not browser native selection or CodeMirror text selection, so normal table caret placement and text dragging remain stable.
 
-**Tech Stack:** TypeScript, CodeMirror 6 `ViewPlugin`, CodeMirror decorations, Bun tests, existing Markora plugin/theme patterns, browser validation on the React playground at `http://localhost:3001/`.
+**Tech Stack:** TypeScript, CodeMirror 6 `ViewPlugin`, CodeMirror decorations, Bun tests, existing Mardora plugin/theme patterns, browser validation on the React playground at `http://localhost:3001/`.
 
 ---
 
 ## File Structure
 
-- Create `packages/markora/src/plugins/table-model.ts`
+- Create `packages/mardora/src/plugins/table-model.ts`
   - Own table types, parsing, normalization, formatting, row/column pure transforms, and delete-table change helpers.
-- Create `packages/markora/src/plugins/table-controls.ts`
+- Create `packages/mardora/src/plugins/table-controls.ts`
   - Own overlay state, row/column handle DOM, menu DOM, outside-click handling, Escape handling, and action dispatch callbacks.
-- Create `packages/markora/src/plugins/table-controls-theme.ts`
+- Create `packages/mardora/src/plugins/table-controls-theme.ts`
   - Own row/column handle, menu, overlay, and selected row/column cell styles.
-- Modify `packages/markora/src/plugins/table-plugin.ts`
+- Modify `packages/mardora/src/plugins/table-plugin.ts`
   - Import model helpers, register controls extension, add cell data attributes, add selected row/column classes, and keep existing caret/mouse mapping behavior intact.
-- Create `packages/markora/tests/table-commands.spec.ts`
+- Create `packages/mardora/tests/table-commands.spec.ts`
   - Cover pure row/column transforms and delete-table changes.
-- Create `packages/markora/tests/table-controls-state.spec.ts`
+- Create `packages/mardora/tests/table-controls-state.spec.ts`
   - Cover small pure helpers for menu item enabled/disabled state and active-control matching.
 - Modify `docs/guides/project-introduction.md`
   - Document that `TablePlugin` includes row/column controls in Live mode.
@@ -47,13 +47,13 @@ referenced_by: docs/README.md#superpowers-plans
 
 **Files:**
 
-- Create: `packages/markora/src/plugins/table-model.ts`
-- Modify: `packages/markora/src/plugins/table-plugin.ts`
-- Test: `packages/markora/tests/table-commands.spec.ts`
+- Create: `packages/mardora/src/plugins/table-model.ts`
+- Modify: `packages/mardora/src/plugins/table-plugin.ts`
+- Test: `packages/mardora/tests/table-commands.spec.ts`
 
 - [ ] **Step 1: Write baseline table model tests**
 
-Create `packages/markora/tests/table-commands.spec.ts` with this initial coverage:
+Create `packages/mardora/tests/table-commands.spec.ts` with this initial coverage:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -85,14 +85,14 @@ describe("table model parsing and formatting", () => {
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-commands.spec.ts
+bun run --cwd packages/mardora test tests/table-commands.spec.ts
 ```
 
 Expected: FAIL because `../src/plugins/table-model` does not exist.
 
 - [ ] **Step 3: Move model types and pure helpers into `table-model.ts`**
 
-Create `packages/markora/src/plugins/table-model.ts` by moving these definitions out of `table-plugin.ts` and exporting them:
+Create `packages/mardora/src/plugins/table-model.ts` by moving these definitions out of `table-plugin.ts` and exporting them:
 
 ```ts
 import { EditorState } from "@codemirror/state";
@@ -185,7 +185,7 @@ Use the exact existing implementations from `table-plugin.ts`. Do not rewrite pa
 
 - [ ] **Step 4: Update `table-plugin.ts` imports**
 
-Remove the moved local definitions from `packages/markora/src/plugins/table-plugin.ts` and import them:
+Remove the moved local definitions from `packages/mardora/src/plugins/table-plugin.ts` and import them:
 
 ```ts
 import {
@@ -222,8 +222,8 @@ import {
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-commands.spec.ts
-bun run --cwd packages/markora test
+bun run --cwd packages/mardora test tests/table-commands.spec.ts
+bun run --cwd packages/mardora test
 ```
 
 Expected: both PASS, proving extraction did not break existing table or editor tests.
@@ -233,7 +233,7 @@ Expected: both PASS, proving extraction did not break existing table or editor t
 Run:
 
 ```bash
-git add packages/markora/src/plugins/table-model.ts packages/markora/src/plugins/table-plugin.ts packages/markora/tests/table-commands.spec.ts
+git add packages/mardora/src/plugins/table-model.ts packages/mardora/src/plugins/table-plugin.ts packages/mardora/tests/table-commands.spec.ts
 git commit -m "refactor(table): 抽离表格模型工具"
 ```
 
@@ -243,12 +243,12 @@ git commit -m "refactor(table): 抽离表格模型工具"
 
 **Files:**
 
-- Modify: `packages/markora/src/plugins/table-model.ts`
-- Modify: `packages/markora/tests/table-commands.spec.ts`
+- Modify: `packages/mardora/src/plugins/table-model.ts`
+- Modify: `packages/mardora/tests/table-commands.spec.ts`
 
 - [ ] **Step 1: Add failing row command tests**
 
-Append to `packages/markora/tests/table-commands.spec.ts`:
+Append to `packages/mardora/tests/table-commands.spec.ts`:
 
 ```ts
 import {
@@ -351,14 +351,14 @@ describe("table column commands", () => {
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-commands.spec.ts
+bun run --cwd packages/mardora test tests/table-commands.spec.ts
 ```
 
 Expected: FAIL because row/column command exports do not exist.
 
 - [ ] **Step 4: Implement row command helpers**
 
-Add to `packages/markora/src/plugins/table-model.ts`:
+Add to `packages/mardora/src/plugins/table-model.ts`:
 
 ```ts
 export type InsertSide = "above" | "below";
@@ -426,7 +426,7 @@ export function deleteTableRow(parsed: ParsedTable, rowIndex: number): ParsedTab
 
 - [ ] **Step 5: Implement column command helpers**
 
-Add to `packages/markora/src/plugins/table-model.ts`:
+Add to `packages/mardora/src/plugins/table-model.ts`:
 
 ```ts
 function columnArrayIndex(columnIndex: number): number {
@@ -508,7 +508,7 @@ export function deleteTableColumn(parsed: ParsedTable, columnIndex: number): Par
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-commands.spec.ts
+bun run --cwd packages/mardora test tests/table-commands.spec.ts
 ```
 
 Expected: PASS.
@@ -518,7 +518,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/plugins/table-model.ts packages/markora/tests/table-commands.spec.ts
+git add packages/mardora/src/plugins/table-model.ts packages/mardora/tests/table-commands.spec.ts
 git commit -m "feat(table): 增加表格行列变换命令"
 ```
 
@@ -528,12 +528,12 @@ git commit -m "feat(table): 增加表格行列变换命令"
 
 **Files:**
 
-- Create: `packages/markora/src/plugins/table-controls.ts`
-- Test: `packages/markora/tests/table-controls-state.spec.ts`
+- Create: `packages/mardora/src/plugins/table-controls.ts`
+- Test: `packages/mardora/tests/table-controls-state.spec.ts`
 
 - [ ] **Step 1: Write menu state tests**
 
-Create `packages/markora/tests/table-controls-state.spec.ts`:
+Create `packages/mardora/tests/table-controls-state.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -575,14 +575,14 @@ describe("createTableControlMenuState", () => {
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-controls-state.spec.ts
+bun run --cwd packages/mardora test tests/table-controls-state.spec.ts
 ```
 
 Expected: FAIL because `table-controls.ts` does not exist.
 
 - [ ] **Step 3: Add exported control types and pure menu-state helper**
 
-Create `packages/markora/src/plugins/table-controls.ts`:
+Create `packages/mardora/src/plugins/table-controls.ts`:
 
 ```ts
 export type TableControlKind = "row" | "column";
@@ -645,7 +645,7 @@ export function createTableControlMenuState(input: TableMenuStateInput): TableCo
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-controls-state.spec.ts
+bun run --cwd packages/mardora test tests/table-controls-state.spec.ts
 ```
 
 Expected: PASS.
@@ -655,7 +655,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/plugins/table-controls.ts packages/markora/tests/table-controls-state.spec.ts
+git add packages/mardora/src/plugins/table-controls.ts packages/mardora/tests/table-controls-state.spec.ts
 git commit -m "feat(table): 增加表格控件状态规则"
 ```
 
@@ -665,15 +665,15 @@ git commit -m "feat(table): 增加表格控件状态规则"
 
 **Files:**
 
-- Modify: `packages/markora/src/plugins/table-controls.ts`
-- Modify: `packages/markora/src/plugins/table-plugin.ts`
-- Modify: `packages/markora/src/plugins/table-model.ts`
-- Test: `packages/markora/tests/table-controls-state.spec.ts`
-- Test: `packages/markora/tests/table-commands.spec.ts`
+- Modify: `packages/mardora/src/plugins/table-controls.ts`
+- Modify: `packages/mardora/src/plugins/table-plugin.ts`
+- Modify: `packages/mardora/src/plugins/table-model.ts`
+- Test: `packages/mardora/tests/table-controls-state.spec.ts`
+- Test: `packages/mardora/tests/table-commands.spec.ts`
 
 - [ ] **Step 1: Add active-control effect and extension skeleton**
 
-Extend `packages/markora/src/plugins/table-controls.ts`:
+Extend `packages/mardora/src/plugins/table-controls.ts`:
 
 ```ts
 import { Extension, StateEffect, StateField } from "@codemirror/state";
@@ -724,7 +724,7 @@ export function tableControls(config: TableControlsConfig): Extension[] {
 
 - [ ] **Step 2: Implement overlay DOM class**
 
-Add this class in `packages/markora/src/plugins/table-controls.ts` and fill in methods exactly as described:
+Add this class in `packages/mardora/src/plugins/table-controls.ts` and fill in methods exactly as described:
 
 ```ts
 class TableControlsView {
@@ -736,7 +736,7 @@ class TableControlsView {
     private readonly config: TableControlsConfig
   ) {
     this.overlay = view.dom.ownerDocument.createElement("div");
-    this.overlay.className = "cm-markora-table-controls-overlay";
+    this.overlay.className = "cm-mardora-table-controls-overlay";
     this.overlay.addEventListener("mousedown", this.handleOverlayMouseDown);
     view.dom.appendChild(this.overlay);
     view.dom.addEventListener("mousemove", this.handleMouseMove);
@@ -765,7 +765,7 @@ Inside the class, implement these methods:
 
 ```ts
 private readonly handleMouseMove = (event: MouseEvent): void => {
-  const cell = event.target instanceof Element ? event.target.closest(".cm-markora-table-cell") : null;
+  const cell = event.target instanceof Element ? event.target.closest(".cm-mardora-table-cell") : null;
   if (!cell || !this.view.dom.contains(cell)) {
     if (!this.currentControl()?.menuOpen) {
       this.hoverControl = null;
@@ -774,10 +774,10 @@ private readonly handleMouseMove = (event: MouseEvent): void => {
     return;
   }
 
-  const tableFrom = Number(cell.getAttribute("data-markora-table-from"));
-  const rowIndex = Number(cell.getAttribute("data-markora-row-index"));
-  const columnIndex = Number(cell.getAttribute("data-markora-column-index"));
-  const rowKind = cell.getAttribute("data-markora-row-kind");
+  const tableFrom = Number(cell.getAttribute("data-mardora-table-from"));
+  const rowIndex = Number(cell.getAttribute("data-mardora-row-index"));
+  const columnIndex = Number(cell.getAttribute("data-mardora-column-index"));
+  const rowKind = cell.getAttribute("data-mardora-row-kind");
   if (!Number.isFinite(tableFrom) || !Number.isFinite(rowIndex) || !Number.isFinite(columnIndex)) {
     return;
   }
@@ -806,7 +806,7 @@ private readonly handleDocumentMouseDown = (event: MouseEvent): void => {
 
 private readonly handleOverlayMouseDown = (event: MouseEvent): void => {
   const target = event.target instanceof Element ? event.target : null;
-  const button = target?.closest<HTMLElement>("[data-markora-table-control-action]");
+  const button = target?.closest<HTMLElement>("[data-mardora-table-control-action]");
   if (!button) {
     return;
   }
@@ -818,7 +818,7 @@ private readonly handleOverlayMouseDown = (event: MouseEvent): void => {
     return;
   }
 
-  const action = button.dataset.markoraTableControlAction as TableControlAction;
+  const action = button.dataset.mardoraTableControlAction as TableControlAction;
   if (button.getAttribute("aria-disabled") === "true") {
     return;
   }
@@ -866,8 +866,8 @@ private render(): void {
 private createHandle(kind: TableControlKind, control: ActiveTableControl): HTMLButtonElement {
   const button = this.view.dom.ownerDocument.createElement("button");
   button.type = "button";
-  button.className = `cm-markora-table-handle cm-markora-table-${kind}-handle`;
-  button.dataset.markoraTableControlAction = kind === "row" ? "open-row-menu" : "open-column-menu";
+  button.className = `cm-mardora-table-handle cm-mardora-table-${kind}-handle`;
+  button.dataset.mardoraTableControlAction = kind === "row" ? "open-row-menu" : "open-column-menu";
   button.setAttribute("aria-label", kind === "row" ? "Table row actions" : "Table column actions");
   button.innerHTML = "<span></span><span></span><span></span>";
   return button;
@@ -882,7 +882,7 @@ private createMenu(control: ActiveTableControl, table: TableInfo): HTMLElement {
     columnCount: table.columnCount,
   });
   const menu = this.view.dom.ownerDocument.createElement("div");
-  menu.className = "cm-markora-table-control-menu";
+  menu.className = "cm-mardora-table-control-menu";
   menu.setAttribute("role", "menu");
 
   const items =
@@ -909,8 +909,8 @@ private createMenu(control: ActiveTableControl, table: TableInfo): HTMLElement {
   for (const [action, label, enabled] of items) {
     const item = this.view.dom.ownerDocument.createElement("button");
     item.type = "button";
-    item.className = "cm-markora-table-control-menu-item";
-    item.dataset.markoraTableControlAction = action;
+    item.className = "cm-mardora-table-control-menu-item";
+    item.dataset.mardoraTableControlAction = action;
     item.setAttribute("role", "menuitem");
     item.setAttribute("aria-disabled", enabled ? "false" : "true");
     if (!enabled) item.disabled = true;
@@ -935,13 +935,13 @@ private positionOverlay(control: ActiveTableControl, table: TableInfo): void {
       const editorRect = this.view.dom.getBoundingClientRect();
       return {
         editorRect,
-        rowRect: rowCell ? this.view.domAtPos(rowCell.contentFrom).node.parentElement?.closest(".cm-markora-table-cell")?.getBoundingClientRect() ?? null : null,
-        columnRect: columnCell ? this.view.domAtPos(columnCell.contentFrom).node.parentElement?.closest(".cm-markora-table-cell")?.getBoundingClientRect() ?? null : null,
+        rowRect: rowCell ? this.view.domAtPos(rowCell.contentFrom).node.parentElement?.closest(".cm-mardora-table-cell")?.getBoundingClientRect() ?? null : null,
+        columnRect: columnCell ? this.view.domAtPos(columnCell.contentFrom).node.parentElement?.closest(".cm-mardora-table-cell")?.getBoundingClientRect() ?? null : null,
       };
     },
     write: (measure) => {
-      const rowHandle = this.overlay.querySelector<HTMLElement>(".cm-markora-table-row-handle");
-      const columnHandle = this.overlay.querySelector<HTMLElement>(".cm-markora-table-column-handle");
+      const rowHandle = this.overlay.querySelector<HTMLElement>(".cm-mardora-table-row-handle");
+      const columnHandle = this.overlay.querySelector<HTMLElement>(".cm-mardora-table-column-handle");
       if (rowHandle && measure.rowRect) {
         rowHandle.style.left = `${measure.rowRect.left - measure.editorRect.left - 14}px`;
         rowHandle.style.top = `${measure.rowRect.top - measure.editorRect.top + measure.rowRect.height / 2 - 14}px`;
@@ -950,7 +950,7 @@ private positionOverlay(control: ActiveTableControl, table: TableInfo): void {
         columnHandle.style.left = `${measure.columnRect.left - measure.editorRect.left + measure.columnRect.width / 2 - 18}px`;
         columnHandle.style.top = `${measure.columnRect.top - measure.editorRect.top - 18}px`;
       }
-      const menu = this.overlay.querySelector<HTMLElement>(".cm-markora-table-control-menu");
+      const menu = this.overlay.querySelector<HTMLElement>(".cm-mardora-table-control-menu");
       const anchor = control.kind === "row" ? rowHandle : columnHandle;
       if (menu && anchor) {
         menu.style.left = `${Number.parseFloat(anchor.style.left) + 34}px`;
@@ -965,7 +965,7 @@ If `domAtPos(...).node.parentElement` does not resolve the decorated cell reliab
 
 ```ts
 this.view.dom.querySelector(
-  `.cm-markora-table-cell[data-markora-table-from="${table.from}"][data-markora-row-index="${rowIndex}"][data-markora-column-index="${columnIndex}"]`
+  `.cm-mardora-table-cell[data-mardora-table-from="${table.from}"][data-mardora-row-index="${rowIndex}"][data-mardora-column-index="${columnIndex}"]`
 );
 ```
 
@@ -974,10 +974,10 @@ this.view.dom.querySelector(
 Modify `getCellDecoration()` to include:
 
 ```ts
-"data-markora-table-from": String(cell.tableFrom),
-"data-markora-row-index": String(cell.rowIndex),
-"data-markora-row-kind": cell.rowKind,
-"data-markora-column-index": String(cell.columnIndex),
+"data-mardora-table-from": String(cell.tableFrom),
+"data-mardora-row-index": String(cell.rowIndex),
+"data-mardora-row-kind": cell.rowKind,
+"data-mardora-column-index": String(cell.columnIndex),
 ```
 
 Add `tableFrom` to `TableCellInfo` in `table-model.ts` and set it inside `readTableInfo()` when creating each cell:
@@ -1003,8 +1003,8 @@ const isColumnSelected =
 Append these classes when true:
 
 ```ts
-isRowSelected ? "cm-markora-table-cell-row-selected" : "",
-isColumnSelected ? "cm-markora-table-cell-column-selected" : "",
+isRowSelected ? "cm-mardora-table-cell-row-selected" : "",
+isColumnSelected ? "cm-mardora-table-cell-column-selected" : "",
 ```
 
 - [ ] **Step 5: Register controls extension and implement action dispatch**
@@ -1096,9 +1096,9 @@ private runTableControlAction(view: EditorView, control: ActiveTableControl, act
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-commands.spec.ts
-bun run --cwd packages/markora test tests/table-controls-state.spec.ts
-bun run --cwd packages/markora typecheck
+bun run --cwd packages/mardora test tests/table-commands.spec.ts
+bun run --cwd packages/mardora test tests/table-controls-state.spec.ts
+bun run --cwd packages/mardora typecheck
 ```
 
 Expected: all PASS.
@@ -1108,7 +1108,7 @@ Expected: all PASS.
 Run:
 
 ```bash
-git add packages/markora/src/plugins/table-controls.ts packages/markora/src/plugins/table-model.ts packages/markora/src/plugins/table-plugin.ts packages/markora/tests/table-commands.spec.ts packages/markora/tests/table-controls-state.spec.ts
+git add packages/mardora/src/plugins/table-controls.ts packages/mardora/src/plugins/table-model.ts packages/mardora/src/plugins/table-plugin.ts packages/mardora/tests/table-commands.spec.ts packages/mardora/tests/table-controls-state.spec.ts
 git commit -m "feat(table): 接入表格行列控件"
 ```
 
@@ -1118,29 +1118,29 @@ git commit -m "feat(table): 接入表格行列控件"
 
 **Files:**
 
-- Create: `packages/markora/src/plugins/table-controls-theme.ts`
-- Modify: `packages/markora/src/plugins/table-plugin.ts`
-- Modify: `packages/markora/src/plugins/table-controls.ts`
+- Create: `packages/mardora/src/plugins/table-controls-theme.ts`
+- Modify: `packages/mardora/src/plugins/table-plugin.ts`
+- Modify: `packages/mardora/src/plugins/table-controls.ts`
 
 - [ ] **Step 1: Create the theme module**
 
-Create `packages/markora/src/plugins/table-controls-theme.ts`:
+Create `packages/mardora/src/plugins/table-controls-theme.ts`:
 
 ```ts
 import { createTheme } from "../editor";
 
 export const tableControlsTheme = createTheme({
   default: {
-    ".cm-markora-table-wrapper": {
+    ".cm-mardora-table-wrapper": {
       overflow: "visible",
     },
-    ".cm-markora-table-controls-overlay": {
+    ".cm-mardora-table-controls-overlay": {
       position: "absolute",
       inset: "0",
       pointerEvents: "none",
       zIndex: "20",
     },
-    ".cm-markora-table-handle": {
+    ".cm-mardora-table-handle": {
       position: "absolute",
       width: "1.75rem",
       height: "1.75rem",
@@ -1157,17 +1157,17 @@ export const tableControlsTheme = createTheme({
       opacity: "1",
       cursor: "pointer",
     },
-    ".cm-markora-table-handle span": {
+    ".cm-mardora-table-handle span": {
       width: "0.25rem",
       height: "0.25rem",
       borderRadius: "999px",
       backgroundColor: "currentColor",
       display: "block",
     },
-    ".cm-markora-table-row-handle": {
+    ".cm-mardora-table-row-handle": {
       flexDirection: "column",
     },
-    ".cm-markora-table-control-menu": {
+    ".cm-mardora-table-control-menu": {
       position: "absolute",
       minWidth: "12rem",
       padding: "0.25rem",
@@ -1177,7 +1177,7 @@ export const tableControlsTheme = createTheme({
       boxShadow: "0 18px 44px rgba(15, 23, 42, 0.16)",
       pointerEvents: "auto",
     },
-    ".cm-markora-table-control-menu-item": {
+    ".cm-mardora-table-control-menu-item": {
       width: "100%",
       minHeight: "2rem",
       border: "0",
@@ -1191,37 +1191,37 @@ export const tableControlsTheme = createTheme({
       textAlign: "left",
       cursor: "pointer",
     },
-    ".cm-markora-table-control-menu-item:hover": {
+    ".cm-mardora-table-control-menu-item:hover": {
       backgroundColor: "rgba(15, 23, 42, 0.06)",
     },
-    ".cm-markora-table-control-menu-item:disabled": {
+    ".cm-mardora-table-control-menu-item:disabled": {
       color: "var(--color-muted-foreground, #94a3b8)",
       cursor: "not-allowed",
     },
-    ".cm-markora-table-cell-row-selected, .cm-markora-table-cell-column-selected": {
+    ".cm-mardora-table-cell-row-selected, .cm-mardora-table-cell-column-selected": {
       backgroundColor: "rgba(37, 99, 235, 0.12)",
       boxShadow: "inset 0 0 0 1px rgba(37, 99, 235, 0.38)",
     },
   },
   dark: {
-    ".cm-markora-table-handle": {
+    ".cm-mardora-table-handle": {
       borderColor: "var(--color-border, #30363d)",
       backgroundColor: "var(--color-background, #161b22)",
       color: "var(--color-muted-foreground, #94a3b8)",
       boxShadow: "0 12px 28px rgba(0, 0, 0, 0.35)",
     },
-    ".cm-markora-table-control-menu": {
+    ".cm-mardora-table-control-menu": {
       borderColor: "var(--color-border, #30363d)",
       backgroundColor: "var(--color-background, #161b22)",
       boxShadow: "0 18px 44px rgba(0, 0, 0, 0.42)",
     },
-    ".cm-markora-table-control-menu-item": {
+    ".cm-mardora-table-control-menu-item": {
       color: "var(--color-text, #e6edf3)",
     },
-    ".cm-markora-table-control-menu-item:hover": {
+    ".cm-mardora-table-control-menu-item:hover": {
       backgroundColor: "rgba(255, 255, 255, 0.08)",
     },
-    ".cm-markora-table-cell-row-selected, .cm-markora-table-cell-column-selected": {
+    ".cm-mardora-table-cell-row-selected, .cm-mardora-table-cell-column-selected": {
       backgroundColor: "rgba(96, 165, 250, 0.18)",
       boxShadow: "inset 0 0 0 1px rgba(96, 165, 250, 0.5)",
     },
@@ -1240,15 +1240,15 @@ import { tableControlsTheme } from "./table-controls-theme";
 Add the controls theme extension to `getExtensions()` beside the existing table controls extension:
 
 ```ts
-tableControlsTheme(this.markoraConfig?.theme || ThemeEnum.AUTO),
+tableControlsTheme(this.mardoraConfig?.theme || ThemeEnum.AUTO),
 ```
 
 - [ ] **Step 3: Add event safety guards**
 
-In `handleTableMouseDown()` in `table-plugin.ts`, add this before resolving `.cm-markora-table-cell`:
+In `handleTableMouseDown()` in `table-plugin.ts`, add this before resolving `.cm-mardora-table-cell`:
 
 ```ts
-if (event.target instanceof Element && event.target.closest(".cm-markora-table-controls-overlay")) {
+if (event.target instanceof Element && event.target.closest(".cm-mardora-table-controls-overlay")) {
   return false;
 }
 ```
@@ -1265,8 +1265,8 @@ event.stopPropagation();
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-controls-state.spec.ts
-bun run --cwd packages/markora typecheck
+bun run --cwd packages/mardora test tests/table-controls-state.spec.ts
+bun run --cwd packages/mardora typecheck
 ```
 
 Expected: both PASS.
@@ -1276,7 +1276,7 @@ Expected: both PASS.
 Run:
 
 ```bash
-git add packages/markora/src/plugins/table-controls-theme.ts packages/markora/src/plugins/table-controls.ts packages/markora/src/plugins/table-plugin.ts
+git add packages/mardora/src/plugins/table-controls-theme.ts packages/mardora/src/plugins/table-controls.ts packages/mardora/src/plugins/table-plugin.ts
 git commit -m "style(table): 增加表格行列控件样式"
 ```
 
@@ -1350,9 +1350,9 @@ git commit -m "docs(table): 说明表格行列控件能力"
 Run:
 
 ```bash
-bun run --cwd packages/markora test tests/table-commands.spec.ts
-bun run --cwd packages/markora test tests/table-controls-state.spec.ts
-bun run --cwd packages/markora typecheck
+bun run --cwd packages/mardora test tests/table-commands.spec.ts
+bun run --cwd packages/mardora test tests/table-controls-state.spec.ts
+bun run --cwd packages/mardora typecheck
 ```
 
 Expected: all PASS.
@@ -1362,7 +1362,7 @@ Expected: all PASS.
 Run:
 
 ```bash
-bun run --cwd packages/markora test
+bun run --cwd packages/mardora test
 ```
 
 Expected: PASS.
@@ -1448,7 +1448,7 @@ If browser QA requires fixes, commit them with a focused message:
 
 ```bash
 git status --short
-git add packages/markora/src/plugins/table-controls.ts packages/markora/src/plugins/table-controls-theme.ts packages/markora/src/plugins/table-model.ts packages/markora/src/plugins/table-plugin.ts packages/markora/tests/table-commands.spec.ts packages/markora/tests/table-controls-state.spec.ts
+git add packages/mardora/src/plugins/table-controls.ts packages/mardora/src/plugins/table-controls-theme.ts packages/mardora/src/plugins/table-model.ts packages/mardora/src/plugins/table-plugin.ts packages/mardora/tests/table-commands.spec.ts packages/mardora/tests/table-controls-state.spec.ts
 git commit -m "fix(table): 修复表格控件交互细节"
 ```
 
@@ -1463,6 +1463,6 @@ If `git status --short` shows a different exact file list, stage the exact files
 - [ ] Single-click table caret placement still works.
 - [ ] Drag-selecting table text still works and can show the selection toolbar.
 - [ ] Row/column command helpers are covered by focused unit tests.
-- [ ] Table controls do not add framework dependencies to `packages/markora`.
+- [ ] Table controls do not add framework dependencies to `packages/mardora`.
 - [ ] User-facing docs and playground guide data mention the final table capability.
-- [ ] `bun run --cwd packages/markora test`, `typecheck`, `bun run lint`, and `bun run build` pass.
+- [ ] `bun run --cwd packages/mardora test`, `typecheck`, `bun run lint`, and `bun run build` pass.

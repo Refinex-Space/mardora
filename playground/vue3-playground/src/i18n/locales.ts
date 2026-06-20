@@ -1,5 +1,5 @@
 // Shell UI locale model + message dictionary for the Vue 3 playground.
-// Independent of the Markora editor's own i18n (config.locale).
+// Independent of the Mardora editor's own i18n (config.locale).
 // Covers only the playground shell: Header, Sidebar, Devbar, Footer, dialogs.
 
 export type ShellLocale = "zh" | "en";
@@ -11,7 +11,7 @@ export const SHELL_LOCALE_OPTIONS: { value: ShellLocale; label: string }[] = [
 
 export const DEFAULT_SHELL_LOCALE: ShellLocale = "zh";
 
-export const SHELL_LOCALE_STORAGE_KEY = "markora-vue3-playground-locale";
+export const SHELL_LOCALE_STORAGE_KEY = "mardora-vue3-playground-locale";
 
 export type MessageKey =
   | "header.toggleSidebar"
@@ -135,7 +135,7 @@ const zh: Dict = {
   "devbar.contentWidthRegular": "常规",
   "devbar.contentWidthWide": "宽屏",
   "devbar.language": "语言",
-  "devbar.languageDesc": "调整 Markora 编辑器内置 UI 文案",
+  "devbar.languageDesc": "调整 Mardora 编辑器内置 UI 文案",
 
   "opt.baseStyles.label": "基础样式",
   "opt.baseStyles.desc": "包含默认编辑器样式",
@@ -219,7 +219,7 @@ const en: Dict = {
   "devbar.contentWidthRegular": "Regular",
   "devbar.contentWidthWide": "Wide",
   "devbar.language": "Language",
-  "devbar.languageDesc": "Adjust Markora-owned editor UI text",
+  "devbar.languageDesc": "Adjust Mardora-owned editor UI text",
 
   "opt.baseStyles.label": "Base Styles",
   "opt.baseStyles.desc": "Include default editor styles",

@@ -9,44 +9,44 @@ referenced_by: docs/README.md#superpowers-plans
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build Markora's core selected-text toolbar with inline formatting, link editing, color/highlight swatches, list conversion, and Vue2 playground validation.
+**Goal:** Build Mardora's core selected-text toolbar with inline formatting, link editing, color/highlight swatches, list conversion, and Vue2 playground validation.
 
-**Architecture:** Add a core `editor/selection-toolbar` module beside the existing `slash` module. Keep document transformations in pure functions, keep floating placement in pure functions, and keep DOM concerns inside the toolbar menu/view plugin. Register the toolbar through `markora()` so every framework integration gets the same behavior.
+**Architecture:** Add a core `editor/selection-toolbar` module beside the existing `slash` module. Keep document transformations in pure functions, keep floating placement in pure functions, and keep DOM concerns inside the toolbar menu/view plugin. Register the toolbar through `mardora()` so every framework integration gets the same behavior.
 
-**Tech Stack:** TypeScript, CodeMirror 6 `ViewPlugin`, Bun test, existing Markora SVG icon registry, existing Markora plugin and theme patterns.
+**Tech Stack:** TypeScript, CodeMirror 6 `ViewPlugin`, Bun test, existing Mardora SVG icon registry, existing Mardora plugin and theme patterns.
 
 ---
 
 ## File Structure
 
-- Create `packages/markora/src/editor/selection-toolbar/types.ts`
+- Create `packages/mardora/src/editor/selection-toolbar/types.ts`
   - Shared command, range, palette, panel, layout, and runtime config types.
-- Create `packages/markora/src/editor/selection-toolbar/commands.ts`
+- Create `packages/mardora/src/editor/selection-toolbar/commands.ts`
   - Pure document transformation helpers for inline markers, HTML wrappers, links, and list markers.
-- Create `packages/markora/src/editor/selection-toolbar/position.ts`
+- Create `packages/mardora/src/editor/selection-toolbar/position.ts`
   - Pure layout helper for toolbar and child panels.
-- Create `packages/markora/src/editor/selection-toolbar/menu.ts`
+- Create `packages/mardora/src/editor/selection-toolbar/menu.ts`
   - DOM renderer for the toolbar, color panel, and link panel.
-- Create `packages/markora/src/editor/selection-toolbar/theme.ts`
+- Create `packages/mardora/src/editor/selection-toolbar/theme.ts`
   - Base theme for black/white compact toolbar UI.
-- Create `packages/markora/src/editor/selection-toolbar/extension.ts`
+- Create `packages/mardora/src/editor/selection-toolbar/extension.ts`
   - CodeMirror `ViewPlugin` that tracks selections, renders the menu, executes commands, and handles closing.
-- Create `packages/markora/src/editor/selection-toolbar/index.ts`
+- Create `packages/mardora/src/editor/selection-toolbar/index.ts`
   - Public exports for the toolbar module.
-- Modify `packages/markora/src/editor/icons/index.ts`
+- Modify `packages/mardora/src/editor/icons/index.ts`
   - Add toolbar icons: `bold`, `italic`, `strikethrough`, `underline`, `code`, `highlighter`, `baseline`, `copy`, `external-link`, `trash-2`.
-- Modify `packages/markora/src/editor/markora.ts`
-  - Add `selectionToolbar?: MarkoraSelectionToolbarConfig` to `MarkoraConfig`.
+- Modify `packages/mardora/src/editor/mardora.ts`
+  - Add `selectionToolbar?: MardoraSelectionToolbarConfig` to `MardoraConfig`.
   - Register `selectionToolbar()` by default.
-- Modify `packages/markora/src/editor/index.ts`
+- Modify `packages/mardora/src/editor/index.ts`
   - Export `./selection-toolbar`.
-- Modify `playground/vue2-playground/src/shims-markora.d.ts`
+- Modify `playground/vue2-playground/src/shims-mardora.d.ts`
   - Add the optional `selectionToolbar` config shape for the Vue2 TypeScript shim.
-- Create `packages/markora/tests/selection-toolbar-commands.spec.ts`
+- Create `packages/mardora/tests/selection-toolbar-commands.spec.ts`
   - Bun tests for command transformations.
-- Create `packages/markora/tests/selection-toolbar-position.spec.ts`
+- Create `packages/mardora/tests/selection-toolbar-position.spec.ts`
   - Bun tests for toolbar and panel placement.
-- Modify `packages/markora/tests/slash-insertions.spec.ts`
+- Modify `packages/mardora/tests/slash-insertions.spec.ts`
   - Extend icon registry test to cover new toolbar icon identifiers.
 
 ---
@@ -55,12 +55,12 @@ referenced_by: docs/README.md#superpowers-plans
 
 **Files:**
 
-- Modify: `packages/markora/src/editor/icons/index.ts`
-- Test: `packages/markora/tests/slash-insertions.spec.ts`
+- Modify: `packages/mardora/src/editor/icons/index.ts`
+- Test: `packages/mardora/tests/slash-insertions.spec.ts`
 
 - [ ] **Step 1: Write the failing icon coverage test**
 
-Append this test to the existing `describe("defaultSlashCommands", ...)` block or add a new `describe("markora icons", ...)` block in `packages/markora/tests/slash-insertions.spec.ts`:
+Append this test to the existing `describe("defaultSlashCommands", ...)` block or add a new `describe("mardora icons", ...)` block in `packages/mardora/tests/slash-insertions.spec.ts`:
 
 ```ts
 it("contains built-in icons required by the selection toolbar", () => {
@@ -80,7 +80,7 @@ it("contains built-in icons required by the selection toolbar", () => {
       "copy",
       "external-link",
       "trash-2",
-    ].every((icon) => hasMarkoraIcon(icon))
+    ].every((icon) => hasMardoraIcon(icon))
   ).toBe(true);
 });
 ```
@@ -90,20 +90,20 @@ it("contains built-in icons required by the selection toolbar", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/slash-insertions.spec.ts
 ```
 
-Expected: FAIL because `hasMarkoraIcon("bold")` and the other new names return false.
+Expected: FAIL because `hasMardoraIcon("bold")` and the other new names return false.
 
 - [ ] **Step 3: Add icon names and SVG definitions**
 
-In `packages/markora/src/editor/icons/index.ts`, extend `IconElementName`:
+In `packages/mardora/src/editor/icons/index.ts`, extend `IconElementName`:
 
 ```ts
 type IconElementName = "circle" | "line" | "path" | "rect";
 ```
 
-Extend `MarkoraIconName` with:
+Extend `MardoraIconName` with:
 
 ```ts
   | "baseline"
@@ -174,7 +174,7 @@ Add these entries to `iconDefinitions`:
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/slash-insertions.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/slash-insertions.spec.ts
 ```
 
 Expected: PASS.
@@ -184,7 +184,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/icons/index.ts packages/markora/tests/slash-insertions.spec.ts
+git add packages/mardora/src/editor/icons/index.ts packages/mardora/tests/slash-insertions.spec.ts
 git commit -m "feat(editor): 补充选区工具条内置图标"
 ```
 
@@ -194,15 +194,15 @@ git commit -m "feat(editor): 补充选区工具条内置图标"
 
 **Files:**
 
-- Create: `packages/markora/src/editor/selection-toolbar/types.ts`
-- Create: `packages/markora/src/editor/selection-toolbar/position.ts`
-- Create: `packages/markora/src/editor/selection-toolbar/index.ts`
-- Modify: `packages/markora/src/editor/index.ts`
-- Test: `packages/markora/tests/selection-toolbar-position.spec.ts`
+- Create: `packages/mardora/src/editor/selection-toolbar/types.ts`
+- Create: `packages/mardora/src/editor/selection-toolbar/position.ts`
+- Create: `packages/mardora/src/editor/selection-toolbar/index.ts`
+- Modify: `packages/mardora/src/editor/index.ts`
+- Test: `packages/mardora/tests/selection-toolbar-position.spec.ts`
 
 - [ ] **Step 1: Write the failing positioning tests**
 
-Create `packages/markora/tests/selection-toolbar-position.spec.ts`:
+Create `packages/mardora/tests/selection-toolbar-position.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -269,19 +269,19 @@ describe("computeSelectionToolbarLayout", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-position.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/selection-toolbar-position.spec.ts
 ```
 
 Expected: FAIL because `../src/editor/selection-toolbar` does not exist.
 
 - [ ] **Step 3: Add shared types**
 
-Create `packages/markora/src/editor/selection-toolbar/types.ts`:
+Create `packages/mardora/src/editor/selection-toolbar/types.ts`:
 
 ```ts
-import type { MarkoraIconName } from "../icons";
+import type { MardoraIconName } from "../icons";
 
-export type MarkoraSelectionToolbarConfig = {
+export type MardoraSelectionToolbarConfig = {
   enabled?: boolean;
 };
 
@@ -333,14 +333,14 @@ export type SelectionToolbarActionId =
 export type SelectionToolbarButton = {
   id: SelectionToolbarActionId;
   label: string;
-  icon: MarkoraIconName;
+  icon: MardoraIconName;
   active?: boolean;
 };
 ```
 
 - [ ] **Step 4: Implement the positioning helper**
 
-Create `packages/markora/src/editor/selection-toolbar/position.ts`:
+Create `packages/mardora/src/editor/selection-toolbar/position.ts`:
 
 ```ts
 import type { SelectionToolbarLayout, SelectionToolbarLayoutInput, SelectionToolbarPlacement } from "./types";
@@ -381,14 +381,14 @@ export function computeSelectionToolbarLayout(input: SelectionToolbarLayoutInput
 
 - [ ] **Step 5: Export the module**
 
-Create `packages/markora/src/editor/selection-toolbar/index.ts`:
+Create `packages/mardora/src/editor/selection-toolbar/index.ts`:
 
 ```ts
 export * from "./types";
 export * from "./position";
 ```
 
-Modify `packages/markora/src/editor/index.ts`:
+Modify `packages/mardora/src/editor/index.ts`:
 
 ```ts
 export * from "./selection-toolbar";
@@ -399,7 +399,7 @@ export * from "./selection-toolbar";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-position.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/selection-toolbar-position.spec.ts
 ```
 
 Expected: PASS.
@@ -409,7 +409,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/selection-toolbar packages/markora/src/editor/index.ts packages/markora/tests/selection-toolbar-position.spec.ts
+git add packages/mardora/src/editor/selection-toolbar packages/mardora/src/editor/index.ts packages/mardora/tests/selection-toolbar-position.spec.ts
 git commit -m "feat(editor): 添加选区工具条定位计算"
 ```
 
@@ -419,14 +419,14 @@ git commit -m "feat(editor): 添加选区工具条定位计算"
 
 **Files:**
 
-- Modify: `packages/markora/src/editor/selection-toolbar/types.ts`
-- Create: `packages/markora/src/editor/selection-toolbar/commands.ts`
-- Modify: `packages/markora/src/editor/selection-toolbar/index.ts`
-- Test: `packages/markora/tests/selection-toolbar-commands.spec.ts`
+- Modify: `packages/mardora/src/editor/selection-toolbar/types.ts`
+- Create: `packages/mardora/src/editor/selection-toolbar/commands.ts`
+- Modify: `packages/mardora/src/editor/selection-toolbar/index.ts`
+- Test: `packages/mardora/tests/selection-toolbar-commands.spec.ts`
 
 - [ ] **Step 1: Write failing command tests**
 
-Create `packages/markora/tests/selection-toolbar-commands.spec.ts`:
+Create `packages/mardora/tests/selection-toolbar-commands.spec.ts`:
 
 ```ts
 import { describe, expect, it } from "bun:test";
@@ -479,31 +479,31 @@ describe("selection toolbar inline commands", () => {
 
 describe("selection toolbar link commands", () => {
   it("derives link defaults from a selected URL", () => {
-    expect(parseSelectedLink("https://markora.dev")).toEqual({
+    expect(parseSelectedLink("https://mardora.dev")).toEqual({
       kind: "url",
       title: "",
-      url: "https://markora.dev",
+      url: "https://mardora.dev",
     });
   });
 
   it("parses an existing markdown link", () => {
-    expect(parseSelectedLink("[Markora](https://markora.dev)")).toEqual({
+    expect(parseSelectedLink("[Mardora](https://mardora.dev)")).toEqual({
       kind: "markdown-link",
-      title: "Markora",
-      url: "https://markora.dev",
+      title: "Mardora",
+      url: "https://mardora.dev",
     });
   });
 
   it("writes a markdown link", () => {
-    expect(buildLinkChange({ from: 0, to: 7, title: "Markora", url: "https://markora.dev" })).toEqual({
-      changes: { from: 0, to: 7, insert: "[Markora](https://markora.dev)" },
+    expect(buildLinkChange({ from: 0, to: 7, title: "Mardora", url: "https://mardora.dev" })).toEqual({
+      changes: { from: 0, to: 7, insert: "[Mardora](https://mardora.dev)" },
       selection: { anchor: 0, head: 28 },
     });
   });
 
   it("deletes a markdown link back to plain text", () => {
-    expect(buildLinkChange({ from: 0, to: 28, title: "Markora", url: "", remove: true })).toEqual({
-      changes: { from: 0, to: 28, insert: "Markora" },
+    expect(buildLinkChange({ from: 0, to: 28, title: "Mardora", url: "", remove: true })).toEqual({
+      changes: { from: 0, to: 28, insert: "Mardora" },
       selection: { anchor: 0, head: 7 },
     });
   });
@@ -544,14 +544,14 @@ describe("selection toolbar list commands", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/selection-toolbar-commands.spec.ts
 ```
 
 Expected: FAIL because command exports are missing.
 
 - [ ] **Step 3: Add command types**
 
-Append to `packages/markora/src/editor/selection-toolbar/types.ts`:
+Append to `packages/mardora/src/editor/selection-toolbar/types.ts`:
 
 ```ts
 export type TextChange = {
@@ -600,7 +600,7 @@ export type SelectionToolbarListKind = "ordered" | "unordered" | "task";
 
 - [ ] **Step 4: Implement command helpers**
 
-Create `packages/markora/src/editor/selection-toolbar/commands.ts`:
+Create `packages/mardora/src/editor/selection-toolbar/commands.ts`:
 
 ```ts
 import type {
@@ -750,7 +750,7 @@ export function stripSpanStyle(text: string, property: "color" | "background-col
 
 - [ ] **Step 5: Export command helpers**
 
-Modify `packages/markora/src/editor/selection-toolbar/index.ts`:
+Modify `packages/mardora/src/editor/selection-toolbar/index.ts`:
 
 ```ts
 export * from "./types";
@@ -763,7 +763,7 @@ export * from "./commands";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/selection-toolbar-commands.spec.ts
 ```
 
 Expected: PASS.
@@ -773,7 +773,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/selection-toolbar packages/markora/tests/selection-toolbar-commands.spec.ts
+git add packages/mardora/src/editor/selection-toolbar packages/mardora/tests/selection-toolbar-commands.spec.ts
 git commit -m "feat(editor): 添加选区工具条文本转换命令"
 ```
 
@@ -783,14 +783,14 @@ git commit -m "feat(editor): 添加选区工具条文本转换命令"
 
 **Files:**
 
-- Modify: `packages/markora/src/editor/selection-toolbar/types.ts`
-- Create: `packages/markora/src/editor/selection-toolbar/menu.ts`
-- Create: `packages/markora/src/editor/selection-toolbar/theme.ts`
-- Modify: `packages/markora/src/editor/selection-toolbar/index.ts`
+- Modify: `packages/mardora/src/editor/selection-toolbar/types.ts`
+- Create: `packages/mardora/src/editor/selection-toolbar/menu.ts`
+- Create: `packages/mardora/src/editor/selection-toolbar/theme.ts`
+- Modify: `packages/mardora/src/editor/selection-toolbar/index.ts`
 
 - [ ] **Step 1: Add menu state and callback types**
 
-Append to `packages/markora/src/editor/selection-toolbar/types.ts`:
+Append to `packages/mardora/src/editor/selection-toolbar/types.ts`:
 
 ```ts
 export type SelectionToolbarPanel = "toolbar" | "link" | "color" | "highlight";
@@ -832,10 +832,10 @@ export type SelectionToolbarMenuCallbacks = {
 
 - [ ] **Step 2: Implement menu renderer**
 
-Create `packages/markora/src/editor/selection-toolbar/menu.ts`:
+Create `packages/mardora/src/editor/selection-toolbar/menu.ts`:
 
 ```ts
-import { createMarkoraIcon } from "../icons";
+import { createMardoraIcon } from "../icons";
 import type {
   SelectionToolbarButton,
   SelectionToolbarMenuCallbacks,
@@ -847,17 +847,17 @@ function iconButton(button: SelectionToolbarButton, callbacks: SelectionToolbarM
   const element = document.createElement("button");
   element.type = "button";
   element.className = button.active
-    ? "cm-markora-selection-toolbar-button cm-markora-selection-toolbar-button-active"
-    : "cm-markora-selection-toolbar-button";
+    ? "cm-mardora-selection-toolbar-button cm-mardora-selection-toolbar-button-active"
+    : "cm-mardora-selection-toolbar-button";
   element.setAttribute("aria-label", button.label);
   element.setAttribute("aria-pressed", String(!!button.active));
-  element.dataset.markoraSelectionAction = button.id;
+  element.dataset.mardoraSelectionAction = button.id;
   element.addEventListener("mousedown", (event) => {
     event.preventDefault();
     callbacks.onAction(button.id);
   });
 
-  const icon = createMarkoraIcon(button.icon);
+  const icon = createMardoraIcon(button.icon);
   if (icon) {
     element.appendChild(icon);
   } else {
@@ -868,7 +868,7 @@ function iconButton(button: SelectionToolbarButton, callbacks: SelectionToolbarM
 
 function divider(): HTMLSpanElement {
   const element = document.createElement("span");
-  element.className = "cm-markora-selection-toolbar-divider";
+  element.className = "cm-mardora-selection-toolbar-divider";
   element.setAttribute("aria-hidden", "true");
   return element;
 }
@@ -896,8 +896,8 @@ function paletteButton(
   element.className = className;
   element.setAttribute("aria-label", item.label);
   element.title = item.label;
-  element.dataset.markoraSwatch = item.id;
-  if (item.value) element.style.setProperty("--markora-swatch-color", item.value);
+  element.dataset.mardoraSwatch = item.id;
+  if (item.value) element.style.setProperty("--mardora-swatch-color", item.value);
   element.addEventListener("mousedown", (event) => {
     event.preventDefault();
     callback(item.value);
@@ -912,17 +912,17 @@ function appendPalette(
   callback: (value: string | null) => void
 ): void {
   const group = document.createElement("div");
-  group.className = "cm-markora-selection-toolbar-palette-group";
+  group.className = "cm-mardora-selection-toolbar-palette-group";
 
   const label = document.createElement("div");
-  label.className = "cm-markora-selection-toolbar-palette-label";
+  label.className = "cm-mardora-selection-toolbar-palette-label";
   label.textContent = title;
   group.appendChild(label);
 
   const grid = document.createElement("div");
-  grid.className = "cm-markora-selection-toolbar-swatch-grid";
+  grid.className = "cm-mardora-selection-toolbar-swatch-grid";
   for (const item of items) {
-    grid.appendChild(paletteButton(item, "cm-markora-selection-toolbar-swatch", callback));
+    grid.appendChild(paletteButton(item, "cm-mardora-selection-toolbar-swatch", callback));
   }
   group.appendChild(grid);
   root.appendChild(group);
@@ -934,7 +934,7 @@ function appendLinkPanel(
   callbacks: SelectionToolbarMenuCallbacks
 ): void {
   const title = document.createElement("input");
-  title.className = "cm-markora-selection-toolbar-link-input";
+  title.className = "cm-mardora-selection-toolbar-link-input";
   title.setAttribute("aria-label", "Link title");
   title.value = state.link.title;
   title.addEventListener("input", () => callbacks.onLinkInput("title", title.value));
@@ -944,7 +944,7 @@ function appendLinkPanel(
   });
 
   const url = document.createElement("input");
-  url.className = "cm-markora-selection-toolbar-link-input";
+  url.className = "cm-mardora-selection-toolbar-link-input";
   url.setAttribute("aria-label", "Link URL");
   url.value = state.link.url;
   url.addEventListener("input", () => callbacks.onLinkInput("url", url.value));
@@ -954,11 +954,11 @@ function appendLinkPanel(
   });
 
   const actions = document.createElement("div");
-  actions.className = "cm-markora-selection-toolbar-link-actions";
+  actions.className = "cm-mardora-selection-toolbar-link-actions";
 
   const follow = document.createElement("button");
   follow.type = "button";
-  follow.className = "cm-markora-selection-toolbar-follow";
+  follow.className = "cm-mardora-selection-toolbar-follow";
   follow.textContent = "Follow Link  ⌘ + click";
   follow.addEventListener("mousedown", (event) => {
     event.preventDefault();
@@ -976,10 +976,10 @@ function appendLinkPanel(
     button.type = "button";
     button.className =
       label === "Remove link"
-        ? "cm-markora-selection-toolbar-link-button cm-markora-selection-toolbar-link-button-danger"
-        : "cm-markora-selection-toolbar-link-button";
+        ? "cm-mardora-selection-toolbar-link-button cm-mardora-selection-toolbar-link-button-danger"
+        : "cm-mardora-selection-toolbar-link-button";
     button.setAttribute("aria-label", label);
-    const svg = createMarkoraIcon(icon);
+    const svg = createMardoraIcon(icon);
     if (svg) button.appendChild(svg);
     button.addEventListener("mousedown", (event) => {
       event.preventDefault();
@@ -991,7 +991,7 @@ function appendLinkPanel(
   root.append(title, url);
   if (state.link.error) {
     const error = document.createElement("div");
-    error.className = "cm-markora-selection-toolbar-error";
+    error.className = "cm-mardora-selection-toolbar-error";
     error.textContent = state.link.error;
     root.appendChild(error);
   }
@@ -1006,8 +1006,8 @@ export function createSelectionToolbarElement(
   const root = document.createElement("div");
   root.className =
     state.panel === "toolbar"
-      ? "cm-markora-selection-toolbar"
-      : "cm-markora-selection-toolbar cm-markora-selection-toolbar-panel";
+      ? "cm-mardora-selection-toolbar"
+      : "cm-mardora-selection-toolbar cm-mardora-selection-toolbar-panel";
   root.setAttribute("role", "toolbar");
   root.addEventListener("mousedown", (event) => event.preventDefault());
 
@@ -1027,13 +1027,13 @@ export function createSelectionToolbarElement(
 
 - [ ] **Step 3: Add toolbar theme**
 
-Create `packages/markora/src/editor/selection-toolbar/theme.ts`:
+Create `packages/mardora/src/editor/selection-toolbar/theme.ts`:
 
 ```ts
 import { EditorView } from "@codemirror/view";
 
 export const selectionToolbarTheme = EditorView.baseTheme({
-  ".cm-markora-selection-toolbar": {
+  ".cm-mardora-selection-toolbar": {
     position: "fixed",
     zIndex: "1001",
     display: "inline-flex",
@@ -1041,14 +1041,14 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     gap: "2px",
     border: "1px solid rgba(24, 24, 27, 0.14)",
     borderRadius: "10px",
-    background: "var(--markora-selection-toolbar-bg, #ffffff)",
+    background: "var(--mardora-selection-toolbar-bg, #ffffff)",
     boxShadow: "0 14px 38px rgba(15, 23, 42, 0.16)",
     padding: "4px",
-    color: "var(--markora-selection-toolbar-fg, #18181b)",
+    color: "var(--mardora-selection-toolbar-fg, #18181b)",
     fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
     userSelect: "none",
   },
-  ".cm-markora-selection-toolbar-panel": {
+  ".cm-mardora-selection-toolbar-panel": {
     display: "flex",
     flexDirection: "column",
     alignItems: "stretch",
@@ -1056,7 +1056,7 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     gap: "6px",
     padding: "8px",
   },
-  ".cm-markora-selection-toolbar-button, .cm-markora-selection-toolbar-link-button": {
+  ".cm-mardora-selection-toolbar-button, .cm-mardora-selection-toolbar-link-button": {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1069,88 +1069,88 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     cursor: "default",
     padding: "0",
   },
-  ".cm-markora-selection-toolbar-button:hover, .cm-markora-selection-toolbar-button-active": {
-    background: "var(--markora-selection-toolbar-active, #f4f4f5)",
+  ".cm-mardora-selection-toolbar-button:hover, .cm-mardora-selection-toolbar-button-active": {
+    background: "var(--mardora-selection-toolbar-active, #f4f4f5)",
   },
-  ".cm-markora-selection-toolbar-button svg, .cm-markora-selection-toolbar-link-button svg": {
+  ".cm-mardora-selection-toolbar-button svg, .cm-mardora-selection-toolbar-link-button svg": {
     width: "16px",
     height: "16px",
     strokeWidth: "2",
   },
-  ".cm-markora-selection-toolbar-divider": {
+  ".cm-mardora-selection-toolbar-divider": {
     width: "1px",
     height: "22px",
     margin: "0 4px",
-    background: "var(--markora-selection-toolbar-border, #e4e4e7)",
+    background: "var(--mardora-selection-toolbar-border, #e4e4e7)",
   },
-  ".cm-markora-selection-toolbar-link-input": {
+  ".cm-mardora-selection-toolbar-link-input": {
     boxSizing: "border-box",
     width: "100%",
     border: "0",
     borderRadius: "7px",
-    background: "var(--markora-selection-toolbar-input, #f4f4f5)",
+    background: "var(--mardora-selection-toolbar-input, #f4f4f5)",
     color: "inherit",
     font: "inherit",
     fontSize: "14px",
     outline: "none",
     padding: "8px 10px",
   },
-  ".cm-markora-selection-toolbar-link-actions": {
+  ".cm-mardora-selection-toolbar-link-actions": {
     display: "flex",
     alignItems: "center",
     gap: "6px",
   },
-  ".cm-markora-selection-toolbar-follow": {
+  ".cm-mardora-selection-toolbar-follow": {
     marginRight: "auto",
     border: "0",
     background: "transparent",
-    color: "var(--markora-selection-toolbar-link, #2563eb)",
+    color: "var(--mardora-selection-toolbar-link, #2563eb)",
     cursor: "default",
     fontSize: "14px",
     padding: "0 4px",
   },
-  ".cm-markora-selection-toolbar-link-button-danger": {
-    color: "var(--markora-selection-toolbar-danger, #dc2626)",
+  ".cm-mardora-selection-toolbar-link-button-danger": {
+    color: "var(--mardora-selection-toolbar-danger, #dc2626)",
   },
-  ".cm-markora-selection-toolbar-error": {
-    color: "var(--markora-selection-toolbar-danger, #dc2626)",
+  ".cm-mardora-selection-toolbar-error": {
+    color: "var(--mardora-selection-toolbar-danger, #dc2626)",
     fontSize: "12px",
     padding: "0 2px",
   },
-  ".cm-markora-selection-toolbar-palette-label": {
-    color: "var(--markora-selection-toolbar-muted, #71717a)",
+  ".cm-mardora-selection-toolbar-palette-label": {
+    color: "var(--mardora-selection-toolbar-muted, #71717a)",
     fontSize: "12px",
     padding: "0 2px 4px",
   },
-  ".cm-markora-selection-toolbar-swatch-grid": {
+  ".cm-mardora-selection-toolbar-swatch-grid": {
     display: "grid",
     gridTemplateColumns: "repeat(8, 24px)",
     gap: "6px",
   },
-  ".cm-markora-selection-toolbar-swatch": {
+  ".cm-mardora-selection-toolbar-swatch": {
     width: "24px",
     height: "24px",
-    border: "1px solid var(--markora-selection-toolbar-border, #e4e4e7)",
+    border: "1px solid var(--mardora-selection-toolbar-border, #e4e4e7)",
     borderRadius: "6px",
-    background: "var(--markora-swatch-color, transparent)",
+    background: "var(--mardora-swatch-color, transparent)",
     padding: "0",
   },
-  "&dark .cm-markora-selection-toolbar": {
-    "--markora-selection-toolbar-bg": "#18181b",
-    "--markora-selection-toolbar-fg": "#f4f4f5",
-    "--markora-selection-toolbar-active": "#27272a",
-    "--markora-selection-toolbar-border": "#3f3f46",
-    "--markora-selection-toolbar-input": "#27272a",
-    "--markora-selection-toolbar-muted": "#a1a1aa",
-    "--markora-selection-toolbar-link": "#60a5fa",
-    "--markora-selection-toolbar-danger": "#f87171",
+  "&dark .cm-mardora-selection-toolbar": {
+    "--mardora-selection-toolbar-bg": "#18181b",
+    "--mardora-selection-toolbar-fg": "#f4f4f5",
+    "--mardora-selection-toolbar-active": "#27272a",
+    "--mardora-selection-toolbar-border": "#3f3f46",
+    "--mardora-selection-toolbar-input": "#27272a",
+    "--mardora-selection-toolbar-muted": "#a1a1aa",
+    "--mardora-selection-toolbar-link": "#60a5fa",
+    "--mardora-selection-toolbar-danger": "#f87171",
   },
 });
 ```
 
 - [ ] **Step 4: Export menu and theme**
 
-Modify `packages/markora/src/editor/selection-toolbar/index.ts`:
+Modify `packages/mardora/src/editor/selection-toolbar/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1165,7 +1165,7 @@ export * from "./theme";
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
 ```
 
 Expected: PASS.
@@ -1175,24 +1175,24 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/selection-toolbar
+git add packages/mardora/src/editor/selection-toolbar
 git commit -m "feat(editor): 渲染选区工具条界面"
 ```
 
 ---
 
-### Task 5: Wire Toolbar ViewPlugin Into Markora
+### Task 5: Wire Toolbar ViewPlugin Into Mardora
 
 **Files:**
 
-- Create: `packages/markora/src/editor/selection-toolbar/extension.ts`
-- Modify: `packages/markora/src/editor/selection-toolbar/index.ts`
-- Modify: `packages/markora/src/editor/markora.ts`
-- Modify: `playground/vue2-playground/src/shims-markora.d.ts`
+- Create: `packages/mardora/src/editor/selection-toolbar/extension.ts`
+- Modify: `packages/mardora/src/editor/selection-toolbar/index.ts`
+- Modify: `packages/mardora/src/editor/mardora.ts`
+- Modify: `playground/vue2-playground/src/shims-mardora.d.ts`
 
 - [ ] **Step 1: Add extension exports**
 
-Modify `packages/markora/src/editor/selection-toolbar/index.ts`:
+Modify `packages/mardora/src/editor/selection-toolbar/index.ts`:
 
 ```ts
 export * from "./types";
@@ -1205,7 +1205,7 @@ export * from "./extension";
 
 - [ ] **Step 2: Implement the ViewPlugin extension**
 
-Create `packages/markora/src/editor/selection-toolbar/extension.ts`:
+Create `packages/mardora/src/editor/selection-toolbar/extension.ts`:
 
 ```ts
 import { Extension, Prec } from "@codemirror/state";
@@ -1215,7 +1215,7 @@ import { createSelectionToolbarElement } from "./menu";
 import { computeSelectionToolbarLayout } from "./position";
 import { selectionToolbarTheme } from "./theme";
 import type {
-  MarkoraSelectionToolbarConfig,
+  MardoraSelectionToolbarConfig,
   SelectionToolbarActionId,
   SelectionToolbarButton,
   SelectionToolbarLinkState,
@@ -1301,7 +1301,7 @@ class SelectionToolbarViewPlugin {
 
   private updateState(): void {
     const selection = this.view.state.selection.main;
-    if (selection.empty || !this.view.hasFocus || this.view.dom.classList.contains("cm-markora-slash-open")) {
+    if (selection.empty || !this.view.hasFocus || this.view.dom.classList.contains("cm-mardora-slash-open")) {
       this.close();
       return;
     }
@@ -1385,7 +1385,7 @@ class SelectionToolbarViewPlugin {
         this.menu.style.left = `${layout.left}px`;
         this.menu.style.top = `${layout.top}px`;
         this.menu.style.maxHeight = `${layout.maxHeight}px`;
-        this.menu.dataset.markoraSelectionPlacement = layout.placement;
+        this.menu.dataset.mardoraSelectionPlacement = layout.placement;
         this.view.dom.appendChild(this.menu);
       },
     });
@@ -1498,7 +1498,7 @@ class SelectionToolbarViewPlugin {
   }
 }
 
-export function selectionToolbar(config: MarkoraSelectionToolbarConfig = {}): Extension[] {
+export function selectionToolbar(config: MardoraSelectionToolbarConfig = {}): Extension[] {
   if (config.enabled === false) return [];
   const plugin = ViewPlugin.define((view) => new SelectionToolbarViewPlugin(view));
   return [
@@ -1518,20 +1518,20 @@ export function selectionToolbar(config: MarkoraSelectionToolbarConfig = {}): Ex
 }
 ```
 
-- [ ] **Step 3: Register the toolbar in `markora()`**
+- [ ] **Step 3: Register the toolbar in `mardora()`**
 
-Modify `packages/markora/src/editor/markora.ts` imports:
+Modify `packages/mardora/src/editor/mardora.ts` imports:
 
 ```ts
-import type { MarkoraSelectionToolbarConfig } from "./selection-toolbar";
+import type { MardoraSelectionToolbarConfig } from "./selection-toolbar";
 import { selectionToolbar } from "./selection-toolbar";
 ```
 
-Add to `MarkoraConfig`:
+Add to `MardoraConfig`:
 
 ```ts
   /** Selected text floating toolbar configuration */
-  selectionToolbar?: MarkoraSelectionToolbarConfig;
+  selectionToolbar?: MardoraSelectionToolbarConfig;
 ```
 
 Add to config destructuring:
@@ -1548,7 +1548,7 @@ Add to composed extensions after `attachments(configAttachments)`:
 
 - [ ] **Step 4: Update Vue2 shim**
 
-Modify the local `MarkoraConfig` declaration in `playground/vue2-playground/src/shims-markora.d.ts` to include:
+Modify the local `MardoraConfig` declaration in `playground/vue2-playground/src/shims-mardora.d.ts` to include:
 
 ```ts
     selectionToolbar?: {
@@ -1561,8 +1561,8 @@ Modify the local `MarkoraConfig` declaration in `playground/vue2-playground/src/
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts tests/selection-toolbar-position.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/selection-toolbar-commands.spec.ts tests/selection-toolbar-position.spec.ts
 ```
 
 Expected: both commands PASS.
@@ -1572,7 +1572,7 @@ Expected: both commands PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/selection-toolbar packages/markora/src/editor/markora.ts playground/vue2-playground/src/shims-markora.d.ts
+git add packages/mardora/src/editor/selection-toolbar packages/mardora/src/editor/mardora.ts playground/vue2-playground/src/shims-mardora.d.ts
 git commit -m "feat(editor): 接入选中文本工具条扩展"
 ```
 
@@ -1582,14 +1582,14 @@ git commit -m "feat(editor): 接入选中文本工具条扩展"
 
 **Files:**
 
-- Modify: `packages/markora/src/editor/selection-toolbar/commands.ts`
-- Modify: `packages/markora/src/editor/selection-toolbar/extension.ts`
-- Modify: `packages/markora/src/editor/selection-toolbar/theme.ts`
-- Test: `packages/markora/tests/selection-toolbar-commands.spec.ts`
+- Modify: `packages/mardora/src/editor/selection-toolbar/commands.ts`
+- Modify: `packages/mardora/src/editor/selection-toolbar/extension.ts`
+- Modify: `packages/mardora/src/editor/selection-toolbar/theme.ts`
+- Test: `packages/mardora/tests/selection-toolbar-commands.spec.ts`
 
 - [ ] **Step 1: Add failing tests for range and clear behavior**
 
-Append these tests to `packages/markora/tests/selection-toolbar-commands.spec.ts`:
+Append these tests to `packages/mardora/tests/selection-toolbar-commands.spec.ts`:
 
 ```ts
 it("does not build a link change when the url is empty", () => {
@@ -1617,14 +1617,14 @@ it("clears color span wrappers", () => {
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/selection-toolbar-commands.spec.ts
 ```
 
 Expected: FAIL because `clear` is not typed and empty URLs are not rejected.
 
 - [ ] **Step 3: Add `clear` support to inline command types**
 
-Modify `InlineFormatInput` in `packages/markora/src/editor/selection-toolbar/types.ts`:
+Modify `InlineFormatInput` in `packages/mardora/src/editor/selection-toolbar/types.ts`:
 
 ```ts
 export type InlineFormatInput = {
@@ -1643,7 +1643,7 @@ export type InlineFormatInput = {
 
 - [ ] **Step 4: Harden command implementations**
 
-Modify `packages/markora/src/editor/selection-toolbar/commands.ts`:
+Modify `packages/mardora/src/editor/selection-toolbar/commands.ts`:
 
 ```ts
 export function buildInlineFormatChange(input: InlineFormatInput): TextCommandResult {
@@ -1709,7 +1709,7 @@ export function buildLinkChange(input: LinkChangeInput): TextCommandResult {
 
 - [ ] **Step 5: Guard saved range before applying changes**
 
-In `packages/markora/src/editor/selection-toolbar/extension.ts`, add:
+In `packages/mardora/src/editor/selection-toolbar/extension.ts`, add:
 
 ```ts
   private isSavedRangeCurrent(): boolean {
@@ -1759,8 +1759,8 @@ Add this public method to `SelectionToolbarViewPlugin`:
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test tests/selection-toolbar-commands.spec.ts
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora test tests/selection-toolbar-commands.spec.ts
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
 ```
 
 Expected: PASS.
@@ -1770,7 +1770,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/markora/src/editor/selection-toolbar packages/markora/tests/selection-toolbar-commands.spec.ts
+git add packages/mardora/src/editor/selection-toolbar packages/mardora/tests/selection-toolbar-commands.spec.ts
 git commit -m "fix(editor): 加固选区工具条状态边界"
 ```
 
@@ -1780,18 +1780,18 @@ git commit -m "fix(editor): 加固选区工具条状态边界"
 
 **Files:**
 
-- Modify only if type errors require it: `playground/vue2-playground/src/shims-markora.d.ts`
-- Runtime build output: `packages/markora/dist` generated by build and typically ignored by git.
+- Modify only if type errors require it: `playground/vue2-playground/src/shims-mardora.d.ts`
+- Runtime build output: `packages/mardora/dist` generated by build and typically ignored by git.
 
 - [ ] **Step 1: Run full package checks**
 
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
-pnpm --config.package-manager-strict=false --dir packages/markora lint
-pnpm --config.package-manager-strict=false --dir packages/markora build
+pnpm --config.package-manager-strict=false --dir packages/mardora test
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora lint
+pnpm --config.package-manager-strict=false --dir packages/mardora build
 ```
 
 Expected:
@@ -1840,14 +1840,14 @@ Expected: all listed interactions work without console errors.
 
 Use Browser developer logs or equivalent check.
 
-Expected: no new `error` logs from Markora selection toolbar interactions.
+Expected: no new `error` logs from Mardora selection toolbar interactions.
 
 - [ ] **Step 6: Commit verification-only shim changes if any**
 
 If Step 2 or Step 4 required shim-only adjustments, commit them:
 
 ```bash
-git add playground/vue2-playground/src/shims-markora.d.ts
+git add playground/vue2-playground/src/shims-mardora.d.ts
 git commit -m "fix(playground): 同步选区工具条类型声明"
 ```
 
@@ -1890,10 +1890,10 @@ Expected:
 Run:
 
 ```bash
-pnpm --config.package-manager-strict=false --dir packages/markora test
-pnpm --config.package-manager-strict=false --dir packages/markora typecheck
-pnpm --config.package-manager-strict=false --dir packages/markora build
-pnpm --config.package-manager-strict=false --dir packages/markora lint
+pnpm --config.package-manager-strict=false --dir packages/mardora test
+pnpm --config.package-manager-strict=false --dir packages/mardora typecheck
+pnpm --config.package-manager-strict=false --dir packages/mardora build
+pnpm --config.package-manager-strict=false --dir packages/mardora lint
 pnpm --config.package-manager-strict=false --filter vue2-playground build
 git diff --check
 ```
@@ -1914,5 +1914,5 @@ Final response must include:
 - Rollback method:
 
 ```text
-Rollback by reverting the selection-toolbar commits. This removes the toolbar module, MarkoraConfig.selectionToolbar registration, icon additions, tests, and Vue2 shim changes while leaving slash menu and existing plugins intact.
+Rollback by reverting the selection-toolbar commits. This removes the toolbar module, MardoraConfig.selectionToolbar registration, icon additions, tests, and Vue2 shim changes while leaving slash menu and existing plugins intact.
 ```

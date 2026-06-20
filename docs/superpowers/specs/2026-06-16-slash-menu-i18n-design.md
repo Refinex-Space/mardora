@@ -9,13 +9,13 @@ referenced_by: docs/README.md#superpowers-specs
 
 ## Goal
 
-Add a small, framework-agnostic internationalization layer for Markora editor UI text. The first delivery scope covers the slash command menu only.
+Add a small, framework-agnostic internationalization layer for Mardora editor UI text. The first delivery scope covers the slash command menu only.
 
 The default language is Simplified Chinese. Integrators can opt into English without rebuilding the entire slash command list.
 
 ## Context
 
-The current slash menu implementation lives in `packages/markora/src/editor/slash`.
+The current slash menu implementation lives in `packages/mardora/src/editor/slash`.
 
 Today, localized text is split across two places:
 
@@ -26,7 +26,7 @@ The search path in `query.ts` already indexes `title`, `id`, `hint`, and `aliase
 
 ## Constraints
 
-- Keep the capability in `packages/markora`, not in a playground.
+- Keep the capability in `packages/mardora`, not in a playground.
 - Do not introduce a runtime i18n framework or dependency.
 - Keep the default behavior backward-compatible: no configuration still renders Chinese slash menu text.
 - Preserve custom `slashCommands.commands`; integrators who provide commands stay in control of command titles.
@@ -36,18 +36,18 @@ The search path in `query.ts` already indexes `title`, `id`, `hint`, and `aliase
 
 ## Recommended Approach
 
-Use a core-owned, typed dictionary for Markora UI strings and a locale-aware default slash command factory.
+Use a core-owned, typed dictionary for Mardora UI strings and a locale-aware default slash command factory.
 
 Supported locales:
 
 ```ts
-export type MarkoraLocale = "zh-CN" | "en-US";
+export type MardoraLocale = "zh-CN" | "en-US";
 ```
 
 Default locale:
 
 ```ts
-const defaultMarkoraLocale: MarkoraLocale = "zh-CN";
+const defaultMardoraLocale: MardoraLocale = "zh-CN";
 ```
 
 This keeps the first version simple while leaving a stable seam for later editor surfaces such as the selection toolbar.
@@ -57,24 +57,24 @@ This keeps the first version simple while leaving a stable seam for later editor
 Add locale options to the core config:
 
 ```ts
-type MarkoraI18nConfig = {
-  locale?: MarkoraLocale;
+type MardoraI18nConfig = {
+  locale?: MardoraLocale;
 };
 
-type MarkoraConfig = {
-  locale?: MarkoraLocale;
-  i18n?: MarkoraI18nConfig;
-  slashCommands?: MarkoraSlashCommandsConfig;
+type MardoraConfig = {
+  locale?: MardoraLocale;
+  i18n?: MardoraI18nConfig;
+  slashCommands?: MardoraSlashCommandsConfig;
 };
 ```
 
 Extend slash command config:
 
 ```ts
-type MarkoraSlashCommandsConfig = {
+type MardoraSlashCommandsConfig = {
   enabled?: boolean;
-  locale?: MarkoraLocale;
-  commands?: MarkoraSlashCommand[];
+  locale?: MardoraLocale;
+  commands?: MardoraSlashCommand[];
 };
 ```
 
@@ -85,15 +85,15 @@ Resolution order:
 3. `locale`
 4. `"zh-CN"`
 
-This allows app-wide editor locale through `markora({ locale: "en-US" })` while still allowing slash-only override when needed.
+This allows app-wide editor locale through `mardora({ locale: "en-US" })` while still allowing slash-only override when needed.
 
 ## Slash Dictionary
 
 Add a localized slash menu message type:
 
 ```ts
-type MarkoraSlashMessages = {
-  groups: Record<MarkoraSlashCommandGroup, string>;
+type MardoraSlashMessages = {
+  groups: Record<MardoraSlashCommandGroup, string>;
   empty: string;
   close: string;
   closeHint: string;
@@ -125,7 +125,7 @@ The menu renderer receives messages explicitly instead of reading hard-coded con
 Replace the single hard-coded command list with a locale-aware factory:
 
 ```ts
-export function getDefaultSlashCommands(locale: MarkoraLocale = "zh-CN"): MarkoraSlashCommand[];
+export function getDefaultSlashCommands(locale: MardoraLocale = "zh-CN"): MardoraSlashCommand[];
 ```
 
 Keep the existing export for compatibility:
@@ -177,15 +177,15 @@ Implementation rule:
 
 ## Custom Commands
 
-If an integrator passes `slashCommands.commands`, Markora does not translate those custom commands.
+If an integrator passes `slashCommands.commands`, Mardora does not translate those custom commands.
 
 Reason:
 
 - Custom commands may be product-specific.
-- Markora cannot infer translation quality.
+- Mardora cannot infer translation quality.
 - The integrator should provide localized custom commands for their own UI.
 
-Menu chrome still follows the resolved locale, because group labels and footer text remain Markora-owned.
+Menu chrome still follows the resolved locale, because group labels and footer text remain Mardora-owned.
 
 ## Vue2 Playground
 
@@ -198,7 +198,7 @@ Expose a Developer Panel debugging control:
 The Vue2 playground stores the selected locale in its existing config state and passes it to:
 
 ```ts
-markora({
+mardora({
   locale: config.locale,
   slashCommands: {
     enabled: config.features.slashCommands,
@@ -227,11 +227,11 @@ Add Vue2 playground verification through build and browser checks:
 
 ## Done When
 
-- `markora()` with no locale renders Chinese slash menu text.
-- `markora({ locale: "en-US" })` renders English slash command titles, group labels, empty state, and footer.
+- `mardora()` with no locale renders Chinese slash menu text.
+- `mardora({ locale: "en-US" })` renders English slash command titles, group labels, empty state, and footer.
 - `slashCommands.locale` can override the top-level locale for slash only.
 - Existing `defaultSlashCommands` import remains source-compatible and Chinese by default.
-- Vue2 playground exposes the locale switch and passes it through the public Markora API.
+- Vue2 playground exposes the locale switch and passes it through the public Mardora API.
 - Relevant typecheck, build, unit tests, and browser validation pass.
 
 ## Rollback

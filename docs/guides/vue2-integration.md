@@ -7,7 +7,7 @@ referenced_by: docs/README.md#product-and-integration-guides
 
 # Vue2 接入指南
 
-本文面向 Vue 2 项目，即 Vue 2 + TypeScript + CodeMirror 6 的接入方式。目标是让业务项目接入一个与 Markora Vue 2 playground 同等质量的编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、选区工具栏、目录、主题切换和本地持久化。
+本文面向 Vue 2 项目，即 Vue 2 + TypeScript + CodeMirror 6 的接入方式。目标是让业务项目接入一个与 Mardora Vue 2 playground 同等质量的编辑器：支持富 Markdown 编辑、源码模式、预览模式、HTML/CSS 输出、插件开关、slash commands、附件上传、选区工具栏、目录、主题切换和本地持久化。
 
 ## 1. Vue 2 接入结论
 
@@ -23,29 +23,29 @@ referenced_by: docs/README.md#product-and-integration-guides
 ## 2. 安装依赖
 
 ```shell
-npm install @refinex/markora
+npm install mardora
 ```
 
 下面的 HTML/CSS 输出面板示例会用到 `@codemirror/lang-html`、`@codemirror/lang-css` 和 `@uiw/codemirror-theme-github`；只有保留该面板时才需要按需安装。
 
-Vue 2 项目还需要自己的构建环境，例如 `vue@2`、`vue-template-compiler`、`@vue/cli-service`、`@vue/cli-plugin-typescript`。Markora 不提供 Vue 2 adapter，也不要求额外 adapter。
+Vue 2 项目还需要自己的构建环境，例如 `vue@2`、`vue-template-compiler`、`@vue/cli-service`、`@vue/cli-plugin-typescript`。Mardora 不提供 Vue 2 adapter，也不要求额外 adapter。
 
 ## 3. 模板结构
 
 ```vue
 <template>
-  <section class="markora-vue2-shell">
-    <header class="markora-toolbar">
+  <section class="mardora-vue2-shell">
+    <header class="mardora-toolbar">
       <button type="button" @click="mode = 'live'">编辑</button>
       <button type="button" @click="mode = 'code'">源码</button>
       <button type="button" @click="mode = 'view'">预览</button>
       <button type="button" @click="mode = 'output'">输出</button>
     </header>
 
-    <div v-if="mode === 'view'" ref="previewHost" class="markora-preview-host">
+    <div v-if="mode === 'view'" ref="previewHost" class="mardora-preview-host">
       <div v-html="previewOutput.html" />
 
-      <aside v-if="config.features.tableOfContents" class="markora-preview-toc">
+      <aside v-if="config.features.tableOfContents" class="mardora-preview-toc">
         <button
           v-for="item in previewToc"
           :key="item.id"
@@ -59,32 +59,32 @@ Vue 2 项目还需要自己的构建环境，例如 `vue@2`、`vue-template-comp
       </aside>
     </div>
 
-    <div v-else-if="mode === 'output'" class="markora-output-grid">
+    <div v-else-if="mode === 'output'" class="mardora-output-grid">
       <div ref="htmlOutputHost" />
       <div ref="cssOutputHost" />
     </div>
 
-    <div v-else ref="editorHost" class="markora-editor-host" />
+    <div v-else ref="editorHost" class="mardora-editor-host" />
   </section>
 </template>
 ```
 
 ```css
-.markora-vue2-shell {
+.mardora-vue2-shell {
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 
-.markora-editor-host,
-.markora-preview-host,
-.markora-output-grid {
+.mardora-editor-host,
+.mardora-preview-host,
+.mardora-output-grid {
   flex: 1;
   min-height: 0;
   overflow: auto;
 }
 
-.markora-output-grid {
+.mardora-output-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
@@ -93,7 +93,7 @@ Vue 2 项目还需要自己的构建环境，例如 `vue@2`、`vue-template-comp
 ## 4. 配置模型
 
 ```ts
-import { allPlugins } from "@refinex/markora/plugins";
+import { allPlugins } from "mardora/plugins";
 
 export type PluginConfig = Record<string, boolean>;
 
@@ -161,28 +161,28 @@ import Vue from "vue";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import type { MarkoraAttachmentUploadContext, MarkoraNode, MarkoraTocItem } from "@refinex/markora/editor";
-import { EditorState, EditorView, markora, ThemeEnum } from "@refinex/markora/editor";
-import { extractPreviewTocFromMarkdown, generateCSS, preview } from "@refinex/markora/preview";
+import type { MardoraAttachmentUploadContext, MardoraNode, MardoraTocItem } from "mardora/editor";
+import { EditorState, EditorView, mardora, ThemeEnum } from "mardora/editor";
+import { extractPreviewTocFromMarkdown, generateCSS, preview } from "mardora/preview";
 import { defaultConfig, getActivePlugins } from "./playground-config";
 
 type Mode = "live" | "code" | "view" | "output";
 
 export default Vue.extend({
-  name: "MarkoraVue2Editor",
+  name: "MardoraVue2Editor",
 
   data() {
     return {
       mode: "live" as Mode,
       theme: "light" as "light" | "dark",
-      content: "# Hello, Markora",
+      content: "# Hello, Mardora",
       config: defaultConfig,
       editorView: null as EditorView | null,
       htmlView: null as EditorView | null,
       cssView: null as EditorView | null,
       previewStyleElement: null as HTMLStyleElement | null,
       previewOutput: { html: "", css: "" },
-      previewToc: [] as MarkoraTocItem[],
+      previewToc: [] as MardoraTocItem[],
       objectUrls: [] as string[],
       internalUpdate: false,
     };
@@ -233,7 +233,7 @@ export default Vue.extend({
       return this.theme === "dark" ? githubDark : githubLight;
     },
 
-    markoraTheme() {
+    mardoraTheme() {
       return this.theme === "dark" ? ThemeEnum.DARK : ThemeEnum.LIGHT;
     },
 
@@ -276,8 +276,8 @@ export default Vue.extend({
           doc: this.content,
           extensions: [
             this.cmTheme(),
-            markora({
-              theme: this.markoraTheme(),
+            mardora({
+              theme: this.mardoraTheme(),
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
               plugins: getActivePlugins(this.config.plugins),
@@ -295,8 +295,8 @@ export default Vue.extend({
               },
               toc: {
                 enabled: this.mode === "live" && this.config.features.tableOfContents,
-                storageKey: "markora-vue2:toc",
-                onTocChange: (items: MarkoraTocItem[]) => {
+                storageKey: "mardora-vue2:toc",
+                onTocChange: (items: MardoraTocItem[]) => {
                   this.previewToc = items;
                 },
               },
@@ -312,7 +312,7 @@ export default Vue.extend({
                   file: ["*/*"],
                 },
               },
-              onNodesChange: (nodes: MarkoraNode[]) => {
+              onNodesChange: (nodes: MardoraNode[]) => {
                 this.$emit("nodes-change", nodes);
               },
             }),
@@ -327,19 +327,19 @@ export default Vue.extend({
       const syntaxTheme = this.cmTheme();
 
       const htmlOutput = await preview(this.content, {
-        theme: this.markoraTheme(),
+        theme: this.mardoraTheme(),
         plugins,
         markdown: [],
         syntaxTheme,
         sanitize: this.config.preview.sanitize,
         wrapperTag: "div",
-        wrapperClass: "markora-preview vue2-preview",
+        wrapperClass: "mardora-preview vue2-preview",
       });
 
       const cssOutput = generateCSS({
-        theme: this.markoraTheme(),
+        theme: this.mardoraTheme(),
         plugins,
-        wrapperClass: "markora-preview",
+        wrapperClass: "mardora-preview",
         includeBase: this.config.preview.includeBase,
         syntaxTheme,
       });
@@ -387,7 +387,7 @@ export default Vue.extend({
       });
     },
 
-    jumpToc(item: MarkoraTocItem) {
+    jumpToc(item: MardoraTocItem) {
       if (this.mode === "view") {
         const host = this.$refs.previewHost as HTMLElement | undefined;
         const target = host?.querySelector(`#${CSS.escape(item.id)}`) as HTMLElement | null;
@@ -428,7 +428,7 @@ export default Vue.extend({
 });
 ```
 
-## 6. Markora 配置速查
+## 6. Mardora 配置速查
 
 | 配置                       | 默认值           | Vue 2 建议                                                                       |
 | -------------------------- | ---------------- | -------------------------------------------------------------------------------- |
@@ -449,9 +449,9 @@ export default Vue.extend({
 
 ## 7. 附件上传接入
 
-Vue 2 接入时，附件上传要明确区分 Markora 与业务后端职责。
+Vue 2 接入时，附件上传要明确区分 Mardora 与业务后端职责。
 
-| 项目     | Markora 负责                           | 业务负责                          |
+| 项目     | Mardora 负责                           | 业务负责                          |
 | -------- | --------------------------------------- | --------------------------------- |
 | 文件来源 | slash 选择、paste、drop。               | 决定是否开启 paste/drop。         |
 | 类型判断 | 根据 MIME 判断 image/video/audio/file。 | 限制业务允许的 MIME、后缀、大小。 |
@@ -460,7 +460,7 @@ Vue 2 接入时，附件上传要明确区分 Markora 与业务后端职责。
 | 失败结果 | 插入 Upload failed 标记。               | 抛出错误并记录日志。              |
 
 ```ts
-async function productionUploader(file: File, context: MarkoraAttachmentUploadContext) {
+async function productionUploader(file: File, context: MardoraAttachmentUploadContext) {
   if (file.size > 20 * 1024 * 1024) {
     throw new Error("File is larger than 20MB");
   }
@@ -495,13 +495,13 @@ async function productionUploader(file: File, context: MarkoraAttachmentUploadCo
 
 ## 9. 插件体系
 
-Vue 2 不需要特殊插件写法。自定义插件仍然继承 `MarkoraPlugin`：
+Vue 2 不需要特殊插件写法。自定义插件仍然继承 `MardoraPlugin`：
 
 ```ts
-import type { DecorationContext } from "@refinex/markora/editor";
-import { MarkoraPlugin } from "@refinex/markora/editor";
+import type { DecorationContext } from "mardora/editor";
+import { MardoraPlugin } from "mardora/editor";
 
-export class AuditPlugin extends MarkoraPlugin {
+export class AuditPlugin extends MardoraPlugin {
   readonly name = "audit";
   readonly version = "1.0.0";
 
