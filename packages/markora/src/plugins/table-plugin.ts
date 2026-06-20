@@ -2035,35 +2035,40 @@ const theme = createTheme({
 
       "& .cm-markora-table-control": {
         position: "absolute",
-        width: "1.75rem",
-        height: "1.75rem",
+        width: "1.25rem",
+        height: "1.25rem",
         border: "1px solid var(--color-border, #d7dee7)",
-        borderRadius: "999px",
+        borderRadius: "0.375rem",
         backgroundColor: "var(--color-background, #ffffff)",
-        color: "var(--color-text, #0f172a)",
-        boxShadow: "0 10px 24px rgba(15, 23, 42, 0.12)",
+        color: "var(--color-muted-foreground, #64748b)",
+        boxShadow: "0 8px 18px rgba(15, 23, 42, 0.08)",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
+        fontSize: "0.875rem",
+        lineHeight: "1",
         opacity: "0",
         pointerEvents: "auto",
-        transition: "opacity 120ms ease, transform 120ms ease, background-color 120ms ease",
+        transition: "opacity 120ms ease, transform 120ms ease, background-color 120ms ease, border-color 120ms ease, color 120ms ease",
       },
 
-      "& .cm-markora-table-control:hover": {
-        backgroundColor: "rgba(15, 23, 42, 0.05)",
+      "& .cm-markora-table-control:hover, & .cm-markora-table-control:focus-visible": {
+        borderColor: "rgba(37, 99, 235, 0.55)",
+        backgroundColor: "rgba(37, 99, 235, 0.08)",
+        color: "rgba(37, 99, 235, 0.95)",
+        outline: "none",
       },
 
       "& .cm-markora-table-control-column": {
         top: "50%",
-        right: "-0.95rem",
-        transform: "translate(0.35rem, -50%)",
+        right: "-0.625rem",
+        transform: "translate(0.25rem, -50%)",
       },
 
       "& .cm-markora-table-control-row": {
         left: "50%",
-        bottom: "-0.95rem",
-        transform: "translate(-50%, 0.35rem)",
+        bottom: "-0.625rem",
+        transform: "translate(-50%, 0.25rem)",
       },
 
       "&:hover .cm-markora-table-control, &:focus-within .cm-markora-table-control": {
@@ -2092,12 +2097,14 @@ const theme = createTheme({
       "& .cm-markora-table-control": {
         borderColor: "var(--color-border, #30363d)",
         backgroundColor: "var(--color-background, #161b22)",
-        color: "var(--color-text, #e6edf3)",
-        boxShadow: "0 12px 28px rgba(0, 0, 0, 0.35)",
+        color: "var(--color-muted-foreground, #94a3b8)",
+        boxShadow: "0 10px 24px rgba(0, 0, 0, 0.28)",
       },
 
-      "& .cm-markora-table-control:hover": {
-        backgroundColor: "rgba(255, 255, 255, 0.08)",
+      "& .cm-markora-table-control:hover, & .cm-markora-table-control:focus-visible": {
+        borderColor: "rgba(96, 165, 250, 0.68)",
+        backgroundColor: "rgba(96, 165, 250, 0.14)",
+        color: "rgba(147, 197, 253, 0.98)",
       },
     },
   },
