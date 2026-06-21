@@ -239,8 +239,8 @@ const resolveLinkPreview = useCallback(async ({ url, title }: { url: string; tit
 卡片写入 Markdown 时会变成：
 
 ```md
-[Octarine - Take back control of your writing](https://octarine.app/)
-<!--mardora-link-preview:v1 {"kind":"link","url":"https://octarine.app/","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://octarine.app/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
+[Mardora - Take back control of your writing](https://github.com/Refinex-Space/mardora)
+<!--mardora-link-preview:v1 {"kind":"link","url":"https://github.com/Refinex-Space/mardora","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://github.com/Refinex-Space/mardora/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
 ```
 
 这条注释对用户不可见；Live 编辑态和 `preview()` 会把它和上一行链接一起渲染为卡片。若该链接在段落内，链接面板会禁用 `Embed Link`，避免破坏行内排版。

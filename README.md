@@ -185,8 +185,8 @@ Live 编辑态中点击链接会打开链接面板，而不是展开 `[title](ur
 卡片形态仍然保存为可读 Markdown：上一行是普通链接，下一行是 Mardora 专用隐藏元信息注释。其他 Markdown 工具会把它当作普通 HTML 注释，Mardora Live 编辑态和 `preview()` 会把匹配的“独占行链接 + 注释”渲染为卡片。
 
 ```text
-[Octarine - Take back control of your writing](https://octarine.app/)
-<!--mardora-link-preview:v1 {"kind":"link","url":"https://octarine.app/","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://octarine.app/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
+[Mardora - Take back control of your writing](https://github.com/Refinex-Space/mardora)
+<!--mardora-link-preview:v1 {"kind":"link","url":"https://github.com/Refinex-Space/mardora","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://github.com/Refinex-Space/mardora/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
 ```
 
 Mardora core 不直接抓取任意外站。生产环境应通过 `linkPreview.resolve` 调用业务服务端接口解析目标站点元信息，并在服务端限制协议、私网地址、重定向次数、超时、响应体大小和内容类型，优先读取 `og:*`、`twitter:*` 和 `<title>`。

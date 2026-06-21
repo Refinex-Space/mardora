@@ -203,7 +203,7 @@ describe("selection toolbar i18n", () => {
       highlightColors: [],
       link: {
         title: "Octarine",
-        url: "https://octarine.app/",
+        url: "https://github.com/Refinex-Space/mardora",
         canRemove: true,
         canEmbed: false,
         isPreview: false,

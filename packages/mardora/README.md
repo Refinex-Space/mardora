@@ -90,8 +90,8 @@ and, for standalone links only, embed the link as a block card.
 Link cards remain plain Markdown plus a hidden HTML comment:
 
 ```text
-[Octarine - Take back control of your writing](https://octarine.app/)
-<!--mardora-link-preview:v1 {"kind":"link","url":"https://octarine.app/","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://octarine.app/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
+[Mardora - Take back control of your writing](https://github.com/Refinex-Space/mardora)
+<!--mardora-link-preview:v1 {"kind":"link","url":"https://github.com/Refinex-Space/mardora","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://github.com/Refinex-Space/mardora/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
 ```
 
 Mardora renders the matching standalone link and metadata comment as a card in

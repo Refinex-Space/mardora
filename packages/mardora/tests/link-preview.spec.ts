@@ -56,13 +56,15 @@ function linkDecorationSummaries(doc: string): Array<{
 
 const metadata = {
   kind: "link" as const,
-  url: "https://octarine.app/",
+  url: "https://github.com/Refinex-Space/mardora",
   title: "Octarine - Take back control of your writing",
   domain: "octarine.app",
-  image: "https://octarine.app/img/og/base.png",
+  image: "https://github.com/Refinex-Space/mardora/img/og/base.png",
   description:
     "Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer.",
 };
+
+const metadataLink = `[${metadata.title}](${metadata.url})`;
 
 describe("link preview metadata protocol", () => {
   it("serializes and parses the versioned hidden comment", () => {
@@ -73,7 +75,7 @@ describe("link preview metadata protocol", () => {
   });
 
   it("finds a preview comment immediately after a matching standalone link", () => {
-    const link = "[Octarine - Take back control of your writing](https://octarine.app/)";
+    const link = metadataLink;
     const doc = `${link}\n${serializeLinkPreviewComment(metadata)}\n\nnext`;
 
     expect(findLinkPreviewForLink({ doc, linkFrom: 0, linkTo: link.length, url: metadata.url })).toEqual({
@@ -86,14 +88,14 @@ describe("link preview metadata protocol", () => {
   });
 
   it("rejects preview metadata whose URL does not match the link", () => {
-    const link = "[Octarine](https://octarine.app/)";
+    const link = "[Octarine](https://github.com/Refinex-Space/mardora)";
     const doc = `${link}\n${serializeLinkPreviewComment({ ...metadata, url: "https://example.com/" })}`;
 
     expect(findLinkPreviewForLink({ doc, linkFrom: 0, linkTo: link.length, url: metadata.url })).toBeNull();
   });
 
   it("detects standalone links and rejects inline links", () => {
-    const standalone = "[Octarine](https://octarine.app/)";
+    const standalone = "[Octarine](https://github.com/Refinex-Space/mardora)";
     const inline = `Read ${standalone} today`;
 
     expect(isStandaloneLinkRange({ doc: standalone, from: 0, to: standalone.length })).toBe(true);
@@ -101,7 +103,7 @@ describe("link preview metadata protocol", () => {
   });
 
   it("builds embed and remove changes for link preview comments", () => {
-    const link = "[Octarine](https://octarine.app/)";
+    const link = "[Octarine](https://github.com/Refinex-Space/mardora)";
     const comment = serializeLinkPreviewComment(metadata);
     const doc = `${link}\n${comment}\n`;
 
@@ -120,7 +122,7 @@ describe("link preview metadata protocol", () => {
 
 describe("link preview rendering", () => {
   it("replaces the standalone link and hides the metadata comment in live decorations", () => {
-    const link = "[Octarine - Take back control of your writing](https://octarine.app/)";
+    const link = metadataLink;
     const comment = serializeLinkPreviewComment(metadata);
     const summaries = linkDecorationSummaries(`${link}\n${comment}`);
 
@@ -144,15 +146,15 @@ describe("link preview rendering", () => {
   });
 
   it("renders a standalone link and matching hidden metadata as one link preview card", async () => {
-    const link = "[Octarine - Take back control of your writing](https://octarine.app/)";
+    const link = metadataLink;
     const html = await preview(`${link}\n${serializeLinkPreviewComment(metadata)}`, {
       plugins: [new LinkPlugin(), new HTMLPlugin()],
     });
 
-    expect(html).toContain('class="cm-mardora-link-preview-card"');
+    expect(html).toContain('class="cm-mardora-link-preview-card cm-mardora-link-preview-card-with-image"');
     expect(html).toContain("Octarine - Take back control of your writing");
     expect(html).toContain("Private, markdown-based note-taking app");
-    expect(html).toContain("https://octarine.app/");
+    expect(html).toContain("https://github.com/Refinex-Space/mardora");
     expect(html).not.toContain("<!--mardora-link-preview");
   });
 });
