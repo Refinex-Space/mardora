@@ -730,4 +730,23 @@ const theme = createTheme({
       "--mardora-callout-bg": "rgba(207, 34, 46, 0.08)",
     },
   },
+  dark: {
+    ".cm-mardora-callout-type-menu": {
+      border: "1px solid var(--mardora-border-color, #3f3f46)",
+      backgroundColor: "var(--mardora-bg-primary, #18181b)",
+      boxShadow: "0 18px 48px rgba(0, 0, 0, 0.36)",
+    },
+
+    ".cm-mardora-callout-type-menu-item": {
+      color: "var(--mardora-text-primary, #f4f4f5)",
+    },
+
+    ".cm-mardora-callout-type-menu-item:hover": {
+      backgroundColor: "var(--mardora-bg-secondary, #27272a)",
+    },
+
+    ".cm-mardora-callout-type-menu-item-active": {
+      backgroundColor: "var(--mardora-bg-secondary, #27272a)",
+    },
+  },
 });

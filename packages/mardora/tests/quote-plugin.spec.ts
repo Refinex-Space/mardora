@@ -68,6 +68,21 @@ describe("QuotePlugin callout editing", () => {
     expect(styles[".cm-mardora-callout-line"]?.minHeight).toBe("1.6em");
   });
 
+  it("uses dark menu colors for callout type switching in dark theme", () => {
+    const styles = new QuotePlugin().theme(ThemeEnum.DARK);
+
+    expect(styles[".cm-mardora-callout-type-menu"]?.backgroundColor).toBe("var(--mardora-bg-primary, #18181b)");
+    expect(styles[".cm-mardora-callout-type-menu"]?.border).toBe("1px solid var(--mardora-border-color, #3f3f46)");
+    expect(styles[".cm-mardora-callout-type-menu"]?.boxShadow).toBe("0 18px 48px rgba(0, 0, 0, 0.36)");
+    expect(styles[".cm-mardora-callout-type-menu-item"]?.color).toBe("var(--mardora-text-primary, #f4f4f5)");
+    expect(styles[".cm-mardora-callout-type-menu-item:hover"]?.backgroundColor).toBe(
+      "var(--mardora-bg-secondary, #27272a)"
+    );
+    expect(styles[".cm-mardora-callout-type-menu-item-active"]?.backgroundColor).toBe(
+      "var(--mardora-bg-secondary, #27272a)"
+    );
+  });
+
   it("moves title-line clicks to the callout body when the body exists", () => {
     const state = stateFromDoc("> [!WARNING]\n> Body");
 
