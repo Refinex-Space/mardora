@@ -171,6 +171,19 @@ class CalloutTitleWidget extends WidgetType {
   }
 }
 
+class EmptyQuoteContentAnchorWidget extends WidgetType {
+  override eq(other: EmptyQuoteContentAnchorWidget): boolean {
+    return other instanceof EmptyQuoteContentAnchorWidget;
+  }
+
+  toDOM(): HTMLElement {
+    const wrap = document.createElement("span");
+    wrap.className = "cm-mardora-empty-quote-content-anchor";
+    wrap.setAttribute("aria-hidden", "true");
+    return wrap;
+  }
+}
+
 /**
  * Mark decorations for blockquote elements
  */
@@ -205,10 +218,15 @@ function calloutLineDecoration(info: CalloutInfo, first: boolean): Decoration {
   return Decoration.line(spec);
 }
 
-function getQuoteMarkReplacementEnd(lineText: string, nodeTo: number, lineFrom: number): number {
+function getQuoteMarkReplacementEnd(
+  lineText: string,
+  nodeTo: number,
+  lineFrom: number,
+  replaceEmptyLinePrefix: boolean
+): number {
   const restOfLine = lineText.slice(nodeTo - lineFrom);
   if (restOfLine.trim().length === 0) {
-    return nodeTo;
+    return replaceEmptyLinePrefix ? lineFrom + lineText.length : nodeTo;
   }
 
   return Math.min(nodeTo + 1, lineFrom + lineText.length);
@@ -472,7 +490,7 @@ export class QuotePlugin extends DecorationPlugin {
         );
 
         // Find all QuoteMark children (> symbols)
-        this.hideQuoteMarks(from, to, decorations, view);
+        this.hideQuoteMarks(from, to, decorations, view, !!callout);
         if (callout) {
           this.hideCalloutMarker(startLine.from, startLine.to, callout, decorations, view);
         }
@@ -505,7 +523,8 @@ export class QuotePlugin extends DecorationPlugin {
     from: number,
     to: number,
     decorations: import("@codemirror/state").Range<Decoration>[],
-    view: import("@codemirror/view").EditorView
+    view: import("@codemirror/view").EditorView,
+    callout: boolean
   ): void {
     syntaxTree(view.state).iterate({
       from,
@@ -517,8 +536,16 @@ export class QuotePlugin extends DecorationPlugin {
 
         // Clamp to line end so replace decoration never spans a newline.
         const line = view.state.doc.lineAt(node.from);
-        const markEnd = getQuoteMarkReplacementEnd(line.text, node.to, line.from);
+        const markEnd = getQuoteMarkReplacementEnd(line.text, node.to, line.from, !callout);
         decorations.push(quoteMarkDecorations["quote-mark"].range(node.from, markEnd));
+        if (!callout && markEnd === line.to) {
+          decorations.push(
+            Decoration.widget({
+              widget: new EmptyQuoteContentAnchorWidget(),
+              side: 1,
+            }).range(markEnd)
+          );
+        }
       },
     });
   }

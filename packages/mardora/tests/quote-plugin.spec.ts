@@ -29,6 +29,38 @@ function replacementRanges(doc: string, selectionOverlaps = false): Array<[numbe
     .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 }
 
+function widgetSummaries(
+  doc: string,
+  selectionOverlaps = false
+): Array<{ from: number; to: number; isReplace: boolean; widgetName: string }> {
+  const state = stateFromDoc(doc);
+  const decorations: Range<Decoration>[] = [];
+
+  new QuotePlugin().buildDecorations({
+    view: { state } as unknown as EditorView,
+    decorations,
+    selectionOverlapsRange: () => selectionOverlaps,
+    cursorInRange: () => selectionOverlaps,
+  });
+
+  return decorations
+    .filter((decoration) => Boolean((decoration.value as { widget?: unknown }).widget))
+    .map((decoration) => {
+      const value = decoration.value as {
+        isReplace?: boolean;
+        widget?: { constructor?: { name?: string } };
+      };
+
+      return {
+        from: decoration.from,
+        to: decoration.to,
+        isReplace: Boolean(value.isReplace),
+        widgetName: value.widget?.constructor?.name ?? "",
+      };
+    })
+    .sort((a, b) => a.from - b.from || a.to - b.to || Number(b.isReplace) - Number(a.isReplace));
+}
+
 describe("QuotePlugin decorations", () => {
   it("keeps ordinary quote markers hidden while editing inside the quote", () => {
     expect(replacementRanges("> First\n> Second", true)).toEqual([
@@ -50,6 +82,21 @@ describe("QuotePlugin decorations", () => {
       [0, 2],
       [2, 12],
       [13, 14],
+    ]);
+  });
+
+  it("replaces the full empty ordinary quote marker", () => {
+    expect(replacementRanges("> ", true)).toEqual([[0, 2]]);
+  });
+
+  it("adds a writable content anchor after an empty ordinary quote marker", () => {
+    expect(widgetSummaries("> ", true)).toEqual([
+      {
+        from: 2,
+        to: 2,
+        isReplace: false,
+        widgetName: "EmptyQuoteContentAnchorWidget",
+      },
     ]);
   });
 });

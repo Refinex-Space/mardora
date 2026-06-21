@@ -6,6 +6,27 @@ import { createMardoraBaseTheme, MardoraContentWidth } from "./theme";
 import { DecorationContext, MardoraPlugin } from "./plugin";
 import { MardoraNode } from "./mardora";
 
+export type MardoraDecorationUpdateSignal = {
+  docChanged: boolean;
+  selectionSet: boolean;
+  viewportChanged: boolean;
+  pendingCompositionDecorationRebuild?: boolean;
+  view: {
+    composing: boolean;
+    compositionStarted: boolean;
+  };
+};
+
+export function shouldRebuildMardoraDecorations(update: MardoraDecorationUpdateSignal): boolean {
+  const hasDecorationTrigger =
+    update.docChanged || update.selectionSet || update.viewportChanged || !!update.pendingCompositionDecorationRebuild;
+  if (!hasDecorationTrigger) {
+    return false;
+  }
+
+  return !update.view.composing && !update.view.compositionStarted;
+}
+
 /**
  * Facet to register plugins with the view plugin
  */
@@ -80,6 +101,7 @@ class mardoraViewPluginClass {
   decorations: DecorationSet;
   private plugins: MardoraPlugin[];
   private onNodesChange: ((nodes: MardoraNode[]) => void) | undefined;
+  private pendingCompositionDecorationRebuild = false;
 
   constructor(view: EditorView) {
     this.plugins = view.state.facet(MardoraPluginsFacet);
@@ -107,17 +129,27 @@ class mardoraViewPluginClass {
       plugin.onViewUpdate(update);
     }
 
-    // Rebuild decorations when:
-    // - Document changes
-    // - Selection changes (to show/hide syntax markers)
-    // - Viewport changes
-    if (update.docChanged || update.selectionSet || update.viewportChanged) {
+    if (
+      shouldRebuildMardoraDecorations({
+        docChanged: update.docChanged,
+        selectionSet: update.selectionSet,
+        viewportChanged: update.viewportChanged,
+        view: update.view,
+        pendingCompositionDecorationRebuild: this.pendingCompositionDecorationRebuild,
+      })
+    ) {
       this.decorations = buildDecorations(update.view, this.plugins);
+      this.pendingCompositionDecorationRebuild = false;
 
       // Call onNodesChange callback
       if (this.onNodesChange) {
         this.onNodesChange(this.buildNodes(update.view));
       }
+    } else if (update.docChanged && (update.view.composing || update.view.compositionStarted)) {
+      this.decorations = this.decorations.map(update.changes);
+      this.pendingCompositionDecorationRebuild = true;
+    } else if ((update.selectionSet || update.viewportChanged) && (update.view.composing || update.view.compositionStarted)) {
+      this.pendingCompositionDecorationRebuild = true;
     }
   }
 
