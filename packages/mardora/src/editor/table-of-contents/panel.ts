@@ -18,16 +18,6 @@ function appendIcon(parent: HTMLElement, name: string): void {
   if (icon) parent.appendChild(icon);
 }
 
-function createExpandedToggle(callbacks: TocPanelCallbacks): HTMLButtonElement {
-  const toggle = document.createElement("button");
-  toggle.type = "button";
-  toggle.className = "cm-mardora-toc-toggle";
-  toggle.setAttribute("aria-label", "Toggle table of contents");
-  toggle.textContent = "‹";
-  toggle.addEventListener("click", callbacks.onToggle);
-  return toggle;
-}
-
 function createCollapsed(callbacks: TocPanelCallbacks): HTMLElement {
   const button = document.createElement("button");
   button.type = "button";
@@ -65,8 +55,6 @@ export function createTocPanelElement(state: TocPanelRenderState, callbacks: Toc
     root.appendChild(createCollapsed(callbacks));
     return root;
   }
-
-  root.appendChild(createExpandedToggle(callbacks));
 
   const list = document.createElement("nav");
   list.className = "cm-mardora-toc-list";

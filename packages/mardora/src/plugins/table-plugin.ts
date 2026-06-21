@@ -503,6 +503,78 @@ function getVisibleBounds(rawCellText: string): { startOffset: number; endOffset
   };
 }
 
+function readBacktickRun(text: string, index: number): number {
+  if (text[index] !== "`" || isEscaped(text, index)) {
+    return 0;
+  }
+
+  let length = 1;
+  while (text[index + length] === "`") {
+    length++;
+  }
+  return length;
+}
+
+function findClosingBacktickRun(text: string, from: number, runLength: number, end: number): number {
+  for (let index = from; index <= end - runLength; index++) {
+    if (isEscaped(text, index)) {
+      continue;
+    }
+
+    let matches = true;
+    for (let offset = 0; offset < runLength; offset++) {
+      if (text[index + offset] !== "`") {
+        matches = false;
+        break;
+      }
+    }
+
+    if (matches && text[index - 1] !== "`" && text[index + runLength] !== "`") {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+export function __mapTableCellTextOffsetToMarkdownOffset(rawCellText: string, textOffset: number): number {
+  const visible = getVisibleBounds(rawCellText);
+  const targetOffset = Math.max(0, textOffset);
+  let visibleOffset = 0;
+  let index = visible.startOffset;
+  const hiddenClosingRuns = new Set<number>();
+
+  while (index < visible.endOffset) {
+    if (hiddenClosingRuns.has(index)) {
+      if (visibleOffset >= targetOffset) {
+        return index;
+      }
+      const closeRunLength = readBacktickRun(rawCellText, index);
+      index += Math.max(closeRunLength, 1);
+      continue;
+    }
+
+    const openRunLength = readBacktickRun(rawCellText, index);
+    if (openRunLength > 0) {
+      const closeFrom = findClosingBacktickRun(rawCellText, index + openRunLength, openRunLength, visible.endOffset);
+      if (closeFrom !== -1) {
+        hiddenClosingRuns.add(closeFrom);
+        index += openRunLength;
+        continue;
+      }
+    }
+
+    if (visibleOffset >= targetOffset) {
+      return index;
+    }
+
+    visibleOffset++;
+    index++;
+  }
+
+  return visible.endOffset;
+}
+
 /** Returns whether every cell in a body row is empty. */
 function isBodyRowEmpty(row: TableCellInfo[]): boolean {
   return row.every((cell) => normalizeCellContent(cell.rawText) === "");
@@ -824,7 +896,10 @@ function getTableCellPositionFromPoint(view: EditorView, cellElement: Element, x
 
   const coordinatePosition = view.posAtCoords({ x, y }, false);
   const textOffset = getCellTextOffsetFromPoint(cellElement, x, y);
-  const fallbackPosition = textOffset === null ? contentFrom : contentFrom + textOffset;
+  const rawContent = view.state.sliceDoc(contentFrom, contentTo);
+  const mappedOffset =
+    textOffset === null ? 0 : __mapTableCellTextOffsetToMarkdownOffset(rawContent, textOffset);
+  const fallbackPosition = contentFrom + mappedOffset;
   const position =
     textOffset !== null
       ? fallbackPosition

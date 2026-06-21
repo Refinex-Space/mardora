@@ -131,6 +131,7 @@ describe("createTocPanelElement", () => {
 
     expect(panel.className).toContain("cm-mardora-toc");
     expect(panel.getAttribute("data-mardora-toc-expanded")).toBe("true");
+    expect(panel.querySelector(".cm-mardora-toc-toggle")).toBeNull();
     expect(panel.querySelectorAll(".cm-mardora-toc-item").length).toBe(2);
     expect(panel.querySelector(".cm-mardora-toc-item-active")?.textContent).toContain("Intro");
     expect(panel.querySelector('[data-mardora-toc-level="3"]')?.textContent).toContain("Details");

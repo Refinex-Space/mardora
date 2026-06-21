@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { TablePlugin } from "../src/plugins/table-plugin";
+import { TablePlugin, __mapTableCellTextOffsetToMarkdownOffset } from "../src/plugins/table-plugin";
 import { generateCSS } from "../src/preview";
 
 describe("table plugin styles", () => {
@@ -18,5 +18,17 @@ describe("table plugin styles", () => {
     expect(rowRule).toContain("bottom: -0.625rem;");
     expect(controlRule).not.toContain("border-radius: 999px;");
     expect(controlHoverRule).not.toContain("background-color: rgba(15, 23, 42, 0.05);");
+  });
+});
+
+describe("table cell pointer mapping", () => {
+  it("maps visible offsets past hidden inline-code backticks back to markdown offsets", () => {
+    const rawCellText = "基于 `@codemirror/lang-markdown` 与 Lezer Markdown，支持插件追加 `MarkdownConfig`。";
+    const visibleText = rawCellText.replace(/`/g, "");
+    const visibleOffset = visibleText.indexOf("MarkdownConfig");
+
+    expect(__mapTableCellTextOffsetToMarkdownOffset(rawCellText, visibleOffset)).toBe(
+      rawCellText.indexOf("MarkdownConfig")
+    );
   });
 });
