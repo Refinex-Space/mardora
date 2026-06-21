@@ -21,15 +21,29 @@ function stateFromDoc(doc: string): EditorState {
   });
 }
 
-function replacementRanges(doc: string, selectionOverlaps = false): Array<[number, number]> {
-  const state = stateFromDoc(doc);
+function replacementRanges(
+  doc: string,
+  options:
+    | boolean
+    | { selectionOverlaps?: boolean; cursorInRange?: boolean; selection?: { anchor: number; head?: number } } = false
+): Array<[number, number]> {
+  const state =
+    typeof options === "boolean" || !options.selection
+      ? stateFromDoc(doc)
+      : EditorState.create({
+          doc,
+          selection: options.selection,
+          extensions: [markdown({ base: markdownLanguage })],
+        });
   const decorations: Range<Decoration>[] = [];
+  const selectionOverlaps = typeof options === "boolean" ? options : !!options.selectionOverlaps;
+  const cursorInRange = typeof options === "boolean" ? options : !!options.cursorInRange;
 
   new CodePlugin().buildDecorations({
     view: { state } as unknown as EditorView,
     decorations,
     selectionOverlapsRange: () => selectionOverlaps,
-    cursorInRange: () => selectionOverlaps,
+    cursorInRange: () => cursorInRange,
   });
 
   return decorations
@@ -62,6 +76,32 @@ describe("code plugin", () => {
       [0, 3],
       [3, 6],
       [27, 30],
+    ]);
+  });
+
+  it("hides inline code backticks while the inline code text is selected", () => {
+    expect(
+      replacementRanges("text `1.0.0` ok", {
+        selectionOverlaps: true,
+        cursorInRange: false,
+        selection: { anchor: 6, head: 11 },
+      })
+    ).toEqual([
+      [5, 6],
+      [11, 12],
+    ]);
+  });
+
+  it("hides inline code backticks when an empty cursor is inside the inline code", () => {
+    expect(
+      replacementRanges("text `1.0.0` ok", {
+        selectionOverlaps: true,
+        cursorInRange: true,
+        selection: { anchor: 8 },
+      })
+    ).toEqual([
+      [5, 6],
+      [11, 12],
     ]);
   });
 

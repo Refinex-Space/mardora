@@ -1026,10 +1026,6 @@ export class CodePlugin extends DecorationPlugin {
     const { from, to } = node;
     ctx.decorations.push(codeMarkDecorations["inline-code"].range(from, to));
 
-    if (ctx.selectionOverlapsRange(from, to)) {
-      return;
-    }
-
     for (let child = node.node.firstChild; child; child = child.nextSibling) {
       if (child.name === "CodeMark") {
         ctx.decorations.push(codeMarkDecorations["inline-mark"].range(child.from, child.to));
