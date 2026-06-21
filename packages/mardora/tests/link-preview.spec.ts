@@ -3,7 +3,7 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorState, type Range } from "@codemirror/state";
 import { Decoration, type EditorView } from "@codemirror/view";
 import { preview } from "../src/preview";
-import { LinkPlugin, HTMLPlugin } from "../src/plugins";
+import { bindLinkPreviewCardButtons, LinkPlugin, HTMLPlugin } from "../src/plugins";
 import {
   buildEmbedLinkPreviewChange,
   buildRemoveLinkPreviewChange,
@@ -13,7 +13,14 @@ import {
   serializeLinkPreviewComment,
 } from "../src/editor/link-preview";
 
-function linkDecorationSummaries(doc: string): Array<{ from: number; to: number; isReplace: boolean; widgetName: string; className?: string }> {
+function linkDecorationSummaries(doc: string): Array<{
+  from: number;
+  to: number;
+  isReplace: boolean;
+  isBlock: boolean;
+  widgetName: string;
+  className?: string;
+}> {
   const state = EditorState.create({
     doc,
     extensions: [markdown({ base: markdownLanguage })],
@@ -31,6 +38,7 @@ function linkDecorationSummaries(doc: string): Array<{ from: number; to: number;
     .map((decoration) => {
       const value = decoration.value as {
         isReplace?: boolean;
+        block?: boolean;
         widget?: { constructor?: { name?: string } };
         spec?: { class?: string };
       };
@@ -38,6 +46,7 @@ function linkDecorationSummaries(doc: string): Array<{ from: number; to: number;
         from: decoration.from,
         to: decoration.to,
         isReplace: Boolean(value.isReplace),
+        isBlock: Boolean(value.block),
         widgetName: value.widget?.constructor?.name ?? "",
         className: value.spec?.class,
       };
@@ -47,13 +56,15 @@ function linkDecorationSummaries(doc: string): Array<{ from: number; to: number;
 
 const metadata = {
   kind: "link" as const,
-  url: "https://octarine.app/",
+  url: "https://github.com/Refinex-Space/mardora",
   title: "Octarine - Take back control of your writing",
   domain: "octarine.app",
-  image: "https://octarine.app/img/og/base.png",
+  image: "https://github.com/Refinex-Space/mardora/img/og/base.png",
   description:
     "Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer.",
 };
+
+const metadataLink = `[${metadata.title}](${metadata.url})`;
 
 describe("link preview metadata protocol", () => {
   it("serializes and parses the versioned hidden comment", () => {
@@ -64,7 +75,7 @@ describe("link preview metadata protocol", () => {
   });
 
   it("finds a preview comment immediately after a matching standalone link", () => {
-    const link = "[Octarine - Take back control of your writing](https://octarine.app/)";
+    const link = metadataLink;
     const doc = `${link}\n${serializeLinkPreviewComment(metadata)}\n\nnext`;
 
     expect(findLinkPreviewForLink({ doc, linkFrom: 0, linkTo: link.length, url: metadata.url })).toEqual({
@@ -77,14 +88,14 @@ describe("link preview metadata protocol", () => {
   });
 
   it("rejects preview metadata whose URL does not match the link", () => {
-    const link = "[Octarine](https://octarine.app/)";
+    const link = "[Octarine](https://github.com/Refinex-Space/mardora)";
     const doc = `${link}\n${serializeLinkPreviewComment({ ...metadata, url: "https://example.com/" })}`;
 
     expect(findLinkPreviewForLink({ doc, linkFrom: 0, linkTo: link.length, url: metadata.url })).toBeNull();
   });
 
   it("detects standalone links and rejects inline links", () => {
-    const standalone = "[Octarine](https://octarine.app/)";
+    const standalone = "[Octarine](https://github.com/Refinex-Space/mardora)";
     const inline = `Read ${standalone} today`;
 
     expect(isStandaloneLinkRange({ doc: standalone, from: 0, to: standalone.length })).toBe(true);
@@ -92,7 +103,7 @@ describe("link preview metadata protocol", () => {
   });
 
   it("builds embed and remove changes for link preview comments", () => {
-    const link = "[Octarine](https://octarine.app/)";
+    const link = "[Octarine](https://github.com/Refinex-Space/mardora)";
     const comment = serializeLinkPreviewComment(metadata);
     const doc = `${link}\n${comment}\n`;
 
@@ -111,7 +122,7 @@ describe("link preview metadata protocol", () => {
 
 describe("link preview rendering", () => {
   it("replaces the standalone link and hides the metadata comment in live decorations", () => {
-    const link = "[Octarine - Take back control of your writing](https://octarine.app/)";
+    const link = metadataLink;
     const comment = serializeLinkPreviewComment(metadata);
     const summaries = linkDecorationSummaries(`${link}\n${comment}`);
 
@@ -119,6 +130,7 @@ describe("link preview rendering", () => {
       from: 0,
       to: link.length,
       isReplace: true,
+      isBlock: false,
       widgetName: "LinkPreviewCardWidget",
       className: undefined,
     });
@@ -126,6 +138,7 @@ describe("link preview rendering", () => {
       from: link.length + 1,
       to: link.length + 1 + comment.length,
       isReplace: true,
+      isBlock: false,
       widgetName: "",
       className: undefined,
     });
@@ -133,15 +146,70 @@ describe("link preview rendering", () => {
   });
 
   it("renders a standalone link and matching hidden metadata as one link preview card", async () => {
-    const link = "[Octarine - Take back control of your writing](https://octarine.app/)";
+    const link = metadataLink;
     const html = await preview(`${link}\n${serializeLinkPreviewComment(metadata)}`, {
       plugins: [new LinkPlugin(), new HTMLPlugin()],
     });
 
-    expect(html).toContain('class="cm-mardora-link-preview-card"');
+    expect(html).toContain("cm-mardora-link-preview-card");
+    expect(html).toContain("cm-mardora-link-preview-card-static");
+    expect(html).toContain("cm-mardora-link-preview-card-with-image");
+    expect(html).toContain("cm-mardora-link-preview-copy-button");
+    expect(html).toContain("cm-mardora-link-preview-open-button");
+    expect(html).toContain("cm-mardora-link-preview-card-open-area");
     expect(html).toContain("Octarine - Take back control of your writing");
     expect(html).toContain("Private, markdown-based note-taking app");
-    expect(html).toContain("https://octarine.app/");
+    expect(html).toContain("https://github.com/Refinex-Space/mardora");
     expect(html).not.toContain("<!--mardora-link-preview");
+  });
+
+  it("binds static link preview copy buttons", async () => {
+    let copied = "";
+    const button = {
+      dataset: { url: "https://github.com/Refinex-Space/mardora" },
+      title: "复制链接",
+      classList: {
+        add() {},
+        remove() {},
+      },
+      ownerDocument: {
+        defaultView: {
+          navigator: {
+            clipboard: {
+              async writeText(text: string) {
+                copied = text;
+              },
+            },
+          },
+        },
+      },
+      closest(selector: string) {
+        return selector.includes("cm-mardora-link-preview-copy-button") ? this : null;
+      },
+    };
+    const root = {
+      listeners: new Map<string, (event: Event) => void>(),
+      addEventListener(type: string, listener: (event: Event) => void) {
+        this.listeners.set(type, listener);
+      },
+      removeEventListener(type: string) {
+        this.listeners.delete(type);
+      },
+      contains: () => true,
+    };
+    const cleanup = bindLinkPreviewCardButtons(root as unknown as HTMLElement);
+    const event = {
+      type: "click",
+      target: button,
+      preventDefault() {},
+      stopPropagation() {},
+    } as unknown as Event;
+
+    root.listeners.get("click")?.(event);
+    await Promise.resolve();
+
+    expect(copied).toBe("https://github.com/Refinex-Space/mardora");
+    cleanup();
+    expect(root.listeners.has("click")).toBe(false);
   });
 });

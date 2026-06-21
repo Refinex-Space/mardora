@@ -112,6 +112,7 @@ declare module "mardora/plugins" {
   }>;
   export function bindCodeCopyButtons(root: HTMLElement | Document): () => void;
   export function bindImagePreviewButtons(root: HTMLElement | Document): () => void;
+  export function bindLinkPreviewCardButtons(root: HTMLElement | Document): () => void;
 }
 
 declare module "mardora/preview" {

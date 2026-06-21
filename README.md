@@ -107,6 +107,11 @@ const extensions = mardora({
   locale: "zh-CN",
   plugins: allPlugins,
   baseStyles: true,
+  fonts: {
+    document: '"Songti SC", serif',
+    code: '"JetBrains Mono", ui-monospace, monospace',
+    ui: '"SF Pro Text", system-ui, sans-serif',
+  },
   disableViewPlugin: false,
   defaultKeybindings: true,
   history: true,
@@ -185,8 +190,8 @@ Live 编辑态中点击链接会打开链接面板，而不是展开 `[title](ur
 卡片形态仍然保存为可读 Markdown：上一行是普通链接，下一行是 Mardora 专用隐藏元信息注释。其他 Markdown 工具会把它当作普通 HTML 注释，Mardora Live 编辑态和 `preview()` 会把匹配的“独占行链接 + 注释”渲染为卡片。
 
 ```text
-[Octarine - Take back control of your writing](https://octarine.app/)
-<!--mardora-link-preview:v1 {"kind":"link","url":"https://octarine.app/","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://octarine.app/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
+[Mardora - Take back control of your writing](https://github.com/Refinex-Space/mardora)
+<!--mardora-link-preview:v1 {"kind":"link","url":"https://github.com/Refinex-Space/mardora","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://github.com/Refinex-Space/mardora/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
 ```
 
 Mardora core 不直接抓取任意外站。生产环境应通过 `linkPreview.resolve` 调用业务服务端接口解析目标站点元信息，并在服务端限制协议、私网地址、重定向次数、超时、响应体大小和内容类型，优先读取 `og:*`、`twitter:*` 和 `<title>`。
@@ -211,12 +216,19 @@ const html = await preview(markdown, {
 const css = generateCSS({
   theme: ThemeEnum.LIGHT,
   plugins: allPlugins,
+  fonts: {
+    document: '"Songti SC", serif',
+    code: '"JetBrains Mono", ui-monospace, monospace',
+    ui: '"SF Pro Text", system-ui, sans-serif',
+  },
   includeBase: true,
   wrapperClass: "mardora-preview",
 });
 ```
 
-生产环境必须让 `preview()` 和 `generateCSS()` 使用同一组 `plugins`、`theme`、`wrapperClass` 和语法高亮主题，否则 HTML 与 CSS 可能不匹配。
+`fonts` 接收合法 CSS `font-family` 值，分别控制文章正文/标题、代码块/行内代码、Mardora 自有 UI 控件。未配置时 Mardora 使用内置系统 sans 与等宽字体栈。
+
+生产环境必须让 `preview()` 和 `generateCSS()` 使用同一组 `plugins`、`theme`、`wrapperClass`、`fonts` 和语法高亮主题，否则 HTML 与 CSS 可能不匹配。
 
 ## 接入指南
 

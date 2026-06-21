@@ -9,6 +9,7 @@ import { indentOnInput } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import { ThemeEnum } from "./utils";
 import { markdownResetExtension, MardoraContentWidth } from "./theme";
+import type { MardoraFontConfig } from "./theme";
 import type { MardoraSlashCommandsConfig } from "./slash";
 import { slashCommands } from "./slash";
 import type { MardoraAttachmentsConfig } from "./attachments";
@@ -54,6 +55,9 @@ export interface MardoraConfig {
 
   /** Content width for live editing. Defaults to the readable 48rem column. */
   contentWidth?: MardoraContentWidth;
+
+  /** Font families used by document text, code text, and Mardora-owned UI controls. */
+  fonts?: MardoraFontConfig;
 
   /** Plugins to load */
   plugins?: MardoraPlugin[];
@@ -135,6 +139,7 @@ export function mardora(config: MardoraConfig = {}): Extension[] {
     theme: configTheme = ThemeEnum.AUTO,
     baseStyles = true,
     contentWidth: configContentWidth = "default",
+    fonts: configFonts = {},
     plugins = [],
     extensions = [],
     keymap: configKeymap = [],
@@ -223,7 +228,7 @@ export function mardora(config: MardoraConfig = {}): Extension[] {
   const mardoraExtensions: Extension[] = [];
   if (!disableViewPlugin) {
     mardoraExtensions.push(
-      createMardoraViewExtension(configTheme, baseStyles, allPlugins, configOnNodesChange, configContentWidth)
+      createMardoraViewExtension(configTheme, baseStyles, allPlugins, configOnNodesChange, configContentWidth, configFonts)
     );
     mardoraExtensions.push(Prec.highest(markdownResetExtension));
   }

@@ -655,7 +655,7 @@ const imageTheme = createTheme({
     // Image markers (! [ ] ( ))
     ".cm-mardora-image-marker": {
       color: "#6a737d",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     // Alt text

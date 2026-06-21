@@ -5,7 +5,7 @@ export const codePluginTheme = createTheme({
   default: {
     // Inline code
     ".cm-mardora-code-inline": {
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
       fontSize: "0.9em",
       backgroundColor: "rgba(0, 0, 0, 0.05)",
       padding: "0.1rem 0.25rem",
@@ -17,7 +17,7 @@ export const codePluginTheme = createTheme({
     ".cm-mardora-code-block-line": {
       "--radius": "0.375rem",
 
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
       fontSize: "0.9rem",
       backgroundColor: "transparent",
       padding: "0 1rem !important",
@@ -65,7 +65,7 @@ export const codePluginTheme = createTheme({
       pointerEvents: "none",
       transition: "opacity 0.12s ease",
       color: "var(--color-text, inherit)",
-      fontFamily: "var(--font-sans, system-ui, sans-serif)",
+      fontFamily: "var(--mardora-font-ui)",
       fontSize: "0.78rem",
       lineHeight: "1",
 
@@ -245,7 +245,7 @@ export const codePluginTheme = createTheme({
     // Fence markers (```)
     ".cm-mardora-code-fence": {
       color: "#6a737d",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     // Line numbers
@@ -262,7 +262,7 @@ export const codePluginTheme = createTheme({
         textAlign: "right",
         color: "#6a737d",
         opacity: "0.6",
-        fontFamily: "var(--font-jetbrains-mono, monospace)",
+        fontFamily: "var(--mardora-font-code)",
         fontSize: "0.85rem",
         userSelect: "none",
       },
@@ -281,7 +281,7 @@ export const codePluginTheme = createTheme({
         textAlign: "right",
         color: "#6a737d",
         opacity: "0.6",
-        fontFamily: "var(--font-jetbrains-mono, monospace)",
+        fontFamily: "var(--mardora-font-code)",
         fontSize: "0.85rem",
         userSelect: "none",
       },
@@ -295,7 +295,7 @@ export const codePluginTheme = createTheme({
         textAlign: "right",
         color: "#6a737d",
         opacity: "0.6",
-        fontFamily: "var(--font-jetbrains-mono, monospace)",
+        fontFamily: "var(--mardora-font-code)",
         fontSize: "0.85rem",
         userSelect: "none",
       },
@@ -310,7 +310,7 @@ export const codePluginTheme = createTheme({
           top: "0.1rem",
           width: "1ch",
           textAlign: "right",
-          fontFamily: "var(--font-jetbrains-mono, monospace)",
+          fontFamily: "var(--mardora-font-code)",
           fontSize: "0.85rem",
           fontWeight: "700",
           userSelect: "none",
@@ -409,7 +409,7 @@ export const codePluginTheme = createTheme({
 
     // Preview: standalone code block (not in container)
     ".cm-mardora-code-block": {
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
       fontSize: "0.9rem",
       backgroundColor: "transparent",
       padding: "1rem",

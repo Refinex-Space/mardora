@@ -1,5 +1,6 @@
 import { SyntaxNode } from "@lezer/common";
 import { ThemeEnum } from "../editor/utils";
+import type { MardoraFontConfig } from "../editor/theme";
 
 export type SyntaxThemeInput =
   | import("@codemirror/language").HighlightStyle
@@ -64,6 +65,9 @@ export interface PreviewConfig {
 export interface GenerateCSSConfig {
   /** Plugins to extract styles from */
   plugins?: import("../editor/plugin").MardoraPlugin[];
+
+  /** Font families used by document text, code text, and Mardora-owned UI controls. */
+  fonts?: MardoraFontConfig;
 
   /** Theme to use */
   theme?: ThemeEnum;

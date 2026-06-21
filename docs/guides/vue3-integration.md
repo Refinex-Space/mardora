@@ -127,6 +127,11 @@ let internalUpdate = false;
 
 const config = reactive({
   locale: "zh-CN" as "zh-CN" | "en-US",
+  fonts: {
+    document: '"Songti SC", serif',
+    code: '"JetBrains Mono", ui-monospace, monospace',
+    ui: "system-ui, sans-serif",
+  },
   editor: {
     baseStyles: true,
     defaultKeybindings: true,
@@ -196,6 +201,7 @@ function createEditorView() {
           locale: config.locale,
           baseStyles: config.editor.baseStyles,
           contentWidth: config.preview.contentWidth === "wide" ? "full" : "default",
+          fonts: config.fonts,
           plugins: activePlugins.value,
           disableViewPlugin: mode.value === "code",
           defaultKeybindings: config.editor.defaultKeybindings,
@@ -264,6 +270,7 @@ async function renderPreview() {
     plugins: activePlugins.value,
     wrapperClass: "mardora-preview",
     includeBase: config.preview.includeBase,
+    fonts: config.fonts,
     syntaxTheme,
   });
 
@@ -386,6 +393,7 @@ onBeforeUnmount(() => {
 | `theme`                    | `ThemeEnum.AUTO` | 和应用主题 ref 同步。                                     |
 | `locale`                   | `"zh-CN"`        | 由产品语言决定。                                          |
 | `baseStyles`               | `true`           | 初次接入保持开启。                                        |
+| `fonts`                    | 内置字体栈       | 用同一组 CSS `font-family` 值同步编辑态和预览态。         |
 | `plugins`                  | `[]`             | 传 `activePlugins.value`。                                |
 | `disableViewPlugin`        | `false`          | 源码模式设为 `true`。                                     |
 | `defaultKeybindings`       | `true`           | 保持开启。                                                |
@@ -497,7 +505,7 @@ Vue 3 中自定义插件不需要 Composition API 包装。插件仍然是 Mardo
 
 - `mode` 切换不会留下旧 EditorView。
 - 输入正文不会触发频繁重建。
-- `preview()` 和 `generateCSS()` 使用同一组插件和主题。
+- `preview()` 和 `generateCSS()` 使用同一组插件、主题和字体。
 - 附件上传在 slash、paste、drop 三种来源都按预期工作。
 - 上传失败能被用户看见。
 - TOC 在编辑态和预览态都能跳转。

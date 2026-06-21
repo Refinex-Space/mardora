@@ -6,8 +6,6 @@ import {
   FileTextIcon,
   GalleryHorizontalEnd,
   Loader2,
-  PanelLeftClose,
-  PanelRightClose,
   ScanTextIcon,
 } from "lucide-react";
 import React, { Dispatch, SetStateAction } from "react";
@@ -43,8 +41,6 @@ const modes: { value: ModeValue; key: keyof typeof modeKeys; icon: typeof FilePe
 ];
 
 type Props = {
-  sidebarOpen: boolean;
-  setSidebarOpen: Dispatch<SetStateAction<boolean>>;
   devbarOpen: boolean;
   setDevbarOpen: Dispatch<SetStateAction<boolean>>;
   saveStatus: SaveStatus;
@@ -53,8 +49,6 @@ type Props = {
 };
 
 export default function Header({
-  sidebarOpen,
-  setSidebarOpen,
   devbarOpen,
   setDevbarOpen,
   saveStatus,
@@ -69,15 +63,6 @@ export default function Header({
   return (
     <header className="h-12 w-full flex items-center justify-between py-1 px-4 overflow-y-auto">
       <div className="flex items-center gap-3">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8" onClick={() => setSidebarOpen(!sidebarOpen)}>
-              <PanelLeftClose className="size-5" />
-              <span className="sr-only">{t("header.toggleSidebar")}</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">{t("header.toggleSidebar")}</TooltipContent>
-        </Tooltip>
         {/* Theme-aware inline logo */}
         <span className="size-7 inline-block" dangerouslySetInnerHTML={{ __html: logo }} aria-hidden="true" />
         <span className="text-xl font-mono">Mardora</span>
@@ -126,7 +111,7 @@ export default function Header({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="size-8" onClick={() => setDevbarOpen(!devbarOpen)}>
-              <PanelRightClose className="size-5" />
+              <PanelRightIcon className="size-6" />
               <span className="sr-only">{devbarOpen ? t("header.hideDevbar") : t("header.showDevbar")}</span>
             </Button>
           </TooltipTrigger>
@@ -134,5 +119,37 @@ export default function Header({
         </Tooltip>
       </div>
     </header>
+  );
+}
+
+function PanelRightIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 68 50"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect
+        x="24"
+        y="11"
+        width="28"
+        height="26"
+        rx="5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M45 18V30"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

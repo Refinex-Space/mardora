@@ -110,6 +110,7 @@ declare module "mardora/plugins" {
     readonly version: string;
   }>;
   export function bindCodeCopyButtons(root: HTMLElement | Document): () => void;
+  export function bindLinkPreviewCardButtons(root: HTMLElement | Document): () => void;
 }
 
 declare module "mardora/preview" {

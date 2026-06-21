@@ -25,6 +25,10 @@ const linkLineDecorations = {
   "hidden-line": Decoration.line({ class: "cm-mardora-link-preview-hidden-line" }),
 };
 
+const LINK_PREVIEW_COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>`;
+const LINK_PREVIEW_OPEN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>`;
+const LINK_PREVIEW_COPY_RESET_DELAY = 1200;
+
 /**
  * Parse link markdown to extract text and URL
  * Format: [text](url) or [text](url "title")
@@ -398,7 +402,8 @@ function renderLinkPreviewCardHTML(
   const description = metadata.description ? ctx.sanitize(metadata.description) : "";
   const image = metadata.image ? ctx.sanitize(metadata.image) : "";
 
-  let html = `<a class="cm-mardora-link-preview-card" href="${url}" target="_blank" rel="noopener noreferrer">`;
+  const imageClass = image ? "cm-mardora-link-preview-card-with-image" : "cm-mardora-link-preview-card-without-image";
+  let html = `<span class="cm-mardora-link-preview-card cm-mardora-link-preview-card-static ${imageClass}">`;
   html += `<span class="cm-mardora-link-preview-content">`;
   html += `<span class="cm-mardora-link-preview-title">${title}</span>`;
   if (description) html += `<span class="cm-mardora-link-preview-description">${description}</span>`;
@@ -408,8 +413,81 @@ function renderLinkPreviewCardHTML(
   if (image) {
     html += `<span class="cm-mardora-link-preview-image-wrap"><img class="cm-mardora-link-preview-image" src="${image}" alt="" loading="lazy" decoding="async" /></span>`;
   }
-  html += `</a>`;
+  html += `<a class="cm-mardora-link-preview-card-open-area" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="打开链接"></a>`;
+  html += `<span class="cm-mardora-link-preview-toolbar cm-mardora-link-preview-toolbar-static">`;
+  html += `<button class="cm-mardora-link-preview-tool-button cm-mardora-link-preview-copy-button" type="button" aria-label="复制链接" title="复制链接" data-url="${url}">${LINK_PREVIEW_COPY_ICON}</button>`;
+  html += `<a class="cm-mardora-link-preview-tool-button cm-mardora-link-preview-open-button" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="打开链接" title="打开链接">${LINK_PREVIEW_OPEN_ICON}</a>`;
+  html += `</span>`;
+  html += `</span>`;
   return html;
+}
+
+function getClipboardApi(documentRef: Document): Clipboard | undefined {
+  return documentRef.defaultView?.navigator.clipboard ?? (typeof navigator !== "undefined" ? navigator.clipboard : undefined);
+}
+
+function copyTextWithTextAreaFallback(text: string, documentRef: Document): boolean {
+  const textArea = documentRef.createElement("textarea");
+  textArea.value = text;
+  textArea.setAttribute("readonly", "true");
+  textArea.style.position = "fixed";
+  textArea.style.left = "-9999px";
+  textArea.style.top = "0";
+  documentRef.body.appendChild(textArea);
+  textArea.select();
+  textArea.setSelectionRange(0, text.length);
+
+  try {
+    return documentRef.execCommand("copy");
+  } finally {
+    textArea.remove();
+  }
+}
+
+async function copyLinkPreviewUrlToClipboard(url: string, documentRef: Document): Promise<void> {
+  const clipboard = getClipboardApi(documentRef);
+  if (clipboard?.writeText) {
+    try {
+      await clipboard.writeText(url);
+      return;
+    } catch {
+      // Fall back to a selected textarea when the Clipboard API is blocked.
+    }
+  }
+
+  if (copyTextWithTextAreaFallback(url, documentRef)) {
+    return;
+  }
+
+  throw new Error("Unable to copy link preview URL");
+}
+
+function markLinkPreviewCopyButtonCopied(copyButton: HTMLButtonElement): void {
+  const previousTitle = copyButton.title;
+  copyButton.classList.add("copied");
+  copyButton.title = "已复制";
+  setTimeout(() => {
+    copyButton.classList.remove("copied");
+    copyButton.title = previousTitle;
+  }, LINK_PREVIEW_COPY_RESET_DELAY);
+}
+
+export function bindLinkPreviewCardButtons(root: HTMLElement | Document): () => void {
+  const onClick = (event: Event) => {
+    const target =
+      event.target && typeof (event.target as Element).closest === "function" ? (event.target as Element) : null;
+    const copyButton = target?.closest<HTMLButtonElement>(".cm-mardora-link-preview-copy-button[data-url]");
+    if (!copyButton || !root.contains(copyButton)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    void copyLinkPreviewUrlToClipboard(copyButton.dataset.url ?? "", copyButton.ownerDocument).then(() => {
+      markLinkPreviewCopyButtonCopied(copyButton);
+    });
+  };
+
+  root.addEventListener("click", onClick);
+  return () => root.removeEventListener("click", onClick);
 }
 
 /**
@@ -522,7 +600,7 @@ class LinkPreviewCardWidget extends WidgetType {
   }
 
   toDOM(view: EditorView) {
-    const card = document.createElement("div");
+    const card = document.createElement("span");
     card.className = [
       "cm-mardora-link-preview-card",
       "cm-mardora-link-preview-card-editor",
@@ -684,7 +762,7 @@ const theme = createTheme({
     // Link markers ([ ] ( ))
     ".cm-mardora-link-marker": {
       color: "#6a737d",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     // URL in raw markdown
@@ -727,7 +805,7 @@ const theme = createTheme({
     ".cm-mardora-link-preview-card": {
       display: "grid",
       gridTemplateColumns: "minmax(0, 1fr)",
-      gap: "1rem",
+      gap: "0.625rem",
       width: "100%",
       margin: "0.75rem 0",
       overflow: "hidden",
@@ -740,17 +818,36 @@ const theme = createTheme({
     },
 
     ".cm-mardora-link-preview-card-with-image": {
-      gridTemplateColumns: "minmax(0, 1fr) minmax(13rem, 34%)",
-      height: "clamp(8.75rem, 13vw, 12rem)",
-      minHeight: "8.75rem",
+      gridTemplateColumns: "minmax(0, 1fr) minmax(10rem, 30%)",
+      height: "clamp(5.75rem, 7vw, 7rem)",
+      minHeight: "5.75rem",
     },
 
     ".cm-mardora-link-preview-card-without-image": {
-      minHeight: "7rem",
+      minHeight: "4.75rem",
     },
 
     ".cm-mardora-link-preview-card-editor": {
+      display: "inline-grid",
+      margin: "0.375rem 0",
+      verticalAlign: "top",
       cursor: "pointer",
+    },
+
+    ".cm-mardora-link-preview-card-static": {
+      cursor: "pointer",
+    },
+
+    ".cm-mardora-link-preview-card-open-area": {
+      position: "absolute",
+      inset: "0",
+      zIndex: "1",
+      borderRadius: "inherit",
+    },
+
+    ".cm-mardora-link-preview-card-open-area:focus-visible": {
+      outline: "2px solid #2563eb",
+      outlineOffset: "-2px",
     },
 
     ".cm-mardora-link-preview-card:hover": {
@@ -763,17 +860,17 @@ const theme = createTheme({
       minHeight: "0",
       flexDirection: "column",
       justifyContent: "center",
-      gap: "0.625rem",
-      padding: "1rem 1.25rem",
+      gap: "0.3125rem",
+      padding: "0.625rem 0.875rem",
     },
 
     ".cm-mardora-link-preview-title": {
       display: "block",
       overflow: "hidden",
       color: "#18181b",
-      fontSize: "1rem",
+      fontSize: "0.875rem",
       fontWeight: "600",
-      lineHeight: "1.35",
+      lineHeight: "1.3",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
     },
@@ -782,8 +879,8 @@ const theme = createTheme({
       display: "-webkit-box",
       overflow: "hidden",
       color: "#3f3f46",
-      fontSize: "0.875rem",
-      lineHeight: "1.55",
+      fontSize: "0.8125rem",
+      lineHeight: "1.4",
       WebkitBoxOrient: "vertical",
       WebkitLineClamp: "2",
     },
@@ -792,8 +889,8 @@ const theme = createTheme({
       display: "block",
       overflow: "hidden",
       color: "#2563eb",
-      fontSize: "0.875rem",
-      lineHeight: "1.4",
+      fontSize: "0.8125rem",
+      lineHeight: "1.3",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
     },
@@ -832,6 +929,7 @@ const theme = createTheme({
       opacity: "0",
       pointerEvents: "none",
       transition: "opacity 120ms ease",
+      zIndex: "2",
     },
 
     ".cm-mardora-link-preview-card:hover .cm-mardora-link-preview-toolbar, .cm-mardora-link-preview-card:focus-within .cm-mardora-link-preview-toolbar":
@@ -852,12 +950,18 @@ const theme = createTheme({
       backgroundColor: "transparent",
       color: "#3f3f46",
       cursor: "pointer",
+      textDecoration: "none",
     },
 
     ".cm-mardora-link-preview-tool-button:hover, .cm-mardora-link-preview-tool-button:focus-visible": {
       backgroundColor: "#e4e4e7",
       color: "#18181b",
       outline: "none",
+    },
+
+    ".cm-mardora-link-preview-tool-button.copied": {
+      backgroundColor: "#dcfce7",
+      color: "#166534",
     },
 
     ".cm-mardora-link-preview-tool-button svg": {

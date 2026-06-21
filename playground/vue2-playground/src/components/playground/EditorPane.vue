@@ -47,7 +47,7 @@ import { EditorView } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import type { MardoraNode, MardoraTocItem } from "mardora/editor";
 import { mardora, ThemeEnum } from "mardora/editor";
-import { bindCodeCopyButtons, bindImagePreviewButtons } from "mardora/plugins";
+import { bindCodeCopyButtons, bindImagePreviewButtons, bindLinkPreviewCardButtons } from "mardora/plugins";
 import { extractPreviewTocFromMarkdown, generateCSS, preview } from "mardora/preview";
 import { getActivePlugins } from "@/state/playgroundConfig";
 import type { Content, PlaygroundConfig, PlaygroundMode, PreviewOutput, ThemeMode } from "@/types";
@@ -102,6 +102,7 @@ export default Vue.extend({
       previewStyleElement: null as HTMLStyleElement | null,
       previewCopyCleanup: null as (() => void) | null,
       previewImageCleanup: null as (() => void) | null,
+      previewLinkCleanup: null as (() => void) | null,
       previewOutput: { html: "", css: "" } as PreviewOutput,
       internalUpdate: false,
       renderRequest: 0,
@@ -205,6 +206,10 @@ export default Vue.extend({
       if (this.previewImageCleanup) {
         this.previewImageCleanup();
         this.previewImageCleanup = null;
+      }
+      if (this.previewLinkCleanup) {
+        this.previewLinkCleanup();
+        this.previewLinkCleanup = null;
       }
       this.previewToc = [];
     },
@@ -364,6 +369,7 @@ export default Vue.extend({
           this.updatePreviewStyles();
           this.bindPreviewCodeCopyButtons();
           this.bindPreviewImageButtons();
+          this.bindPreviewLinkButtons();
           this.syncPreviewTocActive();
         }
         if (this.mode === "output") {
@@ -423,6 +429,16 @@ export default Vue.extend({
       const previewHost = this.$refs.previewHost as HTMLElement | undefined;
       if (!previewHost) return;
       this.previewImageCleanup = bindImagePreviewButtons(previewHost);
+    },
+    bindPreviewLinkButtons() {
+      if (this.previewLinkCleanup) {
+        this.previewLinkCleanup();
+        this.previewLinkCleanup = null;
+      }
+
+      const previewHost = this.$refs.previewHost as HTMLElement | undefined;
+      if (!previewHost) return;
+      this.previewLinkCleanup = bindLinkPreviewCardButtons(previewHost);
     },
     createOutputViews() {
       const htmlParent = this.$refs.htmlOutputHost as HTMLElement | undefined;

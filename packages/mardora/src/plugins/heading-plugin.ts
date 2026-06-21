@@ -135,42 +135,42 @@ const theme = createTheme({
     ".cm-mardora-h1": {
       fontSize: "2em",
       fontWeight: "bold",
-      fontFamily: "sans-serif",
+      fontFamily: "var(--mardora-font-document)",
       textDecoration: "none",
     },
 
     ".cm-mardora-h2": {
       fontSize: "1.75em",
       fontWeight: "bold",
-      fontFamily: "sans-serif",
+      fontFamily: "var(--mardora-font-document)",
       textDecoration: "none",
     },
 
     ".cm-mardora-h3": {
       fontSize: "1.5em",
       fontWeight: "bold",
-      fontFamily: "sans-serif",
+      fontFamily: "var(--mardora-font-document)",
       textDecoration: "none",
     },
 
     ".cm-mardora-h4": {
       fontSize: "1.25em",
       fontWeight: "bold",
-      fontFamily: "sans-serif",
+      fontFamily: "var(--mardora-font-document)",
       textDecoration: "none",
     },
 
     ".cm-mardora-h5": {
       fontSize: "1em",
       fontWeight: "bold",
-      fontFamily: "sans-serif",
+      fontFamily: "var(--mardora-font-document)",
       textDecoration: "none",
     },
 
     ".cm-mardora-h6": {
       fontSize: "0.75em",
       fontWeight: "bold",
-      fontFamily: "sans-serif",
+      fontFamily: "var(--mardora-font-document)",
       textDecoration: "none",
     },
 

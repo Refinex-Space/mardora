@@ -13,7 +13,7 @@ export const headingFoldTheme = EditorView.baseTheme({
     color: "var(--mardora-heading-fold-muted, #a1a1aa)",
     cursor: "pointer",
     display: "inline-flex",
-    font: "600 0.7rem/1 var(--font-sans, sans-serif)",
+    font: "600 0.7rem/1 var(--mardora-font-ui)",
     height: "1rem",
     justifyContent: "center",
     marginLeft: "-2.55rem",
@@ -73,7 +73,7 @@ export const headingFoldTheme = EditorView.baseTheme({
 
   ".cm-mardora-heading-fold-placeholder": {
     color: "var(--mardora-heading-fold-muted, #a1a1aa)",
-    font: "600 0.9rem/1.4 var(--font-sans, sans-serif)",
+    font: "600 0.9rem/1.4 var(--mardora-font-ui)",
     padding: "0.1rem 0 0.35rem 0.25rem",
   },
 

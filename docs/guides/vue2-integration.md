@@ -99,6 +99,11 @@ export type PluginConfig = Record<string, boolean>;
 
 export type PlaygroundConfig = {
   locale: "zh-CN" | "en-US";
+  fonts: {
+    document: string;
+    code: string;
+    ui: string;
+  };
   editor: {
     baseStyles: boolean;
     defaultKeybindings: boolean;
@@ -131,6 +136,11 @@ export function getActivePlugins(pluginConfig: PluginConfig) {
 
 export const defaultConfig: PlaygroundConfig = {
   locale: "zh-CN",
+  fonts: {
+    document: '"Songti SC", serif',
+    code: '"JetBrains Mono", ui-monospace, monospace',
+    ui: "system-ui, sans-serif",
+  },
   editor: {
     baseStyles: true,
     defaultKeybindings: true,
@@ -281,6 +291,7 @@ export default Vue.extend({
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
               contentWidth: this.config.preview.contentWidth === "wide" ? "full" : "default",
+              fonts: this.config.fonts,
               plugins: getActivePlugins(this.config.plugins),
               disableViewPlugin: this.mode === "code",
               defaultKeybindings: this.config.editor.defaultKeybindings,
@@ -346,6 +357,7 @@ export default Vue.extend({
         plugins,
         wrapperClass: "mardora-preview",
         includeBase: this.config.preview.includeBase,
+        fonts: this.config.fonts,
         syntaxTheme,
       });
 
@@ -440,6 +452,7 @@ export default Vue.extend({
 | `theme`                    | `ThemeEnum.AUTO` | 跟随应用主题明确传 `ThemeEnum.LIGHT/DARK`，避免 Vue 2 主题状态和系统主题不一致。 |
 | `locale`                   | `"zh-CN"`        | 中文应用保持默认，英文应用传 `"en-US"`。                                         |
 | `baseStyles`               | `true`           | 初次接入保持开启。                                                               |
+| `fonts`                    | 内置字体栈       | 用同一组 CSS `font-family` 值同步编辑态和预览态。                                |
 | `plugins`                  | `[]`             | 传 `getActivePlugins(config.plugins)`，支持插件开关。                            |
 | `disableViewPlugin`        | `false`          | `mode === "code"` 时设为 `true`。                                                |
 | `defaultKeybindings`       | `true`           | 保持开启。                                                                       |
@@ -520,7 +533,7 @@ async function productionUploader(file: File, context: MardoraAttachmentUploadCo
 | `generateCSS(config)`                     | 生成和插件/主题一致的 CSS。     | 插入 `<style>` 或输出面板。                  |
 | `extractPreviewTocFromMarkdown(markdown)` | 从 Markdown 生成 preview 目录。 | 预览模式使用，因为此时可能没有 editor view。 |
 
-关键要求：`preview()` 和 `generateCSS()` 必须使用同一组 `plugins`、`theme`、`syntaxTheme`，否则 HTML 与 CSS 会不匹配。
+关键要求：`preview()` 和 `generateCSS()` 必须使用同一组 `plugins`、`theme`、`fonts`、`syntaxTheme`，否则 HTML 与 CSS 会不匹配。
 
 ## 9. 插件体系
 
@@ -571,6 +584,6 @@ Vue 2 playground 的策略是固定默认文档 id，并通过 `STORAGE_VERSION`
 - 附件上传成功会插入图片、音视频或文件链接。
 - 附件上传失败会留下用户可见失败标记。
 - paste/drop 与页面其他上传区域没有事件冲突。
-- `preview()` 与 `generateCSS()` 使用同一组插件和主题。
+- `preview()` 与 `generateCSS()` 使用同一组插件、主题和字体。
 - TOC 在编辑态和预览态都能跳转。
 - 默认文档升级能保留用户自建文档。

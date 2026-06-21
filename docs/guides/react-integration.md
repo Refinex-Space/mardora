@@ -60,6 +60,11 @@ type PluginConfig = Record<string, boolean>;
 
 type PlaygroundConfig = {
   locale: "zh-CN" | "en-US";
+  fonts: {
+    document: string;
+    code: string;
+    ui: string;
+  };
   editor: {
     baseStyles: boolean;
     defaultKeybindings: boolean;
@@ -89,6 +94,11 @@ const defaultPluginConfig: PluginConfig = Object.fromEntries(
 
 const defaultConfig: PlaygroundConfig = {
   locale: "zh-CN",
+  fonts: {
+    document: '"Songti SC", serif',
+    code: '"JetBrains Mono", ui-monospace, monospace',
+    ui: 'system-ui, sans-serif',
+  },
   editor: {
     baseStyles: true,
     defaultKeybindings: true,
@@ -239,8 +249,8 @@ const resolveLinkPreview = useCallback(async ({ url, title }: { url: string; tit
 卡片写入 Markdown 时会变成：
 
 ```md
-[Octarine - Take back control of your writing](https://octarine.app/)
-<!--mardora-link-preview:v1 {"kind":"link","url":"https://octarine.app/","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://octarine.app/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
+[Mardora - Take back control of your writing](https://github.com/Refinex-Space/mardora)
+<!--mardora-link-preview:v1 {"kind":"link","url":"https://github.com/Refinex-Space/mardora","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://github.com/Refinex-Space/mardora/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
 ```
 
 这条注释对用户不可见；Live 编辑态和 `preview()` 会把它和上一行链接一起渲染为卡片。若该链接在段落内，链接面板会禁用 `Embed Link`，避免破坏行内排版。
@@ -255,6 +265,7 @@ const extensions = useMemo<Extension[]>(
       locale: config.locale,
       baseStyles: config.editor.baseStyles,
       contentWidth: config.preview.contentWidth === "wide" ? "full" : "default",
+      fonts: config.fonts,
       plugins: activePlugins,
       disableViewPlugin: mode === "code",
       defaultKeybindings: config.editor.defaultKeybindings,
@@ -371,6 +382,7 @@ useEffect(() => {
       plugins: activePlugins,
       wrapperClass: "mardora-preview",
       includeBase: config.preview.includeBase,
+      fonts: config.fonts,
       syntaxTheme: cmTheme,
     });
 
@@ -402,6 +414,7 @@ useEffect(() => {
 | `locale`                   | `"zh-CN"`        | 中文应用保持默认，英文应用传 `"en-US"`。  |
 | `baseStyles`               | `true`           | 初次接入保持开启。                        |
 | `contentWidth`             | `"default"`      | 由页面宽度模式映射为 `"default"`/`"full"`。 |
+| `fonts`                    | 内置字体栈       | 用同一组 CSS `font-family` 值同步编辑态和预览态。 |
 | `plugins`                  | `[]`             | 传 `activePlugins`。                      |
 | `disableViewPlugin`        | `false`          | `mode === "code"` 时设为 `true`。         |
 | `defaultKeybindings`       | `true`           | 保持开启。                                |
@@ -449,6 +462,6 @@ class MentionPlugin extends MardoraPlugin {
 - 编辑、源码、预览、输出模式都能切换。
 - 附件上传成功、失败、超限和权限错误都有用户可见反馈。
 - slash media 命令和 paste/drop 复用同一个 uploader。
-- `preview()` 与 `generateCSS()` 使用同一组插件、主题和 syntax theme。
+- `preview()` 与 `generateCSS()` 使用同一组插件、主题、字体和 syntax theme。
 - `blob:` URL 在组件卸载时释放。
 - 用户 Markdown 原文已保存到业务存储。

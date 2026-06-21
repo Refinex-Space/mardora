@@ -394,7 +394,7 @@ const mermaidTheme = createTheme({
       "--radius": "0.375rem",
       position: "relative",
 
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
       fontSize: "0.9rem",
       backgroundColor: "rgba(0, 0, 0, 0.03)",
       padding: "0 1rem !important",
@@ -427,7 +427,7 @@ const mermaidTheme = createTheme({
       textAlign: "right",
       color: "#6a737d",
       opacity: "0.6",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
       fontSize: "0.85rem",
       userSelect: "none",
     },
@@ -439,7 +439,7 @@ const mermaidTheme = createTheme({
     // Mermaid markers (```mermaid / ```)
     ".cm-mardora-mermaid-marker": {
       color: "#6a737d",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     // Hidden mermaid syntax (when cursor is not in range)
@@ -471,7 +471,7 @@ const mermaidTheme = createTheme({
       color: "#6a737d",
       fontSize: "0.875em",
       fontStyle: "italic",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     // Error styling
@@ -483,7 +483,7 @@ const mermaidTheme = createTheme({
       borderRadius: "4px",
       fontSize: "0.875em",
       fontStyle: "italic",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
   },
 

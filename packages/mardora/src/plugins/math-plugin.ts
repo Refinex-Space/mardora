@@ -445,7 +445,7 @@ export class MathPlugin extends DecorationPlugin {
 const theme = createTheme({
   default: {
     ".cm-mardora-math-block": {
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     ".cm-mardora-math-block br": {
@@ -455,12 +455,12 @@ const theme = createTheme({
     // Math markers ($ $$)
     ".cm-mardora-math-marker": {
       color: "#6a737d",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     // Inline math styling when editing
     ".cm-mardora-math-inline": {
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
       fontSize: "0.9em",
     },
 
@@ -505,7 +505,7 @@ const theme = createTheme({
       borderRadius: "4px",
       fontSize: "0.875em",
       fontStyle: "italic",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
   },
 

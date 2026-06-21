@@ -19,6 +19,42 @@ describe("mardora content width", () => {
     expect(rules).not.toContain("max-width: 48rem");
   });
 
+  it("exposes first-class font variables for live editing", () => {
+    const rules = getThemeRules(
+      mardora({
+        contentWidth: "full",
+        fonts: {
+          code: '"JetBrains Mono", monospace',
+          document: '"Songti SC", serif',
+          ui: '"SF Pro Text", sans-serif',
+        },
+        plugins: [],
+        toc: { enabled: false },
+      })
+    );
+
+    expect(rules).toContain('--mardora-font-document: "Songti SC", serif');
+    expect(rules).toContain('--mardora-font-code: "JetBrains Mono", monospace');
+    expect(rules).toContain('--mardora-font-ui: "SF Pro Text", sans-serif');
+    expect(rules).toContain("font-family: var(--mardora-font-document)");
+  });
+
+  it("falls back to built-in font stacks for invalid font values", () => {
+    const rules = getThemeRules(
+      createMardoraBaseTheme("default", {
+        code: "Bad; color: red",
+        document: "",
+        ui: "Bad { font-family: hacked }",
+      })
+    );
+
+    expect(rules).toContain("--mardora-font-document: var(--font-sans");
+    expect(rules).toContain("--mardora-font-code: var(--font-jetbrains-mono");
+    expect(rules).toContain("--mardora-font-ui: var(--font-sans");
+    expect(rules).not.toContain("color: red");
+    expect(rules).not.toContain("hacked");
+  });
+
   it("applies table of contents spacing to the same cm-mardora editor element", () => {
     const rules = getThemeRules(tocTheme);
 
