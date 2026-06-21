@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { mardora } from "../src/editor";
+import { tocTheme } from "../src/editor/table-of-contents";
 import { createMardoraBaseTheme } from "../src/editor/theme";
 
 describe("mardora content width", () => {
@@ -16,6 +17,13 @@ describe("mardora content width", () => {
     expect(rules).toContain("max-width: none");
     expect(rules).toContain("margin: 0");
     expect(rules).not.toContain("max-width: 48rem");
+  });
+
+  it("applies table of contents spacing to the same cm-mardora editor element", () => {
+    const rules = getThemeRules(tocTheme);
+
+    expect(rules).toMatch(/\.\S+\.cm-mardora \.cm-scroller/);
+    expect(rules).not.toMatch(/\.\S+ \.cm-mardora \.cm-scroller/);
   });
 });
 

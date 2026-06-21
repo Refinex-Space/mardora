@@ -1,15 +1,15 @@
 import { EditorView } from "@codemirror/view";
 
 export const tocTheme = EditorView.baseTheme({
-  ".cm-mardora": {
+  "&.cm-mardora": {
     position: "relative",
   },
-  ".cm-mardora .cm-scroller": {
+  "&.cm-mardora .cm-scroller": {
     boxSizing: "border-box",
     paddingRight: "calc(var(--mardora-toc-layout-width, 0px) + var(--mardora-toc-scrollbar-gutter, 0px))",
     scrollbarGutter: "stable",
   },
-  ".cm-mardora .cm-scroller::-webkit-scrollbar-track": {
+  "&.cm-mardora .cm-scroller::-webkit-scrollbar-track": {
     background: "transparent",
   },
   ".cm-mardora-toc": {

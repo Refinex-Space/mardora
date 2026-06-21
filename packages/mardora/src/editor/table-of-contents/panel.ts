@@ -18,13 +18,27 @@ function appendIcon(parent: HTMLElement, name: string): void {
   if (icon) parent.appendChild(icon);
 }
 
+function handleTocMouseDown(event: MouseEvent, action: () => void): void {
+  event.preventDefault();
+  event.stopPropagation();
+  action();
+}
+
+function handleTocClick(event: MouseEvent, action: () => void): void {
+  event.stopPropagation();
+  if (event.detail !== 0) return;
+  event.preventDefault();
+  action();
+}
+
 function createCollapsed(callbacks: TocPanelCallbacks): HTMLElement {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "cm-mardora-toc-collapsed";
   button.setAttribute("aria-label", "Open table of contents");
   appendIcon(button, "table-of-contents");
-  button.addEventListener("click", callbacks.onToggle);
+  button.addEventListener("mousedown", (event) => handleTocMouseDown(event, callbacks.onToggle));
+  button.addEventListener("click", (event) => handleTocClick(event, callbacks.onToggle));
   return button;
 }
 
@@ -36,7 +50,8 @@ function createItem(item: MardoraTocItem, callbacks: TocPanelCallbacks): HTMLBut
   button.dataset.mardoraTocLevel = String(item.level);
   button.title = item.text;
   button.textContent = item.text;
-  button.addEventListener("click", () => callbacks.onSelect(item));
+  button.addEventListener("mousedown", (event) => handleTocMouseDown(event, () => callbacks.onSelect(item)));
+  button.addEventListener("click", (event) => handleTocClick(event, () => callbacks.onSelect(item)));
   return button;
 }
 
@@ -45,6 +60,13 @@ export function createTocPanelElement(state: TocPanelRenderState, callbacks: Toc
   root.className = "cm-mardora-toc";
   root.dataset.mardoraTocExpanded = String(state.expanded);
   root.style.setProperty("--mardora-toc-width", `${state.width}px`);
+  root.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  root.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
 
   const resize = document.createElement("div");
   resize.className = "cm-mardora-toc-resize";
