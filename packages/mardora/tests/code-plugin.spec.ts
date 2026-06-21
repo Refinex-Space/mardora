@@ -179,6 +179,15 @@ describe("code plugin", () => {
     expect(css).not.toContain("transform: translateY(-50%);");
   });
 
+  it("keeps language menu scrollbar tracks transparent", () => {
+    const css = generateCSS({ plugins: [new CodePlugin()] });
+
+    expect(css).toContain(".cm-mardora-code-language-list::-webkit-scrollbar-track");
+    expect(css).toContain("background: transparent;");
+    expect(css).toContain(".cm-mardora-code-language-list::-webkit-scrollbar-thumb");
+    expect(css).toContain("border-radius: 999px;");
+  });
+
   it("keeps empty fenced code blocks tall enough for direct input", () => {
     const css = generateCSS({ plugins: [new CodePlugin()] });
 
