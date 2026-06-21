@@ -7,6 +7,47 @@ import type {
   SelectionToolbarPaletteItem,
 } from "./types";
 
+function shortcutPlatform(): string {
+  return typeof navigator === "undefined" ? "" : navigator.platform;
+}
+
+export function formatSelectionToolbarShortcut(shortcut: string, platform = ""): string[] {
+  const isMac = /Mac|iPhone|iPad|iPod/i.test(platform);
+  return shortcut.split("-").map((part) => {
+    if (part === "Mod") return isMac ? "⌘" : "Ctrl";
+    if (part === "Shift") return isMac ? "⇧" : "Shift";
+    if (part === "Alt") return isMac ? "⌥" : "Alt";
+    if (part === "Ctrl") return isMac ? "⌃" : "Ctrl";
+    if (part === "Meta") return isMac ? "⌘" : "Meta";
+    return part.length === 1 ? part.toUpperCase() : part;
+  });
+}
+
+function appendButtonTooltip(element: HTMLButtonElement, button: SelectionToolbarButton): void {
+  const tooltip = document.createElement("span");
+  tooltip.className = "cm-mardora-selection-toolbar-tooltip";
+  tooltip.setAttribute("role", "tooltip");
+
+  const label = document.createElement("span");
+  label.className = "cm-mardora-selection-toolbar-tooltip-label";
+  label.textContent = button.label;
+  tooltip.appendChild(label);
+
+  if (button.shortcut) {
+    const shortcut = document.createElement("span");
+    shortcut.className = "cm-mardora-selection-toolbar-tooltip-shortcut";
+    for (const part of formatSelectionToolbarShortcut(button.shortcut, shortcutPlatform())) {
+      const key = document.createElement("kbd");
+      key.className = "cm-mardora-selection-toolbar-tooltip-key";
+      key.textContent = part;
+      shortcut.appendChild(key);
+    }
+    tooltip.appendChild(shortcut);
+  }
+
+  element.appendChild(tooltip);
+}
+
 function iconButton(button: SelectionToolbarButton, callbacks: SelectionToolbarMenuCallbacks): HTMLButtonElement {
   const element = document.createElement("button");
   element.type = "button";
@@ -39,6 +80,7 @@ function iconButton(button: SelectionToolbarButton, callbacks: SelectionToolbarM
       element.textContent = button.label;
     }
   }
+  appendButtonTooltip(element, button);
   return element;
 }
 

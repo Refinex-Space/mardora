@@ -93,23 +93,40 @@ function blockButton(blockType: SelectionToolbarBlockType, messages: ReturnType<
       };
 }
 
+const actionShortcuts: Partial<Record<SelectionToolbarActionId, string>> = {
+  bold: "Mod-b",
+  italic: "Mod-i",
+  strike: "Mod-Shift-s",
+  code: "Mod-e",
+  highlight: "Mod-Shift-h",
+  link: "Mod-k",
+  "ordered-list": "Mod-Shift-7",
+  "unordered-list": "Mod-Shift-8",
+  "task-list": "Mod-Shift-9",
+};
+
+function toolbarButton(input: Omit<SelectionToolbarButton, "shortcut">): SelectionToolbarButton {
+  const shortcut = actionShortcuts[input.id];
+  return shortcut ? { ...input, shortcut } : input;
+}
+
 function defaultButtons(
   messages: ReturnType<typeof getSelectionToolbarMessages>,
   blockType: SelectionToolbarBlockType
 ): SelectionToolbarButton[] {
   return [
     blockButton(blockType, messages),
-    { id: "bold", label: messages.buttons.bold, icon: "bold" },
-    { id: "italic", label: messages.buttons.italic, icon: "italic" },
-    { id: "strike", label: messages.buttons.strike, icon: "strikethrough" },
-    { id: "underline", label: messages.buttons.underline, icon: "underline" },
-    { id: "code", label: messages.buttons.code, icon: "code" },
-    { id: "highlight", label: messages.buttons.highlight, icon: "highlighter" },
-    { id: "color", label: messages.buttons.color, icon: "baseline" },
-    { id: "link", label: messages.buttons.link, icon: "link" },
-    { id: "ordered-list", label: messages.buttons.orderedList, icon: "list-ordered" },
-    { id: "unordered-list", label: messages.buttons.unorderedList, icon: "list" },
-    { id: "task-list", label: messages.buttons.taskList, icon: "list-todo" },
+    toolbarButton({ id: "bold", label: messages.buttons.bold, icon: "bold" }),
+    toolbarButton({ id: "italic", label: messages.buttons.italic, icon: "italic" }),
+    toolbarButton({ id: "strike", label: messages.buttons.strike, icon: "strikethrough" }),
+    toolbarButton({ id: "underline", label: messages.buttons.underline, icon: "underline" }),
+    toolbarButton({ id: "code", label: messages.buttons.code, icon: "code" }),
+    toolbarButton({ id: "highlight", label: messages.buttons.highlight, icon: "highlighter" }),
+    toolbarButton({ id: "color", label: messages.buttons.color, icon: "baseline" }),
+    toolbarButton({ id: "link", label: messages.buttons.link, icon: "link" }),
+    toolbarButton({ id: "ordered-list", label: messages.buttons.orderedList, icon: "list-ordered" }),
+    toolbarButton({ id: "unordered-list", label: messages.buttons.unorderedList, icon: "list" }),
+    toolbarButton({ id: "task-list", label: messages.buttons.taskList, icon: "list-todo" }),
   ];
 }
 

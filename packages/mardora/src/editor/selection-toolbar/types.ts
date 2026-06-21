@@ -66,6 +66,7 @@ export type SelectionToolbarButton = {
   label: string;
   icon: MardoraIconName;
   text?: string;
+  shortcut?: string;
   active?: boolean;
 };
 
