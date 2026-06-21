@@ -171,6 +171,19 @@ class CalloutTitleWidget extends WidgetType {
   }
 }
 
+class EmptyQuoteContentAnchorWidget extends WidgetType {
+  override eq(other: EmptyQuoteContentAnchorWidget): boolean {
+    return other instanceof EmptyQuoteContentAnchorWidget;
+  }
+
+  toDOM(): HTMLElement {
+    const wrap = document.createElement("span");
+    wrap.className = "cm-mardora-empty-quote-content-anchor";
+    wrap.setAttribute("aria-hidden", "true");
+    return wrap;
+  }
+}
+
 /**
  * Mark decorations for blockquote elements
  */
@@ -205,10 +218,15 @@ function calloutLineDecoration(info: CalloutInfo, first: boolean): Decoration {
   return Decoration.line(spec);
 }
 
-function getQuoteMarkReplacementEnd(lineText: string, nodeTo: number, lineFrom: number): number {
+function getQuoteMarkReplacementEnd(
+  lineText: string,
+  nodeTo: number,
+  lineFrom: number,
+  replaceEmptyLinePrefix: boolean
+): number {
   const restOfLine = lineText.slice(nodeTo - lineFrom);
   if (restOfLine.trim().length === 0) {
-    return nodeTo;
+    return replaceEmptyLinePrefix ? lineFrom + lineText.length : nodeTo;
   }
 
   return Math.min(nodeTo + 1, lineFrom + lineText.length);
@@ -472,7 +490,7 @@ export class QuotePlugin extends DecorationPlugin {
         );
 
         // Find all QuoteMark children (> symbols)
-        this.hideQuoteMarks(from, to, decorations, view);
+        this.hideQuoteMarks(from, to, decorations, view, !!callout);
         if (callout) {
           this.hideCalloutMarker(startLine.from, startLine.to, callout, decorations, view);
         }
@@ -505,7 +523,8 @@ export class QuotePlugin extends DecorationPlugin {
     from: number,
     to: number,
     decorations: import("@codemirror/state").Range<Decoration>[],
-    view: import("@codemirror/view").EditorView
+    view: import("@codemirror/view").EditorView,
+    callout: boolean
   ): void {
     syntaxTree(view.state).iterate({
       from,
@@ -517,8 +536,16 @@ export class QuotePlugin extends DecorationPlugin {
 
         // Clamp to line end so replace decoration never spans a newline.
         const line = view.state.doc.lineAt(node.from);
-        const markEnd = getQuoteMarkReplacementEnd(line.text, node.to, line.from);
+        const markEnd = getQuoteMarkReplacementEnd(line.text, node.to, line.from, !callout);
         decorations.push(quoteMarkDecorations["quote-mark"].range(node.from, markEnd));
+        if (!callout && markEnd === line.to) {
+          decorations.push(
+            Decoration.widget({
+              widget: new EmptyQuoteContentAnchorWidget(),
+              side: 1,
+            }).range(markEnd)
+          );
+        }
       },
     });
   }
@@ -556,13 +583,33 @@ const theme = createTheme({
       paddingBottom: "0.25em !important",
       marginLeft: "0.25em",
       minHeight: "1.6em",
-      boxSizing: "content-box",
+      boxSizing: "border-box",
       opacity: "0.85",
     },
 
     // Quote content styling
     ".cm-mardora-quote-content": {
       fontStyle: "italic",
+    },
+
+    ".cm-mardora-quote-line.cm-mardora-list-line-ul > .cm-mardora-quote-content": {
+      flexShrink: 1,
+      minWidth: "0",
+    },
+
+    ".cm-mardora-quote-line.cm-mardora-list-line-ol > .cm-mardora-quote-content": {
+      flexShrink: 1,
+      minWidth: "0",
+    },
+
+    ".cm-mardora-callout-line.cm-mardora-list-line-ul > .cm-mardora-callout-content": {
+      flexShrink: 1,
+      minWidth: "0",
+    },
+
+    ".cm-mardora-callout-line.cm-mardora-list-line-ol > .cm-mardora-callout-content": {
+      flexShrink: 1,
+      minWidth: "0",
     },
 
     ".cm-mardora-callout-line": {
@@ -572,6 +619,7 @@ const theme = createTheme({
       paddingBottom: "0.25em !important",
       marginLeft: "0.25em",
       minHeight: "1.6em",
+      boxSizing: "border-box",
       backgroundColor: "var(--mardora-callout-bg)",
     },
 
@@ -728,6 +776,25 @@ const theme = createTheme({
     ".cm-mardora-callout-caution": {
       "--mardora-callout-color": "#cf222e",
       "--mardora-callout-bg": "rgba(207, 34, 46, 0.08)",
+    },
+  },
+  dark: {
+    ".cm-mardora-callout-type-menu": {
+      border: "1px solid var(--mardora-border-color, #3f3f46)",
+      backgroundColor: "var(--mardora-bg-primary, #18181b)",
+      boxShadow: "0 18px 48px rgba(0, 0, 0, 0.36)",
+    },
+
+    ".cm-mardora-callout-type-menu-item": {
+      color: "var(--mardora-text-primary, #f4f4f5)",
+    },
+
+    ".cm-mardora-callout-type-menu-item:hover": {
+      backgroundColor: "var(--mardora-bg-secondary, #27272a)",
+    },
+
+    ".cm-mardora-callout-type-menu-item-active": {
+      backgroundColor: "var(--mardora-bg-secondary, #27272a)",
     },
   },
 });

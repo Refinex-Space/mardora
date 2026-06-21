@@ -1,6 +1,6 @@
 ---
 owner: refinex
-updated: 2026-06-18
+updated: 2026-06-21
 status: active
 referenced_by: docs/README.md#product-and-integration-guides
 ---
@@ -280,6 +280,7 @@ export default Vue.extend({
               theme: this.mardoraTheme(),
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
+              contentWidth: this.config.preview.contentWidth === "wide" ? "full" : "default",
               plugins: getActivePlugins(this.config.plugins),
               disableViewPlugin: this.mode === "code",
               defaultKeybindings: this.config.editor.defaultKeybindings,
@@ -311,6 +312,10 @@ export default Vue.extend({
                   audio: ["audio/*"],
                   file: ["*/*"],
                 },
+              },
+              linkPreview: {
+                enabled: true,
+                resolve: this.resolveLinkPreview,
               },
               onNodesChange: (nodes: MardoraNode[]) => {
                 this.$emit("nodes-change", nodes);
@@ -447,7 +452,31 @@ export default Vue.extend({
 | `toc.enabled`              | `true`           | 内置面板或自定义侧栏二选一。                                                     |
 | `attachments.enabled`      | `false`          | 有 uploader 后再开启。                                                           |
 
-## 7. 附件上传接入
+## 7. 链接卡片解析
+
+链接面板支持把独占一行的 Markdown 链接切换为卡片。Vue 2 项目应在业务层提供 `resolveLinkPreview`，由服务端接口抓取目标站点的 `og:*`、`twitter:*`、`title`、description 和 image 信息；Mardora core 只负责调用 resolver、写入隐藏注释并渲染卡片。
+
+Vue 2 playground 已在 `vue.config.js` 中挂载 `/api/link-preview`，复用同一套解析器读取 Open Graph、Twitter Card、`title`、description 和 image；接口不可用时才回退为标题、URL 和 domain。
+
+```ts
+async resolveLinkPreview({ url, title }: { url: string; title: string }) {
+  const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+  if (!response.ok) throw new Error("Failed to resolve link preview");
+  const metadata = await response.json();
+  return {
+    kind: "link" as const,
+    url: metadata.url || url,
+    title: metadata.title || title || url,
+    ...(metadata.domain ? { domain: metadata.domain } : {}),
+    ...(metadata.image ? { image: metadata.image } : {}),
+    ...(metadata.description ? { description: metadata.description } : {}),
+  };
+}
+```
+
+卡片在 Markdown 中持久化为“独占行链接 + 下一行 `<!--mardora-link-preview:v1 ...-->` 注释”。这条注释对用户不可见；Live 编辑态和 `preview()` 会把它渲染为卡片。服务端 resolver 必须限制协议、私网地址、超时、响应体大小和内容类型，避免在浏览器端直接抓取任意站点。
+
+## 8. 附件上传接入
 
 Vue 2 接入时，附件上传要明确区分 Mardora 与业务后端职责。
 

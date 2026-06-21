@@ -167,6 +167,21 @@ export const codePluginTheme = createTheme({
     ".cm-mardora-code-language-list": {
       maxHeight: "14.5rem",
       overflowY: "auto",
+      scrollbarColor: "rgba(113, 113, 122, 0.42) transparent",
+      scrollbarWidth: "thin",
+    },
+
+    ".cm-mardora-code-language-list::-webkit-scrollbar": {
+      width: "8px",
+    },
+
+    ".cm-mardora-code-language-list::-webkit-scrollbar-track": {
+      background: "transparent",
+    },
+
+    ".cm-mardora-code-language-list::-webkit-scrollbar-thumb": {
+      borderRadius: "999px",
+      background: "rgba(113, 113, 122, 0.42)",
     },
 
     ".cm-mardora-code-language-item": {

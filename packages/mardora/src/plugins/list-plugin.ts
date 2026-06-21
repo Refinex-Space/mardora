@@ -35,7 +35,7 @@ const classes = {
 
 /**
  * Interactive checkbox widget for task list items.
- * Replaces `[ ]` or `[x]` markers with a clickable checkbox when not editing.
+ * Replaces `[ ]` or `[x]` markers with a clickable checkbox.
  */
 export class TaskCheckboxWidget extends WidgetType {
   constructor(readonly checked: boolean) {
@@ -82,6 +82,19 @@ export class TaskCheckboxWidget extends WidgetType {
         changes: { from: markerStart, to: markerStart + 1, insert: newChar },
       });
     }
+  }
+}
+
+class EmptyListContentAnchorWidget extends WidgetType {
+  override eq(other: EmptyListContentAnchorWidget): boolean {
+    return other instanceof EmptyListContentAnchorWidget;
+  }
+
+  toDOM(): HTMLElement {
+    const wrap = document.createElement("span");
+    wrap.className = "cm-mardora-empty-list-content-anchor";
+    wrap.setAttribute("aria-hidden", "true");
+    return wrap;
   }
 }
 
@@ -237,7 +250,7 @@ export class ListPlugin extends DecorationPlugin {
             break;
 
           case "TaskMarker":
-            this.decorateTaskMarker(from, to, view, decorations, cursorInLine);
+            this.decorateTaskMarker(from, to, view, decorations);
             break;
         }
       },
@@ -302,46 +315,49 @@ export class ListPlugin extends DecorationPlugin {
     const parent = node.node.parent;
     const grandparent = parent?.parent;
     const listType = grandparent?.name;
-    const activeClass = cursorInLine ? classes.active : "";
+    const isOrderedList = listType === "OrderedList";
+    const activeClass = cursorInLine && isOrderedList ? classes.active : "";
 
     // Add indent decoration for nested items
     if (from > line.from) {
       decorations.push(Decoration.mark({ class: classes.indent + activeClass }).range(line.from, from));
     }
 
-    // Add marker decoration based on list type
-    const markClass = listType === "OrderedList" ? classes.markOL : classes.markUL;
-    decorations.push(Decoration.mark({ class: markClass + activeClass }).range(from, to + 1));
+    if (isOrderedList) {
+      decorations.push(Decoration.mark({ class: classes.markOL + activeClass }).range(from, to + 1));
+    } else {
+      decorations.push(Decoration.replace({}).range(from, to + 1));
+    }
 
     // Wrap remaining line content
     const contentStart = to + 1;
     if (contentStart < line.to) {
       decorations.push(Decoration.mark({ class: classes.content }).range(contentStart, line.to));
+    } else if (!isOrderedList) {
+      decorations.push(
+        Decoration.widget({
+          widget: new EmptyListContentAnchorWidget(),
+          side: 1,
+        }).range(contentStart)
+      );
     }
   }
 
-  /** Decorate task markers - show checkbox widget or raw text based on cursor */
+  /** Decorate task markers as checkbox widgets */
   private decorateTaskMarker(
     from: number,
     to: number,
     view: EditorView,
-    decorations: Range<Decoration>[],
-    cursorInLine: boolean
+    decorations: Range<Decoration>[]
   ): void {
     const text = view.state.sliceDoc(from, to);
     const isChecked = text.includes("x") || text.includes("X");
 
-    if (cursorInLine) {
-      // Show raw marker when editing
-      decorations.push(Decoration.mark({ class: classes.taskMarker }).range(from, to));
-    } else {
-      // Replace with interactive checkbox
-      decorations.push(
-        Decoration.replace({
-          widget: new TaskCheckboxWidget(isChecked),
-        }).range(from, to)
-      );
-    }
+    decorations.push(
+      Decoration.replace({
+        widget: new TaskCheckboxWidget(isChecked),
+      }).range(from, to)
+    );
   }
 
   /** Render list nodes to HTML */
@@ -394,7 +410,13 @@ const theme = createTheme({
     },
 
     // List line layout (flexbox for marker alignment)
-    ".cm-mardora-list-line-ul, .cm-mardora-list-line-ol": {
+    ".cm-mardora-list-line-ul": {
+      position: "relative",
+      paddingLeft: "calc(1rem * (var(--depth, 0) + 2)) !important",
+      display: "flex",
+      alignItems: "start",
+    },
+    ".cm-mardora-list-line-ol": {
       position: "relative",
       paddingLeft: "calc(1rem * (var(--depth, 0) + 1)) !important",
       display: "flex",
@@ -420,14 +442,23 @@ const theme = createTheme({
       },
 
     // Styled bullet for unordered lists
-    ".cm-mardora-list-line-ul .cm-mardora-list-mark-ul:not(.cm-mardora-active)::after": {
+    ".cm-mardora-list-line-ul::before": {
       content: '"•"',
+      position: "absolute",
+      left: "calc(1rem * (var(--depth, 0) + 1))",
+      width: "1rem",
       color: "var(--color-link)",
       fontWeight: "bold",
       pointerEvents: "none",
     },
+    ".cm-mardora-empty-list-content-anchor": {
+      display: "inline-block",
+      width: 0,
+      overflow: "hidden",
+      verticalAlign: "baseline",
+    },
 
-    // Task marker styling (visible when editing)
+    // Task marker styling (kept for compatibility with existing generated CSS)
     ".cm-mardora-task-marker": {
       color: "var(--mardora-highlight, #a4a4a4)",
       fontFamily: "monospace",

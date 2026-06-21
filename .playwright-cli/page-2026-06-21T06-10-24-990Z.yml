@@ -1,0 +1,124 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e6]
+      - generic [ref=e11]: Mardora
+    - generic [ref=e12]:
+      - button "选择语言" [ref=e14] [cursor=pointer]:
+        - img [ref=e16]
+      - button "选择主题" [ref=e21] [cursor=pointer]:
+        - img [ref=e23]
+      - button "选择模式" [ref=e30] [cursor=pointer]:
+        - img [ref=e32]
+      - button "显示开发面板" [ref=e34] [cursor=pointer]:
+        - img [ref=e36]
+  - main [ref=e38]:
+    - complementary [ref=e40]:
+      - generic [ref=e41]:
+        - option "项目介绍" [selected] [ref=e42] [cursor=pointer]:
+          - img [ref=e44]
+          - generic [ref=e47]: 项目介绍
+        - option "Vue2 接入指南" [ref=e48] [cursor=pointer]:
+          - img [ref=e50]
+          - generic [ref=e53]: Vue2 接入指南
+        - option "Vue3 接入指南" [ref=e54] [cursor=pointer]:
+          - img [ref=e56]
+          - generic [ref=e59]: Vue3 接入指南
+        - option "React 接入指南" [ref=e60] [cursor=pointer]:
+          - img [ref=e62]
+          - generic [ref=e65]: React 接入指南
+    - generic [ref=e69]:
+      - textbox [ref=e73]:
+        - generic [ref=e75]: 项目介绍
+        - generic [ref=e77]:
+          - generic [ref=e78]: •
+          - generic [ref=e79]: 测试
+        - generic [ref=e80]:
+          - generic [ref=e81]: •
+          - generic [ref=e82]: 哈哈
+      - complementary [ref=e83]:
+        - navigation "Document table of contents" [ref=e85]:
+          - generic [ref=e86]: 暂无目录
+    - complementary [ref=e87]:
+      - generic [ref=e88]: 开发面板
+      - generic:
+        - generic:
+          - button "编辑器选项" [ref=e89] [cursor=pointer]:
+            - generic [ref=e90]: 编辑器选项
+            - generic [ref=e91]: ^
+          - generic [ref=e92]:
+            - generic:
+              - generic:
+                - generic: 基础样式
+                - generic: 包含默认编辑器样式
+              - checkbox "基础样式 包含默认编辑器样式" [checked] [ref=e93]
+            - generic:
+              - generic:
+                - generic: 默认快捷键
+                - generic: 启用标准键盘快捷键
+              - checkbox "默认快捷键 启用标准键盘快捷键" [checked] [ref=e95]
+            - generic:
+              - generic:
+                - generic: 历史记录
+                - generic: 启用撤销 / 重做
+              - checkbox "历史记录 启用撤销 / 重做" [checked] [ref=e97]
+            - generic:
+              - generic:
+                - generic: Tab 缩进
+                - generic: 使用 Tab 键缩进
+              - checkbox "Tab 缩进 使用 Tab 键缩进" [checked] [ref=e99]
+            - generic:
+              - generic:
+                - generic: 高亮当前行
+                - generic: 高亮显示当前行
+              - checkbox "高亮当前行 高亮显示当前行" [checked] [ref=e101]
+            - generic:
+              - generic:
+                - generic: 自动换行
+                - generic: 长行自动折行
+              - checkbox "自动换行 长行自动折行" [checked] [ref=e103]
+        - generic:
+          - button "预览选项" [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]: 预览选项
+            - generic [ref=e107]: ^
+          - generic [ref=e108]:
+            - generic:
+              - generic:
+                - generic: 基础 CSS
+                - generic: 包含基础预览样式
+              - checkbox "基础 CSS 包含基础预览样式" [checked] [ref=e109]
+            - generic:
+              - generic:
+                - generic: 净化 HTML
+                - generic: 净化 HTML 输出以提升安全性
+              - checkbox "净化 HTML 净化 HTML 输出以提升安全性" [checked] [ref=e111]
+            - generic:
+              - generic:
+                - generic: 内容宽度
+                - generic: 调整实时与预览的内容宽度
+              - group "Content width" [ref=e113]:
+                - button "常规" [ref=e114] [cursor=pointer]
+                - button "宽屏" [ref=e115] [cursor=pointer]
+            - generic:
+              - generic:
+                - generic: 语言
+                - generic: 调整 Mardora 编辑器内置 UI 文案
+              - group "Language" [ref=e116]:
+                - button "中文" [ref=e117] [cursor=pointer]
+                - button "English" [ref=e118] [cursor=pointer]
+        - button "功能选项" [ref=e119] [cursor=pointer]:
+          - generic [ref=e120]: 功能选项
+          - generic [ref=e121]: v
+        - button "插件" [ref=e122] [cursor=pointer]:
+          - generic [ref=e123]: 插件
+          - generic [ref=e124]: v
+        - button "节点 （隐藏以提升性能）" [ref=e125] [cursor=pointer]:
+          - generic [ref=e126]: 节点 （隐藏以提升性能）
+          - generic [ref=e127]: v
+  - contentinfo [ref=e128]:
+    - generic [ref=e129]:
+      - generic [ref=e130]: "词数: 6"
+      - generic [ref=e131]: .
+      - generic [ref=e132]: "行数: 4"
+      - generic [ref=e133]: .
+      - generic [ref=e134]: "字符: 17"

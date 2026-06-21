@@ -102,6 +102,7 @@ export default [
   "  theme: ThemeEnum.AUTO,",
   '  locale: "en-US",',
   "  baseStyles: true,",
+  '  contentWidth: "full",',
   "  plugins: allPlugins,",
   "  markdown: [] satisfies MarkdownConfig[],",
   "  extensions: [] satisfies Extension[],",

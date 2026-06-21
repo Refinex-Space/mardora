@@ -67,6 +67,7 @@ import PlaygroundHeader from "./Header.vue";
 import PlaygroundSidebar from "./Sidebar.vue";
 import { loadPlaygroundSnapshot, relocalizeContents, savePlaygroundSnapshot } from "@/state/storage";
 import { createDefaultConfig } from "@/state/playgroundConfig";
+import { resolvePanelStateForViewport } from "@/state/panels";
 import { createContentId, getContentMetrics } from "@/utils/contentMetrics";
 import { setLocale as setShellLocaleStore, type ShellLocale } from "@/i18n";
 import type {
@@ -146,10 +147,12 @@ export default Vue.extend({
   },
   methods: {
     handleResize() {
-      this.isDesktop = window.matchMedia("(min-width: 1280px)").matches;
-      if (this.isDesktop) {
-        this.devbarOpen = true;
-      }
+      const nextPanelState = resolvePanelStateForViewport(window.matchMedia("(min-width: 1280px)").matches, {
+        isDesktop: this.isDesktop,
+        devbarOpen: this.devbarOpen,
+      });
+      this.isDesktop = nextPanelState.isDesktop;
+      this.devbarOpen = nextPanelState.devbarOpen;
     },
     syncSystemTheme() {
       if (this.themePreference !== "system") return;

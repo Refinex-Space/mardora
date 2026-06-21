@@ -22,6 +22,7 @@ export type MardoraIconName =
   | "copy"
   | "external-link"
   | "file"
+  | "gallery-vertical-end"
   | "heading-1"
   | "heading-2"
   | "heading-3"
@@ -143,6 +144,11 @@ const iconDefinitions: Record<MardoraIconName, IconElementDefinition[]> = {
       },
     },
     { name: "path", attrs: { d: "M14 2v5a1 1 0 0 0 1 1h5" } },
+  ],
+  "gallery-vertical-end": [
+    { name: "path", attrs: { d: "M7 2h10" } },
+    { name: "path", attrs: { d: "M5 6h14" } },
+    { name: "rect", attrs: { width: "18", height: "12", x: "3", y: "10", rx: "2" } },
   ],
   "heading-1": [
     { name: "path", attrs: { d: "M4 12h8" } },

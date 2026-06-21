@@ -66,6 +66,7 @@ export type SelectionToolbarButton = {
   label: string;
   icon: MardoraIconName;
   text?: string;
+  shortcut?: string;
   active?: boolean;
 };
 
@@ -126,6 +127,11 @@ export type SelectionToolbarLinkState = {
   title: string;
   url: string;
   canRemove: boolean;
+  canEmbed?: boolean;
+  isPreview?: boolean;
+  embedding?: boolean;
+  previewCommentFrom?: number;
+  previewCommentTo?: number;
   error?: string;
   copied?: boolean;
 };
@@ -149,6 +155,8 @@ export type SelectionToolbarMenuCallbacks = {
   onLinkInput: (field: "title" | "url", value: string) => void;
   onLinkSubmit: () => void;
   onLinkCopy: () => void;
+  onLinkEmbed: () => void;
+  onLinkUnembed: () => void;
   onLinkOpen: () => void;
   onLinkRemove: () => void;
   onCancelPanel: () => void;

@@ -7,6 +7,14 @@ import { readTocPanelState, writeTocPanelState } from "./storage";
 import { tocTheme } from "./theme";
 import type { MardoraTocConfig, MardoraTocItem, ResolvedMardoraTocConfig, TocPanelState } from "./types";
 
+interface TocScrollView {
+  lineBlockAt(pos: number): { top: number };
+}
+
+export function resolveTocScrollTop(view: TocScrollView, from: number, topOffset = 8): number {
+  return Math.max(0, view.lineBlockAt(from).top - topOffset);
+}
+
 function sameItems(a: MardoraTocItem[], b: MardoraTocItem[]): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -145,8 +153,8 @@ class TocViewPlugin {
     if (typeof item.from !== "number") return;
     this.view.dispatch({
       selection: EditorSelection.cursor(item.from),
-      effects: EditorView.scrollIntoView(item.from, { y: "start" }),
     });
+    this.view.scrollDOM.scrollTop = resolveTocScrollTop(this.view, item.from);
     this.view.focus();
     this.updateActiveItem(item.id);
     this.scheduleActiveMeasure();

@@ -1,5 +1,24 @@
 # mardora
 
+## 1.3.0
+
+### Minor Changes
+
+- Add link preview cards with hidden Markdown metadata, playground metadata resolvers, and toolbar controls for editing, copying, opening, and switching links back to inline form.
+- Improve Live editing interactions for lists, blockquotes, inline code, links, and selection toolbar tooltips.
+
+## 1.2.3
+
+### Patch Changes
+
+- Add `contentWidth` to `MardoraConfig` so Live editing can use the default readable column, full width, or an application-defined content width.
+
+## 1.2.2
+
+### Patch Changes
+
+- Prevent image widget pointer and mouse interactions from leaking into CodeMirror text selection.
+
 ## 1.2.0
 
 ### Minor Changes

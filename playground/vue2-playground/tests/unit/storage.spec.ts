@@ -44,6 +44,7 @@ describe("storage", () => {
     expect(snapshot.currentContent).toBe(0);
     expect(snapshot.version).toBe(STORAGE_VERSION);
     expect(localStorage.getItem(STORAGE_VERSION_KEY)).toBe(String(STORAGE_VERSION));
+    expect(snapshot.contents.every((content) => typeof content.content === "string")).toBe(true);
   });
 
   it("uses stored contents when versions match", () => {

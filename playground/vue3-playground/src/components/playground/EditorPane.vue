@@ -218,6 +218,31 @@ export default defineComponent({
         mimeType: file.type,
       };
     },
+    async resolveLinkPreview({ url, title }: { url: string; title: string }) {
+      const normalized = new URL(url.startsWith("www.") ? `https://${url}` : url);
+      try {
+        const response = await fetch(`/api/link-preview?url=${encodeURIComponent(normalized.href)}`);
+        if (response.ok) {
+          const metadata = await response.json();
+          return {
+            kind: "link" as const,
+            url: metadata.url || normalized.href,
+            title: metadata.title || title || normalized.href,
+            ...(metadata.domain ? { domain: metadata.domain } : {}),
+            ...(metadata.image ? { image: metadata.image } : {}),
+            ...(metadata.description ? { description: metadata.description } : {}),
+          };
+        }
+      } catch {
+        // Playground fallback: keep card creation usable when the demo metadata route is unavailable.
+      }
+      return {
+        kind: "link" as const,
+        url: normalized.href,
+        title: title || normalized.href,
+        domain: normalized.hostname.replace(/^www\./, ""),
+      };
+    },
     rebuildForMode() {
       this.$nextTick(() => {
         this.destroyViews();
@@ -250,6 +275,8 @@ export default defineComponent({
               theme: this.mardoraTheme(),
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
+              contentWidth:
+                this.config.preview.contentWidth === "wide" ? { maxWidth: wideContentWidth } : "default",
               plugins: getActivePlugins(this.config.plugins),
               markdown: [],
               extensions: [],
@@ -278,6 +305,10 @@ export default defineComponent({
                   audio: ["audio/*"],
                   file: ["*/*"],
                 },
+              },
+              linkPreview: {
+                enabled: true,
+                resolve: this.resolveLinkPreview,
               },
               onNodesChange: (nodes: MardoraNode[]) => {
                 if (this.showNodes) {

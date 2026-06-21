@@ -1,6 +1,6 @@
 ---
 owner: refinex
-updated: 2026-06-16
+updated: 2026-06-21
 status: active
 referenced_by: AGENTS.md#knowledge-map
 ---
@@ -39,10 +39,13 @@ referenced_by: AGENTS.md#knowledge-map
 ## Release
 
 1. Run relevant tests for the changed area.
-2. Run `bun run build`.
-3. Add a Changeset with `bun run changeset` when package consumers are affected.
-4. Use `bun run version-packages` only when preparing a release version update.
-5. Use `bun run release` only after build, review, and package publishing intent are confirmed.
+2. Run `bun run harness:check` when docs, guides, or control-plane files changed.
+3. Run `bun run build`.
+4. Confirm root `package.json`, `packages/mardora/package.json`, and `bun.lock` agree on the target version.
+5. Confirm `packages/mardora/README.md` documents the public npm-facing capabilities and links to the current guides.
+6. Add a Changeset with `bun run changeset` when package consumers are affected.
+7. Use `bun run version-packages` only when preparing a release version update.
+8. Use `bun run release` only after build, review, and package publishing intent are confirmed.
 
 ## Rollback
 

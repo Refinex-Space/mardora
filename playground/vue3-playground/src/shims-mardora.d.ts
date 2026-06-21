@@ -41,10 +41,19 @@ declare module "mardora/editor" {
     AUTO = "auto",
   }
 
+  export type MardoraContentWidth =
+    | "default"
+    | "full"
+    | {
+        maxWidth: string;
+        margin?: string;
+      };
+
   export function mardora(config?: {
     theme?: ThemeEnum;
     locale?: "zh-CN" | "en-US";
     baseStyles?: boolean;
+    contentWidth?: MardoraContentWidth;
     plugins?: MardoraPlugin[];
     markdown?: unknown[];
     extensions?: unknown[];
@@ -77,6 +86,17 @@ declare module "mardora/editor" {
         audio?: string[];
         file?: string[];
       };
+    };
+    linkPreview?: {
+      enabled?: boolean;
+      resolve?: (input: { url: string; title: string }) => Promise<{
+        kind: "link";
+        url: string;
+        title: string;
+        domain?: string;
+        image?: string;
+        description?: string;
+      }>;
     };
     onNodesChange?: (nodes: MardoraNode[]) => void;
   }): any;

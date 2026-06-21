@@ -11,6 +11,7 @@ import Footer from "./footer";
 import Header from "./header";
 import Devbar from "./devbar";
 import Sidebar from "./sidebar";
+import { resolveInitialDesktopPanelState } from "./panels";
 import { Content } from "./types";
 import CreateContentDialog from "./create-content-dialog";
 import { useLocale } from "../i18n/LocaleContext";
@@ -97,7 +98,7 @@ const DEBOUNCE_MS = 500;
 
 // Bump this version whenever default guide content changes.
 // The app will detect the mismatch and refresh the default entries in localStorage.
-const VERSION = 3;
+const VERSION = 8;
 
 const DEFAULT_CONTENT_IDS = new Set(["project-introduction", "vue2-guide", "vue3-guide", "react-guide"]);
 
@@ -119,13 +120,11 @@ export default function Page() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [devbarOpen, setDevbarOpen] = useState(false);
 
-  // Open panels by default only on desktop (xl breakpoint = 1280px)
+  // Open the document sidebar by default on desktop; keep the developer panel opt-in.
   useEffect(() => {
-    const isDesktop = window.matchMedia("(min-width: 1280px)").matches;
-    if (isDesktop) {
-      setSidebarOpen(true);
-      setDevbarOpen(true);
-    }
+    const nextPanelState = resolveInitialDesktopPanelState(window.matchMedia("(min-width: 1280px)").matches);
+    setSidebarOpen(nextPanelState.sidebarOpen);
+    setDevbarOpen(nextPanelState.devbarOpen);
   }, []);
 
   const [contents, setContents] = useState<Content[]>([]);
@@ -151,6 +150,22 @@ export default function Page() {
       url,
       name: file.name,
       mimeType: file.type,
+    };
+  }, []);
+
+  const resolveLinkPreview = useCallback(async ({ url, title }: { url: string; title: string }) => {
+    const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+    if (!response.ok) {
+      throw new Error("Failed to resolve link preview");
+    }
+    const metadata = await response.json();
+    return {
+      kind: "link" as const,
+      url: metadata.url || url,
+      title: metadata.title || title || url,
+      ...(metadata.domain ? { domain: metadata.domain } : {}),
+      ...(metadata.image ? { image: metadata.image } : {}),
+      ...(metadata.description ? { description: metadata.description } : {}),
     };
   }, []);
 
@@ -363,11 +378,15 @@ export default function Page() {
             file: ["*/*"],
           },
         },
+        linkPreview: {
+          enabled: true,
+          resolve: resolveLinkPreview,
+        },
         onNodesChange: (nodes) => {
           if (showNodes) setNodes(nodes);
         },
       }),
-    [theme, mode, showNodes, config.editor, config.features, activePlugins, mockUploader]
+    [theme, mode, showNodes, config.editor, config.features, activePlugins, mockUploader, resolveLinkPreview]
   );
 
   useEffect(() => {

@@ -15,6 +15,16 @@ import { selectionToolbarTheme } from "./theme";
 import { resolveMardoraLocale } from "../i18n";
 import { getSelectionToolbarMessages } from "./i18n";
 import {
+  buildEmbedLinkPreviewChange,
+  buildRemoveLinkPreviewChange,
+  createFallbackLinkPreviewMetadata,
+  findLinkPreviewForLink,
+  isStandaloneLinkRange,
+  mardoraLinkEditEvent,
+  type MardoraLinkEditDetail,
+  type MardoraLinkPreviewConfig,
+} from "../link-preview";
+import {
   canActivateFromNativeSelection,
   hasSelectionToolbarExcludedAncestor,
   selectionOverlapsExcludedSyntaxNode,
@@ -36,6 +46,7 @@ import type {
 
 type MardoraSelectionToolbarRuntimeConfig = MardoraSelectionToolbarConfig & {
   inheritedLocale?: MardoraLocale;
+  linkPreview?: MardoraLinkPreviewConfig;
 };
 
 const toolbarWidth = 448;
@@ -93,23 +104,40 @@ function blockButton(blockType: SelectionToolbarBlockType, messages: ReturnType<
       };
 }
 
+const actionShortcuts: Partial<Record<SelectionToolbarActionId, string>> = {
+  bold: "Mod-b",
+  italic: "Mod-i",
+  strike: "Mod-Shift-s",
+  code: "Mod-e",
+  highlight: "Mod-Shift-h",
+  link: "Mod-k",
+  "ordered-list": "Mod-Shift-7",
+  "unordered-list": "Mod-Shift-8",
+  "task-list": "Mod-Shift-9",
+};
+
+function toolbarButton(input: Omit<SelectionToolbarButton, "shortcut">): SelectionToolbarButton {
+  const shortcut = actionShortcuts[input.id];
+  return shortcut ? { ...input, shortcut } : input;
+}
+
 function defaultButtons(
   messages: ReturnType<typeof getSelectionToolbarMessages>,
   blockType: SelectionToolbarBlockType
 ): SelectionToolbarButton[] {
   return [
     blockButton(blockType, messages),
-    { id: "bold", label: messages.buttons.bold, icon: "bold" },
-    { id: "italic", label: messages.buttons.italic, icon: "italic" },
-    { id: "strike", label: messages.buttons.strike, icon: "strikethrough" },
-    { id: "underline", label: messages.buttons.underline, icon: "underline" },
-    { id: "code", label: messages.buttons.code, icon: "code" },
-    { id: "highlight", label: messages.buttons.highlight, icon: "highlighter" },
-    { id: "color", label: messages.buttons.color, icon: "baseline" },
-    { id: "link", label: messages.buttons.link, icon: "link" },
-    { id: "ordered-list", label: messages.buttons.orderedList, icon: "list-ordered" },
-    { id: "unordered-list", label: messages.buttons.unorderedList, icon: "list" },
-    { id: "task-list", label: messages.buttons.taskList, icon: "list-todo" },
+    toolbarButton({ id: "bold", label: messages.buttons.bold, icon: "bold" }),
+    toolbarButton({ id: "italic", label: messages.buttons.italic, icon: "italic" }),
+    toolbarButton({ id: "strike", label: messages.buttons.strike, icon: "strikethrough" }),
+    toolbarButton({ id: "underline", label: messages.buttons.underline, icon: "underline" }),
+    toolbarButton({ id: "code", label: messages.buttons.code, icon: "code" }),
+    toolbarButton({ id: "highlight", label: messages.buttons.highlight, icon: "highlighter" }),
+    toolbarButton({ id: "color", label: messages.buttons.color, icon: "baseline" }),
+    toolbarButton({ id: "link", label: messages.buttons.link, icon: "link" }),
+    toolbarButton({ id: "ordered-list", label: messages.buttons.orderedList, icon: "list-ordered" }),
+    toolbarButton({ id: "unordered-list", label: messages.buttons.unorderedList, icon: "list" }),
+    toolbarButton({ id: "task-list", label: messages.buttons.taskList, icon: "list-todo" }),
   ];
 }
 
@@ -154,6 +182,7 @@ class SelectionToolbarViewPlugin {
     this.messages = getSelectionToolbarMessages(locale);
     this.view.dom.ownerDocument.addEventListener("mousedown", this.handleDocumentMouseDown, true);
     this.view.dom.ownerDocument.addEventListener("selectionchange", this.handleDocumentSelectionChange);
+    this.view.dom.addEventListener(mardoraLinkEditEvent, this.handleLinkEditEvent as EventListener);
     this.updateState();
   }
 
@@ -166,6 +195,7 @@ class SelectionToolbarViewPlugin {
   destroy(): void {
     this.view.dom.ownerDocument.removeEventListener("mousedown", this.handleDocumentMouseDown, true);
     this.view.dom.ownerDocument.removeEventListener("selectionchange", this.handleDocumentSelectionChange);
+    this.view.dom.removeEventListener(mardoraLinkEditEvent, this.handleLinkEditEvent as EventListener);
     this.removeMenu();
   }
 
@@ -234,6 +264,37 @@ class SelectionToolbarViewPlugin {
       top: rect.top,
       bottom: rect.bottom,
     };
+    this.renderMenu();
+  };
+
+  private readonly handleLinkEditEvent = (event: CustomEvent<MardoraLinkEditDetail>): void => {
+    event.preventDefault();
+    const detail = event.detail;
+    if (!detail || detail.from < 0 || detail.to <= detail.from) return;
+    const text = this.view.state.sliceDoc(detail.from, detail.to);
+    if (!text) return;
+    const doc = this.view.state.doc.toString();
+    const canEmbed =
+      detail.canEmbed &&
+      isStandaloneLinkRange({ doc, from: detail.from, to: detail.to }) &&
+      this.config.linkPreview?.enabled !== false;
+
+    this.savedRange = {
+      from: detail.from,
+      to: detail.to,
+      text,
+    };
+    this.selectionAnchor = detail.anchor ?? null;
+    this.link = {
+      title: detail.title || text,
+      url: detail.url,
+      canRemove: true,
+      canEmbed,
+      isPreview: detail.isPreview,
+      ...(detail.previewCommentFrom === undefined ? {} : { previewCommentFrom: detail.previewCommentFrom }),
+      ...(detail.previewCommentTo === undefined ? {} : { previewCommentTo: detail.previewCommentTo }),
+    };
+    this.panel = "link";
     this.renderMenu();
   };
 
@@ -373,6 +434,8 @@ class SelectionToolbarViewPlugin {
           },
           onLinkSubmit: () => this.submitLink(),
           onLinkCopy: () => void this.copyLink(),
+          onLinkEmbed: () => void this.embedLink(),
+          onLinkUnembed: () => this.unembedLink(),
           onLinkOpen: () => this.openLink(),
           onLinkRemove: () => this.removeLink(),
           onCancelPanel: () => {
@@ -426,7 +489,21 @@ class SelectionToolbarViewPlugin {
 
     if (id === "link") {
       const parsed = parseSelectedLink(range.text);
-      this.link = { title: parsed.title || range.text, url: parsed.url, canRemove: parsed.kind === "markdown-link" };
+      const preview =
+        parsed.kind === "markdown-link"
+          ? findLinkPreviewForLink({ doc, linkFrom: range.from, linkTo: range.to, url: parsed.url })
+          : null;
+      this.link = {
+        title: parsed.title || range.text,
+        url: parsed.url,
+        canRemove: parsed.kind === "markdown-link",
+        canEmbed:
+          parsed.kind === "markdown-link" &&
+          isStandaloneLinkRange({ doc, from: range.from, to: range.to }) &&
+          this.config.linkPreview?.enabled !== false,
+        isPreview: !!preview,
+        ...(preview ? { previewCommentFrom: preview.commentFrom, previewCommentTo: preview.commentTo } : {}),
+      };
       this.panel = "link";
       this.renderMenu();
       return;
@@ -528,6 +605,64 @@ class SelectionToolbarViewPlugin {
     this.dispatchResult(
       buildLinkChange({ from: range.from, to: range.to, title: this.link.title || range.text, url: "", remove: true })
     );
+  }
+
+  private async embedLink(): Promise<void> {
+    const range = this.savedRange;
+    if (!range || !this.link.canEmbed || this.link.isPreview) return;
+    if (!this.link.url || !isValidUrl(this.link.url)) {
+      this.link = { ...this.link, error: this.messages.link.invalid };
+      this.renderMenu();
+      return;
+    }
+
+    this.link = { ...this.link, embedding: true };
+    this.renderMenu();
+
+    const resolver = this.config.linkPreview?.resolve;
+    const fallback = createFallbackLinkPreviewMetadata({ url: this.link.url, title: this.link.title || range.text });
+    let metadata = fallback;
+    try {
+      const resolved = resolver ? await resolver({ url: this.link.url, title: this.link.title || range.text }) : fallback;
+      metadata = {
+        ...resolved,
+        kind: "link",
+        url: fallback.url,
+        title: resolved.title || fallback.title,
+      };
+    } catch {
+      metadata = fallback;
+    }
+
+    if (!this.isSavedRangeCurrent()) {
+      this.close();
+      return;
+    }
+
+    this.view.dispatch({
+      changes: buildEmbedLinkPreviewChange({
+        doc: this.view.state.doc.toString(),
+        linkTo: range.to,
+        metadata,
+      }),
+      scrollIntoView: true,
+    });
+    this.view.focus();
+    this.close();
+  }
+
+  private unembedLink(): void {
+    if (this.link.previewCommentFrom === undefined || this.link.previewCommentTo === undefined) return;
+    this.view.dispatch({
+      changes: buildRemoveLinkPreviewChange({
+        doc: this.view.state.doc.toString(),
+        commentFrom: this.link.previewCommentFrom,
+        commentTo: this.link.previewCommentTo,
+      }),
+      scrollIntoView: true,
+    });
+    this.view.focus();
+    this.close();
   }
 
   private async copyLink(): Promise<void> {

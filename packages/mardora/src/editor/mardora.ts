@@ -8,7 +8,7 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirro
 import { indentOnInput } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import { ThemeEnum } from "./utils";
-import { markdownResetExtension } from "./theme";
+import { markdownResetExtension, MardoraContentWidth } from "./theme";
 import type { MardoraSlashCommandsConfig } from "./slash";
 import { slashCommands } from "./slash";
 import type { MardoraAttachmentsConfig } from "./attachments";
@@ -21,6 +21,7 @@ import type { MardoraHeadingFoldConfig } from "./heading-fold";
 import { headingFold } from "./heading-fold";
 import type { MardoraI18nConfig, MardoraLocale } from "./i18n";
 import { resolveMardoraLocale } from "./i18n";
+import type { MardoraLinkPreviewConfig } from "./link-preview";
 
 /**
  * MardoraNode: represents a node in the markdown tree
@@ -50,6 +51,9 @@ export interface MardoraConfig {
 
   /** Weather to load base styles */
   baseStyles?: boolean;
+
+  /** Content width for live editing. Defaults to the readable 48rem column. */
+  contentWidth?: MardoraContentWidth;
 
   /** Plugins to load */
   plugins?: MardoraPlugin[];
@@ -98,6 +102,9 @@ export interface MardoraConfig {
 
   /** Heading section folding configuration */
   headingFold?: MardoraHeadingFoldConfig;
+
+  /** Link preview card configuration */
+  linkPreview?: MardoraLinkPreviewConfig;
 }
 
 /**
@@ -127,6 +134,7 @@ export function mardora(config: MardoraConfig = {}): Extension[] {
     i18n: configI18n = {},
     theme: configTheme = ThemeEnum.AUTO,
     baseStyles = true,
+    contentWidth: configContentWidth = "default",
     plugins = [],
     extensions = [],
     keymap: configKeymap = [],
@@ -142,6 +150,7 @@ export function mardora(config: MardoraConfig = {}): Extension[] {
     selectionToolbar: configSelectionToolbar = { enabled: true },
     toc: configToc = { enabled: true },
     headingFold: configHeadingFold = { enabled: true },
+    linkPreview: configLinkPreview = { enabled: true },
   } = config;
   const resolvedLocale = resolveMardoraLocale(configSlashCommands.locale ?? configI18n.locale ?? configLocale);
 
@@ -213,7 +222,9 @@ export function mardora(config: MardoraConfig = {}): Extension[] {
   // mardora extensions (pass plugins for decoration support)
   const mardoraExtensions: Extension[] = [];
   if (!disableViewPlugin) {
-    mardoraExtensions.push(createMardoraViewExtension(configTheme, baseStyles, allPlugins, configOnNodesChange));
+    mardoraExtensions.push(
+      createMardoraViewExtension(configTheme, baseStyles, allPlugins, configOnNodesChange, configContentWidth)
+    );
     mardoraExtensions.push(Prec.highest(markdownResetExtension));
   }
   if (!disableViewPlugin || configLineWrapping) mardoraExtensions.push(EditorView.lineWrapping);
@@ -240,6 +251,7 @@ export function mardora(config: MardoraConfig = {}): Extension[] {
     selectionToolbar({
       ...configSelectionToolbar,
       inheritedLocale: resolvedLocale,
+      linkPreview: configLinkPreview,
     }),
     tableOfContents(configToc),
     ...(!disableViewPlugin ? headingFold(configHeadingFold) : []),

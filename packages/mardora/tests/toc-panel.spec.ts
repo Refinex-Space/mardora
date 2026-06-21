@@ -98,8 +98,11 @@ function installFakeDom(): void {
   };
   globalThis.document = fakeDocument as unknown as Document;
   globalThis.MouseEvent = class FakeMouseEvent extends Event {
-    constructor(type: string) {
-      super(type);
+    readonly detail: number;
+
+    constructor(type: string, init?: EventInit) {
+      super(type, init);
+      this.detail = (init as MouseEventInit | undefined)?.detail ?? 0;
     }
   } as unknown as typeof MouseEvent;
 }
@@ -131,6 +134,7 @@ describe("createTocPanelElement", () => {
 
     expect(panel.className).toContain("cm-mardora-toc");
     expect(panel.getAttribute("data-mardora-toc-expanded")).toBe("true");
+    expect(panel.querySelector(".cm-mardora-toc-toggle")).toBeNull();
     expect(panel.querySelectorAll(".cm-mardora-toc-item").length).toBe(2);
     expect(panel.querySelector(".cm-mardora-toc-item-active")?.textContent).toContain("Intro");
     expect(panel.querySelector('[data-mardora-toc-level="3"]')?.textContent).toContain("Details");
@@ -140,6 +144,50 @@ describe("createTocPanelElement", () => {
       ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
     expect(calls).toEqual(["intro"]);
+  });
+
+  it("selects table of contents items on mouse down before the editor can handle the press", () => {
+    installFakeDom();
+    const calls: string[] = [];
+    const panel = createTocPanelElement(
+      {
+        expanded: true,
+        width: 240,
+        items: [{ id: "intro", level: 2, text: "Intro", from: 0, to: 8, active: true }],
+      },
+      {
+        onSelect: (item) => calls.push(item.id),
+        onToggle: () => undefined,
+        onResizeStart: () => undefined,
+      }
+    );
+    const event = new MouseEvent("mousedown", { cancelable: true, bubbles: true });
+
+    panel.querySelector<HTMLButtonElement>(".cm-mardora-toc-item")?.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(calls).toEqual(["intro"]);
+  });
+
+  it("keeps table of contents mouse presses out of the editor surface", () => {
+    installFakeDom();
+    const panel = createTocPanelElement(
+      {
+        expanded: true,
+        width: 240,
+        items: [{ id: "intro", level: 2, text: "Intro", from: 0, to: 8, active: true }],
+      },
+      {
+        onSelect: () => undefined,
+        onToggle: () => undefined,
+        onResizeStart: () => undefined,
+      }
+    );
+    const event = new MouseEvent("mousedown", { cancelable: true, bubbles: true });
+
+    panel.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
   });
 
   it("renders collapsed rail and empty state", () => {

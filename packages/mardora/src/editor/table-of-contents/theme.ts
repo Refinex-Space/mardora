@@ -1,15 +1,15 @@
 import { EditorView } from "@codemirror/view";
 
 export const tocTheme = EditorView.baseTheme({
-  ".cm-mardora": {
+  "&.cm-mardora": {
     position: "relative",
   },
-  ".cm-mardora .cm-scroller": {
+  "&.cm-mardora .cm-scroller": {
     boxSizing: "border-box",
     paddingRight: "calc(var(--mardora-toc-layout-width, 0px) + var(--mardora-toc-scrollbar-gutter, 0px))",
     scrollbarGutter: "stable",
   },
-  ".cm-mardora .cm-scroller::-webkit-scrollbar-track": {
+  "&.cm-mardora .cm-scroller::-webkit-scrollbar-track": {
     background: "transparent",
   },
   ".cm-mardora-toc": {
@@ -57,30 +57,14 @@ export const tocTheme = EditorView.baseTheme({
     width: "16px",
     height: "16px",
   },
-  ".cm-mardora-toc-toggle, .cm-mardora-toc-collapsed, .cm-mardora-toc-item": {
+  ".cm-mardora-toc-collapsed, .cm-mardora-toc-item": {
     border: "0",
     background: "transparent",
     color: "inherit",
     cursor: "default",
     font: "inherit",
   },
-  ".cm-mardora-toc-toggle": {
-    position: "absolute",
-    top: "8px",
-    right: "8px",
-    zIndex: "1",
-    width: "28px",
-    height: "28px",
-    borderRadius: "6px",
-    color: "var(--mardora-toc-muted, #71717a)",
-    opacity: "0.55",
-    transition: "background 120ms ease, color 120ms ease, opacity 120ms ease",
-  },
-  ".cm-mardora-toc-toggle:hover": {
-    color: "var(--mardora-toc-active, #18181b)",
-    opacity: "1",
-  },
-  ".cm-mardora-toc-toggle:hover, .cm-mardora-toc-collapsed:hover, .cm-mardora-toc-item:hover": {
+  ".cm-mardora-toc-collapsed:hover, .cm-mardora-toc-item:hover": {
     background: "var(--mardora-toc-hover, #f4f4f5)",
   },
   ".cm-mardora-toc-collapsed": {
@@ -109,13 +93,14 @@ export const tocTheme = EditorView.baseTheme({
   },
   ".cm-mardora-toc-item": {
     display: "block",
+    position: "relative",
     width: "100%",
     overflow: "hidden",
     minHeight: "30px",
     padding: "0 8px",
-    borderLeft: "2px solid transparent",
     borderRadius: "6px",
     color: "var(--mardora-toc-muted, #71717a)",
+    cursor: "pointer",
     lineHeight: "30px",
     textAlign: "left",
     textOverflow: "ellipsis",
@@ -127,10 +112,18 @@ export const tocTheme = EditorView.baseTheme({
   ".cm-mardora-toc-item[data-mardora-toc-level='5']": { paddingLeft: "38px" },
   ".cm-mardora-toc-item[data-mardora-toc-level='6']": { paddingLeft: "48px" },
   ".cm-mardora-toc-item-active": {
-    borderLeftColor: "var(--mardora-toc-active, #18181b)",
-    background: "var(--mardora-toc-hover, #f4f4f5)",
     color: "var(--mardora-toc-active, #18181b)",
     fontWeight: "600",
+  },
+  ".cm-mardora-toc-item-active::before": {
+    position: "absolute",
+    top: "7px",
+    bottom: "7px",
+    left: "0",
+    width: "2px",
+    borderRadius: "999px",
+    background: "currentColor",
+    content: "''",
   },
   ".cm-mardora-toc-empty": {
     padding: "12px 8px",
