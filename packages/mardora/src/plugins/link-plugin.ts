@@ -523,7 +523,11 @@ class LinkPreviewCardWidget extends WidgetType {
 
   toDOM(view: EditorView) {
     const card = document.createElement("div");
-    card.className = "cm-mardora-link-preview-card cm-mardora-link-preview-card-editor";
+    card.className = [
+      "cm-mardora-link-preview-card",
+      "cm-mardora-link-preview-card-editor",
+      this.metadata.image ? "cm-mardora-link-preview-card-with-image" : "cm-mardora-link-preview-card-without-image",
+    ].join(" ");
     card.setAttribute("role", "button");
     card.tabIndex = 0;
 
@@ -722,10 +726,9 @@ const theme = createTheme({
 
     ".cm-mardora-link-preview-card": {
       display: "grid",
-      gridTemplateColumns: "minmax(0, 1fr) minmax(12rem, 40%)",
+      gridTemplateColumns: "minmax(0, 1fr)",
       gap: "1rem",
       width: "100%",
-      minHeight: "9rem",
       margin: "0.75rem 0",
       overflow: "hidden",
       border: "1px solid #e5e7eb",
@@ -734,6 +737,16 @@ const theme = createTheme({
       color: "#18181b",
       textDecoration: "none",
       position: "relative",
+    },
+
+    ".cm-mardora-link-preview-card-with-image": {
+      gridTemplateColumns: "minmax(0, 1fr) minmax(13rem, 34%)",
+      height: "clamp(8.75rem, 13vw, 12rem)",
+      minHeight: "8.75rem",
+    },
+
+    ".cm-mardora-link-preview-card-without-image": {
+      minHeight: "7rem",
     },
 
     ".cm-mardora-link-preview-card-editor": {
@@ -747,6 +760,7 @@ const theme = createTheme({
     ".cm-mardora-link-preview-content": {
       display: "flex",
       minWidth: "0",
+      minHeight: "0",
       flexDirection: "column",
       justifyContent: "center",
       gap: "0.625rem",
@@ -791,7 +805,9 @@ const theme = createTheme({
 
     ".cm-mardora-link-preview-image-wrap": {
       display: "block",
-      minHeight: "9rem",
+      minHeight: "0",
+      height: "100%",
+      overflow: "hidden",
       backgroundColor: "#f4f4f5",
     },
 
