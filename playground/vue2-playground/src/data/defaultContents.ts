@@ -9,7 +9,7 @@ import reactGuideEn from "./md/react-guide.en";
 import vue2GuideEn from "./md/vue2-guide.en";
 import vue3GuideEn from "./md/vue3-guide.en";
 
-export const STORAGE_VERSION = 3;
+export const STORAGE_VERSION = 4;
 
 export const defaultContentIds = new Set([
   "project-introduction",

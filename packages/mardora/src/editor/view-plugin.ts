@@ -2,7 +2,7 @@ import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate } from "@
 import { Extension, Facet, Range, RangeSetBuilder } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { cursorInRange, selectionOverlapsRange, ThemeEnum } from "./utils";
-import { mardoraBaseTheme } from "./theme";
+import { createMardoraBaseTheme, MardoraContentWidth } from "./theme";
 import { DecorationContext, MardoraPlugin } from "./plugin";
 import { MardoraNode } from "./mardora";
 
@@ -176,7 +176,8 @@ export function createMardoraViewExtension(
   theme: ThemeEnum = ThemeEnum.AUTO,
   baseStyles: boolean = true,
   plugins: MardoraPlugin[] = [],
-  onNodesChange?: (nodes: MardoraNode[]) => void
+  onNodesChange?: (nodes: MardoraNode[]) => void,
+  contentWidth: MardoraContentWidth = "default"
 ): Extension[] {
   return [
     mardoraEditorClass,
@@ -184,6 +185,6 @@ export function createMardoraViewExtension(
     mardoraOnNodesChangeFacet.of(onNodesChange),
     mardoraThemeFacet.of(theme),
     mardoraViewPlugin,
-    ...(baseStyles ? [mardoraBaseTheme] : []),
+    ...(baseStyles ? [createMardoraBaseTheme(contentWidth)] : []),
   ];
 }

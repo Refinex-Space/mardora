@@ -207,6 +207,7 @@ export default [
   "          theme: mardoraTheme(),",
   "          locale: config.locale,",
   "          baseStyles: config.editor.baseStyles,",
+  "          contentWidth: config.preview.contentWidth === \"wide\" ? \"full\" : \"default\",",
   "          plugins: activePlugins.value,",
   "          markdown: [],",
   "          extensions: [],",

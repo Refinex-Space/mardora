@@ -54,6 +54,7 @@ const view = new EditorView({
       mardora({
         theme: ThemeEnum.AUTO,
         plugins: allPlugins,
+        contentWidth: "full",
       }),
     ],
   }),
@@ -62,6 +63,10 @@ const view = new EditorView({
 // Call this when the owning component or page unmounts.
 // view.destroy();
 ```
+
+`contentWidth` controls the live editor content column. The default keeps the
+readable `48rem` column; use `"full"` for full-width workspace editors, or pass
+`{ maxWidth: "64rem" }` for an application-specific centered column.
 
 ## Static Preview
 

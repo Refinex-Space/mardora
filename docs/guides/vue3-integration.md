@@ -195,6 +195,7 @@ function createEditorView() {
           theme: mardoraTheme(),
           locale: config.locale,
           baseStyles: config.editor.baseStyles,
+          contentWidth: config.preview.contentWidth === "wide" ? "full" : "default",
           plugins: activePlugins.value,
           disableViewPlugin: mode.value === "code",
           defaultKeybindings: config.editor.defaultKeybindings,

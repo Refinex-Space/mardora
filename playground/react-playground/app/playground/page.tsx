@@ -98,7 +98,7 @@ const DEBOUNCE_MS = 500;
 
 // Bump this version whenever default guide content changes.
 // The app will detect the mismatch and refresh the default entries in localStorage.
-const VERSION = 3;
+const VERSION = 4;
 
 const DEFAULT_CONTENT_IDS = new Set(["project-introduction", "vue2-guide", "vue3-guide", "react-guide"]);
 

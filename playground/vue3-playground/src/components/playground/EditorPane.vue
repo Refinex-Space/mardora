@@ -250,6 +250,8 @@ export default defineComponent({
               theme: this.mardoraTheme(),
               locale: this.config.locale,
               baseStyles: this.config.editor.baseStyles,
+              contentWidth:
+                this.config.preview.contentWidth === "wide" ? { maxWidth: wideContentWidth } : "default",
               plugins: getActivePlugins(this.config.plugins),
               markdown: [],
               extensions: [],

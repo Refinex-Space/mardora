@@ -71,6 +71,7 @@ type PlaygroundConfig = {
   preview: {
     includeBase: boolean;
     sanitize: boolean;
+    contentWidth: "regular" | "wide";
   };
   features: {
     slashCommands: boolean;
@@ -99,6 +100,7 @@ const defaultConfig: PlaygroundConfig = {
   preview: {
     includeBase: true,
     sanitize: true,
+    contentWidth: "regular",
   },
   features: {
     slashCommands: true,
@@ -219,6 +221,7 @@ const extensions = useMemo<Extension[]>(
       theme: mardoraTheme,
       locale: config.locale,
       baseStyles: config.editor.baseStyles,
+      contentWidth: config.preview.contentWidth === "wide" ? "full" : "default",
       plugins: activePlugins,
       disableViewPlugin: mode === "code",
       defaultKeybindings: config.editor.defaultKeybindings,
@@ -349,6 +352,7 @@ useEffect(() => {
 | ------------------------- | -------------------- | --------------------------------- |
 | `preview.plugins`         | `[]`                 | 使用 `activePlugins`。            |
 | `preview.sanitize`        | `true`               | 用户内容保持开启。                |
+| `preview.contentWidth`    | `"regular"`          | 需要全宽工作区时设为 `"wide"`。   |
 | `preview.wrapperClass`    | `"mardora-preview"` | 和 CSS 生成保持一致。             |
 | `generateCSS.includeBase` | `true`               | 需要完全自定义 spacing 时再关闭。 |
 | `generateCSS.syntaxTheme` | `undefined`          | 使用当前 CodeMirror theme。       |
@@ -360,6 +364,7 @@ useEffect(() => {
 | `theme`                    | `ThemeEnum.AUTO` | 从主题状态映射为 `ThemeEnum.LIGHT/DARK`。 |
 | `locale`                   | `"zh-CN"`        | 中文应用保持默认，英文应用传 `"en-US"`。  |
 | `baseStyles`               | `true`           | 初次接入保持开启。                        |
+| `contentWidth`             | `"default"`      | 由页面宽度模式映射为 `"default"`/`"full"`。 |
 | `plugins`                  | `[]`             | 传 `activePlugins`。                      |
 | `disableViewPlugin`        | `false`          | `mode === "code"` 时设为 `true`。         |
 | `defaultKeybindings`       | `true`           | 保持开启。                                |

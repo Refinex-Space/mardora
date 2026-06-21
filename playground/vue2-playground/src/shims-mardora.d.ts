@@ -41,10 +41,19 @@ declare module "mardora/editor" {
     AUTO = "auto",
   }
 
+  export type MardoraContentWidth =
+    | "default"
+    | "full"
+    | {
+        maxWidth: string;
+        margin?: string;
+      };
+
   export function mardora(config?: {
     theme?: ThemeEnum;
     locale?: "zh-CN" | "en-US";
     baseStyles?: boolean;
+    contentWidth?: MardoraContentWidth;
     plugins?: MardoraPlugin[];
     markdown?: unknown[];
     extensions?: unknown[];

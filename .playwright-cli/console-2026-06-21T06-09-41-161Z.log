@@ -1,0 +1,19 @@
+[     316ms] [LOG] [HMR] Waiting for update signal from WDS... @ webpack-internal:///../../node_modules/webpack/hot/log.js:23
+[     793ms] [INFO] Download the Vue Devtools extension for a better development experience:
+https://github.com/vuejs/vue-devtools @ webpack-internal:///../../node_modules/vue/dist/vue.runtime.esm.js:8461
+[   10642ms] [LOG] [HMR] Waiting for update signal from WDS... @ webpack-internal:///../../node_modules/webpack/hot/log.js:23
+[   10698ms] [INFO] Download the Vue Devtools extension for a better development experience:
+https://github.com/vuejs/vue-devtools @ webpack-internal:///../../node_modules/vue/dist/vue.runtime.esm.js:8461
+[   94506ms] [LOG] [HMR] Waiting for update signal from WDS... @ webpack-internal:///../../node_modules/webpack/hot/log.js:23
+[   94665ms] [INFO] Download the Vue Devtools extension for a better development experience:
+https://github.com/vuejs/vue-devtools @ webpack-internal:///../../node_modules/vue/dist/vue.runtime.esm.js:8461
+[  147652ms] [LOG] [HMR] Waiting for update signal from WDS... @ webpack-internal:///../../node_modules/webpack/hot/log.js:23
+[  147844ms] [INFO] Download the Vue Devtools extension for a better development experience:
+https://github.com/vuejs/vue-devtools @ webpack-internal:///../../node_modules/vue/dist/vue.runtime.esm.js:8461
+[  301255ms] [LOG] [HMR] Waiting for update signal from WDS... @ webpack-internal:///../../node_modules/webpack/hot/log.js:23
+[  301400ms] [INFO] Download the Vue Devtools extension for a better development experience:
+https://github.com/vuejs/vue-devtools @ webpack-internal:///../../node_modules/vue/dist/vue.runtime.esm.js:8461
+[  820527ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://192.168.1.6:3001/sockjs-node/info?t=1782023001685:0
+[  822621ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://192.168.1.6:3001/sockjs-node/info?t=1782023003778:0
+[  826658ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://192.168.1.6:3001/sockjs-node/info?t=1782023007815:0
+[  834749ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://192.168.1.6:3001/sockjs-node/info?t=1782023015908:0

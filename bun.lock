@@ -34,7 +34,7 @@
     },
     "packages/mardora": {
       "name": "mardora",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "dependencies": {
         "@codemirror/commands": "6.10.3",
         "@codemirror/lang-markdown": "6.5.0",

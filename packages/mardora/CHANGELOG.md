@@ -1,5 +1,11 @@
 # mardora
 
+## 1.2.3
+
+### Patch Changes
+
+- Add `contentWidth` to `MardoraConfig` so Live editing can use the default readable column, full width, or an application-defined content width.
+
 ## 1.2.2
 
 ### Patch Changes

@@ -91,6 +91,7 @@ export default [
   "| `locale`              | `\"zh-CN\" \\| \"en-US\"`             | `\"zh-CN\"`            | 编辑器内置 UI 文案语言。                    | 中文产品使用默认值；英文产品设为 `\"en-US\"`。           |",
   "| `i18n.locale`         | `\"zh-CN\" \\| \"en-US\"`             | `undefined`          | 也可通过 i18n 配置 locale。                 | 优先级低于 `slashCommands.locale`，高于 `locale`。     |",
   "| `baseStyles`          | `boolean`                        | `true`               | 是否注入 Mardora 插件基础样式。             | 首次接入保持 `true`；完全自定义视觉时再关闭。          |",
+  "| `contentWidth`        | `\"default\" \\| \"full\" \\| object`  | `\"default\"`          | 控制 Live 编辑态正文内容宽度。              | 知识库/IDE 工作区可设为 `\"full\"`；长文阅读列保持默认。 |",
   "| `plugins`             | `MardoraPlugin[]`                | `[]`                 | 要启用的 Markdown 插件。                    | playground 质量使用 `allPlugins`。                     |",
   "| `markdown`            | `MarkdownConfig[]`               | `[]`                 | 追加 Lezer Markdown 解析扩展。              | 自定义语法或接入第三方 Markdown 扩展时使用。           |",
   "| `extensions`          | `Extension[]`                    | `[]`                 | 追加 CodeMirror 扩展。                      | 放业务扩展，例如 update listener、只读、主题补丁等。   |",

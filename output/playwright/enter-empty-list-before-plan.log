@@ -1,0 +1,11 @@
+### Result
+- [Screenshot of viewport](.playwright-cli/page-2026-06-21T06-10-27-417Z.png)
+### Ran Playwright code
+```js
+// Screenshot viewport and save it as .playwright-cli/page-2026-06-21T06-10-27-417Z.png
+await page.screenshot({
+  path: '.playwright-cli/page-2026-06-21T06-10-27-417Z.png',
+  scale: 'css',
+  type: 'png'
+});
+```

@@ -35,7 +35,7 @@ const classes = {
 
 /**
  * Interactive checkbox widget for task list items.
- * Replaces `[ ]` or `[x]` markers with a clickable checkbox when not editing.
+ * Replaces `[ ]` or `[x]` markers with a clickable checkbox.
  */
 export class TaskCheckboxWidget extends WidgetType {
   constructor(readonly checked: boolean) {
@@ -82,6 +82,19 @@ export class TaskCheckboxWidget extends WidgetType {
         changes: { from: markerStart, to: markerStart + 1, insert: newChar },
       });
     }
+  }
+}
+
+class BulletListMarkerWidget extends WidgetType {
+  override eq(other: BulletListMarkerWidget): boolean {
+    return other instanceof BulletListMarkerWidget;
+  }
+
+  toDOM(): HTMLElement {
+    const wrap = document.createElement("span");
+    wrap.className = classes.markUL;
+    wrap.setAttribute("aria-hidden", "true");
+    return wrap;
   }
 }
 
@@ -237,7 +250,7 @@ export class ListPlugin extends DecorationPlugin {
             break;
 
           case "TaskMarker":
-            this.decorateTaskMarker(from, to, view, decorations, cursorInLine);
+            this.decorateTaskMarker(from, to, view, decorations);
             break;
         }
       },
@@ -302,16 +315,24 @@ export class ListPlugin extends DecorationPlugin {
     const parent = node.node.parent;
     const grandparent = parent?.parent;
     const listType = grandparent?.name;
-    const activeClass = cursorInLine ? classes.active : "";
+    const isOrderedList = listType === "OrderedList";
+    const activeClass = cursorInLine && isOrderedList ? classes.active : "";
 
     // Add indent decoration for nested items
     if (from > line.from) {
       decorations.push(Decoration.mark({ class: classes.indent + activeClass }).range(line.from, from));
     }
 
-    // Add marker decoration based on list type
-    const markClass = listType === "OrderedList" ? classes.markOL : classes.markUL;
-    decorations.push(Decoration.mark({ class: markClass + activeClass }).range(from, to + 1));
+    // Replace unordered source markers so the cursor cannot land before the visual bullet.
+    if (isOrderedList) {
+      decorations.push(Decoration.mark({ class: classes.markOL + activeClass }).range(from, to + 1));
+    } else {
+      decorations.push(
+        Decoration.replace({
+          widget: new BulletListMarkerWidget(),
+        }).range(from, to + 1)
+      );
+    }
 
     // Wrap remaining line content
     const contentStart = to + 1;
@@ -320,28 +341,21 @@ export class ListPlugin extends DecorationPlugin {
     }
   }
 
-  /** Decorate task markers - show checkbox widget or raw text based on cursor */
+  /** Decorate task markers as checkbox widgets */
   private decorateTaskMarker(
     from: number,
     to: number,
     view: EditorView,
-    decorations: Range<Decoration>[],
-    cursorInLine: boolean
+    decorations: Range<Decoration>[]
   ): void {
     const text = view.state.sliceDoc(from, to);
     const isChecked = text.includes("x") || text.includes("X");
 
-    if (cursorInLine) {
-      // Show raw marker when editing
-      decorations.push(Decoration.mark({ class: classes.taskMarker }).range(from, to));
-    } else {
-      // Replace with interactive checkbox
-      decorations.push(
-        Decoration.replace({
-          widget: new TaskCheckboxWidget(isChecked),
-        }).range(from, to)
-      );
-    }
+    decorations.push(
+      Decoration.replace({
+        widget: new TaskCheckboxWidget(isChecked),
+      }).range(from, to)
+    );
   }
 
   /** Render list nodes to HTML */
@@ -427,7 +441,7 @@ const theme = createTheme({
       pointerEvents: "none",
     },
 
-    // Task marker styling (visible when editing)
+    // Task marker styling (kept for compatibility with existing generated CSS)
     ".cm-mardora-task-marker": {
       color: "var(--mardora-highlight, #a4a4a4)",
       fontFamily: "monospace",
