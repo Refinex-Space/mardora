@@ -3,6 +3,13 @@ import { syntaxTree } from "@codemirror/language";
 import { DecorationContext, DecorationPlugin } from "../editor/plugin";
 import { createTheme } from "../editor";
 import { SyntaxNode } from "@lezer/common";
+import { createMardoraIcon } from "../editor/icons";
+import {
+  buildRemoveLinkPreviewChange,
+  dispatchMardoraLinkEditEvent,
+  findLinkPreviewForLink,
+  type MardoraLinkPreviewMetadata,
+} from "../editor/link-preview";
 
 /**
  * Mark decorations for link syntax elements
@@ -12,6 +19,10 @@ const linkMarkDecorations = {
   "link-marker": Decoration.mark({ class: "cm-mardora-link-marker" }),
   "link-url": Decoration.mark({ class: "cm-mardora-link-url" }),
   "link-hidden": Decoration.mark({ class: "cm-mardora-link-hidden" }),
+};
+
+const linkLineDecorations = {
+  "hidden-line": Decoration.line({ class: "cm-mardora-link-preview-hidden-line" }),
 };
 
 /**
@@ -82,11 +93,18 @@ class LinkTooltipWidget extends WidgetType {
         // Regular click: select raw markdown
         e.preventDefault();
         e.stopPropagation();
-        view.dispatch({
-          selection: { anchor: this.from, head: this.to },
-          scrollIntoView: true,
-        });
-        view.focus();
+        dispatchMardoraLinkEditEvent(
+          view,
+          {
+            from: this.from,
+            to: this.to,
+            title: "",
+            url: this.url,
+            canEmbed: false,
+            isPreview: false,
+          },
+          wrapper
+        );
       }
     });
 
@@ -232,6 +250,31 @@ export class LinkPlugin extends DecorationPlugin {
 
           if (!parsed) return;
 
+          const preview = findLinkPreviewForLink({
+            doc: view.state.doc.toString(),
+            linkFrom: from,
+            linkTo: to,
+            url: parsed.url,
+          });
+          if (preview) {
+            const cursorInPreview = ctx.selectionOverlapsRange(from, preview.commentTo);
+            if (cursorInPreview) {
+              this.decorateRawLink(node.node, decorations, view);
+              return;
+            }
+
+            const linkLine = view.state.doc.lineAt(from);
+            const commentLine = view.state.doc.lineAt(preview.commentFrom);
+            decorations.push(
+              Decoration.replace({
+                widget: new LinkPreviewCardWidget(parsed.text, parsed.url, from, to, preview.metadata, preview.commentFrom, preview.commentTo),
+              }).range(linkLine.from, linkLine.to)
+            );
+            decorations.push(Decoration.replace({}).range(preview.commentFrom, preview.commentTo));
+            decorations.push(linkLineDecorations["hidden-line"].range(commentLine.from));
+            return;
+          }
+
           const cursorInRange = ctx.selectionOverlapsRange(from, to);
 
           if (cursorInRange) {
@@ -312,12 +355,61 @@ export class LinkPlugin extends DecorationPlugin {
     const parsed = parseLinkMarkdown(content);
     if (!parsed) return null;
 
+    const preview = findLinkPreviewForLink({
+      doc: "doc" in ctx && typeof ctx.doc === "string" ? ctx.doc : "",
+      linkFrom: node.from,
+      linkTo: node.to,
+      url: parsed.url,
+    });
+    if (preview) {
+      return renderLinkPreviewCardHTML(preview.metadata, parsed.text, ctx);
+    }
+
     const textContent = ctx.sanitize(parsed.text);
     const urlAttr = ctx.sanitize(parsed.url);
     const titleAttr = parsed.title ? ` title="${ctx.sanitize(parsed.title)}"` : "";
 
     return `<a class="cm-mardora-link" href="${urlAttr}"${titleAttr} target="_blank" rel="noopener noreferrer">${textContent}</a>`;
   }
+
+  override getPreviewConsumedTo(node: SyntaxNode, ctx: { doc: string; sliceDoc(from: number, to: number): string }): number | null {
+    if (node.name !== "Link") return null;
+    const parsed = parseLinkMarkdown(ctx.sliceDoc(node.from, node.to));
+    if (!parsed) return null;
+    return (
+      findLinkPreviewForLink({
+        doc: ctx.doc,
+        linkFrom: node.from,
+        linkTo: node.to,
+        url: parsed.url,
+      })?.commentTo ?? null
+    );
+  }
+}
+
+function renderLinkPreviewCardHTML(
+  metadata: MardoraLinkPreviewMetadata,
+  fallbackTitle: string,
+  ctx: { sanitize(html: string): string }
+): string {
+  const title = ctx.sanitize(metadata.title || fallbackTitle || metadata.url);
+  const url = ctx.sanitize(metadata.url);
+  const domain = metadata.domain ? ctx.sanitize(metadata.domain) : "";
+  const description = metadata.description ? ctx.sanitize(metadata.description) : "";
+  const image = metadata.image ? ctx.sanitize(metadata.image) : "";
+
+  let html = `<a class="cm-mardora-link-preview-card" href="${url}" target="_blank" rel="noopener noreferrer">`;
+  html += `<span class="cm-mardora-link-preview-content">`;
+  html += `<span class="cm-mardora-link-preview-title">${title}</span>`;
+  if (description) html += `<span class="cm-mardora-link-preview-description">${description}</span>`;
+  html += `<span class="cm-mardora-link-preview-url">${url}</span>`;
+  if (domain) html += `<span class="cm-mardora-link-preview-domain">${domain}</span>`;
+  html += `</span>`;
+  if (image) {
+    html += `<span class="cm-mardora-link-preview-image-wrap"><img class="cm-mardora-link-preview-image" src="${image}" alt="" loading="lazy" decoding="async" /></span>`;
+  }
+  html += `</a>`;
+  return html;
 }
 
 /**
@@ -380,11 +472,18 @@ class LinkTextWidget extends WidgetType {
         // Regular click: select raw markdown
         e.preventDefault();
         e.stopPropagation();
-        view.dispatch({
-          selection: { anchor: this.from, head: this.to },
-          scrollIntoView: true,
-        });
-        view.focus();
+        dispatchMardoraLinkEditEvent(
+          view,
+          {
+            from: this.from,
+            to: this.to,
+            title: this.text,
+            url: this.url,
+            canEmbed: true,
+            isPreview: false,
+          },
+          span
+        );
       }
     });
 
@@ -394,6 +493,177 @@ class LinkTextWidget extends WidgetType {
   override ignoreEvent(event: Event): boolean {
     // Allow click and mouse events to be handled by our handlers
     return event.type !== "click" && event.type !== "mouseenter" && event.type !== "mouseleave";
+  }
+}
+
+class LinkPreviewCardWidget extends WidgetType {
+  constructor(
+    readonly text: string,
+    readonly url: string,
+    readonly from: number,
+    readonly to: number,
+    readonly metadata: MardoraLinkPreviewMetadata,
+    readonly commentFrom: number,
+    readonly commentTo: number
+  ) {
+    super();
+  }
+
+  override eq(other: LinkPreviewCardWidget): boolean {
+    return (
+      other.text === this.text &&
+      other.url === this.url &&
+      other.from === this.from &&
+      other.to === this.to &&
+      other.commentFrom === this.commentFrom &&
+      other.commentTo === this.commentTo &&
+      JSON.stringify(other.metadata) === JSON.stringify(this.metadata)
+    );
+  }
+
+  toDOM(view: EditorView) {
+    const card = document.createElement("div");
+    card.className = "cm-mardora-link-preview-card cm-mardora-link-preview-card-editor";
+    card.setAttribute("role", "button");
+    card.tabIndex = 0;
+
+    const content = document.createElement("span");
+    content.className = "cm-mardora-link-preview-content";
+
+    const title = document.createElement("span");
+    title.className = "cm-mardora-link-preview-title";
+    title.textContent = this.metadata.title || this.text || this.url;
+    content.appendChild(title);
+
+    if (this.metadata.description) {
+      const description = document.createElement("span");
+      description.className = "cm-mardora-link-preview-description";
+      description.textContent = this.metadata.description;
+      content.appendChild(description);
+    }
+
+    const url = document.createElement("span");
+    url.className = "cm-mardora-link-preview-url";
+    url.textContent = this.metadata.url || this.url;
+    content.appendChild(url);
+
+    if (this.metadata.domain) {
+      const domain = document.createElement("span");
+      domain.className = "cm-mardora-link-preview-domain";
+      domain.textContent = this.metadata.domain;
+      content.appendChild(domain);
+    }
+
+    card.appendChild(content);
+
+    if (this.metadata.image) {
+      const imageWrap = document.createElement("span");
+      imageWrap.className = "cm-mardora-link-preview-image-wrap";
+      const image = document.createElement("img");
+      image.className = "cm-mardora-link-preview-image";
+      image.src = this.metadata.image;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      imageWrap.appendChild(image);
+      card.appendChild(imageWrap);
+    }
+
+    card.appendChild(this.createToolbar(view, card));
+
+    const openPanel = () => {
+      dispatchMardoraLinkEditEvent(
+        view,
+        {
+          from: this.from,
+          to: this.to,
+          title: this.text,
+          url: this.url,
+          canEmbed: true,
+          isPreview: true,
+          previewCommentFrom: this.commentFrom,
+          previewCommentTo: this.commentTo,
+        },
+        card
+      );
+    };
+
+    card.addEventListener("click", (event) => {
+      if ((event.target as Element | null)?.closest("button")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      openPanel();
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      openPanel();
+    });
+
+    return card;
+  }
+
+  override ignoreEvent(event: Event): boolean {
+    return event.type !== "click" && event.type !== "keydown";
+  }
+
+  private createToolbar(view: EditorView, card: HTMLElement): HTMLElement {
+    const toolbar = card.ownerDocument.createElement("div");
+    toolbar.className = "cm-mardora-link-preview-toolbar";
+    toolbar.appendChild(this.createToolButton(card.ownerDocument, "编辑链接", "link", () => {
+      dispatchMardoraLinkEditEvent(
+        view,
+        {
+          from: this.from,
+          to: this.to,
+          title: this.text,
+          url: this.url,
+          canEmbed: true,
+          isPreview: true,
+          previewCommentFrom: this.commentFrom,
+          previewCommentTo: this.commentTo,
+        },
+        card
+      );
+    }));
+    toolbar.appendChild(this.createToolButton(card.ownerDocument, "切回链接", "type", () => {
+      view.dispatch({
+        changes: buildRemoveLinkPreviewChange({
+          doc: view.state.doc.toString(),
+          commentFrom: this.commentFrom,
+          commentTo: this.commentTo,
+        }),
+      });
+      view.focus();
+    }));
+    toolbar.appendChild(this.createToolButton(card.ownerDocument, "复制链接", "copy", () => {
+      void card.ownerDocument.defaultView?.navigator.clipboard?.writeText(this.url);
+    }));
+    toolbar.appendChild(this.createToolButton(card.ownerDocument, "打开链接", "external-link", () => {
+      card.ownerDocument.defaultView?.open(this.url, "_blank", "noopener,noreferrer");
+    }));
+    return toolbar;
+  }
+
+  private createToolButton(
+    ownerDocument: Document,
+    label: string,
+    iconName: string,
+    onActivate: () => void
+  ): HTMLButtonElement {
+    const button = ownerDocument.createElement("button");
+    button.type = "button";
+    button.className = "cm-mardora-link-preview-tool-button";
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    const icon = createMardoraIcon(iconName);
+    if (icon) button.appendChild(icon);
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onActivate();
+    });
+    return button;
   }
 }
 
@@ -424,6 +694,10 @@ const theme = createTheme({
       display: "none",
     },
 
+    ".cm-mardora-link-preview-hidden-line": {
+      display: "none",
+    },
+
     // Styled link when cursor is not in range
     ".cm-mardora-link-styled": {
       color: "#0366d6",
@@ -444,6 +718,135 @@ const theme = createTheme({
 
     ".cm-mardora-link:hover": {
       color: "#0056b3",
+    },
+
+    ".cm-mardora-link-preview-card": {
+      display: "grid",
+      gridTemplateColumns: "minmax(0, 1fr) minmax(12rem, 40%)",
+      gap: "1rem",
+      width: "100%",
+      minHeight: "9rem",
+      margin: "0.75rem 0",
+      overflow: "hidden",
+      border: "1px solid #e5e7eb",
+      borderRadius: "0.5rem",
+      backgroundColor: "#ffffff",
+      color: "#18181b",
+      textDecoration: "none",
+      position: "relative",
+    },
+
+    ".cm-mardora-link-preview-card-editor": {
+      cursor: "pointer",
+    },
+
+    ".cm-mardora-link-preview-card:hover": {
+      borderColor: "#d4d4d8",
+    },
+
+    ".cm-mardora-link-preview-content": {
+      display: "flex",
+      minWidth: "0",
+      flexDirection: "column",
+      justifyContent: "center",
+      gap: "0.625rem",
+      padding: "1rem 1.25rem",
+    },
+
+    ".cm-mardora-link-preview-title": {
+      display: "block",
+      overflow: "hidden",
+      color: "#18181b",
+      fontSize: "1rem",
+      fontWeight: "600",
+      lineHeight: "1.35",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+
+    ".cm-mardora-link-preview-description": {
+      display: "-webkit-box",
+      overflow: "hidden",
+      color: "#3f3f46",
+      fontSize: "0.875rem",
+      lineHeight: "1.55",
+      WebkitBoxOrient: "vertical",
+      WebkitLineClamp: "2",
+    },
+
+    ".cm-mardora-link-preview-url, .cm-mardora-link-preview-domain": {
+      display: "block",
+      overflow: "hidden",
+      color: "#2563eb",
+      fontSize: "0.875rem",
+      lineHeight: "1.4",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+
+    ".cm-mardora-link-preview-domain": {
+      display: "none",
+      color: "#71717a",
+    },
+
+    ".cm-mardora-link-preview-image-wrap": {
+      display: "block",
+      minHeight: "9rem",
+      backgroundColor: "#f4f4f5",
+    },
+
+    ".cm-mardora-link-preview-image": {
+      display: "block",
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    },
+
+    ".cm-mardora-link-preview-toolbar": {
+      position: "absolute",
+      top: "0.5rem",
+      right: "0.5rem",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "0.125rem",
+      padding: "0.1875rem",
+      border: "1px solid #e5e7eb",
+      borderRadius: "0.375rem",
+      backgroundColor: "rgba(255, 255, 255, 0.94)",
+      opacity: "0",
+      pointerEvents: "none",
+      transition: "opacity 120ms ease",
+    },
+
+    ".cm-mardora-link-preview-card:hover .cm-mardora-link-preview-toolbar, .cm-mardora-link-preview-card:focus-within .cm-mardora-link-preview-toolbar":
+      {
+        opacity: "1",
+        pointerEvents: "auto",
+      },
+
+    ".cm-mardora-link-preview-tool-button": {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "1.875rem",
+      height: "1.875rem",
+      padding: "0",
+      border: "0",
+      borderRadius: "0.3125rem",
+      backgroundColor: "transparent",
+      color: "#3f3f46",
+      cursor: "pointer",
+    },
+
+    ".cm-mardora-link-preview-tool-button:hover, .cm-mardora-link-preview-tool-button:focus-visible": {
+      backgroundColor: "#e4e4e7",
+      color: "#18181b",
+      outline: "none",
+    },
+
+    ".cm-mardora-link-preview-tool-button svg": {
+      width: "1rem",
+      height: "1rem",
     },
 
     // Tooltip styling
@@ -499,6 +902,50 @@ const theme = createTheme({
 
     ".cm-mardora-link:hover": {
       color: "#79c0ff",
+    },
+
+    ".cm-mardora-link-preview-card": {
+      borderColor: "#30363d",
+      backgroundColor: "#0d1117",
+      color: "#c9d1d9",
+    },
+
+    ".cm-mardora-link-preview-card:hover": {
+      borderColor: "#484f58",
+    },
+
+    ".cm-mardora-link-preview-title": {
+      color: "#f0f6fc",
+    },
+
+    ".cm-mardora-link-preview-description": {
+      color: "#c9d1d9",
+    },
+
+    ".cm-mardora-link-preview-url": {
+      color: "#58a6ff",
+    },
+
+    ".cm-mardora-link-preview-domain": {
+      color: "#8b949e",
+    },
+
+    ".cm-mardora-link-preview-image-wrap": {
+      backgroundColor: "#161b22",
+    },
+
+    ".cm-mardora-link-preview-toolbar": {
+      borderColor: "#30363d",
+      backgroundColor: "rgba(22, 27, 34, 0.94)",
+    },
+
+    ".cm-mardora-link-preview-tool-button": {
+      color: "#c9d1d9",
+    },
+
+    ".cm-mardora-link-preview-tool-button:hover, .cm-mardora-link-preview-tool-button:focus-visible": {
+      backgroundColor: "#30363d",
+      color: "#f0f6fc",
     },
 
     ".cm-mardora-link-tooltip": {

@@ -88,6 +88,17 @@ declare module "mardora/editor" {
         file?: string[];
       };
     };
+    linkPreview?: {
+      enabled?: boolean;
+      resolve?: (input: { url: string; title: string }) => Promise<{
+        kind: "link";
+        url: string;
+        title: string;
+        domain?: string;
+        image?: string;
+        description?: string;
+      }>;
+    };
     onNodesChange?: (nodes: MardoraNode[]) => void;
   }): any;
 

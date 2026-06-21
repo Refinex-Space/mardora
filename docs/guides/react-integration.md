@@ -1,6 +1,6 @@
 ---
 owner: refinex
-updated: 2026-06-18
+updated: 2026-06-21
 status: active
 referenced_by: docs/README.md#product-and-integration-guides
 ---
@@ -212,7 +212,40 @@ useEffect(() => {
 
 Mardora 不提供对象存储、鉴权、文件扫描、断点续传、进度条或删除接口。需要这些能力时，业务侧应在 uploader 和自己的 UI 中实现。
 
-## 7. 生成 Mardora extensions
+## 7. 链接卡片解析
+
+链接面板支持把独占一行的 Markdown 链接切换为卡片。Mardora core 只负责写入隐藏元信息注释和渲染卡片；目标站点解析应放在业务服务端，React 客户端通过 `linkPreview.resolve` 调用该接口。
+
+```tsx
+const resolveLinkPreview = useCallback(async ({ url, title }: { url: string; title: string }) => {
+  const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+  if (!response.ok) {
+    throw new Error("Failed to resolve link preview");
+  }
+  const metadata = await response.json();
+  return {
+    kind: "link" as const,
+    url: metadata.url || url,
+    title: metadata.title || title || url,
+    ...(metadata.domain ? { domain: metadata.domain } : {}),
+    ...(metadata.image ? { image: metadata.image } : {}),
+    ...(metadata.description ? { description: metadata.description } : {}),
+  };
+}, []);
+```
+
+服务端 resolver 建议只允许 `http:` 和 `https:`，拒绝私网、loopback、link-local 地址，设置超时、重定向次数和响应体大小上限，只解析 `text/html`，按 `og:title`、`twitter:title`、`<title>` 和 description/image 元信息生成结果。不要在 Mardora core 或浏览器端直接抓取任意目标站点。
+
+卡片写入 Markdown 时会变成：
+
+```md
+[Octarine - Take back control of your writing](https://octarine.app/)
+<!--mardora-link-preview:v1 {"kind":"link","url":"https://octarine.app/","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://octarine.app/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
+```
+
+这条注释对用户不可见；Live 编辑态和 `preview()` 会把它和上一行链接一起渲染为卡片。若该链接在段落内，链接面板会禁用 `Embed Link`，避免破坏行内排版。
+
+## 8. 生成 Mardora extensions
 
 ```tsx
 const extensions = useMemo<Extension[]>(
@@ -251,17 +284,21 @@ const extensions = useMemo<Extension[]>(
           file: ["*/*"],
         },
       },
+      linkPreview: {
+        enabled: true,
+        resolve: resolveLinkPreview,
+      },
       onNodesChange: (nextNodes) => {
         setNodes(nextNodes);
       },
     }),
-  [activePlugins, config.editor, config.features, config.locale, mardoraTheme, mode, uploader]
+  [activePlugins, config.editor, config.features, config.locale, mardoraTheme, mode, uploader, resolveLinkPreview]
 );
 ```
 
 不要把当前 Markdown 文本放入这个 `useMemo` 依赖。正文变化应通过 `CodeMirror value/onChange` 同步，否则每次输入都会重建扩展。
 
-## 8. 渲染编辑、预览和输出
+## 9. 渲染编辑、预览和输出
 
 ```tsx
 const current = contents[currentContent];

@@ -25,6 +25,9 @@ export type SelectionToolbarMessages = {
     url: string;
     copy: string;
     copied: string;
+    embed: string;
+    embedding: string;
+    unembed: string;
     open: string;
     remove: string;
     invalid: string;
@@ -73,6 +76,9 @@ const selectionToolbarMessages: Record<MardoraLocale, SelectionToolbarMessages> 
       url: "链接 URL",
       copy: "复制链接",
       copied: "已复制",
+      embed: "嵌入链接",
+      embedding: "正在嵌入",
+      unembed: "切回链接",
       open: "打开链接",
       remove: "移除链接",
       invalid: "请输入有效链接",
@@ -127,6 +133,9 @@ const selectionToolbarMessages: Record<MardoraLocale, SelectionToolbarMessages> 
       url: "Link URL",
       copy: "Copy link",
       copied: "Copied",
+      embed: "Embed link",
+      embedding: "Embedding link",
+      unembed: "Convert to link",
       open: "Open link",
       remove: "Remove link",
       invalid: "Enter a valid link",

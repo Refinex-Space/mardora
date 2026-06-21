@@ -124,12 +124,12 @@ export class PreviewRenderer {
     const plugins = this.nodeToPlugins.get(node.name);
     if (plugins) {
       for (const plugin of plugins) {
-        const children = await this.renderChildren(node);
-        const result = await plugin.renderToHTML!(node, children, this.ctx);
+        const children = await this.renderChildrenWithExtent(node);
+        const result = await plugin.renderToHTML!(node, children.html, this.ctx);
         if (result !== null) {
           return {
             html: result,
-            to: Math.max(node.to, plugin.getPreviewConsumedTo?.(node, this.ctx) ?? node.to),
+            to: Math.max(node.to, children.to, plugin.getPreviewConsumedTo?.(node, this.ctx) ?? node.to),
           };
         }
       }
@@ -138,13 +138,14 @@ export class PreviewRenderer {
     // Use default renderer
     const renderer = this.renderers[node.name];
     if (renderer) {
-      const children = await this.renderChildren(node);
-      return { html: renderer(node, children, this.ctx), to: node.to };
+      const children = await this.renderChildrenWithExtent(node);
+      return { html: renderer(node, children.html, this.ctx), to: Math.max(node.to, children.to) };
     }
 
     // Unknown node - render children or text
     if (node.firstChild) {
-      return { html: await this.renderChildren(node), to: node.to };
+      const children = await this.renderChildrenWithExtent(node);
+      return { html: children.html, to: Math.max(node.to, children.to) };
     }
 
     // Leaf node - return text content
@@ -155,11 +156,20 @@ export class PreviewRenderer {
    * Render all children of a node, including text between nodes
    */
   private async renderChildren(node: SyntaxNode): Promise<string> {
+    return (await this.renderChildrenWithExtent(node)).html;
+  }
+
+  private async renderChildrenWithExtent(node: SyntaxNode): Promise<{ html: string; to: number }> {
     let result = "";
     let pos = node.from; // Track position to find text gaps
     let child = node.firstChild;
 
     while (child) {
+      if (child.to <= pos) {
+        child = child.nextSibling;
+        continue;
+      }
+
       // Add any text between the last position and this child
       if (child.from > pos) {
         result += escapeHtml(this.ctx.sliceDoc(pos, child.from));
@@ -179,6 +189,6 @@ export class PreviewRenderer {
       result += escapeHtml(this.ctx.sliceDoc(pos, node.to));
     }
 
-    return result;
+    return { html: result, to: pos };
   }
 }

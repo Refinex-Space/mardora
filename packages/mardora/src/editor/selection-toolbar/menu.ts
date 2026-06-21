@@ -200,7 +200,8 @@ function appendLinkAction(
   label: string,
   iconName: string,
   callback: () => void,
-  danger = false
+  danger = false,
+  disabled = false
 ): void {
   const button = document.createElement("button");
   button.type = "button";
@@ -208,10 +209,15 @@ function appendLinkAction(
     ? "cm-mardora-selection-toolbar-link-button cm-mardora-selection-toolbar-link-button-danger"
     : "cm-mardora-selection-toolbar-link-button";
   button.setAttribute("aria-label", label);
+  if (disabled) {
+    button.disabled = true;
+    button.setAttribute("aria-disabled", "true");
+  }
   const svg = createMardoraIcon(iconName);
   if (svg) button.appendChild(svg);
   button.addEventListener("mousedown", (event) => {
     event.preventDefault();
+    if (disabled) return;
     callback();
   });
   actions.appendChild(button);
@@ -245,6 +251,18 @@ function appendLinkPanel(
   const actions = document.createElement("div");
   actions.className = "cm-mardora-selection-toolbar-link-actions";
 
+  if (state.link.isPreview) {
+    appendLinkAction(actions, state.messages.link.unembed, "type", callbacks.onLinkUnembed);
+  } else {
+    appendLinkAction(
+      actions,
+      state.link.embedding ? state.messages.link.embedding : state.messages.link.embed,
+      "gallery-vertical-end",
+      callbacks.onLinkEmbed,
+      false,
+      !state.link.canEmbed || state.link.embedding
+    );
+  }
   appendLinkAction(actions, state.link.copied ? state.messages.link.copied : state.messages.link.copy, "copy", callbacks.onLinkCopy);
   appendLinkAction(actions, state.messages.link.open, "external-link", callbacks.onLinkOpen);
   if (state.link.canRemove) appendLinkAction(actions, state.messages.link.remove, "trash-2", callbacks.onLinkRemove, true);

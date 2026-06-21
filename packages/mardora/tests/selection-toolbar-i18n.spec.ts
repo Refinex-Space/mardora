@@ -10,6 +10,7 @@ class FakeElement {
   className = "";
   type = "";
   value = "";
+  disabled = false;
   readonly style = { setProperty: () => undefined };
   readonly dataset: Record<string, string> = {};
   readonly children: FakeElement[] = [];
@@ -52,6 +53,10 @@ class FakeElement {
   }
 
   addEventListener(): void {}
+
+  focus(): void {}
+
+  select(): void {}
 }
 
 function installFakeDom(): void {
@@ -79,6 +84,8 @@ function callbacks(): SelectionToolbarMenuCallbacks {
     onLinkInput: () => undefined,
     onLinkSubmit: () => undefined,
     onLinkCopy: () => undefined,
+    onLinkEmbed: () => undefined,
+    onLinkUnembed: () => undefined,
     onLinkOpen: () => undefined,
     onLinkRemove: () => undefined,
     onCancelPanel: () => undefined,
@@ -182,5 +189,33 @@ describe("selection toolbar i18n", () => {
     expect(menu.textContent).toContain("Text");
     expect(menu.textContent).toContain("Heading 1");
     expect(menu.textContent).toContain("Heading 2");
+  });
+
+  it("renders link embed actions and disables embed for inline links", () => {
+    installFakeDom();
+    const messages = getSelectionToolbarMessages("en-US");
+    const state: SelectionToolbarMenuState = {
+      panel: "link",
+      buttons: [],
+      blockType: "text",
+      blockTypes: [],
+      textColors: [],
+      highlightColors: [],
+      link: {
+        title: "Octarine",
+        url: "https://octarine.app/",
+        canRemove: true,
+        canEmbed: false,
+        isPreview: false,
+      },
+      messages,
+    };
+
+    const menu = createSelectionToolbarElement(state, callbacks()) as unknown as FakeElement;
+    const buttons = menu.children.flatMap((child) => child.children).filter((child) => child.tagName === "button");
+    const embed = buttons.find((button) => button.getAttribute("aria-label") === messages.link.embed);
+
+    expect(messages.link.embed).toBe("Embed link");
+    expect(embed?.disabled).toBe(true);
   });
 });

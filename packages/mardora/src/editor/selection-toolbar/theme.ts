@@ -191,6 +191,14 @@ export const selectionToolbarTheme = EditorView.baseTheme({
   ".cm-mardora-selection-toolbar-link-button:hover": {
     background: "var(--mardora-selection-toolbar-active, #f4f4f5)",
   },
+  ".cm-mardora-selection-toolbar-link-button:disabled, .cm-mardora-selection-toolbar-link-button[aria-disabled='true']": {
+    color: "var(--mardora-selection-toolbar-disabled, #a1a1aa)",
+    cursor: "not-allowed",
+    opacity: "0.42",
+  },
+  ".cm-mardora-selection-toolbar-link-button:disabled:hover, .cm-mardora-selection-toolbar-link-button[aria-disabled='true']:hover": {
+    background: "transparent",
+  },
   ".cm-mardora-selection-toolbar-link-button-danger": {
     color: "var(--mardora-selection-toolbar-danger, #dc2626)",
   },
@@ -242,6 +250,7 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     "--mardora-selection-toolbar-border": "#3f3f46",
     "--mardora-selection-toolbar-input": "#27272a",
     "--mardora-selection-toolbar-muted": "#a1a1aa",
+    "--mardora-selection-toolbar-disabled": "#71717a",
     "--mardora-selection-toolbar-link": "#60a5fa",
     "--mardora-selection-toolbar-danger": "#f87171",
     "--mardora-selection-toolbar-danger-bg": "rgba(248, 113, 113, 0.18)",

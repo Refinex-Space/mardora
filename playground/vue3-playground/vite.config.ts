@@ -1,9 +1,23 @@
+import { createRequire } from "node:module";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
+const require = createRequire(import.meta.url);
+const linkPreviewMetadata = require("../shared/link-preview-metadata.cjs") as {
+  createLinkPreviewMiddleware: () => (req: unknown, res: unknown, next?: () => void) => Promise<void>;
+};
+
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    {
+      name: "mardora-link-preview-api",
+      configureServer(server) {
+        server.middlewares.use("/api/link-preview", linkPreviewMetadata.createLinkPreviewMiddleware());
+      },
+    },
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

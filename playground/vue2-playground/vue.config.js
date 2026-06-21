@@ -1,4 +1,5 @@
 const path = require("path");
+const { createLinkPreviewMiddleware } = require("../shared/link-preview-metadata.cjs");
 
 module.exports = {
   lintOnSave: false,
@@ -32,6 +33,11 @@ module.exports = {
         "@chevrotain/gast$": path.resolve(__dirname, "../../node_modules/@chevrotain/gast/lib/src/api.js"),
         "@chevrotain/utils$": path.resolve(__dirname, "../../node_modules/@chevrotain/utils/lib/src/api.js"),
       },
+    },
+  },
+  devServer: {
+    before(app) {
+      app.get("/api/link-preview", createLinkPreviewMiddleware());
     },
   },
 };

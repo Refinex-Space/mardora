@@ -21,6 +21,7 @@ import type { MardoraHeadingFoldConfig } from "./heading-fold";
 import { headingFold } from "./heading-fold";
 import type { MardoraI18nConfig, MardoraLocale } from "./i18n";
 import { resolveMardoraLocale } from "./i18n";
+import type { MardoraLinkPreviewConfig } from "./link-preview";
 
 /**
  * MardoraNode: represents a node in the markdown tree
@@ -101,6 +102,9 @@ export interface MardoraConfig {
 
   /** Heading section folding configuration */
   headingFold?: MardoraHeadingFoldConfig;
+
+  /** Link preview card configuration */
+  linkPreview?: MardoraLinkPreviewConfig;
 }
 
 /**
@@ -146,6 +150,7 @@ export function mardora(config: MardoraConfig = {}): Extension[] {
     selectionToolbar: configSelectionToolbar = { enabled: true },
     toc: configToc = { enabled: true },
     headingFold: configHeadingFold = { enabled: true },
+    linkPreview: configLinkPreview = { enabled: true },
   } = config;
   const resolvedLocale = resolveMardoraLocale(configSlashCommands.locale ?? configI18n.locale ?? configLocale);
 
@@ -246,6 +251,7 @@ export function mardora(config: MardoraConfig = {}): Extension[] {
     selectionToolbar({
       ...configSelectionToolbar,
       inheritedLocale: resolvedLocale,
+      linkPreview: configLinkPreview,
     }),
     tableOfContents(configToc),
     ...(!disableViewPlugin ? headingFold(configHeadingFold) : []),
