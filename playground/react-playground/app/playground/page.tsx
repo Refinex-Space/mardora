@@ -11,6 +11,7 @@ import Footer from "./footer";
 import Header from "./header";
 import Devbar from "./devbar";
 import Sidebar from "./sidebar";
+import { resolveInitialDesktopPanelState } from "./panels";
 import { Content } from "./types";
 import CreateContentDialog from "./create-content-dialog";
 import { useLocale } from "../i18n/LocaleContext";
@@ -119,13 +120,11 @@ export default function Page() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [devbarOpen, setDevbarOpen] = useState(false);
 
-  // Open panels by default only on desktop (xl breakpoint = 1280px)
+  // Open the document sidebar by default on desktop; keep the developer panel opt-in.
   useEffect(() => {
-    const isDesktop = window.matchMedia("(min-width: 1280px)").matches;
-    if (isDesktop) {
-      setSidebarOpen(true);
-      setDevbarOpen(true);
-    }
+    const nextPanelState = resolveInitialDesktopPanelState(window.matchMedia("(min-width: 1280px)").matches);
+    setSidebarOpen(nextPanelState.sidebarOpen);
+    setDevbarOpen(nextPanelState.devbarOpen);
   }, []);
 
   const [contents, setContents] = useState<Content[]>([]);
