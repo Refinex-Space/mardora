@@ -1,5 +1,12 @@
 # mardora
 
+## 1.3.0
+
+### Minor Changes
+
+- Add link preview cards with hidden Markdown metadata, playground metadata resolvers, and toolbar controls for editing, copying, opening, and switching links back to inline form.
+- Improve Live editing interactions for lists, blockquotes, inline code, links, and selection toolbar tooltips.
+
 ## 1.2.3
 
 ### Patch Changes
