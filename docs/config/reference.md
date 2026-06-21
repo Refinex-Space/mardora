@@ -1,6 +1,6 @@
 ---
 owner: refinex
-updated: 2026-06-16
+updated: 2026-06-21
 status: active
 referenced_by: AGENTS.md#knowledge-map
 ---
@@ -52,6 +52,13 @@ referenced_by: AGENTS.md#knowledge-map
 ## Turborepo
 
 Root `turbo.json` defines `build`, `lint`, `check-types`, and `dev` tasks. `build` depends on upstream builds and outputs `.next/**` and `dist/**`; `dev` is persistent and uncached.
+
+## Package Publishing Files
+
+- Publish package metadata: root `package.json`, `packages/mardora/package.json`, and `bun.lock` must agree on the current `mardora` version.
+- npm package README: `packages/mardora/README.md` is included by `packages/mardora/package.json#files` and is the primary README shown on npm.
+- Repository README: root `README.md` is the product-facing repository overview and should stay aligned with `packages/mardora/README.md` for public capabilities.
+- Long-form guides: `docs/guides/project-introduction.md` is the canonical API guide; playground embedded docs should not lag behind it for current version and public capability descriptions.
 
 ## CI State
 

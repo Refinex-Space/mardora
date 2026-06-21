@@ -11,7 +11,9 @@ Mardora packages the Markdown editor capabilities used by the React, Vue2, and V
 - CodeMirror 6 extension composition through `mardora()`.
 - Rich Markdown editing decorations while preserving plain Markdown source.
 - Built-in plugins for paragraphs, headings, inline formats, links, lists, tables, HTML, images, math, Mermaid, code blocks, quotes, GFM callouts, horizontal rules, and Emoji.
-- Slash commands including Callout templates, browser attachment entry points, selected-text toolbar, editor TOC, UI locale support, and static preview rendering.
+- Slash commands including Callout templates, browser attachment entry points, selected-text toolbar with localized tooltips, editor TOC, UI locale support, and static preview rendering.
+- Link panels and block link cards backed by a Markdown-compatible hidden metadata comment protocol.
+- Live editor content width control through `contentWidth`.
 - Framework-neutral APIs for React, Vue, or plain CodeMirror integrations.
 
 Applications remain responsible for layout, state management, persistence, auth, upload storage, file security, and published-content workflows.
@@ -68,6 +70,60 @@ const view = new EditorView({
 readable `48rem` column; use `"full"` for full-width workspace editors, or pass
 `{ maxWidth: "64rem" }` for an application-specific centered column.
 
+## Selection Toolbar
+
+Set `selectionToolbar.enabled` to `false` to disable the selected-text toolbar.
+When enabled, toolbar labels, button tooltips, the link panel, color panels, and
+block-type names use the resolved editor locale (`"zh-CN"` by default, or
+`"en-US"` through `locale` / `i18n.locale` / `selectionToolbar.locale`).
+
+The built-in toolbar supports block type, bold, italic, strikethrough,
+underline, inline code, highlight, text color, link, ordered list, unordered
+list, and task list actions.
+
+## Link Cards
+
+Clicking a link in live editing opens the link panel instead of expanding the
+raw `[title](url)` source. The panel can edit title and URL, copy, open, remove,
+and, for standalone links only, embed the link as a block card.
+
+Link cards remain plain Markdown plus a hidden HTML comment:
+
+```text
+[Octarine - Take back control of your writing](https://octarine.app/)
+<!--mardora-link-preview:v1 {"kind":"link","url":"https://octarine.app/","title":"Octarine - Take back control of your writing","domain":"octarine.app","image":"https://octarine.app/img/og/base.png","description":"Private, markdown-based note-taking app with a focus on speed, simplicity and data ownership. Write faster, think clearer."}-->
+```
+
+Mardora renders the matching standalone link and metadata comment as a card in
+the live editor and in `preview()` output. It does not fetch arbitrary remote
+pages in the core package. Production applications should provide a server-side
+`linkPreview.resolve` implementation that validates `http:` / `https:`, blocks
+private or loopback addresses, limits redirects, timeout, response size, and
+content type, then extracts Open Graph, Twitter Card, and `<title>` metadata.
+
+```ts
+import { mardora, type MardoraLinkPreviewMetadata } from "mardora/editor";
+
+const extensions = mardora({
+  linkPreview: {
+    enabled: true,
+    async resolve({ url, title }): Promise<MardoraLinkPreviewMetadata> {
+      const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+      if (!response.ok) throw new Error("Failed to resolve link preview");
+      const metadata = await response.json();
+      return {
+        kind: "link",
+        url: metadata.url || url,
+        title: metadata.title || title || url,
+        domain: metadata.domain,
+        image: metadata.image,
+        description: metadata.description,
+      };
+    },
+  },
+});
+```
+
 ## Static Preview
 
 ```ts
@@ -95,8 +151,8 @@ Use the same `plugins`, `theme`, syntax theme, and `wrapperClass` for `preview()
 
 ## Public Entrypoints
 
-| Entrypoint                 | Purpose                                                                                    |
-| -------------------------- | ------------------------------------------------------------------------------------------ |
+| Entrypoint        | Purpose                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------ |
 | `mardora`         | Aggregate export for quick experiments.                                                    |
 | `mardora/editor`  | Editor factory, config types, theme, i18n, attachments, slash, selection toolbar, and TOC. |
 | `mardora/plugins` | Built-in plugins and `allPlugins`.                                                         |
