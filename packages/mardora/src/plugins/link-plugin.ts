@@ -727,7 +727,7 @@ const theme = createTheme({
     ".cm-mardora-link-preview-card": {
       display: "grid",
       gridTemplateColumns: "minmax(0, 1fr)",
-      gap: "1rem",
+      gap: "0.75rem",
       width: "100%",
       margin: "0.75rem 0",
       overflow: "hidden",
@@ -740,13 +740,13 @@ const theme = createTheme({
     },
 
     ".cm-mardora-link-preview-card-with-image": {
-      gridTemplateColumns: "minmax(0, 1fr) minmax(13rem, 34%)",
-      height: "clamp(8.75rem, 13vw, 12rem)",
-      minHeight: "8.75rem",
+      gridTemplateColumns: "minmax(0, 1fr) minmax(11rem, 32%)",
+      height: "clamp(6.75rem, 9vw, 8.5rem)",
+      minHeight: "6.75rem",
     },
 
     ".cm-mardora-link-preview-card-without-image": {
-      minHeight: "7rem",
+      minHeight: "5.5rem",
     },
 
     ".cm-mardora-link-preview-card-editor": {
@@ -766,17 +766,17 @@ const theme = createTheme({
       minHeight: "0",
       flexDirection: "column",
       justifyContent: "center",
-      gap: "0.625rem",
-      padding: "1rem 1.25rem",
+      gap: "0.375rem",
+      padding: "0.75rem 1rem",
     },
 
     ".cm-mardora-link-preview-title": {
       display: "block",
       overflow: "hidden",
       color: "#18181b",
-      fontSize: "1rem",
+      fontSize: "0.9375rem",
       fontWeight: "600",
-      lineHeight: "1.35",
+      lineHeight: "1.3",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
     },
@@ -785,8 +785,8 @@ const theme = createTheme({
       display: "-webkit-box",
       overflow: "hidden",
       color: "#3f3f46",
-      fontSize: "0.875rem",
-      lineHeight: "1.55",
+      fontSize: "0.8125rem",
+      lineHeight: "1.4",
       WebkitBoxOrient: "vertical",
       WebkitLineClamp: "2",
     },
@@ -795,8 +795,8 @@ const theme = createTheme({
       display: "block",
       overflow: "hidden",
       color: "#2563eb",
-      fontSize: "0.875rem",
-      lineHeight: "1.4",
+      fontSize: "0.8125rem",
+      lineHeight: "1.3",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
     },
