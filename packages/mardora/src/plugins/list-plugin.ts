@@ -410,7 +410,13 @@ const theme = createTheme({
     },
 
     // List line layout (flexbox for marker alignment)
-    ".cm-mardora-list-line-ul, .cm-mardora-list-line-ol": {
+    ".cm-mardora-list-line-ul": {
+      position: "relative",
+      paddingLeft: "calc(1rem * (var(--depth, 0) + 2)) !important",
+      display: "flex",
+      alignItems: "start",
+    },
+    ".cm-mardora-list-line-ol": {
       position: "relative",
       paddingLeft: "calc(1rem * (var(--depth, 0) + 1)) !important",
       display: "flex",
@@ -439,7 +445,7 @@ const theme = createTheme({
     ".cm-mardora-list-line-ul::before": {
       content: '"•"',
       position: "absolute",
-      left: "calc(1rem * var(--depth, 0))",
+      left: "calc(1rem * (var(--depth, 0) + 1))",
       width: "1rem",
       color: "var(--color-link)",
       fontWeight: "bold",
