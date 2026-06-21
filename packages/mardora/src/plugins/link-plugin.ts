@@ -522,7 +522,7 @@ class LinkPreviewCardWidget extends WidgetType {
   }
 
   toDOM(view: EditorView) {
-    const card = document.createElement("div");
+    const card = document.createElement("span");
     card.className = [
       "cm-mardora-link-preview-card",
       "cm-mardora-link-preview-card-editor",
@@ -750,6 +750,9 @@ const theme = createTheme({
     },
 
     ".cm-mardora-link-preview-card-editor": {
+      display: "inline-grid",
+      margin: "0",
+      verticalAlign: "top",
       cursor: "pointer",
     },
 

@@ -13,7 +13,14 @@ import {
   serializeLinkPreviewComment,
 } from "../src/editor/link-preview";
 
-function linkDecorationSummaries(doc: string): Array<{ from: number; to: number; isReplace: boolean; widgetName: string; className?: string }> {
+function linkDecorationSummaries(doc: string): Array<{
+  from: number;
+  to: number;
+  isReplace: boolean;
+  isBlock: boolean;
+  widgetName: string;
+  className?: string;
+}> {
   const state = EditorState.create({
     doc,
     extensions: [markdown({ base: markdownLanguage })],
@@ -31,6 +38,7 @@ function linkDecorationSummaries(doc: string): Array<{ from: number; to: number;
     .map((decoration) => {
       const value = decoration.value as {
         isReplace?: boolean;
+        block?: boolean;
         widget?: { constructor?: { name?: string } };
         spec?: { class?: string };
       };
@@ -38,6 +46,7 @@ function linkDecorationSummaries(doc: string): Array<{ from: number; to: number;
         from: decoration.from,
         to: decoration.to,
         isReplace: Boolean(value.isReplace),
+        isBlock: Boolean(value.block),
         widgetName: value.widget?.constructor?.name ?? "",
         className: value.spec?.class,
       };
@@ -119,6 +128,7 @@ describe("link preview rendering", () => {
       from: 0,
       to: link.length,
       isReplace: true,
+      isBlock: false,
       widgetName: "LinkPreviewCardWidget",
       className: undefined,
     });
@@ -126,6 +136,7 @@ describe("link preview rendering", () => {
       from: link.length + 1,
       to: link.length + 1 + comment.length,
       isReplace: true,
+      isBlock: false,
       widgetName: "",
       className: undefined,
     });
