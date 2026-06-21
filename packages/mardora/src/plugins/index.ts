@@ -2,7 +2,7 @@
 export { ParagraphPlugin } from "./paragraph-plugin";
 export { HeadingPlugin } from "./heading-plugin";
 export { InlinePlugin } from "./inline-plugin";
-export { LinkPlugin } from "./link-plugin";
+export { bindLinkPreviewCardButtons, LinkPlugin } from "./link-plugin";
 export { ListPlugin } from "./list-plugin";
 export { TablePlugin } from "./table-plugin";
 export { HTMLPlugin } from "./html-plugin";

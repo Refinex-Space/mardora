@@ -32,7 +32,7 @@ import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { allPlugins } from "mardora/src";
 import { generateCSS, preview } from "mardora/src";
-import { mardora, MardoraNode, MardoraPlugin, ThemeEnum } from "mardora/src";
+import { bindLinkPreviewCardButtons, mardora, MardoraNode, MardoraPlugin, ThemeEnum } from "mardora/src";
 
 // Plugin configuration - dynamic based on allPlugins
 export type PluginConfig = Record<string, boolean>;
@@ -331,6 +331,7 @@ export default function Page() {
   }
 
   const editor = useRef<ReactCodeMirrorRef>(null);
+  const previewHostRef = useRef<HTMLDivElement>(null);
   function handleSetCurrentContent(index: number) {
     setCurrentContent(index);
     saveToStorage(contents, index);
@@ -419,6 +420,11 @@ export default function Page() {
     })();
   }, [currentContent, contents, theme, mode, activePlugins, config.preview, cmTheme]);
 
+  useEffect(() => {
+    if (mode !== "view" || !previewHostRef.current) return;
+    return bindLinkPreviewCardButtons(previewHostRef.current);
+  }, [mode, output?.html]);
+
   if (isLoading) {
     return (
       <div className="min-h-svh h-svh flex flex-col items-center justify-center gap-3">
@@ -479,7 +485,7 @@ export default function Page() {
         >
           {currentContent !== -1 ? (
             mode === "view" ? (
-              <div className="h-full w-full overflow-auto">
+              <div ref={previewHostRef} className="h-full w-full overflow-auto">
                 <style dangerouslySetInnerHTML={{ __html: output?.css || "" }} />
                 <div dangerouslySetInnerHTML={{ __html: output?.html || "" }} />
               </div>

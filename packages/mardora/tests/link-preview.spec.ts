@@ -3,7 +3,7 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorState, type Range } from "@codemirror/state";
 import { Decoration, type EditorView } from "@codemirror/view";
 import { preview } from "../src/preview";
-import { LinkPlugin, HTMLPlugin } from "../src/plugins";
+import { bindLinkPreviewCardButtons, LinkPlugin, HTMLPlugin } from "../src/plugins";
 import {
   buildEmbedLinkPreviewChange,
   buildRemoveLinkPreviewChange,
@@ -151,10 +151,65 @@ describe("link preview rendering", () => {
       plugins: [new LinkPlugin(), new HTMLPlugin()],
     });
 
-    expect(html).toContain('class="cm-mardora-link-preview-card cm-mardora-link-preview-card-with-image"');
+    expect(html).toContain("cm-mardora-link-preview-card");
+    expect(html).toContain("cm-mardora-link-preview-card-static");
+    expect(html).toContain("cm-mardora-link-preview-card-with-image");
+    expect(html).toContain("cm-mardora-link-preview-copy-button");
+    expect(html).toContain("cm-mardora-link-preview-open-button");
+    expect(html).toContain("cm-mardora-link-preview-card-open-area");
     expect(html).toContain("Octarine - Take back control of your writing");
     expect(html).toContain("Private, markdown-based note-taking app");
     expect(html).toContain("https://github.com/Refinex-Space/mardora");
     expect(html).not.toContain("<!--mardora-link-preview");
+  });
+
+  it("binds static link preview copy buttons", async () => {
+    let copied = "";
+    const button = {
+      dataset: { url: "https://github.com/Refinex-Space/mardora" },
+      title: "复制链接",
+      classList: {
+        add() {},
+        remove() {},
+      },
+      ownerDocument: {
+        defaultView: {
+          navigator: {
+            clipboard: {
+              async writeText(text: string) {
+                copied = text;
+              },
+            },
+          },
+        },
+      },
+      closest(selector: string) {
+        return selector.includes("cm-mardora-link-preview-copy-button") ? this : null;
+      },
+    };
+    const root = {
+      listeners: new Map<string, (event: Event) => void>(),
+      addEventListener(type: string, listener: (event: Event) => void) {
+        this.listeners.set(type, listener);
+      },
+      removeEventListener(type: string) {
+        this.listeners.delete(type);
+      },
+      contains: () => true,
+    };
+    const cleanup = bindLinkPreviewCardButtons(root as unknown as HTMLElement);
+    const event = {
+      type: "click",
+      target: button,
+      preventDefault() {},
+      stopPropagation() {},
+    } as unknown as Event;
+
+    root.listeners.get("click")?.(event);
+    await Promise.resolve();
+
+    expect(copied).toBe("https://github.com/Refinex-Space/mardora");
+    cleanup();
+    expect(root.listeners.has("click")).toBe(false);
   });
 });
