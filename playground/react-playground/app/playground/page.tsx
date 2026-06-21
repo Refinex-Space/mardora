@@ -11,7 +11,6 @@ import Footer from "./footer";
 import Header from "./header";
 import Devbar from "./devbar";
 import Sidebar from "./sidebar";
-import { resolveInitialDesktopPanelState } from "./panels";
 import { Content } from "./types";
 import CreateContentDialog from "./create-content-dialog";
 import { useLocale } from "../i18n/LocaleContext";
@@ -117,15 +116,7 @@ export default function Page() {
   const { resolvedTheme: theme } = useTheme();
   const { locale, t } = useLocale();
   const cmTheme = theme?.includes("dark") ? githubDark : githubLight;
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [devbarOpen, setDevbarOpen] = useState(false);
-
-  // Open the document sidebar by default on desktop; keep the developer panel opt-in.
-  useEffect(() => {
-    const nextPanelState = resolveInitialDesktopPanelState(window.matchMedia("(min-width: 1280px)").matches);
-    setSidebarOpen(nextPanelState.sidebarOpen);
-    setDevbarOpen(nextPanelState.devbarOpen);
-  }, []);
 
   const [contents, setContents] = useState<Content[]>([]);
   const [currentContent, setCurrentContent] = useState<number>(-1);
@@ -438,8 +429,6 @@ export default function Page() {
     <div className="min-h-svh h-svh flex flex-col">
       {/* Header */}
       <Header
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
         devbarOpen={devbarOpen}
         setDevbarOpen={setDevbarOpen}
         saveStatus={saveStatus}
@@ -452,37 +441,20 @@ export default function Page() {
         {/* Mobile Backdrop */}
         <div
           className={`fixed inset-0 bg-black/50 z-30 xl:hidden transition-opacity duration-300 ${
-            sidebarOpen || devbarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            devbarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           onClick={() => {
-            setSidebarOpen(false);
             setDevbarOpen(false);
           }}
         />
 
         {/* Sidebar */}
-        <div
-          className={cn(
-            "h-full bg-background overflow-hidden transition-all duration-300 ease-in-out",
-            "fixed xl:relative top-12 xl:top-0 bottom-10 xl:bottom-0 left-0 z-40 xl:z-auto",
-            {
-              "w-64": sidebarOpen,
-              "w-0 xl:w-0": !sidebarOpen,
-            }
-          )}
-        >
+        <div className="h-full w-64 shrink-0 bg-background overflow-hidden">
           <Sidebar contents={contents} currentContent={currentContent} setCurrentContent={handleSetCurrentContent} />
         </div>
 
         {/* Editor */}
-        <div
-          className={cn(
-            "flex-1 h-full mx-2 border rounded-lg overflow-hidden flex items-center justify-center dark:bg-[#0d1117]",
-            {
-              "ml-0 max-xl:ml-2": sidebarOpen,
-            }
-          )}
-        >
+        <div className="flex-1 h-full mx-2 border rounded-lg overflow-hidden flex items-center justify-center dark:bg-[#0d1117]">
           {currentContent !== -1 ? (
             mode === "view" ? (
               <div ref={previewHostRef} className="h-full w-full overflow-auto">

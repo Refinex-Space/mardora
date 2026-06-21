@@ -1,15 +1,6 @@
 <template>
   <header class="playground-header">
     <div class="header-left">
-      <button
-        class="toolbar-icon-button"
-        type="button"
-        :title="$t('header.toggleSidebar')"
-        :aria-label="$t('header.toggleSidebar')"
-        @click="$emit('toggle-sidebar')"
-      >
-        <span class="icon-svg" aria-hidden="true" v-html="icons.panelLeftClose" />
-      </button>
       <span class="brand-logo" aria-hidden="true" v-html="logo" />
       <span class="brand-title">Mardora</span>
     </div>
@@ -104,7 +95,7 @@
         :aria-label="devbarLabel"
         @click="$emit('toggle-devbar')"
       >
-        <span class="icon-svg" aria-hidden="true" v-html="icons.panelRightClose" />
+        <span class="icon-svg devbar-toggle-icon" aria-hidden="true" v-html="icons.panelRight" />
       </button>
     </div>
   </header>
@@ -130,12 +121,8 @@ const ICONS = {
   galleryHorizontalEnd: icon(
     '<path d="M2 7v10"/><path d="M6 5v14"/><rect width="12" height="18" x="10" y="3" rx="2"/>'
   ),
-  panelLeftClose: icon(
-    '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/>'
-  ),
-  panelRightClose: icon(
-    '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m8 9 3 3-3 3"/>'
-  ),
+  panelRight:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="68" height="50" viewBox="0 0 68 50" fill="none"><rect x="24" y="11" width="28" height="26" rx="5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M45 18V30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 
 export default defineComponent({
@@ -147,10 +134,6 @@ export default defineComponent({
     },
     saveStatus: {
       type: String as PropType<SaveStatus>,
-      required: true,
-    },
-    sidebarOpen: {
-      type: Boolean,
       required: true,
     },
     devbarOpen: {

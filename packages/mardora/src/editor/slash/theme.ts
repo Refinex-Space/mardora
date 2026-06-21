@@ -16,7 +16,7 @@ export const slashMenuTheme = EditorView.baseTheme({
     padding: "8px 0 0",
     caretColor: "transparent",
     cursor: "default",
-    fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
+    fontFamily: "var(--mardora-font-ui)",
     userSelect: "none",
   },
   ".cm-mardora-slash-open .cm-cursor": {

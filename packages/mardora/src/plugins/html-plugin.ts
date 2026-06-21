@@ -310,14 +310,14 @@ const theme = createTheme({
   default: {
     ".cm-mardora-html-tag": {
       color: "#6a737d",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
       fontSize: "0.85em",
     },
 
     ".cm-mardora-html-comment": {
       color: "#6a737d",
       fontStyle: "italic",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
       fontSize: "0.85em",
       opacity: 0.5,
     },

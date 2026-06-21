@@ -13,7 +13,7 @@ export const selectionToolbarTheme = EditorView.baseTheme({
     boxShadow: "0 14px 38px rgba(15, 23, 42, 0.16)",
     padding: "4px",
     color: "var(--mardora-selection-toolbar-fg, #18181b)",
-    fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)",
+    fontFamily: "var(--mardora-font-ui)",
     userSelect: "none",
   },
   ".cm-mardora-selection-toolbar-panel": {

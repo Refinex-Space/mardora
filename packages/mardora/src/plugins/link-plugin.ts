@@ -762,7 +762,7 @@ const theme = createTheme({
     // Link markers ([ ] ( ))
     ".cm-mardora-link-marker": {
       color: "#6a737d",
-      fontFamily: "var(--font-jetbrains-mono, monospace)",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     // URL in raw markdown

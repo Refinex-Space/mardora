@@ -107,6 +107,11 @@ const extensions = mardora({
   locale: "zh-CN",
   plugins: allPlugins,
   baseStyles: true,
+  fonts: {
+    document: '"Songti SC", serif',
+    code: '"JetBrains Mono", ui-monospace, monospace',
+    ui: '"SF Pro Text", system-ui, sans-serif',
+  },
   disableViewPlugin: false,
   defaultKeybindings: true,
   history: true,
@@ -211,12 +216,19 @@ const html = await preview(markdown, {
 const css = generateCSS({
   theme: ThemeEnum.LIGHT,
   plugins: allPlugins,
+  fonts: {
+    document: '"Songti SC", serif',
+    code: '"JetBrains Mono", ui-monospace, monospace',
+    ui: '"SF Pro Text", system-ui, sans-serif',
+  },
   includeBase: true,
   wrapperClass: "mardora-preview",
 });
 ```
 
-生产环境必须让 `preview()` 和 `generateCSS()` 使用同一组 `plugins`、`theme`、`wrapperClass` 和语法高亮主题，否则 HTML 与 CSS 可能不匹配。
+`fonts` 接收合法 CSS `font-family` 值，分别控制文章正文/标题、代码块/行内代码、Mardora 自有 UI 控件。未配置时 Mardora 使用内置系统 sans 与等宽字体栈。
+
+生产环境必须让 `preview()` 和 `generateCSS()` 使用同一组 `plugins`、`theme`、`wrapperClass`、`fonts` 和语法高亮主题，否则 HTML 与 CSS 可能不匹配。
 
 ## 接入指南
 

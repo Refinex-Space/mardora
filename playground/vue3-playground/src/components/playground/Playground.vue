@@ -3,12 +3,10 @@
     <PlaygroundHeader
       :mode="mode"
       :save-status="saveStatus"
-      :sidebar-open="sidebarOpen"
       :devbar-open="devbarOpen"
       :theme-preference="themePreference"
       :shell-locale="shellLocale"
       :theme="theme"
-      @toggle-sidebar="sidebarOpen = !sidebarOpen"
       @toggle-devbar="devbarOpen = !devbarOpen"
       @change-mode="mode = $event"
       @change-theme="setThemePreference"
@@ -18,7 +16,7 @@
     <main class="playground-main">
       <div v-if="showBackdrop" class="backdrop" @click="closePanels" />
 
-      <div class="sidebar-panel" :class="sidebarOpen ? 'panel-open' : 'panel-closed'">
+      <div class="sidebar-panel">
         <PlaygroundSidebar :contents="contents" :current-content="currentContent" @select-content="selectContent" />
       </div>
 
@@ -105,7 +103,6 @@ export default defineComponent({
       outputTime: null as number | null,
       showNodes: false,
       saveStatus: "idle" as SaveStatus,
-      sidebarOpen: false,
       devbarOpen: false,
       isDesktop: false,
       theme: "light" as ThemeMode,
@@ -122,7 +119,7 @@ export default defineComponent({
       return getContentMetrics(this.currentDocument?.content || "");
     },
     showBackdrop(): boolean {
-      return !this.isDesktop && (this.sidebarOpen || this.devbarOpen);
+      return !this.isDesktop && this.devbarOpen;
     },
     shellLocale(): "zh" | "en" {
       return shellLocaleRef.value;
@@ -151,11 +148,9 @@ export default defineComponent({
     handleResize() {
       const nextPanelState = resolvePanelStateForViewport(window.matchMedia("(min-width: 1280px)").matches, {
         isDesktop: this.isDesktop,
-        sidebarOpen: this.sidebarOpen,
         devbarOpen: this.devbarOpen,
       });
       this.isDesktop = nextPanelState.isDesktop;
-      this.sidebarOpen = nextPanelState.sidebarOpen;
       this.devbarOpen = nextPanelState.devbarOpen;
     },
     syncSystemTheme() {
@@ -172,7 +167,6 @@ export default defineComponent({
           : preference;
     },
     closePanels() {
-      this.sidebarOpen = false;
       this.devbarOpen = false;
     },
     selectContent(index: number) {

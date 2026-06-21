@@ -461,7 +461,7 @@ const theme = createTheme({
     // Task marker styling (kept for compatibility with existing generated CSS)
     ".cm-mardora-task-marker": {
       color: "var(--mardora-highlight, #a4a4a4)",
-      fontFamily: "monospace",
+      fontFamily: "var(--mardora-font-code)",
     },
 
     // Task checkbox container

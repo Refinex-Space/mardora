@@ -1,13 +1,19 @@
 import { ThemeEnum } from "../editor/utils";
+import { createMardoraFontVariables } from "../editor/theme";
+import type { MardoraFontConfig } from "../editor/theme";
 import { GenerateCSSConfig } from "./types";
 import { generateSyntaxThemeCSS } from "./syntax-theme";
 
 /**
  * Base CSS styles for preview rendering
  */
-const baseStyles = `.mardora-preview {
+function createBaseStyles(wrapperClass: string, fonts: MardoraFontConfig = {}) {
+  return `.${wrapperClass} {
+${formatCssVariables(createMardoraFontVariables(fonts))}
   padding: 0 0.5rem;
+  font-family: var(--mardora-font-document);
 }`;
+}
 
 /**
  * Generate CSS for preview rendering
@@ -30,6 +36,7 @@ const baseStyles = `.mardora-preview {
 export function generateCSS(config: GenerateCSSConfig = {}): string {
   const {
     plugins = [],
+    fonts = {},
     theme = ThemeEnum.AUTO,
     wrapperClass = "mardora-preview",
     includeBase = true,
@@ -40,12 +47,7 @@ export function generateCSS(config: GenerateCSSConfig = {}): string {
 
   // Include base styles
   if (includeBase) {
-    // Replace default wrapper class if custom one is provided
-    if (wrapperClass !== "mardora-preview") {
-      cssChunks.push(baseStyles.replace(/\.mardora-preview/g, `.${wrapperClass}`));
-    } else {
-      cssChunks.push(baseStyles);
-    }
+    cssChunks.push(createBaseStyles(wrapperClass, fonts));
   }
 
   // Collect syntax highlight styles (`tok-*` classes) from CodeMirror theme/extensions
@@ -61,4 +63,10 @@ export function generateCSS(config: GenerateCSSConfig = {}): string {
   }
 
   return cssChunks.join("\n\n");
+}
+
+function formatCssVariables(variables: Record<string, string>) {
+  return Object.entries(variables)
+    .map(([name, value]) => `  ${name}: ${value};`)
+    .join("\n");
 }
