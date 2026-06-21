@@ -556,13 +556,33 @@ const theme = createTheme({
       paddingBottom: "0.25em !important",
       marginLeft: "0.25em",
       minHeight: "1.6em",
-      boxSizing: "content-box",
+      boxSizing: "border-box",
       opacity: "0.85",
     },
 
     // Quote content styling
     ".cm-mardora-quote-content": {
       fontStyle: "italic",
+    },
+
+    ".cm-mardora-quote-line.cm-mardora-list-line-ul > .cm-mardora-quote-content": {
+      flexShrink: 1,
+      minWidth: "0",
+    },
+
+    ".cm-mardora-quote-line.cm-mardora-list-line-ol > .cm-mardora-quote-content": {
+      flexShrink: 1,
+      minWidth: "0",
+    },
+
+    ".cm-mardora-callout-line.cm-mardora-list-line-ul > .cm-mardora-callout-content": {
+      flexShrink: 1,
+      minWidth: "0",
+    },
+
+    ".cm-mardora-callout-line.cm-mardora-list-line-ol > .cm-mardora-callout-content": {
+      flexShrink: 1,
+      minWidth: "0",
     },
 
     ".cm-mardora-callout-line": {
@@ -572,6 +592,7 @@ const theme = createTheme({
       paddingBottom: "0.25em !important",
       marginLeft: "0.25em",
       minHeight: "1.6em",
+      boxSizing: "border-box",
       backgroundColor: "var(--mardora-callout-bg)",
     },
 

@@ -59,13 +59,29 @@ describe("QuotePlugin callout editing", () => {
     const styles = new QuotePlugin().theme(ThemeEnum.LIGHT);
 
     expect(styles[".cm-mardora-quote-line"]?.minHeight).toBe("1.6em");
-    expect(styles[".cm-mardora-quote-line"]?.boxSizing).toBe("content-box");
+    expect(styles[".cm-mardora-quote-line"]?.boxSizing).toBe("border-box");
   });
 
   it("keeps empty callout body lines tall enough for visible cursor placement", () => {
     const styles = new QuotePlugin().theme(ThemeEnum.LIGHT);
 
     expect(styles[".cm-mardora-callout-line"]?.minHeight).toBe("1.6em");
+    expect(styles[".cm-mardora-callout-line"]?.boxSizing).toBe("border-box");
+  });
+
+  it("lets quote and callout content shrink when nested list styles make the line a flex container", () => {
+    const styles = new QuotePlugin().theme(ThemeEnum.LIGHT);
+    const flexContentSelectors = [
+      ".cm-mardora-quote-line.cm-mardora-list-line-ul > .cm-mardora-quote-content",
+      ".cm-mardora-quote-line.cm-mardora-list-line-ol > .cm-mardora-quote-content",
+      ".cm-mardora-callout-line.cm-mardora-list-line-ul > .cm-mardora-callout-content",
+      ".cm-mardora-callout-line.cm-mardora-list-line-ol > .cm-mardora-callout-content",
+    ];
+
+    for (const selector of flexContentSelectors) {
+      expect(styles[selector]?.flexShrink).toBe(1);
+      expect(styles[selector]?.minWidth).toBe("0");
+    }
   });
 
   it("uses dark menu colors for callout type switching in dark theme", () => {
