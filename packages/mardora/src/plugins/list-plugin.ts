@@ -85,14 +85,14 @@ export class TaskCheckboxWidget extends WidgetType {
   }
 }
 
-class BulletListMarkerWidget extends WidgetType {
-  override eq(other: BulletListMarkerWidget): boolean {
-    return other instanceof BulletListMarkerWidget;
+class EmptyListContentAnchorWidget extends WidgetType {
+  override eq(other: EmptyListContentAnchorWidget): boolean {
+    return other instanceof EmptyListContentAnchorWidget;
   }
 
   toDOM(): HTMLElement {
     const wrap = document.createElement("span");
-    wrap.className = classes.markUL;
+    wrap.className = "cm-mardora-empty-list-content-anchor";
     wrap.setAttribute("aria-hidden", "true");
     return wrap;
   }
@@ -323,21 +323,23 @@ export class ListPlugin extends DecorationPlugin {
       decorations.push(Decoration.mark({ class: classes.indent + activeClass }).range(line.from, from));
     }
 
-    // Replace unordered source markers so the cursor cannot land before the visual bullet.
     if (isOrderedList) {
       decorations.push(Decoration.mark({ class: classes.markOL + activeClass }).range(from, to + 1));
     } else {
-      decorations.push(
-        Decoration.replace({
-          widget: new BulletListMarkerWidget(),
-        }).range(from, to + 1)
-      );
+      decorations.push(Decoration.replace({}).range(from, to + 1));
     }
 
     // Wrap remaining line content
     const contentStart = to + 1;
     if (contentStart < line.to) {
       decorations.push(Decoration.mark({ class: classes.content }).range(contentStart, line.to));
+    } else if (!isOrderedList) {
+      decorations.push(
+        Decoration.widget({
+          widget: new EmptyListContentAnchorWidget(),
+          side: 1,
+        }).range(contentStart)
+      );
     }
   }
 
@@ -434,11 +436,20 @@ const theme = createTheme({
       },
 
     // Styled bullet for unordered lists
-    ".cm-mardora-list-line-ul .cm-mardora-list-mark-ul:not(.cm-mardora-active)::after": {
+    ".cm-mardora-list-line-ul::before": {
       content: '"•"',
+      position: "absolute",
+      left: "calc(1rem * var(--depth, 0))",
+      width: "1rem",
       color: "var(--color-link)",
       fontWeight: "bold",
       pointerEvents: "none",
+    },
+    ".cm-mardora-empty-list-content-anchor": {
+      display: "inline-block",
+      width: 0,
+      overflow: "hidden",
+      verticalAlign: "baseline",
     },
 
     // Task marker styling (kept for compatibility with existing generated CSS)
