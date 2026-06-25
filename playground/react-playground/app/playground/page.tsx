@@ -30,8 +30,9 @@ import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { allPlugins } from "mardora/src";
-import { generateCSS, preview } from "mardora/src";
-import { bindLinkPreviewCardButtons, mardora, MardoraNode, MardoraPlugin, ThemeEnum } from "mardora/src";
+import { extractPreviewTocFromMarkdown, generateCSS, preview } from "mardora/src";
+import { bindLinkPreviewCardButtons, mardora, ThemeEnum } from "mardora/src";
+import type { MardoraNode, MardoraPlugin, MardoraTocItem } from "mardora/src";
 
 // Plugin configuration - dynamic based on allPlugins
 export type PluginConfig = Record<string, boolean>;
@@ -112,6 +113,13 @@ function buildDefaultContentsFor(locale: "zh" | "en"): Content[] {
 
 export type SaveStatus = "idle" | "saving" | "saved";
 
+function escapeCssIdentifier(value: string): string {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+    return CSS.escape(value);
+  }
+  return value.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+}
+
 export default function Page() {
   const { resolvedTheme: theme } = useTheme();
   const { locale, t } = useLocale();
@@ -126,12 +134,14 @@ export default function Page() {
   const [mode, setMode] = useState<"live" | "view" | "code" | "output">("live");
   const [showNodes, setShowNodes] = useState(false);
   const [nodes, setNodes] = useState<MardoraNode[]>([]);
+  const [previewToc, setPreviewToc] = useState<MardoraTocItem[]>([]);
   const [config, setConfig] = useState<PlaygroundConfig>(defaultConfig);
 
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const savedIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previewTocManualActiveUntilRef = useRef(0);
   const objectUrlsRef = useRef<string[]>([]);
 
   const mockUploader = useCallback(async (file: File) => {
@@ -328,6 +338,89 @@ export default function Page() {
     saveToStorage(contents, index);
   }
 
+  const markPreviewTocActive = useCallback((activeId: string) => {
+    setPreviewToc((items) =>
+      items.map((item) => ({
+        ...item,
+        active: item.id === activeId,
+      }))
+    );
+  }, []);
+
+  const handleEditorTocChange = useCallback((items: MardoraTocItem[]) => {
+    if (Date.now() >= previewTocManualActiveUntilRef.current) {
+      setPreviewToc(items);
+      return;
+    }
+
+    setPreviewToc((currentItems) => {
+      const activeId = currentItems.find((item) => item.active)?.id;
+      return items.map((item) => ({
+        ...item,
+        active: item.id === activeId,
+      }));
+    });
+  }, []);
+
+  const syncPreviewTocActive = useCallback(() => {
+    if (Date.now() < previewTocManualActiveUntilRef.current) return;
+    const previewHost = previewHostRef.current;
+    if (!previewHost || previewToc.length === 0) return;
+
+    let activeId = previewToc[0]?.id;
+    for (const item of previewToc) {
+      const target = previewHost.querySelector<HTMLElement>(`#${escapeCssIdentifier(item.id)}`);
+      if (target && target.offsetTop - previewHost.scrollTop <= 40) {
+        activeId = item.id;
+      }
+    }
+
+    if (activeId) markPreviewTocActive(activeId);
+  }, [markPreviewTocActive, previewToc]);
+
+  function jumpEditorToc(item: MardoraTocItem) {
+    const view = editor.current?.view;
+    if (!view || typeof item.from !== "number") return;
+
+    previewTocManualActiveUntilRef.current = Date.now() + 650;
+    markPreviewTocActive(item.id);
+    view.dispatch({
+      selection: { anchor: item.from },
+      effects: EditorView.scrollIntoView(item.from, { y: "start" }),
+    });
+    view.scrollDOM.scrollTop = Math.max(0, view.lineBlockAt(item.from).top - 8);
+    view.focus();
+    window.setTimeout(() => {
+      previewTocManualActiveUntilRef.current = 0;
+    }, 700);
+  }
+
+  function jumpPreviewToc(id: string) {
+    const previewHost = previewHostRef.current;
+    const target = previewHost?.querySelector<HTMLElement>(`#${escapeCssIdentifier(id)}`);
+    if (!previewHost || !target) return;
+
+    previewHost.scrollTo({
+      top: Math.max(0, target.offsetTop - 24),
+      behavior: "smooth",
+    });
+    previewTocManualActiveUntilRef.current = Date.now() + 650;
+    markPreviewTocActive(id);
+    window.setTimeout(() => {
+      previewTocManualActiveUntilRef.current = 0;
+      syncPreviewTocActive();
+    }, 700);
+  }
+
+  function jumpToc(item: MardoraTocItem) {
+    if (mode === "live") {
+      jumpEditorToc(item);
+      return;
+    }
+
+    jumpPreviewToc(item.id);
+  }
+
   // Build active plugins list based on config
   const activePlugins = useMemo<MardoraPlugin[]>(() => {
     return allPlugins.filter((plugin) => {
@@ -358,6 +451,10 @@ export default function Page() {
         selectionToolbar: {
           enabled: config.features.selectionToolbar,
         },
+        toc: {
+          enabled: false,
+          onTocChange: mode === "live" ? handleEditorTocChange : undefined,
+        },
         attachments: {
           enabled: config.features.attachments,
           uploader: config.features.attachments ? mockUploader : undefined,
@@ -378,15 +475,26 @@ export default function Page() {
           if (showNodes) setNodes(nodes);
         },
       }),
-    [theme, mode, showNodes, config.editor, config.features, activePlugins, mockUploader, resolveLinkPreview]
+    [
+      theme,
+      mode,
+      showNodes,
+      config.editor,
+      config.features,
+      activePlugins,
+      mockUploader,
+      resolveLinkPreview,
+      handleEditorTocChange,
+    ]
   );
 
   useEffect(() => {
     (async function () {
       if (currentContent === -1 || !["view", "output"].includes(mode)) return;
       const start = performance.now();
+      const content = contents[currentContent]?.content || "";
 
-      const html = await preview(contents[currentContent]?.content || "", {
+      const html = await preview(content, {
         theme:
           theme && theme !== "system" ? (theme.includes("dark") ? ThemeEnum.DARK : ThemeEnum.LIGHT) : ThemeEnum.AUTO,
         plugins: activePlugins,
@@ -408,6 +516,7 @@ export default function Page() {
 
       setOutputTime(performance.now() - start);
       setOutput({ html, css });
+      if (mode === "view") setPreviewToc(extractPreviewTocFromMarkdown(content));
     })();
   }, [currentContent, contents, theme, mode, activePlugins, config.preview, cmTheme]);
 
@@ -415,6 +524,38 @@ export default function Page() {
     if (mode !== "view" || !previewHostRef.current) return;
     return bindLinkPreviewCardButtons(previewHostRef.current);
   }, [mode, output?.html]);
+
+  useEffect(() => {
+    if (mode === "code" || mode === "output" || currentContent === -1) setPreviewToc([]);
+  }, [currentContent, mode]);
+
+  const renderTocPanel = () => (
+    <aside className="hidden lg:flex h-full w-60 shrink-0 border-l bg-background/95 dark:bg-[#0d1117]">
+      <nav className="min-h-0 flex-1 overflow-y-auto py-3" aria-label="Document table of contents">
+        {previewToc.length === 0 ? (
+          <div className="px-4 py-2 text-sm text-muted-foreground">暂无目录</div>
+        ) : (
+          previewToc.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={cn(
+                "block w-full truncate border-l-2 py-1.5 pr-3 text-left text-sm transition-colors",
+                item.active
+                  ? "border-primary bg-muted text-foreground"
+                  : "border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+              )}
+              style={{ paddingLeft: `${12 + (item.level - 2) * 12}px` }}
+              title={item.text}
+              onClick={() => jumpToc(item)}
+            >
+              {item.text}
+            </button>
+          ))
+        )}
+      </nav>
+    </aside>
+  );
 
   if (isLoading) {
     return (
@@ -456,10 +597,39 @@ export default function Page() {
         {/* Editor */}
         <div className="flex-1 h-full mx-2 border rounded-lg overflow-hidden flex items-center justify-center dark:bg-[#0d1117]">
           {currentContent !== -1 ? (
-            mode === "view" ? (
-              <div ref={previewHostRef} className="h-full w-full overflow-auto">
-                <style dangerouslySetInnerHTML={{ __html: output?.css || "" }} />
-                <div dangerouslySetInnerHTML={{ __html: output?.html || "" }} />
+            mode === "view" || mode === "live" ? (
+              <div className="flex h-full w-full min-w-0">
+                {mode === "view" ? (
+                  <div ref={previewHostRef} className="h-full min-w-0 flex-1 overflow-auto" onScroll={syncPreviewTocActive}>
+                    <style dangerouslySetInnerHTML={{ __html: output?.css || "" }} />
+                    <div dangerouslySetInnerHTML={{ __html: output?.html || "" }} />
+                  </div>
+                ) : (
+                  <div className="h-full min-w-0 flex-1">
+                    <CodeMirror
+                      key={`mardora-editor-${mode}`}
+                      id={"mardora-editor"}
+                      ref={editor}
+                      autoFocus={false}
+                      className={"h-full w-full"}
+                      height="100%"
+                      width="100%"
+                      value={contents[currentContent]?.content}
+                      onChange={(value) => handleContentChange(contents[currentContent]!.id, value)}
+                      theme={cmTheme}
+                      extensions={[...defaultExtensions]}
+                      basicSetup={{
+                        lineNumbers: false,
+                        foldGutter: false,
+                        highlightActiveLine: false,
+                        highlightActiveLineGutter: false,
+                        highlightSelectionMatches: false,
+                        drawSelection: false,
+                      }}
+                    />
+                  </div>
+                )}
+                {renderTocPanel()}
               </div>
             ) : mode === "output" ? (
               <div className="h-full w-full">
