@@ -119,6 +119,16 @@ describe("selection toolbar excluded content", () => {
 
     expect(
       selectionOverlapsExcludedSyntaxNode({
+        selectionFrom: 0,
+        selectionTo: 4,
+        nodeFrom: 0,
+        nodeTo: 3,
+        nodeName: "HorizontalRule",
+      })
+    ).toBe(true);
+
+    expect(
+      selectionOverlapsExcludedSyntaxNode({
         selectionFrom: 8,
         selectionTo: 16,
         nodeFrom: 0,

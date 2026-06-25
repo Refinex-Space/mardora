@@ -40,7 +40,14 @@ const excludedClassPrefixes = [
   "cm-mardora-mermaid-",
 ] as const;
 
-const excludedSyntaxNodeNames = new Set(["FencedCode", "MermaidBlock", "MathBlock", "InlineMath", "Image"]);
+const excludedSyntaxNodeNames = new Set([
+  "FencedCode",
+  "MermaidBlock",
+  "MathBlock",
+  "InlineMath",
+  "Image",
+  "HorizontalRule",
+]);
 
 /** Returns whether a browser native selection should activate the toolbar. */
 export function canActivateFromNativeSelection(input: NativeSelectionActivationInput): boolean {
